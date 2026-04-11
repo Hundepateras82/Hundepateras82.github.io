@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SYSTEM V0.8.6c: RESTORED</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@300;500;700&display=swap');
+        
+        :root {
+            --bg-base: #0c0c12; --lavender: #b4a8d4; --mint: #8abfcc;
+            --pink: #c49090; --gold: #c8b98a; --border-glass: rgba(180,168,212,0.12);
+        }
+        body { 
+            background: var(--bg-base); color: var(--lavender); font-family: 'Space Grotesk', sans-serif; 
+            -webkit-tap-highlight-color: transparent; overflow-x: hidden;
+            padding-top: calc(env(safe-area-inset-top) + 5px);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+        }
+        .font-sys { font-family: 'Orbitron', sans-serif; }
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(18,18,24,0.9) 0%, rgba(12,12,18,0.95) 100%);
+            border: 1px solid var(--border-glass); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px); border-radius: 16px;
+        }
+        .btn-aaa {
+            background: linear-gradient(90deg, rgba(180,168,212,0.1), rgba(138,191,204,0.1));
+            border: 1px solid var(--border-glass); color: var(--mint); transition: all 0.2s;
+        }
+        .btn-aaa:active { transform: scale(0.97); }
+        .progress-bar { transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        
+        /* Brillo amarillo para historia reclamable */
+        .story-claimable { 
+            border: 1px solid #fff700 !important; 
+            box-shadow: 0 0 12px rgba(255, 247, 0, 0.6); 
+            cursor: pointer; 
+        }
+        
+        /* Gráfica de líneas SVG */
+        .chart-svg { width: 100%; height: 80px; stroke: var(--mint); stroke-width: 2; fill: none; stroke-linecap: round; }
+        .record-highlight { background: rgba(255,247,0,0.2); color: #fff700; font-weight: bold; border-left: 2px solid #fff700; padding-left: 4px; }
+
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="px-4">
+
+    <header class="glass-panel p-5 mb-6 relative overflow-hidden">
+        <div class="flex justify-between items-start mb-4 relative z-10">
+            <div>
+                <h1 class="font-sys font-bold text-xl text-[var(--mint)] tracking-wider">SYS<span class="text-[var(--pink)] text-xs ml-1">v0.8.6c</span></h1>
+                <p class="text-[10px] font-bold mt-1 uppercase text-[var(--gold)]">💰 <span id="hud-gold">0</span>G</p>
+                <div id="active-potion-hud" class="text-[8px] font-bold text-[var(--mint)] mt-1 animate-pulse hidden uppercase tracking-tighter"></div>
+            </div>
+            <div class="text-right">
+                <p class="font-sys font-bold text-3xl text-[var(--lavender)]">Tier <span id="hud-tier" class="text-white">I</span></p>
+                <p id="hud-next-tier" class="text-[9px] text-[var(--mint)] font-bold uppercase tracking-widest mt-1">Siguiente: H</p>
+            </div>
+        </div>
+
+        <div class="space-y-3 relative z-10">
+            <div>
+                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-[var(--pink)]"><span>Ciclo Solar</span> <span id="sys-countdown">--:--:--</span></div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full overflow-hidden border border-[var(--pink)]/30">
+                    <div id="hud-time-bar" class="progress-bar h-full bg-[var(--pink)]" style="width: 0%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-[var(--lavender)]"><span>EXP</span> <span id="hud-exp-txt">0/400</span></div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full overflow-hidden border border-[var(--lavender)]/30">
+                    <div id="hud-exp-bar" class="progress-bar h-full bg-[var(--lavender)]" style="width: 0%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-[var(--mint)]"><span>MANÁ</span> <span id="hud-mana-txt">10/10</span></div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full overflow-hidden border border-[var(--mint)]/30">
+                    <div id="hud-mana-bar" class="progress-bar h-full bg-[var(--mint)]" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content" class="min-h-[50vh] pb-10"></main>
+
+    <div id="side-toasts" class="fixed right-4 top-24 flex flex-col gap-2 z-50 pointer-events-none items-end"></div>
+
+    <nav class="fixed bottom-0 left-0 w-full glass-panel border-t-0 rounded-t-3xl rounded-b-none p-4 grid grid-cols-5 gap-1 z-40">
+        <button onclick="nav('home')" class="flex flex-col items-center nav-btn" id="nav-home"><span class="text-xl mb-1">⛺</span><span class="text-[8px] font-bold uppercase tracking-wider">Refugio</span></button>
+        <button onclick="nav('lab')" class="flex flex-col items-center nav-btn opacity-40" id="nav-lab"><span class="text-xl mb-1">⚗️</span><span class="text-[8px] font-bold uppercase tracking-wider">Lab</span></button>
+        <button onclick="nav('dungeon')" class="flex flex-col items-center nav-btn opacity-40" id="nav-dungeon"><span class="text-xl mb-1">⛩️</span><span class="text-[8px] font-bold uppercase tracking-wider">Abismo</span></button>
+        <button onclick="nav('forge')" class="flex flex-col items-center nav-btn opacity-40" id="nav-forge"><span class="text-xl mb-1">⚒️</span><span class="text-[8px] font-bold uppercase tracking-wider">Forja</span></button>
+        <button onclick="nav('shop')" class="flex flex-col items-center nav-btn" id="nav-shop"><span class="text-xl mb-1">⚖️</span><span class="text-[8px] font-bold uppercase tracking-wider">Tienda</span></button>
+    </nav>
+
+    <div id="modal" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col justify-center items-center p-6 text-center">
+        <div class="glass-panel w-full p-8">
+            <h3 id="modal-title" class="font-sys text-[14px] font-bold tracking-[0.2em] mb-4 text-[var(--mint)]"></h3>
+            <p id="modal-desc" class="text-sm text-gray-300 mb-8 font-sys"></p>
+            <button onclick="closeModal()" class="btn-aaa w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest">
+                Cerrar (<span id="modal-timer">5</span>)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const DB_KEY = 'sys_v0_8_6_c_save';
+        const TIERS = {1:'I', 2:'H', 3:'G', 4:'F', 5:'E', 6:'D', 7:'C', 8:'B', 9:'A', 10:'S'};
+        const EXP_NEEDED = [0, 400, 1000, 3000, 7500, 15000, 30000, 50000, 75000, 100000];
+
+        // Mantenemos TODO el sistema de items
+        let ALL_EQUIP = [];
+        const W_N = ["Daga", "Espada", "Hacha", "Lanza", "Cetro"]; const A_N = ["Casco", "Peto", "Grebas", "Anillo", "Amuleto"];
+        const ADJ = ["de Hierro", "del Lobo", "Maldito", "de Dragón", "Abisal"];
+        for(let i=1; i<=50; i++) ALL_EQUIP.push({ id:`we_${i}`, type:'weapon', name: `${W_N[i%5]} ${ADJ[Math.floor(i/10)%5]}`, atk: i*3, reqTier: Math.ceil(i/5) });
+        for(let i=51; i<=100; i++) ALL_EQUIP.push({ id:`ar_${i}`, type:'armor', name: `${A_N[i%5]} ${ADJ[Math.floor((i-50)/10)%5]}`, manaDiscount: Math.min((i-50), 30), reqTier: Math.ceil((i-50)/5) });
+        ALL_EQUIP[0].name = "Daga Oxidada";
+
+        let SHOP_BASE = []; let BM_POOL = [];
+        for(let i=1; i<=36; i++) SHOP_BASE.push({ id:`sb_${i}`, name: `Material ${i}`, cost: i*100, reqTier: Math.ceil(i/4) });
+        for(let i=1; i<=16; i++) BM_POOL.push({ id:`bm_${i}`, name: `Reliquia Oscura ${i}`, cost: i*1000, reqTier: 6 + Math.floor(i/4) });
+
+        const STORY_TEXT = ["Tu hermano, el Rey Aric, te exilió...", "Las aldeas están muriendo...", "Has encontrado un refugio...", "Los Perros de Sangre te cazan...", "Aric hizo un trato con el Abismo...", "La cicatriz arcana...", "Forjando reliquias antiguas...", "Marchamos a la capital...", "Las puertas están rotas...", "Aric ha caído a tus pies."];
+
+        let s = JSON.parse(localStorage.getItem(DB_KEY)) || {
+            lvl: 1, exp: 0, gold: 0, mana: 10, prestige: 0,
+            dailies: [{name: "Entrenamiento Físico", done: false}],
+            storyClaimed: Array(10).fill(false),
+            races: [], potionInv: {}, potions: { expB: 1.0 },
+            dialogues: { alchBase: false, alchDark: false },
+            equipment: [ALL_EQUIP[0]], activeWepId: 'we_1', activeArmId: null,
+            bosses: { b1: { name: "Duende Ladrón", hp: 50, maxHp: 50 } },
+            currentTab: 'home', subTabs: {}
+        };
+
+        let modalInterval;
+
+        function save() { localStorage.setItem(DB_KEY, JSON.stringify(s)); updateHUD(); render(); }
+
+        function getEquipStats() {
+            let w = s.equipment.find(x => x.id === s.activeWepId);
+            let a = s.equipment.find(x => x.id === s.activeArmId);
+            return { atk: w ? w.atk : 0, manaDiscount: a ? a.manaDiscount : 0 };
+        }
+
+        function sideToast(msg, color="var(--mint)") {
+            const container = document.getElementById('side-toasts');
+            const el = document.createElement('div');
+            el.className = `glass-panel px-3 py-2 text-[10px] font-bold uppercase flex items-center gap-2 border-l-4`;
+            el.style.borderLeftColor = color; el.innerHTML = msg;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+
+        function showModal(title, desc) {
+            clearInterval(modalInterval);
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerHTML = desc;
+            document.getElementById('modal').classList.remove('hidden');
+            let timeLeft = 5;
+            document.getElementById('modal-timer').innerText = timeLeft;
+            modalInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('modal-timer').innerText = timeLeft;
+                if(timeLeft <= 0) closeModal();
+            }, 1000);
+        }
+
+        function closeModal() { clearInterval(modalInterval); document.getElementById('modal').classList.add('hidden'); }
+
+        function updateHUD() {
+            document.getElementById('hud-tier').innerText = TIERS[s.lvl];
+            document.getElementById('hud-gold').innerText = Math.floor(s.gold);
+            
+            let reqExp = EXP_NEEDED[s.lvl] || 100000;
+            document.getElementById('hud-exp-bar').style.width = `${(s.exp/reqExp)*100}%`;
+            document.getElementById('hud-exp-txt').innerText = `${Math.floor(s.exp)}/${reqExp}`; // Formato exacto requerido
+            
+            let maxM = 10 + (s.lvl * 2);
+            document.getElementById('hud-mana-bar').style.width = `${(s.mana/maxM)*100}%`;
+            document.getElementById('hud-mana-txt').innerText = `${Math.floor(s.mana)}/${maxM}`;
+
+            const potHud = document.getElementById('active-potion-hud');
+            if(s.potions.expB > 1.0) { potHud.innerText = `✨ EXP x${s.potions.expB}`; potHud.classList.remove('hidden'); }
+            else { potHud.classList.add('hidden'); }
+
+            ['lab', 'dungeon', 'forge', 'shop'].forEach((id, idx) => {
+                const btn = document.getElementById(`nav-${id}`);
+                if(s.lvl >= [2,3,4,1][idx]) btn.classList.remove('opacity-40'); else btn.classList.add('opacity-40');
+            });
+        }
+
+        function checkTime() {
+            let now = new Date();
+            let start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+            let diff = now - start;
+            document.getElementById('hud-time-bar').style.width = `${(diff / 86400000) * 100}%`;
+            
+            let rem = 86400000 - diff;
+            let h = Math.floor(rem/3600000).toString().padStart(2,'0');
+            let m = Math.floor((rem%3600000)/60000).toString().padStart(2,'0');
+            let sec = Math.floor((rem%60000)/1000).toString().padStart(2,'0');
+            document.getElementById('sys-countdown').innerText = `${h}:${m}:${sec}`;
+        }
+        setInterval(checkTime, 1000);
+
+        function gain(type, amt) {
+            if(type === 'exp') {
+                s.exp += amt * s.potions.expB;
+                sideToast(`+${Math.floor(amt)} EXP`);
+                let reqExp = EXP_NEEDED[s.lvl];
+                while(s.exp >= reqExp && s.lvl < 10) {
+                    s.exp -= reqExp; s.lvl++; 
+                    showModal("EVOLUCIÓN", `HAS ALCANZADO EL TIER ${TIERS[s.lvl]}`);
+                    reqExp = EXP_NEEDED[s.lvl];
+                }
+                if(s.lvl >= 10) { s.lvl = 10; s.exp = EXP_NEEDED[9]; }
+            }
+            if(type === 'gold') { s.gold += amt; sideToast(`+${Math.floor(amt)} G`, 'var(--gold)'); }
+            save();
+        }
+
+        function nav(tab) { s.currentTab = tab; render(); }
+        function setSubTab(st) { s.subTabs[s.currentTab] = st; render(); }
+
+        function generateLineChart() {
+            if(s.races.length < 2) return `<div class="text-[10px] text-center opacity-50 my-6 tracking-widest uppercase">Gráfica visible a partir de 2 carreras</div>`;
+            let max = Math.max(...s.races.map(r => r.val));
+            let points = s.races.map((r, i) => {
+                let x = (i / (s.races.length - 1)) * 100;
+                let y = 100 - (r.val / max * 80 + 10);
+                return `${x},${y}`;
+            }).join(' ');
+            return `<svg viewBox="0 0 100 100" class="chart-svg my-4"><polyline points="${points}"/></svg>`;
+        }
+
+        function render() {
+            const mc = document.getElementById('main-content'); let h = ""; const t = s.currentTab;
+            document.querySelectorAll('.nav-btn').forEach(b => b.querySelector('span:last-child').classList.remove('text-[var(--mint)]'));
+            document.getElementById(`nav-${t}`).querySelector('span:last-child').classList.add('text-[var(--mint)]');
+
+            if(t === 'home') {
+                const st = s.subTabs[t] || 'main'; // Eliminada pestaña Logros
+                h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
+                    <button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Campamento</button>
+                    <button onclick="setSubTab('story')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='story'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Historia</button>
+                </div>`;
+
+                if(st === 'main') {
+                    // Carreras: Minutos y Segundos
+                    h += `<div class="glass-panel p-4 mb-4">
+                        <div class="flex gap-2 mb-2">
+                            <input id="in-min" type="number" placeholder="Min" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm outline-none">
+                            <input id="in-sec" type="number" placeholder="Sec" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm outline-none">
+                            <button onclick="let m=parseInt(document.getElementById('in-min').value)||0; let sc=parseInt(document.getElementById('in-sec').value)||0; let tot=(m*60)+sc; if(tot>0){ s.races.push({val:tot, date:Date.now()}); gain('exp', 150); save(); }" class="btn-aaa px-4 py-3 rounded-xl font-bold">GO</button>
+                        </div>
+                        ${generateLineChart()}
+                        <div class="mt-2">
+                            <p class="text-[9px] text-[var(--lavender)] uppercase mb-2">Historial Reciente</p>
+                            <div class="max-h-[120px] overflow-y-auto pr-2 space-y-1">`;
+                            let maxRace = s.races.length > 0 ? Math.max(...s.races.map(r=>r.val)) : 0;
+                            s.races.slice().reverse().forEach(r => {
+                                let isRecord = r.val === maxRace;
+                                h += `<div class="flex justify-between items-center text-[10px] py-1 border-b border-[var(--border-glass)] ${isRecord?'record-highlight':''}">
+                                    <span>${new Date(r.date).toLocaleDateString()}</span>
+                                    <span>${Math.floor(r.val/60)}m ${r.val%60}s</span>
+                                </div>`;
+                            });
+                            if(s.races.length === 0) h += `<p class="text-[9px] opacity-50">No hay carreras registradas.</p>`;
+                    h += `</div></div></div>`;
+
+                    // Diarias
+                    h += `<div class="glass-panel p-4 mb-4"><h2 class="text-[10px] uppercase tracking-widest text-[var(--lavender)] mb-3">Misiones Diarias</h2>`;
+                    s.dailies.forEach((d, i) => {
+                        h += `<div class="flex gap-2 items-center mb-2 bg-black/30 p-2 rounded border border-[var(--border-glass)]">
+                            <input type="text" value="${d.name}" onchange="s.dailies[${i}].name=this.value; save();" class="w-full bg-transparent outline-none text-xs ${d.done?'opacity-50 line-through':''}" ${d.done?'disabled':''}>
+                            ${!d.done ? `<button onclick="s.dailies[${i}].done=true; gain('exp',100); gain('gold',50); save();" class="text-[var(--mint)] text-xs">✔️</button>` : ''}
+                            <button onclick="if(s.dailies[${i}].done) { sideToast('Solo en el reinicio', 'var(--pink)'); } else { s.dailies.splice(${i},1); save(); }" class="text-[var(--pink)] text-xs">❌</button>
+                        </div>`;
+                    });
+                    if(s.dailies.length < 3) h += `<button onclick="s.dailies.push({name:'Nueva Misión', done:false}); save();" class="w-full mt-2 py-2 border border-dashed border-[var(--border-glass)] rounded text-[10px] opacity-50">+</button>`;
+                    h += `</div>`;
+                }
+                else if(st === 'story') {
+                    // Historia con Click arreglado, texto de tier arreglado y reborde amarillo
+                    STORY_TEXT.forEach((txt, i) => {
+                        const reqLvl = i + 1;
+                        if(s.lvl >= reqLvl) {
+                            let isClaimed = s.storyClaimed[i];
+                            let extraClass = isClaimed ? 'border-gray-800' : 'story-claimable';
+                            h += `<div onclick="if(!${isClaimed}){ s.storyClaimed[${i}]=true; gain('gold', 150); save(); }" class="glass-panel p-4 mb-3 transition-all ${extraClass}">
+                                <div class="flex justify-between items-center mb-2"><h3 class="text-[10px] font-bold text-[var(--gold)] uppercase">Capítulo ${reqLvl}</h3>${isClaimed?'<span class="text-[8px] opacity-50">LEÍDO</span>':'<span class="text-[8px] text-[var(--gold)] animate-pulse font-bold">TOCA: 150G</span>'}</div>
+                                <p class="text-[11px] text-gray-300 italic leading-relaxed">"${txt}"</p>
+                            </div>`;
+                        } else {
+                            h += `<div class="glass-panel p-4 mb-3 opacity-30 text-center border-dashed border-gray-800"><p class="text-[10px] uppercase text-[var(--pink)]">Requiere Tier ${TIERS[reqLvl]} (Eres Tier ${TIERS[s.lvl]})</p></div>`;
+                        }
+                    });
+                }
+            }
+            else if(t === 'lab') {
+                const st = s.subTabs[t] || 'main';
+                h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl"><button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Base</button><button onclick="setSubTab('sec')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='sec'?'bg-[var(--pink)]/20 text-[var(--pink)]':'opacity-50'}">Oscura</button><button onclick="setSubTab('inv')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='inv'?'bg-[var(--lavender)]/20 text-[var(--lavender)]':'opacity-50'}">Pociones</button></div>`;
+                
+                if(st === 'main') {
+                    if(!s.dialogues.alchBase) {
+                        h += `<div onclick="s.dialogues.alchBase=true; gain('gold',50); save();" class="glass-panel p-4 mb-4 border-[var(--mint)] cursor-pointer story-claimable">
+                            <p class="text-[10px] text-[var(--mint)] font-bold mb-1">Mago del Reino:</p>
+                            <p class="text-xs text-gray-300 italic">"Cazador, la alquimia no es un juego. Mide bien tus ingredientes. Ten estos 50G para empezar."</p>
+                        </div>`;
+                    }
+                    h += `<div class="glass-panel p-4 text-center mb-4"><h3 class="font-sys text-[var(--mint)] text-sm mb-4">Destilación</h3>
+                    <button onclick="s.potionInv['Poción Menor'] = (s.potionInv['Poción Menor']||0)+1; sideToast('Poción Creada'); save();" class="btn-aaa w-full py-4 rounded-xl text-[10px] font-bold uppercase tracking-widest">Crear Poción Menor (x1.2 EXP)</button></div>`;
+                } else if(st === 'sec') {
+                    if(!s.dialogues.alchDark) {
+                        h += `<div onclick="s.dialogues.alchDark=true; save();" class="glass-panel p-4 mb-4 border-[var(--pink)] cursor-pointer story-claimable">
+                            <p class="text-[10px] text-[var(--pink)] font-bold mb-1">Ecos del Abismo:</p>
+                            <p class="text-xs text-gray-500 italic">"..." (El silencio quema tu mente. Toca para ocultar)</p>
+                        </div>`;
+                    }
+                    h += `<div class="glass-panel p-4 text-center border-[var(--pink)]/30"><h3 class="font-sys text-[var(--pink)] text-sm mb-4">Magia Prohibida</h3>
+                    <button onclick="s.potionInv['Poción Oscura'] = (s.potionInv['Poción Oscura']||0)+1; sideToast('Poción Oscura Creada', 'var(--pink)'); save();" class="w-full py-4 bg-[var(--pink)]/10 border border-[var(--pink)]/50 rounded-xl text-[10px] font-bold text-[var(--pink)] uppercase tracking-widest">Crear Poción Oscura (x5.0 EXP)</button></div>`;
+                } else if (st === 'inv') {
+                    h += `<div class="glass-panel p-4"><h3 class="font-sys text-[var(--lavender)] text-sm mb-4">Tus Pociones</h3>`;
+                    let has = false;
+                    for(let p in s.potionInv) {
+                        if(s.potionInv[p] > 0) {
+                            has = true; let mult = p === 'Poción Oscura' ? 5.0 : 1.2;
+                            h += `<div class="flex justify-between items-center bg-black/40 p-3 rounded mb-2 border border-gray-800">
+                                <div><p class="text-xs font-bold">${p}</p><p class="text-[9px] text-gray-400">Cantidad: ${s.potionInv[p]}</p></div>
+                                <button onclick="if(s.potions.expB>1.0){ if(!confirm('Ya tienes un efecto. ¿Sobrescribir?')) return; } s.potionInv['${p}']--; s.potions.expB=${mult}; sideToast('Efecto Aplicado'); save();" class="bg-[var(--lavender)]/20 text-[var(--lavender)] px-3 py-1 rounded text-xs font-bold">USAR</button>
+                            </div>`;
+                        }
+                    }
+                    if(!has) h += `<p class="text-[10px] text-gray-500 text-center uppercase">Inventario vacío</p>`;
+                    h += `</div>`;
+                }
+            }
+            else if(t === 'dungeon') {
+                let eq = getEquipStats(); let atk = 5 + eq.atk + (s.lvl*2);
+                let cost = Math.max(1, 2 * (1 - (eq.manaDiscount/100)));
+                h += `<div class="glass-panel p-6 text-center">
+                    <h3 class="font-sys text-[var(--lavender)] text-sm mb-2">${s.bosses.b1.name}</h3>
+                    <div class="h-6 w-full bg-black rounded border border-[var(--border-glass)] relative overflow-hidden mb-6">
+                        <div class="h-full bg-[var(--pink)]/80 progress-bar" style="width: ${(s.bosses.b1.hp/s.bosses.b1.maxHp)*100}%"></div>
+                        <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold">HP: ${Math.floor(s.bosses.b1.hp)}</div>
+                    </div>
+                    <button onclick="if(s.mana>=${cost}){ s.mana-=${cost}; s.bosses.b1.hp-=${atk}; if(s.bosses.b1.hp<=0){ s.bosses.b1.hp=50; gain('exp',200); gain('gold',50); } save(); } else { sideToast('Sin Maná', 'var(--pink)'); }" class="btn-aaa w-full py-4 rounded-xl font-bold tracking-widest text-xs">ATACAR (Coste: ${cost.toFixed(1)} Maná)</button>
+                </div>`;
+            }
+            else if(t === 'forge') {
+                h += `<div class="glass-panel p-4 h-[60vh] overflow-y-auto pr-2">
+                    <p class="text-[10px] uppercase text-gray-500 tracking-widest mb-4">Inventario</p>`;
+                s.equipment.forEach(e => {
+                    let act = s.activeWepId === e.id || s.activeArmId === e.id;
+                    h += `<div class="bg-black/60 border ${act?'border-[var(--mint)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <p class="text-xs font-bold">${e.name}</p>
+                            <button onclick="if('${e.type}'==='weapon') s.activeWepId='${e.id}'; else s.activeArmId='${e.id}'; save();" class="text-[9px] ${act?'text-[var(--mint)] font-bold':'text-gray-400 border border-gray-600 px-2 py-1 rounded'}">${act?'EQUIPADO':'EQUIPAR'}</button>
+                        </div>
+                        <p class="text-[9px] opacity-60 uppercase">${e.type==='weapon'?`ATK: ${e.atk}`:`Mana Desc: ${e.manaDiscount}%`} | TIER ${TIERS[e.reqTier]}</p>
+                    </div>`;
+                });
+                h += `</div>`;
+            }
+            else if(t === 'shop') {
+                const st = s.subTabs[t] || 'base';
+                h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
+                    <button onclick="setSubTab('base')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='base'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Base</button>
+                    <button onclick="${s.lvl>=6?`setSubTab('bm')`:`sideToast('Requiere Tier D (Eres Tier ${TIERS[s.lvl]})', 'var(--pink)')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='bm'?'bg-[var(--pink)]/20 text-[var(--pink)]':'opacity-50'}">Mercado Negro</button>
+                </div>`;
+
+                let renderPool = st === 'base' ? SHOP_BASE : BM_POOL;
+                let color = st === 'base' ? 'var(--gold)' : 'var(--pink)';
+
+                h += `<div class="glass-panel p-4 mb-4"><div class="space-y-2 max-h-[250px] overflow-y-auto pr-1">`;
+                renderPool.forEach(item => {
+                    if(s.lvl >= item.reqTier) {
+                        h += `<div class="flex justify-between items-center text-[10px] bg-black/30 p-2 rounded border border-gray-800">
+                            <span>${item.name}</span>
+                            <button onclick="if(s.gold>=${item.cost}){ s.gold-=${item.cost}; s.equipment.push(ALL_EQUIP[Math.floor(Math.random()*ALL_EQUIP.length)]); sideToast('Comprado'); save(); } else sideToast('Oro Insuficiente', 'var(--pink)')" class="text-[${color}] border border-[${color}]/50 px-2 py-1 rounded">${item.cost}G</button>
+                        </div>`;
+                    } else {
+                        h += `<div class="flex justify-between items-center text-[10px] bg-black/10 p-2 rounded border border-gray-900 opacity-40"><span>🔒 Desconocido</span><span class="text-gray-500">Tier ${TIERS[item.reqTier]}</span></div>`;
+                    }
+                });
+                h += `</div></div>`;
+
+                h += `<button onclick="if(s.lvl<10) { sideToast('Requiere Tier S (Eres Tier ${TIERS[s.lvl]})', 'var(--pink)'); return; } if(confirm('¿Ascender?')){ s.prestige++; s.lvl=1; s.exp=0; s.gold=0; s.equipment=[ALL_EQUIP[0]]; s.activeWepId='we_1'; s.activeArmId=null; s.storyClaimed.fill(false); save(); showModal('ASCENSIÓN', 'Has renacido'); }" class="w-full py-5 glass-panel text-xs tracking-widest font-bold uppercase transition-all ${s.lvl>=10?'border-[var(--mint)] text-[var(--mint)] shadow-[0_0_15px_var(--mint)]':'opacity-30 border-gray-800 text-gray-500'}">ASCENSIÓN</button>`;
+            }
+            mc.innerHTML = h;
+        }
+
+        render(); updateHUD();
+    </script>
+</body>
+</html>
