@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SYSTEM V0.8.9: LEGACY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@300;500;700&display=swap');
+        
+        :root {
+            --bg: #0c0c12; --lavender: #b4a8d4; --mint: #8abfcc;
+            --pink: #c49090; --gold: #c8b98a; --border: rgba(180,168,212,0.15);
+        }
+        body { 
+            background: var(--bg); color: var(--lavender); font-family: 'Space Grotesk', sans-serif; 
+            padding-bottom: 90px; overflow-x: hidden;
+        }
+        .font-sys { font-family: 'Orbitron', sans-serif; }
+        .glass { background: rgba(18,18,24,0.8); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 16px; }
+        
+        /* Animación Historia */
+        .story-glow { border: 1px solid #fff700 !important; box-shadow: 0 0 15px rgba(255,247,0,0.4); animation: shine 2s infinite; }
+        @keyframes shine { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        
+        /* Gráfica de Líneas */
+        .line-chart { width: 100%; height: 60px; stroke: var(--mint); stroke-width: 2; fill: none; }
+        .record-gold { background: #fff700; color: #000; font-weight: bold; padding: 0 4px; border-radius: 2px; }
+
+        .progress-bar { transition: width 0.5s ease; }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="px-4 pt-6">
+
+    <header class="glass p-5 mb-6">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h1 class="font-sys font-bold text-xl text-[var(--mint)]">SYS<span class="text-[var(--pink)] text-xs ml-1">v0.8.9</span></h1>
+                <p class="text-[10px] font-bold text-[var(--gold)]">💰 <span id="h-gold">0</span>G</p>
+                <p id="active-pot-tag" class="text-[8px] text-[var(--mint)] hidden animate-pulse uppercase">✨ Potenciador Activo</p>
+            </div>
+            <div class="text-right">
+                <p class="font-sys font-bold text-3xl">Tier <span id="h-tier">I</span></p>
+                <p id="h-prestige" class="text-[9px] text-[var(--gold)] font-bold">ASCENSIÓN 0</p>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <div>
+                <div class="flex justify-between text-[9px] font-bold uppercase text-[var(--pink)]"><span>Ciclo Solar</span> <span id="h-timer">00:00:00</span></div>
+                <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div id="h-time-bar" class="h-full bg-[var(--pink)] progress-bar"></div></div>
+            </div>
+            <div>
+                <div class="flex justify-between text-[9px] font-bold uppercase text-[var(--lavender)]"><span>Experiencia</span> <span id="h-exp-txt">0%</span></div>
+                <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div id="h-exp-bar" class="h-full bg-[var(--lavender)] progress-bar"></div></div>
+            </div>
+            <div>
+                <div class="flex justify-between text-[9px] font-bold uppercase text-[var(--mint)]"><span>Esencia Maná</span> <span id="h-mana-txt">10/10</span></div>
+                <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden"><div id="h-mana-bar" class="h-full bg-[var(--mint)] progress-bar"></div></div>
+            </div>
+        </div>
+    </header>
+
+    <main id="view-port"></main>
+
+    <div id="toast-container" class="fixed right-4 top-20 flex flex-col gap-2 z-50 pointer-events-none"></div>
+
+    <nav class="fixed bottom-4 left-4 right-4 glass p-3 flex justify-around items-center z-40">
+        <button onclick="nav('home')" class="text-xl">⛺</button>
+        <button onclick="nav('lab')" class="text-xl">⚗️</button>
+        <button onclick="nav('dungeon')" class="text-xl">⛩️</button>
+        <button onclick="nav('forge')" class="text-xl">⚒️</button>
+        <button onclick="nav('shop')" class="text-xl">⚖️</button>
+    </nav>
+
+    <div id="modal" class="fixed inset-0 bg-black/90 z-[100] hidden flex flex-col justify-center items-center p-8 text-center">
+        <div class="glass w-full p-6">
+            <h3 id="m-title" class="font-sys text-sm mb-4"></h3>
+            <p id="m-body" class="text-xs text-gray-400 mb-6"></p>
+            <button onclick="closeModal()" class="w-full py-3 glass text-[10px] font-bold">CERRAR (<span id="m-count">5</span>)</button>
+        </div>
+    </div>
+
+    <script>
+        const DB_KEY = 'sys_legacy_v89';
+        const TIERS = {1:'I', 2:'H', 3:'G', 4:'F', 5:'E', 6:'D', 7:'C', 8:'B', 9:'A', 10:'S'};
+        const EXP_REQS = [0, 400, 1200, 3500, 8000, 15000, 30000, 55000, 80000, 100000];
+
+        let s = JSON.parse(localStorage.getItem(DB_KEY)) || {
+            lvl: 1, exp: 0, gold: 0, prestige: 0, mana: 10,
+            dailies: [{name: 'Caza Sombras', done: false}],
+            story: Array(10).fill(false),
+            potions: {}, activePot: null,
+            races: [], 
+            inventory: [{id: 1, name: 'Daga Vieja', atk: 5, type: 'W'}],
+            activeW: 1, activeA: null,
+            lastReset: null, tab: 'home'
+        };
+
+        function save() { 
+            localStorage.setItem(DB_KEY, JSON.stringify(s)); 
+            updateHUD(); render(); 
+        }
+
+        function toast(txt, col='var(--mint)') {
+            const c = document.getElementById('toast-container');
+            const e = document.createElement('div');
+            e.className = 'glass px-4 py-2 text-[10px] font-bold border-l-4 transform translate-x-10 opacity-0 transition-all duration-300';
+            e.style.borderLeftColor = col; e.innerText = txt;
+            c.appendChild(e);
+            setTimeout(() => e.classList.remove('translate-x-10', 'opacity-0'), 10);
+            setTimeout(() => { e.classList.add('translate-x-10', 'opacity-0'); setTimeout(()=>e.remove(), 300); }, 3000);
+        }
+
+        let mInt;
+        function openModal(t, b) {
+            document.getElementById('m-title').innerText = t;
+            document.getElementById('m-body').innerText = b;
+            document.getElementById('modal').classList.remove('hidden');
+            let c = 5; document.getElementById('m-count').innerText = c;
+            mInt = setInterval(() => {
+                c--; document.getElementById('m-count').innerText = c;
+                if(c <= 0) closeModal();
+            }, 1000);
+        }
+        function closeModal() { clearInterval(mInt); document.getElementById('modal').classList.add('hidden'); }
+
+        function updateHUD() {
+            document.getElementById('h-gold').innerText = Math.floor(s.gold);
+            document.getElementById('h-tier').innerText = TIERS[s.lvl];
+            document.getElementById('h-prestige').innerText = `ASCENSIÓN ${s.prestige}`;
+            
+            let req = EXP_REQS[s.lvl];
+            document.getElementById('h-exp-bar').style.width = `${(s.exp/req)*100}%`;
+            document.getElementById('h-exp-txt').innerText = `${Math.floor((s.exp/req)*100)}%`;
+            
+            let maxM = 10 + (s.lvl * 5);
+            document.getElementById('h-mana-bar').style.width = `${(s.mana/maxM)*100}%`;
+            document.getElementById('h-mana-txt').innerText = `${Math.floor(s.mana)}/${maxM}`;
+            
+            document.getElementById('active-pot-tag').classList.toggle('hidden', !s.activePot);
+        }
+
+        function syncClock() {
+            let now = new Date();
+            let start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0,0,0);
+            let diff = now - start;
+            document.getElementById('h-time-bar').style.width = `${(diff/86400000)*100}%`;
+            let rem = 86400000 - diff;
+            let h = Math.floor(rem/3600000).toString().padStart(2,'0');
+            let m = Math.floor((rem%3600000)/60000).padStart(2,'0');
+            let sc = Math.floor((rem%60000)/1000).padStart(2,'0');
+            document.getElementById('h-timer').innerText = `${h}:${m}:${sc}`;
+            if(s.lastReset !== now.toLocaleDateString()) {
+                s.lastReset = now.toLocaleDateString();
+                s.dailies.forEach(d => d.done = false); save();
+            }
+        }
+        setInterval(syncClock, 1000);
+
+        function gain(type, val) {
+            if(type === 'exp') {
+                let m = s.activePot ? 1.5 : 1;
+                s.exp += val * m;
+                toast(`+${val} EXP`);
+                if(s.exp >= EXP_REQS[s.lvl] && s.lvl < 10) {
+                    s.exp = 0; s.lvl++; openModal("TIER SUBIDO", `Ahora eres Tier ${TIERS[s.lvl]}`);
+                }
+            }
+            if(type === 'gold') { s.gold += val; toast(`+${val} ORO`, 'var(--gold)'); }
+            save();
+        }
+
+        function nav(t) { s.tab = t; render(); }
+
+        function render() {
+            const v = document.getElementById('view-port'); v.innerHTML = "";
+            let h = "";
+
+            if(s.tab === 'home') {
+                h += `<div class="glass p-4 mb-4">
+                    <div class="flex gap-2 mb-4">
+                        <input id="in-m" type="number" placeholder="Min" class="w-full bg-white/5 p-2 rounded text-xs outline-none border border-white/10">
+                        <input id="in-s" type="number" placeholder="Seg" class="w-full bg-white/5 p-2 rounded text-xs outline-none border border-white/10">
+                        <button onclick="let total=(parseInt(document.getElementById('in-m').value)||0)*60 + (parseInt(document.getElementById('in-s').value)||0); if(total>0){ s.races.push({v:total, d:Date.now()}); gain('exp', 150); gain('gold', 30); save(); }" class="px-4 bg-[var(--mint)]/20 text-[var(--mint)] rounded font-bold text-xs">ADD</button>
+                    </div>`;
+                
+                if(s.races.length > 1) {
+                    let maxV = Math.max(...s.races.map(r=>r.v));
+                    let pts = s.races.slice(-7).map((r,i) => `${(i/6)*100},${60 - (r.v/maxV*40 + 10)}`).join(' ');
+                    h += `<svg viewBox="0 0 100 60" class="line-chart mb-4"><polyline points="${pts}"/></svg>
+                          <div class="text-[9px] space-y-1">`;
+                    s.races.slice(-7).reverse().forEach(r => {
+                        let isRec = r.v === maxV;
+                        h += `<div class="flex justify-between opacity-70 ${isRec?'record-gold':''}"><span>${new Date(r.d).toLocaleDateString()}</span><span>${Math.floor(r.v/60)}m ${r.v%60}s</span></div>`;
+                    });
+                    h += `</div>`;
+                }
+                h += `</div>`;
+
+                h += `<div class="glass p-4 mb-4"><h3 class="text-[10px] uppercase mb-3 opacity-50">Misiones</h3>`;
+                s.dailies.forEach((d,i) => {
+                    h += `<div class="flex items-center bg-white/5 p-2 rounded mb-2 border border-white/5">
+                        <span class="text-xs flex-1 ${d.done?'line-through opacity-30':''}">${d.name}</span>
+                        ${!d.done ? `<button onclick="s.dailies[${i}].done=true; gain('exp',100); gain('gold',50); save();" class="text-[var(--mint)] text-xs mr-2">✔️</button>` : ''}
+                        <button onclick="if(s.dailies[${i}].done){ toast('Espera al reinicio', 'var(--pink)'); } else { s.dailies.splice(${i},1); save(); }" class="text-[var(--pink)] text-xs">❌</button>
+                    </div>`;
+                });
+                if(s.dailies.length < 3) h += `<button onclick="s.dailies.push({name:'Misión', done:false}); save();" class="w-full py-1 text-[10px] opacity-30 border border-dashed border-white/20 rounded">+</button>`;
+                h += `</div>`;
+
+                h += `<div class="space-y-3">`;
+                ["El Rey Aric te exilió...", "Las Sombras acechan...", "Has encontrado el Refugio..."].forEach((txt, i) => {
+                    let claimed = s.story[i];
+                    h += `<div onclick="if(!${claimed}){ s.story[${i}]=true; gain('gold', 100); save(); }" class="glass p-4 ${!claimed?'story-glow':''} transition-all">
+                        <p class="text-[9px] font-bold text-[var(--gold)] mb-1">CAPÍTULO ${i+1}</p>
+                        <p class="text-xs italic text-gray-400">"${txt}"</p>
+                    </div>`;
+                });
+                h += `</div>`;
+            }
+
+            if(s.tab === 'lab') {
+                h += `<div class="glass p-4 mb-4">
+                    <p class="text-[10px] text-[var(--mint)] font-bold">Mago del Reino:</p>
+                    <p class="text-xs italic text-gray-400">"Ten cuidado con lo que mezclas. La magia es una amante cruel."</p>
+                </div>`;
+                h += `<div class="glass p-4 text-center">
+                    <button onclick="s.potions['Poción EXP'] = (s.potions['Poción EXP']||0)+1; toast('Poción Destilada'); save();" class="w-full py-4 glass text-[10px] font-bold mb-4">DESTILAR POCIÓN (x1.5 EXP)</button>
+                    <div class="space-y-2">`;
+                    for(let p in s.potions) {
+                        if(s.potions[p] > 0) h += `<div class="flex justify-between items-center bg-white/5 p-3 rounded text-[10px]">
+                            <span>${p} (x${s.potions[p]})</span>
+                            <button onclick="if(s.activePot){ if(!confirm('¿Sobrescribir efecto actual?')) return; } s.activePot={name:'${p}'}; s.potions['${p}']--; save();" class="text-[var(--mint)] font-bold">USAR</button>
+                        </div>`;
+                    }
+                h += `</div></div>`;
+            }
+
+            if(s.tab === 'dungeon') {
+                let curAtk = (s.inventory.find(e=>e.id===s.activeW)||{atk:5}).atk + (s.lvl*2);
+                h += `<div class="glass p-6 text-center">
+                    <p class="text-xs font-bold mb-6">DUENDE DE LAS RUINAS</p>
+                    <button onclick="if(s.mana>=2){ s.mana-=2; gain('exp', 50); gain('gold', 10); save(); } else { toast('Sin Maná', 'var(--pink)'); }" class="w-full py-8 glass border-dashed border-[var(--mint)]/30 text-sm font-sys">
+                        ATACAR <br> <span class="text-[10px] opacity-50">COSTO: 2 MANÁ | ATK: ${curAtk}</span>
+                    </button>
+                </div>`;
+            }
+
+            if(s.tab === 'forge') {
+                h += `<div class="glass p-4"><p class="text-[10px] uppercase mb-4 opacity-50">Equipo</p>`;
+                s.inventory.forEach(e => {
+                    let active = s.activeW === e.id || s.activeA === e.id;
+                    h += `<div class="flex justify-between items-center bg-white/5 p-3 rounded mb-2 border ${active?'border-[var(--mint)]':'border-transparent'}">
+                        <span class="text-xs">${e.name} <span class="opacity-30 ml-2">(${e.type})</span></span>
+                        <button onclick="if('${e.type}'==='W') s.activeW=${e.id}; else s.activeA=${e.id}; save();" class="text-[10px] font-bold ${active?'text-[var(--mint)]':'opacity-30'}">${active?'EQUIPADO':'EQUIPAR'}</button>
+                    </div>`;
+                });
+                h += `</div>`;
+            }
+
+            if(s.tab === 'shop') {
+                h += `<div class="glass p-4 mb-4">
+                    <p class="text-[10px] uppercase text-center mb-4">Tienda del Reino</p>
+                    <button onclick="if(s.gold>=200){ gain('gold',-200); s.inventory.push({id:Date.now(), name:'Casco de Dragón', type:'A', manaPass: 5}); save(); openModal('COMPRA', 'Obtenido: Casco de Dragón'); } else { toast('Oro insuficiente', 'var(--pink)'); }" class="w-full py-4 glass text-[10px] font-bold">COMPRAR EQUIPO ALEATORIO (200G)</button>
+                </div>`;
+                let tierS = s.lvl >= 10;
+                h += `<button onclick="if(!${tierS}){ toast('Solo para Tier S', 'var(--pink)'); } else { s.prestige++; s.lvl=1; s.gold=0; save(); }" class="w-full py-4 glass text-[10px] font-bold ${tierS?'border-[var(--gold)] text-[var(--gold)]':'opacity-30'}">ASCENSIÓN</button>`;
+            }
+
+            v.innerHTML = h;
+        }
+
+        syncClock();
+        save();
+    </script>
+</body>
+</html>
