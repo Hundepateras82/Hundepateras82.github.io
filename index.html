@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SYSTEM 0.8.5">
+    <title>SYSTEM V0.8.5: ALPHA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@300;500;700&display=swap');
+        
+        :root {
+            --bg-base: #0c0c12; --lavender: #b4a8d4; --mint: #8abfcc;
+            --pink: #c49090; --gold: #c8b98a; --border-glass: rgba(180,168,212,0.12);
+        }
+        body { 
+            background: var(--bg-base); color: var(--lavender); font-family: 'Space Grotesk', sans-serif; 
+            -webkit-tap-highlight-color: transparent; overflow-x: hidden;
+            padding-top: calc(env(safe-area-inset-top) + 5px);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+        }
+        .font-sys { font-family: 'Orbitron', sans-serif; }
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(18,18,24,0.9) 0%, rgba(12,12,18,0.95) 100%);
+            border: 1px solid var(--border-glass); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px); border-radius: 16px;
+        }
+        .btn-aaa {
+            background: linear-gradient(90deg, rgba(180,168,212,0.1), rgba(138,191,204,0.1));
+            border: 1px solid var(--border-glass); color: var(--mint); transition: all 0.2s;
+        }
+        .btn-aaa:active { transform: scale(0.97); }
+        .progress-bar { transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        .active-tab { display: block; animation: fadeIn 0.4s forwards; }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(5px); } }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="px-4">
+
+    <header class="glass-panel p-5 mb-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-[var(--mint)] opacity-5 blur-[60px] rounded-full"></div>
+        
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h1 class="font-sys font-bold text-xl text-[var(--mint)] tracking-wider">SYS<span class="text-[var(--pink)] text-xs ml-1">v0.8.5</span></h1>
+                <p class="text-[10px] font-bold mt-1 uppercase text-[var(--gold)]">💰 <span id="hud-gold">0</span>G</p>
+                <p id="hud-bonus-txt" class="text-[9px] font-bold mt-1 uppercase text-yellow-400 hidden">⚡ Bono Activo</p>
+            </div>
+            <div class="text-right">
+                <p class="font-sys font-bold text-3xl text-[var(--lavender)]">Tier <span id="hud-tier" class="text-white">I</span></p>
+                <p id="hud-prestige" class="text-[10px] text-[var(--gold)] font-bold mt-1">Ascensión 0</p>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <div>
+                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-red-300"><span>Reloj Solar</span> <span id="sys-countdown">--:--:--</span></div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full border border-red-900 overflow-hidden">
+                    <div id="hud-time-bar" class="progress-bar h-full bg-red-600 shadow-[0_0_8px_red]" style="width: 0%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-green-300"><span>EXP</span> <span id="hud-exp-txt">0%</span></div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full border border-green-900 overflow-hidden">
+                    <div id="hud-exp-bar" class="progress-bar h-full bg-green-500 shadow-[0_0_8px_green]" style="width: 0%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-blue-300"><span>MANÁ</span> <span id="hud-mana-txt">10/10</span></div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full border border-blue-900 overflow-hidden">
+                    <div id="hud-mana-bar" class="progress-bar h-full bg-blue-500 shadow-[0_0_8px_blue]" style="width: 100%"></div>
+                </div>
+            </div>
+            <div id="mult-container" class="hidden">
+                <div class="flex justify-between text-[9px] font-bold mb-1 uppercase text-yellow-400"><span>Poción Exp</span> <span id="hud-mult-txt">x1.0</span></div>
+                <div class="h-1 w-full bg-black/50 rounded-full overflow-hidden">
+                    <div class="h-full bg-yellow-400 opacity-80 w-full animate-pulse shadow-[0_0_8px_yellow]"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content" class="min-h-[50vh]"></main>
+
+    <nav class="fixed bottom-0 left-0 w-full glass-panel border-t-0 rounded-t-3xl rounded-b-none p-4 grid grid-cols-5 gap-1 z-40">
+        <button onclick="nav('home')" class="flex flex-col items-center nav-btn" id="nav-home"><span class="text-xl mb-1">⛺</span><span class="text-[8px] font-bold uppercase tracking-wider text-[var(--mint)]">Refugio</span></button>
+        <button onclick="nav('lab')" class="flex flex-col items-center nav-btn opacity-40" id="nav-lab"><span class="text-xl mb-1">⚗️</span><span class="text-[8px] font-bold uppercase tracking-wider">Lab</span></button>
+        <button onclick="nav('dungeon')" class="flex flex-col items-center nav-btn opacity-40" id="nav-dungeon"><span class="text-xl mb-1">⛩️</span><span class="text-[8px] font-bold uppercase tracking-wider">Abismos</span></button>
+        <button onclick="nav('forge')" class="flex flex-col items-center nav-btn opacity-40" id="nav-forge"><span class="text-xl mb-1">⚒️</span><span class="text-[8px] font-bold uppercase tracking-wider">Forja</span></button>
+        <button onclick="nav('shop')" class="flex flex-col items-center nav-btn" id="nav-shop"><span class="text-xl mb-1">⚖️</span><span class="text-[8px] font-bold uppercase tracking-wider">Tienda</span></button>
+    </nav>
+
+    <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 glass-panel !rounded-full px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--mint)] opacity-0 pointer-events-none transition-opacity duration-300 z-50">GUARDADO</div>
+
+    <div id="modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] hidden flex-col justify-center items-center p-6 text-center">
+        <div class="glass-panel w-full p-8 relative overflow-hidden">
+            <div id="modal-glow" class="absolute inset-0 opacity-20 blur-2xl"></div>
+            <div id="modal-icon" class="text-6xl mb-4 relative z-10 drop-shadow-2xl">🔮</div>
+            <h3 id="modal-title" class="font-sys text-[12px] font-bold tracking-[0.2em] mb-2 relative z-10">...</h3>
+            <p id="modal-desc" class="text-sm text-gray-300 relative z-10 mb-8 font-sys leading-relaxed">...</p>
+            <button id="modal-btn" onclick="closeModal()" class="btn-aaa w-full py-4 rounded-xl text-xs font-bold tracking-widest relative z-10 bg-black/50 border border-white/20">ACEPTAR (6s)</button>
+        </div>
+    </div>
+
+    <script>
+        /* ================= ENGINE V0.8.5 ================= */
+        const DB_KEY = 'sys_v0_8_5_save';
+        const TIERS = {1:'I', 2:'H', 3:'G', 4:'F', 5:'E', 6:'D', 7:'C', 8:'B', 9:'A', 10:'S'};
+        
+        // 36 Materials Array: [ID, Icon, Name, Desc]
+        const ALL_MATS = [
+            // Básicos y Metales
+            ["m1","⛏️","Acero","Se compra en la Tienda Básica o se farmea en Mazmorra Tier I."], ["m2","🐉","Escamas","Droppeado por bestias y comprado en Tienda Básica."], ["m3","🧱","Cobre","Mineral básico de la Forja Tier I."], ["m4","🔩","Hierro","Extraído de gólems en la Mazmorra."], ["m5","🪙","Plata","Moneda antigua fundida. Se encuentra en la Tienda."], ["m6","🥇","Oro Puro","Versión refinada del oro. Raro drop de jefes."], ["m7","💎","Platino","Mineral denso. Mazmorra Maldita Tier II."], ["m8","💠","Mithril","Metal ligero y mágico. Exclusivo de Abismo Profundo Tier III."], ["m9","🪨","Piedra Rúnica","Se obtiene purificando tareas en el Lab Personal."],
+            // Naturaleza y Bestias
+            ["m10","🪵","Madera Roble","Material estándar. Tienda Básica."], ["m11","🌿","Hoja Curativa","Cae de monstruos tipo planta en Tier I."], ["m12","☠️","Raíz Venenosa","Mazmorra Maldita. Usada en Alquimia."], ["m13","🌸","Flor Lunar","Florece de noche. Recompensa de misiones."], ["m14","🌻","Semilla Solar","Extraída de monstruos ígneos."], ["m15","🍯","Savia Pétrea","Sangre de Ent. Drop raro de Jefe de Tier I."], ["m16","🦴","Hueso Roto","Común en esqueletos (Tier I)."], ["m17","🦷","Colmillo","De lobos sombra (Tier I/II)."], ["m18","🐾","Piel de Bestia","De quimeras de la Mazmorra."],
+            // Monstruos y Magia
+            ["m19","👁️","Ojo de Araña","Drop de aracnidos en Tier II."], ["m20","🦇","Ala de Murciélago","Se encuentra en las cuevas del Lab Secreto."], ["m21","😈","Cuerno Demonio","Drop garantizado del Monarca Caído."], ["m22","🩸","Sangre Monstruo","Líquido vital. Exploraciones del Abismo."], ["m23","🔮","Núcleos","Fuente de energía. Exploraciones."], ["m24","✨","Polvo Estelar","Se compra en Tienda o cae de Jefes mágicos."], ["m25","🧊","Cristal Roto","Restos de gólems de hielo (Tier II)."], ["m26","🔥","Esencia Fuego","Elemento puro. Abismo Tier III."], ["m27","❄️","Esencia Hielo","Elemento puro. Abismo Tier III."],
+            // Magia Avanzada y Alquimia
+            ["m28","🌪️","Esencia Viento","Drop de arpías en Tier II."], ["m29","🌍","Esencia Tierra","Drop de basiliscos en Tier II."], ["m30","👻","Alma Errante","Sacrificio de diarios en Tier III."], ["m31","🌑","Materia Oscura","Comprado en Bazar Oscuro. Muy raro."], ["m32","⚱️","Ceniza Maldita","Alquimia Oscura. Drop de Liches."], ["m33","🧪","Ectoplasma","Restos espectrales. Exploración de M. Maldita."], ["m34","💧","Lágrima Sirena","Extremadamente raro. Eventos del Lab."], ["m35","🧚","Polvo de Hada","Bazar Oscuro. Sirve para magia de alto nivel."], ["m36","🌋","Azufre","Mazmorra Maldita profunda."]
+        ];
+
+        // Dungeons
+        const BOSSES_T1 = ["Duende Ladrón", "Lobo Sombra", "Esqueleto Roto", "Orco Menor"];
+        const BOSSES_T2 = ["Caballero Caído", "Liche Menor", "Quimera", "Basilisco"];
+        const BOSSES_T3 = ["Dragón de Hueso", "Monarca Caído", "Guardián de Puerta", "General Sangriento", "Rey Aric"];
+
+        // 100 Weapons Data (Generated via loops for brevity in save file, detailed here)
+        let ALL_WEAPONS = [];
+        for(let i=1; i<=100; i++) {
+            ALL_WEAPONS.push({id:`w_sys_${i}`, name:`Arma Genérica ${i}`, atk: i*5, reqTier: Math.ceil(i/10)});
+        }
+        // Customizing first few
+        ALL_WEAPONS[0] = {id:'w_sys_1', name:'Daga Oxidada', atk: 5, reqTier: 1};
+        ALL_WEAPONS[1] = {id:'w_sys_2', name:'Espada Corta', atk: 10, reqTier: 1};
+        ALL_WEAPONS[99] = {id:'w_sys_100', name:'Matadioses', atk: 999, reqTier: 10, passives:{gold:2.0}};
+
+        const STORY_TEXT = [
+            "Tier I: El Exilio. Tu hermano, el Rey Aric, consumió la magia del reino para volverse inmortal. Por oponerte, te arrebató tus títulos y te exilió a los páramos oscuros. No tienes nada, salvo tu vida y tu voluntad.",
+            "Tier II: Impuestos de Sangre. En los páramos, descubres la verdad. Aric no usa magia común; drena la fuerza vital de los campesinos. Las aldeas están muriendo. El reino se marchita mientras él brilla de juventud.",
+            "Tier III: La Alianza Subterránea. Has encontrado un refugio en las antiguas catacumbas. Aquí, los olvidados y marginados te han nombrado su campeón. Si quieres recuperar el trono, necesitas entrenar tu cuerpo y tu maná.",
+            "Tier IV: Cazadores Reales. Aric sabe que sigues vivo. Ha enviado a sus Perros de Sangre a las mazmorras para cazarte. Las peleas se vuelven más duras, pero cada asesino que derrotas te hace más fuerte.",
+            "Tier V: El Pacto Abisal. Interrogando a un asesino moribundo, descubres el origen del poder de Aric. Hizo un trato con los Señores del Abismo Profundo. Su alma ya no le pertenece, es un mero títere de la oscuridad.",
+            "Tier VI: Sangre y Barro. Intentaste emboscar una caravana de suministros del Rey. Fue una trampa. Aric en persona apareció. Casi te mata, dejándote una cicatriz arcana que quema cuando usas maná. Ahora es personal.",
+            "Tier VII: Ecos Antiguos. Te has adentrado más profundo que cualquier mortal en la Forja Primigenia. Estás forjando tu voluntad y tu equipo con las reliquias de los Primeros Reyes. Tu poder empieza a rivalizar con el de tu hermano.",
+            "Tier VIII: El Asedio. Es la hora. Los estandartes de los olvidados se alzan en la noche. Marchamos hacia la Ciudadela de Obsidiana. El suelo tiembla con los pasos de tu ejército improvisado. No hay vuelta atrás.",
+            "Tier IX: La Guardia Caída. Las puertas exteriores de la capital están rotas. Avanzas por los pasillos que una vez llamaste hogar, ahora apestando a magia negra y muerte. Solo queda la Sala del Trono.",
+            "Tier S: Sangre de mi Sangre. Aric ha caído a tus pies. La corona, manchada de negro, murmura tu nombre ofreciéndote el mismo poder absoluto. El reino es tuyo de nuevo. La pregunta es... ¿Serás un salvador, o el próximo tirano?"
+        ];
+
+        let defaultMats = {}; ALL_MATS.forEach(m => defaultMats[m[0]] = 0);
+
+        let s = JSON.parse(localStorage.getItem(DB_KEY)) || {
+            lvl: 1, exp: 0, gold: 0, prestige: 0, mana: 10, atk: 10,
+            dailyStatus: 0, lastDate: null, timeOffset: 0, 
+            storyClaimed: Array(10).fill(false),
+            potions: { expB: 1.0 },
+            mats: defaultMats,
+            weapons: [ALL_WEAPONS[0]], // Player owned weapons
+            activeWepId: 'w_sys_1',
+            bosses: {
+                b1: { name: BOSSES_T1[0], hp: 50, maxHp: 50, lvl: 1 },
+                b2: { name: BOSSES_T2[0], hp: 500, maxHp: 500, lvl: 11 },
+                b3: { name: BOSSES_T3[0], hp: 2000, maxHp: 2000, lvl: 21 }
+            },
+            labTasks: [], currentTab: 'home', subTabs: {}
+        };
+
+        // Retrocompatibility for mats
+        ALL_MATS.forEach(m => { if(s.mats[m[0]] === undefined) s.mats[m[0]] = 0; });
+
+        const MAX_MANA = () => 10 + (s.lvl * 2);
+        const MAX_EXP = () => 1000 * Math.pow(1.2, s.lvl - 1);
+
+        let virtualTime = new Date(); let modalTimer = null; let modalCountdown = 0;
+
+        function checkTime() {
+            virtualTime = new Date(Date.now() + s.timeOffset);
+            
+            // Calculate time bar (Red)
+            let msSinceMidnight = virtualTime.getHours()*3600000 + virtualTime.getMinutes()*60000 + virtualTime.getSeconds()*1000;
+            let percentDay = (msSinceMidnight / 86400000) * 100;
+            document.getElementById('hud-time-bar').style.width = `${percentDay}%`;
+
+            let msUntilMidnight = 86400000 - msSinceMidnight;
+            const h = Math.floor(msUntilMidnight / 3600000).toString().padStart(2, '0');
+            const m = Math.floor((msUntilMidnight % 3600000) / 60000).toString().padStart(2, '0');
+            const sec = Math.floor((msUntilMidnight % 60000) / 1000).toString().padStart(2, '0');
+            document.getElementById('sys-countdown').innerText = `${h}:${m}:${sec}`;
+
+            const strDate = virtualTime.toLocaleDateString();
+            if(s.lastDate !== strDate) { s.dailyStatus = 0; s.lastDate = strDate; save(); }
+        }
+        setInterval(checkTime, 1000);
+
+        function save() { localStorage.setItem(DB_KEY, JSON.stringify(s)); updateHUD(); render(); }
+        function toast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 2000); }
+
+        function getActiveWeapon() { return s.weapons.find(w => w.id === s.activeWepId) || { atk: 0, passives: {} }; }
+
+        function gain(type, amount) {
+            let mult = (s.prestige + 1);
+            let w = getActiveWeapon();
+            if(type === 'exp') {
+                let pMult = w.passives?.exp ? parseFloat(w.passives.exp) : 1.0;
+                s.exp += amount * mult * s.potions.expB * pMult;
+                s.potions.expB = 1.0; 
+                while(s.exp >= MAX_EXP() && s.lvl < 10) { s.exp -= MAX_EXP(); s.lvl++; s.atk += 5; s.mana = MAX_MANA(); showModal("✨ TIER AUMENTADO", `TIER ${TIERS[s.lvl]} ALCANZADO`, "var(--mint)"); }
+                if(s.lvl >= 10) { s.lvl = 10; s.exp = MAX_EXP(); }
+            }
+            if(type === 'gold') {
+                let pMult = w.passives?.gold ? parseFloat(w.passives.gold) : 1.0;
+                s.gold += amount * mult * pMult;
+            }
+            save();
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-tier').innerText = TIERS[s.lvl] || s.lvl;
+            document.getElementById('hud-gold').innerText = Math.floor(s.gold);
+            document.getElementById('hud-prestige').innerText = `Ascensión ${s.prestige}`;
+            
+            document.getElementById('hud-exp-bar').style.width = `${(s.exp/MAX_EXP())*100}%`;
+            document.getElementById('hud-exp-txt').innerText = `${Math.floor((s.exp/MAX_EXP())*100)}%`;
+            document.getElementById('hud-mana-bar').style.width = `${(s.mana/MAX_MANA())*100}%`;
+            document.getElementById('hud-mana-txt').innerText = `${s.mana}/${MAX_MANA()}`;
+
+            const mc = document.getElementById('mult-container');
+            const bt = document.getElementById('hud-bonus-txt');
+            let w = getActiveWeapon(); let hasPassive = w.passives && Object.keys(w.passives).length > 0;
+            
+            if(s.potions.expB > 1.0) { mc.classList.remove('hidden'); document.getElementById('hud-mult-txt').innerText = `x${s.potions.expB}`; }
+            else { mc.classList.add('hidden'); }
+
+            if(s.potions.expB > 1.0 || hasPassive) {
+                bt.classList.remove('hidden');
+                let t = "";
+                if(s.potions.expB > 1.0) t+= `Exp x${s.potions.expB} `;
+                if(hasPassive) t+= `[Wep Bonus]`;
+                bt.innerText = t;
+            } else bt.classList.add('hidden');
+
+            ['lab', 'dungeon', 'forge', 'shop'].forEach((id, idx) => {
+                const btn = document.getElementById(`nav-${id}`);
+                // Simple reqs for layout: Lab(Tier2), Dungeon(Tier3), Forge(Tier4)
+                let req = [2,3,4,1][idx];
+                if(s.lvl >= req) btn.classList.remove('opacity-40');
+                else btn.classList.add('opacity-40');
+            });
+        }
+
+        function showModal(title, desc, color, btnText="ACEPTAR") {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-title').style.color = color;
+            document.getElementById('modal-desc').innerHTML = desc;
+            document.getElementById('modal-glow').style.backgroundColor = color;
+            
+            const m = document.getElementById('modal');
+            m.classList.remove('hidden'); m.style.display = 'flex';
+            
+            modalCountdown = 6;
+            document.getElementById('modal-btn').innerText = `${btnText} (${modalCountdown}s)`;
+            
+            if(modalTimer) clearInterval(modalTimer);
+            modalTimer = setInterval(() => {
+                modalCountdown--;
+                if(modalCountdown <= 0) { closeModal(); } 
+                else { document.getElementById('modal-btn').innerText = `${btnText} (${modalCountdown}s)`; }
+            }, 1000);
+        }
+
+        function closeModal() {
+            if(modalTimer) clearInterval(modalTimer);
+            document.getElementById('modal').classList.add('hidden');
+            document.getElementById('modal').style.display = '';
+        }
+
+        function exploreAbyss(tierLvl) {
+            if(s.dailyStatus !== 1) return toast("Requiere Diaria Completada (Sin sacrificar)");
+            s.dailyStatus = 2; // Sacrificed
+            
+            // Give 3 random mats based on tier
+            let min = (tierLvl-1)*12; let max = min + 11;
+            let lootText = "";
+            for(let i=0; i<3; i++) {
+                let mId = ALL_MATS[Math.floor(Math.random()*(max-min+1))+min];
+                s.mats[mId[0]] += 2;
+                lootText += `${mId[1]} 2x ${mId[2]}<br>`;
+            }
+            showModal("🎒 EXPLORACIÓN FINALIZADA", `Has sacrificado tu Diaria.<br><br>Botín obtenido:<br>${lootText}`, "var(--mint)");
+            save();
+        }
+
+        function attackBoss(bId, cost, namesArray) {
+            let b = s.bosses[bId];
+            if(s.mana < cost) return toast("Maná Insuficiente");
+            s.mana -= cost;
+            let dmg = s.atk + getActiveWeapon().atk;
+            b.hp -= dmg;
+            if(b.hp <= 0) {
+                let e = cost * 400; let g = cost * 200;
+                b.lvl++; b.maxHp = Math.floor(b.maxHp * 1.5); b.hp = b.maxHp;
+                b.name = namesArray[Math.min(b.lvl-1, namesArray.length-1)] || namesArray[namesArray.length-1];
+                showModal("☠️ JEFE DERROTADO", `+${e} EXP / +${g}G`, "red");
+                gain('exp', e); gain('gold', g);
+            }
+            save();
+        }
+
+        function adminGiveAll() { ALL_WEAPONS.forEach(w => { if(!s.weapons.find(x=>x.id===w.id)) s.weapons.push(w); }); save(); toast('Arsenal Desbloqueado'); }
+
+        function nav(tab) { s.currentTab = tab; render(); }
+        function setSubTab(st) { s.subTabs[s.currentTab] = st; render(); }
+
+        function render() {
+            const mc = document.getElementById('main-content');
+            let h = ""; const t = s.currentTab;
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.querySelector('span:last-child').classList.remove('text-[var(--mint)]'));
+            document.getElementById(`nav-${t}`).querySelector('span:last-child').classList.add('text-[var(--mint)]');
+
+            if(t === 'home') {
+                const st = s.subTabs[t] || 'main';
+                h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
+                    <button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Campamento</button>
+                    <button onclick="setSubTab('story')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='story'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Historia</button>
+                </div>`;
+
+                if(st === 'main') {
+                    h += `<div class="glass-panel p-5 mb-4 border-[var(--mint)]/30">
+                            <div class="flex gap-2">
+                                <input id="in-race" type="number" placeholder="Minutos corridos..." class="w-full bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--mint)] outline-none">
+                                <button onclick="let v=parseFloat(document.getElementById('in-race').value); if(v){ gain('exp', v*20); gain('gold', v*10); toast('CARRERA REGISTRADA'); }" class="btn-aaa px-6 rounded-xl font-bold">GO</button>
+                            </div>
+                        </div>`;
+
+                    let btnDaily = "";
+                    if(s.dailyStatus === 0) btnDaily = `<button onclick="s.dailyStatus=1; gain('exp',200); gain('gold',150); toast('DIARIAS HECHAS');" class="w-full py-4 rounded-xl border border-[var(--border-glass)] bg-black/30 text-xs font-bold uppercase tracking-widest shadow-inner">Marcar Entrenamiento Físico</button>`;
+                    else if(s.dailyStatus === 1) btnDaily = `<div class="w-full py-4 rounded-xl border border-green-500 bg-green-500/10 text-green-400 text-center text-xs font-bold uppercase tracking-widest">ENTRENAMIENTO COMPLETADO</div>`;
+                    else btnDaily = `<div class="w-full py-4 rounded-xl border border-red-500/50 bg-red-900/20 text-red-400 text-center text-xs font-bold uppercase tracking-widest">SACRIFICADO AL ABISMO</div>`;
+
+                    h += `<div class="glass-panel p-5 mb-4"><h2 class="text-[10px] font-sys text-[var(--lavender)] mb-3 uppercase tracking-widest flex justify-between"><span>Misiones Diarias</span> <span class="text-red-400">Resetea a Medianoche</span></h2>${btnDaily}</div>`;
+                    
+                    // MEGA INVENTORY
+                    h += `<div class="glass-panel p-4 mb-4">
+                        <h2 class="text-[10px] font-sys text-[var(--mint)] mb-3 uppercase tracking-widest border-b border-[var(--border-glass)] pb-2">Materiales (36)</h2>
+                        <div class="grid grid-cols-4 gap-2 text-[9px] text-center max-h-[300px] overflow-y-auto pr-1">`;
+                    ALL_MATS.forEach(m => {
+                        let qty = s.mats[m[0]];
+                        let op = qty > 0 ? 'opacity-100' : 'opacity-30 grayscale';
+                        h += `<div onclick="showModal('${m[1]} ${m[2]}', '${m[3]}<br><br>Cantidad poseída: ${qty}', 'white', 'CERRAR')" class="bg-black/60 p-2 rounded border border-gray-800 ${op} active:scale-95 transition-transform flex flex-col items-center justify-center min-h-[60px]">
+                            <span class="text-lg mb-1">${m[1]}</span>
+                            <span class="font-bold text-white">${qty}</span>
+                        </div>`;
+                    });
+                    h += `</div></div>`;
+                } else {
+                    STORY_TEXT.forEach((txt, i) => {
+                        const reqLvl = i + 1;
+                        if(s.lvl >= reqLvl) {
+                            let btn = s.storyClaimed[i] ? `<span class="text-[8px] text-[var(--mint)] border border-[var(--mint)] px-2 py-1 rounded">LEÍDO</span>` : `<button onclick="s.storyClaimed[i]=true; gain('gold',50); save();" class="text-[8px] bg-[var(--gold)] text-black font-bold px-2 py-1 rounded shadow-[0_0_8px_var(--gold)]">RECLAMAR 50G</button>`;
+                            h += `<div class="glass-panel p-4 mb-3 border-[var(--gold)]/20">
+                                <div class="flex justify-between items-center mb-2"><h3 class="text-[10px] font-sys text-[var(--gold)] uppercase tracking-wider">Capítulo ${reqLvl}</h3>${btn}</div>
+                                <p class="text-[11px] text-gray-300 italic leading-relaxed">"${txt}"</p>
+                            </div>`;
+                        } else {
+                            h += `<div class="glass-panel p-4 mb-3 opacity-30 text-center"><span class="text-xl">🔒</span><p class="text-[10px] mt-1 uppercase tracking-widest text-[var(--pink)]">Requiere Tier ${TIERS[reqLvl]}</p></div>`;
+                        }
+                    });
+                }
+            }
+            else if(t === 'lab') {
+                if(s.lvl < 2) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--pink)] mt-2 text-xs">Tier H (2) Requerido</p></div>`; } else {
+                    const st = s.subTabs[t] || 'main';
+                    h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl"><button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Tareas</button><button onclick="${s.lvl>=4?`setSubTab('sec')`:`toast('Tier F (4)')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='sec'?'bg-[var(--pink)]/20 text-[var(--pink)]':'opacity-50'}">Alquimia</button></div>`;
+                    
+                    if(st === 'main') {
+                        h += `<div class="glass-panel p-5"><div class="flex gap-2 mb-4"><input id="in-lab" type="text" placeholder="Nueva tarea mental..." class="w-full bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm"><button onclick="let v=document.getElementById('in-lab').value; if(v) { s.labTasks.push(v); save(); }" class="btn-aaa px-4 rounded-xl text-xs font-bold">ADD</button></div>`;
+                        s.labTasks.forEach((tsk, i) => { h += `<div class="flex justify-between items-center bg-black/30 p-3 rounded-lg mb-2 border border-[var(--border-glass)]"><span class="text-xs text-gray-300">${tsk}</span><button onclick="s.labTasks.splice(${i},1); s.mats.m9+=1; gain('exp',50); save();" class="text-[9px] bg-blue-900/30 text-blue-300 border border-blue-500/50 px-2 py-1 rounded font-bold uppercase tracking-widest">Purificar (+ Piedra Rúnica)</button></div>`; });
+                        h += `</div>`;
+                    } else {
+                        // Alquimia no gasta diaria, gasta materiales magicos (Polvo, Sangre)
+                        h += `<div class="glass-panel p-5 border-[var(--pink)]/30 text-center">
+                            <h3 class="font-sys text-[var(--pink)] text-sm mb-2 uppercase tracking-widest">Destilación Oscura</h3>
+                            <p class="text-[10px] opacity-70 mb-4">Convierte materiales de mazmorra en multiplicadores de EXP.</p>
+                            
+                            <div class="bg-black/50 p-4 rounded-xl border border-[var(--border-glass)] mb-4 flex justify-around">
+                                <div class="text-center"><span class="text-xl mb-1 block">✨</span><span class="text-[9px] text-gray-400">Polvo Est.</span><br><span class="${s.mats.m24>=5?'text-green-400':'text-red-400'} text-[10px] font-bold">${s.mats.m24}/5</span></div>
+                                <div class="text-center"><span class="text-xl mb-1 block">🩸</span><span class="text-[9px] text-gray-400">Sangre Mon.</span><br><span class="${s.mats.m22>=3?'text-green-400':'text-red-400'} text-[10px] font-bold">${s.mats.m22}/3</span></div>
+                            </div>
+                            
+                            <button onclick="if(s.mats.m24>=5 && s.mats.m22>=3){ s.mats.m24-=5; s.mats.m22-=3; s.potions.expB=2.0; showModal('🧪 ALQUIMIA EXITOSA', 'Poción x2.0 Activa para tu próxima carrera', 'var(--pink)'); save(); } else toast('Faltan Materiales');" class="w-full py-4 bg-[var(--pink)]/10 border border-[var(--pink)]/50 rounded-xl text-xs font-bold text-[var(--pink)] uppercase tracking-widest active:bg-[var(--pink)]/30 transition-colors">Crear Poción (EXP x2.0)</button>
+                        </div>`;
+                    }
+                }
+            }
+            else if(t === 'dungeon') {
+                if(s.lvl < 3) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--pink)] mt-2 text-xs">Tier G (3) Requerido</p></div>`; } else {
+                    const st = s.subTabs[t] || 'd1';
+                    h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
+                        <button onclick="setSubTab('d1')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d1'?'bg-white/10 text-blue-300':'opacity-50'}">Mazmorra</button>
+                        <button onclick="${s.lvl>=5?`setSubTab('d2')`:`toast('Tier E (5)')`}" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d2'?'bg-red-900/40 text-red-300':'opacity-50'}">Maldita</button>
+                        <button onclick="${s.lvl>=7?`setSubTab('d3')`:`toast('Tier C (7)')`}" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d3'?'bg-purple-900/40 text-purple-300':'opacity-50'}">Abismo</button>
+                    </div>`;
+
+                    let cfg = { id:'b1', arr: BOSSES_T1, mCost: 2, tLvl: 1, cColor: 'blue' };
+                    if(st==='d2') cfg = { id:'b2', arr: BOSSES_T2, mCost: 4, tLvl: 2, cColor: 'red' };
+                    if(st==='d3') cfg = { id:'b3', arr: BOSSES_T3, mCost: 6, tLvl: 3, cColor: 'purple' };
+
+                    let b = s.bosses[cfg.id];
+                    let p = (b.hp / b.maxHp) * 100;
+
+                    h += `<div class="glass-panel p-6 text-center border-${cfg.cColor}-500/30">
+                        <div class="mb-8">
+                            <h3 class="font-sys text-${cfg.cColor}-400 text-xl font-bold uppercase mb-1 drop-shadow-[0_0_8px_var(--${cfg.cColor})]">${b.name}</h3>
+                            <p class="text-[9px] opacity-60 mb-4 uppercase tracking-widest text-gray-400">Atk Base: ${s.atk + getActiveWeapon().atk}</p>
+                            <div class="h-8 w-full bg-black rounded-full border border-${cfg.cColor}-900 relative overflow-hidden mb-4 shadow-inner">
+                                <div class="progress-bar h-full bg-${cfg.cColor}-600" style="width: ${p}%"></div>
+                                <div class="absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase text-white drop-shadow-md">HP: ${b.hp} / ${b.maxHp}</div>
+                            </div>
+                            <button onclick="attackBoss('${cfg.id}', ${cfg.mCost}, [${cfg.arr.map(x=>`'${x}'`).join(',')}])" class="w-full py-4 rounded-xl border border-${cfg.cColor}-500/50 bg-${cfg.cColor}-900/20 text-${cfg.cColor}-300 font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(0,0,0,0.5)]">⚔️ ATACAR (${cfg.mCost} Maná)</button>
+                        </div>
+                        
+                        <hr class="border-gray-800 mb-6">
+                        
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-300 mb-2 uppercase tracking-widest">Exploración Autónoma</h4>
+                            <p class="text-[9px] text-gray-500 mb-4 leading-relaxed">No gasta Maná. Sacrifica tu Diaria completada del día a cambio de 3 materiales aleatorios de este Tier.</p>
+                            <button onclick="exploreAbyss(${cfg.tLvl})" class="w-full py-3 rounded-xl border border-gray-600 bg-gray-900 text-gray-300 text-[10px] font-bold uppercase tracking-widest ${s.dailyStatus===1?'':'opacity-30'}">⛺ EXPLORAR (Requiere Diaria Hecha)</button>
+                        </div>
+                    </div>`;
+                }
+            }
+            else if(t === 'forge') {
+                if(s.lvl < 4) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--pink)] mt-2 text-xs">Tier F (4) Requerido</p></div>`; } else {
+                    const st = s.subTabs[t] || 'equip';
+                    h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
+                        <button onclick="setSubTab('equip')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='equip'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Arsenal</button>
+                        <button onclick="setSubTab('coll')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='coll'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Catálogo</button>
+                    </div>`;
+                    
+                    if(st === 'equip') {
+                        h += `<div class="glass-panel p-4 max-h-[60vh] overflow-y-auto">
+                            <h2 class="text-[10px] font-sys text-gray-400 mb-3 uppercase tracking-widest border-b border-[var(--border-glass)] pb-2 flex justify-between"><span>Mis Armas</span> <span>Atk Base: ${s.atk}</span></h2>`;
+                        s.weapons.forEach((w) => {
+                            let isActive = s.activeWepId === w.id;
+                            h += `<div class="bg-black/60 border ${isActive?'border-[var(--mint)] shadow-[0_0_8px_var(--mint)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-3">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-xs font-bold ${isActive?'text-[var(--mint)]':''}">${w.name}</p>
+                                    <button onclick="s.activeWepId='${w.id}'; save();" class="text-[9px] ${isActive?'bg-[var(--mint)] text-black':'border border-gray-600 text-gray-300'} font-bold px-3 py-1 rounded uppercase tracking-widest transition-colors">${isActive?'Equipado':'Equipar'}</button>
+                                </div>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-widest">ATK: <span class="text-white">${w.atk}</span> <span class="mx-2">|</span> Tier Req: <span class="text-[var(--gold)]">${TIERS[w.reqTier]}</span></p>
+                            </div>`;
+                        });
+                        h += `</div>`;
+                    } else {
+                        h += `<div class="glass-panel p-4 max-h-[60vh] overflow-y-auto">
+                            <h2 class="text-[10px] font-sys text-[var(--gold)] mb-3 uppercase tracking-widest border-b border-[var(--border-glass)] pb-2">Catálogo Completo (100)</h2>
+                            <div class="grid grid-cols-2 gap-2">`;
+                        ALL_WEAPONS.forEach(w => {
+                            let owned = s.weapons.find(x => x.id === w.id);
+                            if(owned) {
+                                h += `<div class="bg-[var(--mint)]/10 border border-[var(--mint)]/30 p-2 rounded text-center">
+                                    <p class="text-[10px] font-bold text-[var(--mint)] truncate">${w.name}</p>
+                                    <p class="text-[8px] text-gray-400 mt-1">ATK ${w.atk}</p>
+                                </div>`;
+                            } else {
+                                h += `<div onclick="showModal('${w.name}', 'Arma bloqueada.<br><br>Atk Base: ${w.atk}<br>Requiere Tier: ${TIERS[w.reqTier]}<br><br>Se consigue aleatoriamente farmeando jefes o en la tienda.', 'gray')" class="bg-black/50 border border-gray-800 p-2 rounded text-center opacity-50 active:scale-95 transition-transform">
+                                    <p class="text-[10px] text-gray-500 font-bold truncate">???????</p>
+                                    <p class="text-[8px] text-gray-600 mt-1">Tier ${TIERS[w.reqTier]}</p>
+                                </div>`;
+                            }
+                        });
+                        h += `</div></div>`;
+                    }
+                }
+            }
+            else if(t === 'shop') {
+                h += `<div class="glass-panel p-5 text-center mb-4">
+                    <h2 class="font-sys text-[var(--gold)] mb-2 uppercase tracking-widest text-sm">Comercio del Exiliado</h2>
+                    <p class="text-[10px] text-gray-400 mb-4">Usa el oro recolectado en tus carreras para comprar materiales de construcción y pociones.</p>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <button onclick="if(s.gold>=500){s.gold-=500; s.mats.m1+=10; save(); toast('Comprado');} else toast('Sin oro')" class="bg-black/50 border border-gray-700 p-4 rounded-xl text-center active:scale-95 transition-transform"><span class="text-2xl mb-1 block">⛏️</span><p class="text-[10px] font-bold text-gray-300 uppercase">10x Acero</p><p class="text-[11px] text-[var(--gold)] mt-1 font-sys">500G</p></button>
+                        <button onclick="if(s.gold>=800){s.gold-=800; s.mats.m10+=15; save(); toast('Comprado');} else toast('Sin oro')" class="bg-black/50 border border-gray-700 p-4 rounded-xl text-center active:scale-95 transition-transform"><span class="text-2xl mb-1 block">🪵</span><p class="text-[10px] font-bold text-gray-300 uppercase">15x Madera</p><p class="text-[11px] text-[var(--gold)] mt-1 font-sys">800G</p></button>
+                    </div>
+                </div>`;
+
+                let adminUI = `<div class="border border-red-900/50 bg-black/80 rounded-xl p-4 shadow-inner mb-4"><p class="text-[9px] font-sys text-red-500 mb-3 text-center tracking-widest">CONSOLA ADMIN</p><input id="admin-in" type="text" placeholder="Escribe 'Admin'..." class="w-full bg-transparent border-b border-red-900/50 px-2 py-2 text-xs text-center focus:outline-none focus:border-red-500 text-white mb-3" oninput="let b=document.getElementById('admin-btns'); if(this.value==='Admin'){ b.classList.remove('hidden'); } else { b.classList.add('hidden'); }">
+                <div id="admin-btns" class="hidden flex flex-col gap-2">
+                    <button onclick="adminGiveAll()" class="bg-purple-900/40 py-3 rounded-lg text-[10px] border border-purple-500/30 text-purple-300 font-bold uppercase tracking-widest">Desbloquear todo el arsenal</button>
+                    <button onclick="s.gold+=99999; save(); toast('+99999 Oro')" class="bg-yellow-900/40 py-3 rounded-lg text-[10px] border border-yellow-500/30 text-yellow-300 font-bold uppercase tracking-widest">+99999 Oro</button>
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <button onclick="gain('exp', 1000); toast('+1000 EXP')" class="bg-blue-900/40 py-2 rounded text-[9px] border border-blue-500/30 text-blue-300">+1000 EXP</button>
+                        <button onclick="s.timeOffset+=3600000; checkTime(); toast('Reloj: +1 Hora')" class="bg-gray-800 py-2 rounded text-[9px] border border-gray-600 text-gray-300">+1H Reloj</button>
+                    </div>
+                </div></div>`;
+                h += adminUI;
+
+                if(s.lvl >= 10) {
+                    h += `<button onclick="if(confirm('¿Ascender? Pierdes niveles, oro y armas, pero ganas un multiplicador permanente.')){ s.prestige++; s.lvl=1; s.exp=0; s.gold=0; s.weapons=[ALL_WEAPONS[0]]; s.activeWepId='w_sys_1'; s.storyClaimed.fill(false); save(); showModal('🌌 ASCENSIÓN', 'Has renacido más fuerte', 'var(--mint)'); }" class="w-full py-5 bg-gradient-to-r from-blue-900 to-[var(--mint)] rounded-xl font-sys text-white text-xs tracking-widest border border-blue-400 shadow-[0_0_20px_rgba(138,191,204,0.4)]">🌌 ASCENSIÓN (RESET)</button>`;
+                }
+            }
+            mc.innerHTML = `<div class="active-tab">${h}</div>`;
+        }
+
+        // INIT
+        checkTime();
+        save();
+    </script>
+</body>
+</html>
