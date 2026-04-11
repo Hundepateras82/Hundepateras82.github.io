@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SYSTEM V0.8">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/wB0f8fN.png">
+    <title>SYSTEM V0.8: LORE & ARSENAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@300;500;700&display=swap');
+        
+        :root {
+            --bg-base: #0c0c12; --lavender: #b4a8d4; --mint: #8abfcc;
+            --pink: #c49090; --gold: #c8b98a; --border-glass: rgba(180,168,212,0.12);
+        }
+
+        body { 
+            background: var(--bg-base); color: var(--lavender); font-family: 'Space Grotesk', sans-serif; 
+            -webkit-tap-highlight-color: transparent; overflow-x: hidden;
+            padding-top: calc(env(safe-area-inset-top) + 5px);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+        }
+
+        .font-sys { font-family: 'Orbitron', sans-serif; }
+        
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(18,18,24,0.9) 0%, rgba(12,12,18,0.95) 100%);
+            border: 1px solid var(--border-glass); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px); border-radius: 16px;
+        }
+
+        .btn-aaa {
+            background: linear-gradient(90deg, rgba(180,168,212,0.1), rgba(138,191,204,0.1));
+            border: 1px solid var(--border-glass); color: var(--mint); transition: all 0.2s;
+        }
+        .btn-aaa:active { transform: scale(0.97); }
+
+        .progress-bar { transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        .active-tab { display: block; animation: fadeIn 0.4s forwards; }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(5px); } }
+
+        .toast-pos { top: calc(env(safe-area-inset-top) + 50px); }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="px-4">
+
+    <div class="flex justify-center mb-4">
+        <div class="bg-black/80 border border-[var(--pink)]/30 rounded-full px-6 py-1.5 flex flex-col items-center shadow-[0_0_10px_rgba(196,144,144,0.2)]">
+            <span id="sys-date" class="text-[9px] font-sys tracking-widest text-[var(--pink)]">--/--/----</span>
+            <span id="sys-countdown" class="text-xs font-bold text-white">Reset en: --:--:--</span>
+        </div>
+    </div>
+
+    <header class="glass-panel p-5 mb-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-[var(--mint)] opacity-5 blur-[60px] rounded-full"></div>
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h1 class="font-sys font-bold text-xl text-[var(--mint)] tracking-wider">SYSTEM<span class="text-[var(--pink)] text-xs ml-1">v0.8</span></h1>
+                <p id="hud-prestige" class="text-[10px] text-[var(--gold)] font-bold mt-1">Prestigio 0</p>
+            </div>
+            <div class="text-right">
+                <p class="font-sys font-bold text-3xl text-[var(--lavender)]">Nv.<span id="hud-lvl">1</span></p>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <div>
+                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-[var(--lavender)]/70"><span>EXP</span> <span id="hud-exp-txt">0%</span></div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full border border-[var(--border-glass)] overflow-hidden">
+                    <div id="hud-exp-bar" class="progress-bar h-full bg-gradient-to-r from-[var(--mint)] to-[var(--lavender)]" style="width: 0%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-[var(--lavender)]/70"><span>MANÁ</span> <span id="hud-mana-txt">10/10</span></div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full border border-[var(--border-glass)] overflow-hidden">
+                    <div id="hud-mana-bar" class="progress-bar h-full bg-gradient-to-r from-[#4a3e6d] to-[var(--pink)]" style="width: 100%"></div>
+                </div>
+            </div>
+            <div id="mult-container" class="hidden">
+                <div class="flex justify-between text-[9px] font-bold mb-1 uppercase text-[var(--pink)]"><span>Bono Activo</span> <span id="hud-mult-txt">x1.0</span></div>
+                <div class="h-1 w-full bg-black/50 rounded-full overflow-hidden">
+                    <div class="h-full bg-[var(--pink)] opacity-50 w-full animate-pulse"></div>
+                </div>
+            </div>
+            <div id="passive-container" class="hidden text-[9px] font-bold text-center mt-2 text-[var(--gold)] border border-[var(--gold)]/30 rounded bg-[var(--gold)]/10 py-1"></div>
+        </div>
+    </header>
+
+    <main id="main-content" class="min-h-[50vh]"></main>
+
+    <nav class="fixed bottom-0 left-0 w-full glass-panel border-t-0 rounded-t-3xl rounded-b-none p-4 grid grid-cols-5 gap-1 z-40">
+        <button onclick="nav('home')" class="flex flex-col items-center nav-btn" id="nav-home"><span class="text-xl mb-1">⛺</span><span class="text-[8px] font-bold uppercase tracking-wider text-[var(--mint)]">Refugio</span></button>
+        <button onclick="nav('lab')" class="flex flex-col items-center nav-btn opacity-40" id="nav-lab"><span class="text-xl mb-1">⚗️</span><span class="text-[8px] font-bold uppercase tracking-wider">Lab</span></button>
+        <button onclick="nav('dungeon')" class="flex flex-col items-center nav-btn opacity-40" id="nav-dungeon"><span class="text-xl mb-1">⛩️</span><span class="text-[8px] font-bold uppercase tracking-wider">Abismo</span></button>
+        <button onclick="nav('forge')" class="flex flex-col items-center nav-btn opacity-40" id="nav-forge"><span class="text-xl mb-1">⚒️</span><span class="text-[8px] font-bold uppercase tracking-wider">Forja</span></button>
+        <button onclick="nav('shop')" class="flex flex-col items-center nav-btn" id="nav-shop"><span class="text-xl mb-1">⚖️</span><span class="text-[8px] font-bold uppercase tracking-wider">Tienda</span></button>
+    </nav>
+
+    <div id="toast" class="fixed toast-pos left-1/2 -translate-x-1/2 glass-panel !rounded-full px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--mint)] opacity-0 pointer-events-none transition-opacity duration-300 z-50">GUARDADO</div>
+
+    <div id="modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] hidden flex-col justify-center items-center p-6">
+        <div class="glass-panel w-full p-8 text-center relative overflow-hidden">
+            <div id="modal-glow" class="absolute inset-0 opacity-20 blur-2xl"></div>
+            <div id="modal-icon" class="text-6xl mb-4 relative z-10 drop-shadow-2xl">🔮</div>
+            <h3 id="modal-title" class="font-sys text-[10px] font-bold tracking-[0.3em] mb-2 relative z-10">...</h3>
+            <p id="modal-desc" class="text-xl font-bold text-white uppercase relative z-10 mb-8 font-sys leading-tight">...</p>
+            <button id="modal-btn" onclick="closeModal()" class="btn-aaa w-full py-4 rounded-xl text-xs font-bold tracking-widest relative z-10 bg-black/50 border border-white/20">ACEPTAR (6s)</button>
+        </div>
+    </div>
+
+    <script>
+        /* ================= ENGINE V0.8 ================= */
+        const DB_KEY = 'system_v0_8_save';
+        let s = JSON.parse(localStorage.getItem(DB_KEY)) || {
+            lvl: 1, exp: 0, gold: 0, prestige: 0, mana: 10, atk: 10,
+            dailyStatus: 0, lastDate: null, timeOffset: 0, abismoCooldown: null,
+            storyClaimed: [false,false,false,false,false,false,false,false,false,false],
+            tuts: { home: false, lab: false, dungeon: false, forge: false, shop: false, story: false, equip: false },
+            potions: { expB: 1.0, heals: 0, illegal: 0 },
+            mats: { steel: 0, scales: 0, dark: 0, dust: 0, cores: 0, blood: 0 },
+            weapons: [{ id: "w1", name: "Daga Oxidada", atk: 2, lvl: 1, active: true, passives: {} }],
+            boss: { name: "Duende Oscuro", hp: 100, maxHp: 100, lvl: 1 },
+            labTasks: [], currentTab: 'home', subTabs: {}
+        };
+
+        const REQS = { shop: 1, lab: 2, dungeon: 3, secLab: 4, forge: 5, secDungeon: 6, secForge: 7, secShop: 9, prestige: 10 };
+        const BOSS_NAMES = ["Duende Oscuro", "Lobo Sombra", "Caballero Caído", "Liche Menor", "Dragón de Hueso", "Monarca Caído", "Guardián de la Puerta", "General Sangriento", "Bestia del Abismo", "Rey Aric, El Corrupto"];
+        const STORY_TEXT = [
+            "El Exilio. Tu hermano, el Rey Aric, ha consumido el reino en sombras. Has sido desterrado a los páramos.",
+            "Los Impuestos de Sangre. Las aldeas sufren. El Rey se alimenta de su vitalidad para mantenerse joven.",
+            "La Resistencia. En las catacumbas, los olvidados te nombran su único campeón.",
+            "Cazadores Reales. Los perros del Rey te buscan en la oscuridad de las mazmorras.",
+            "El Pacto Abisal. Descubres por qué Aric no envejece: vendió su alma al Abismo Profundo.",
+            "Sangre y Barro. Una emboscada fallida. Aric casi te destruye, dejándote una cicatriz arcana.",
+            "Ecos Antiguos. Estás forjando tu voluntad con las reliquias de los Primeros Reyes.",
+            "El Asedio. Es hora. Los estandartes se alzan. Marchamos hacia la Ciudadela de Obsidiana.",
+            "Guardia Caída. Las puertas se rompen. El salón del trono huele a magia negra.",
+            "Sangre de mi Sangre. El Rey cae, pero la corona murmura tu nombre... ¿Serás diferente?"
+        ];
+
+        /* DATABASES: Formato "Nombre|AtaqueBase|TipoPasiva|ValorPasiva" */
+        const ABYSS_LOOT = [
+            "Daga Rota|5", "Garrote de Hueso|8", "Espada Corta|10", "Hacha de Hierro|12", "Cuchilla de Ladrón|15",
+            "Maza de Clérigo|18", "Lanza de Miliciano|20", "Arco de Tejo|22", "Kukri Oxidado|25", "Estoque Fino|28",
+            "Martillo de Guerra|30", "Alabarda Guardia|32", "Espadón Mellado|35", "Guadaña de Granjero|38", "Pico Minero|40",
+            "Látigo de Cuero|42", "Cetro de Madera|45", "Daga Gemela|48", "Hacha Arrojadiza|50", "Tridente Pescador|52",
+            "Garra de Bestia|55", "Espada Larga|58", "Maza Pesada|60", "Lanza Caballería|62", "Arco Compuesto|65",
+            "Cimitarra|68", "Martillo a Dos Manos|70", "Estoque Elegante|72", "Espadón Bastardo|75", "Guadaña Cosechadora|78",
+            "Pico de Guerra|80", "Látigo de Cadenas|82", "Cetro de Mago|85", "Daga Asesino|88", "Hacha de Batalla|90",
+            "Tridente Combate|92", "Garra Demoníaca|95", "Espada Ejecutor|98", "Maza Estrella|100", "Lanza Real|102",
+            "Arco de Caza|105", "Cimitarra Adornada|108", "Martillo Colosal|110", "Estoque Duelista|112", "Espadón Rúnico|115",
+            "Cuchilla Sombría|120|exp|1.1", "Báculo Vacío|130|manaCost|-1", "Hada Embotellada|0|heals|1", "Lanza Negra|140|gold|1.2", "Fragmento Puro|0|exp|1.5"
+        ];
+
+        const FORGE_LOOT = [
+            "Daga de Cobre|15", "Espada de Bronce|25", "Hacha de Acero|35", "Maza de Hierro|45", "Lanza de Aleación|55",
+            "Arco Reforzado|65", "Cimitarra de Plata|75", "Martillo Enano|85", "Estoque de Oro|95", "Espadón de Platino|105",
+            "Guadaña de Titanio|115", "Pico de Mithril|125", "Látigo de Fuego|135", "Cetro de Hielo|145", "Daga Eléctrica|155",
+            "Hacha de Viento|165", "Tridente de Tierra|175", "Garra de Luz|185", "Espada de Sombra|195", "Maza de Sangre|205",
+            "Lanza de Hueso|215", "Arco de Alma|225", "Cimitarra de Cristal|235", "Martillo de Lava|245", "Estoque de Veneno|255",
+            "Espadón de Vacío|265", "Guadaña de Muerte|275", "Pico de Vida|285", "Látigo de Estrellas|295", "Cetro de Luna|305",
+            "Daga de Sol|315", "Hacha de Cometa|325", "Tridente de Meteoro|335", "Garra de Nebulosa|345", "Espada de Galaxia|355",
+            "Maza de Universo|365", "Lanza de Dimensión|375", "Arco de Tiempo|385", "Cimitarra de Espacio|395", "Martillo de Realidad|405",
+            "Filo Meteórico|420", "Destructor de Mundos|450", "Portador de Tormentas|480", "Hoja del Monarca|500", "Lamento de la Reina|520",
+            "Excalibur Falsa|550|gold|1.5", "Gae Bolg Rota|580|exp|1.2", "Mjolnir Astillado|600|atkMult|1.2", "Aegis Oscura|0|heals|2", "Creadora de Estrellas|800|exp|2.0"
+        ];
+
+        const MAX_MANA = () => 10 + (s.lvl * 2);
+        const MAX_EXP = () => 1000 * Math.pow(1.2, s.lvl - 1);
+
+        let virtualTime = new Date();
+        let modalTimer = null;
+        let modalCountdown = 0;
+
+        function checkTime() {
+            virtualTime = new Date(Date.now() + s.timeOffset);
+            const strDate = virtualTime.toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
+            document.getElementById('sys-date').innerText = strDate;
+
+            const msUntilMidnight = new Date(virtualTime).setHours(24,0,0,0) - virtualTime;
+            const h = Math.floor(msUntilMidnight / 3600000).toString().padStart(2, '0');
+            const m = Math.floor((msUntilMidnight % 3600000) / 60000).toString().padStart(2, '0');
+            const sec = Math.floor((msUntilMidnight % 60000) / 1000).toString().padStart(2, '0');
+            document.getElementById('sys-countdown').innerText = `Reset en: ${h}:${m}:${sec}`;
+
+            if(s.lastDate !== strDate) { s.dailyStatus = 0; s.lastDate = strDate; save(); }
+        }
+        setInterval(checkTime, 1000);
+
+        function save() { localStorage.setItem(DB_KEY, JSON.stringify(s)); updateHUD(); render(); }
+        function toast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 2000); }
+
+        function getActiveWeapon() { return s.weapons.find(w => w.active) || { atk: 0, passives: {} }; }
+
+        function gain(type, amount) {
+            let mult = (s.prestige + 1);
+            let w = getActiveWeapon();
+            
+            if(type === 'exp') {
+                let pMult = w.passives?.exp ? parseFloat(w.passives.exp) : 1.0;
+                s.exp += amount * mult * s.potions.expB * pMult;
+                s.potions.expB = 1.0; 
+                while(s.exp >= MAX_EXP() && s.lvl < 10) { s.exp -= MAX_EXP(); s.lvl++; s.atk += 2; s.mana = MAX_MANA(); showModal("✨ ASCENSIÓN", `NIVEL ${s.lvl} ALCANZADO`, "var(--mint)"); }
+                if(s.lvl >= 10) s.exp = MAX_EXP();
+            }
+            if(type === 'gold') {
+                let pMult = w.passives?.gold ? parseFloat(w.passives.gold) : 1.0;
+                s.gold += amount * mult * pMult;
+            }
+            save();
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-lvl').innerText = s.lvl;
+            document.getElementById('hud-prestige').innerText = `Prestigio ${s.prestige}`;
+            
+            document.getElementById('hud-exp-bar').style.width = `${(s.exp/MAX_EXP())*100}%`;
+            document.getElementById('hud-exp-txt').innerText = `${Math.floor((s.exp/MAX_EXP())*100)}%`;
+            document.getElementById('hud-mana-bar').style.width = `${(s.mana/MAX_MANA())*100}%`;
+            document.getElementById('hud-mana-txt').innerText = `${s.mana}/${MAX_MANA()}`;
+
+            const mc = document.getElementById('mult-container');
+            if(s.potions.expB > 1.0) { mc.classList.remove('hidden'); document.getElementById('hud-mult-txt').innerText = `x${s.potions.expB}`; }
+            else { mc.classList.add('hidden'); }
+
+            const pc = document.getElementById('passive-container');
+            let w = getActiveWeapon();
+            if(w.passives && Object.keys(w.passives).length > 0) {
+                pc.classList.remove('hidden');
+                let txt = "PASIVA: ";
+                if(w.passives.exp) txt += `EXP x${w.passives.exp} `;
+                if(w.passives.gold) txt += `ORO x${w.passives.gold} `;
+                if(w.passives.manaCost) txt += `Coste Maná ${w.passives.manaCost} `;
+                pc.innerText = txt;
+            } else { pc.classList.add('hidden'); }
+
+            ['lab', 'dungeon', 'forge', 'shop'].forEach(id => {
+                const btn = document.getElementById(`nav-${id}`);
+                if(s.lvl >= REQS[id]) btn.classList.remove('opacity-40');
+                else btn.classList.add('opacity-40');
+            });
+        }
+
+        function showModal(title, desc, color) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-title').style.color = color;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-glow').style.backgroundColor = color;
+            
+            const m = document.getElementById('modal');
+            m.classList.remove('hidden'); m.style.display = 'flex';
+            
+            modalCountdown = 6;
+            document.getElementById('modal-btn').innerText = `ACEPTAR (${modalCountdown}s)`;
+            
+            if(modalTimer) clearInterval(modalTimer);
+            modalTimer = setInterval(() => {
+                modalCountdown--;
+                if(modalCountdown <= 0) { closeModal(); } 
+                else { document.getElementById('modal-btn').innerText = `ACEPTAR (${modalCountdown}s)`; }
+            }, 1000);
+        }
+
+        function closeModal() {
+            if(modalTimer) clearInterval(modalTimer);
+            document.getElementById('modal').classList.add('hidden');
+            document.getElementById('modal').style.display = '';
+        }
+
+        function rollItem(poolArray) {
+            const index = Math.floor(Math.random() * poolArray.length);
+            const data = poolArray[index].split('|');
+            let w = { id:`w_${Date.now()}_${Math.random()}`, name: data[0], atk: parseInt(data[1]), lvl: 1, active: false, passives: {} };
+            if(data[2] && data[3]) w.passives[data[2]] = data[3];
+            s.weapons.push(w);
+            return w;
+        }
+
+        function pullDungeonGacha() {
+            const today = virtualTime.toLocaleDateString();
+            if(s.abismoCooldown === today) return toast("El Abismo descansa hasta medianoche");
+            if(s.mana < 5) return toast("Maná Insuficiente (5)");
+            
+            s.mana -= 5; s.abismoCooldown = today;
+            
+            const r = Math.random() * 100;
+            if(r < 25) { let w = rollItem(ABYSS_LOOT); showModal("⚔️ ARMA HALLADA", w.name, "var(--pink)"); }
+            else if(r < 50) { s.mats.cores += 1; showModal("🔮 LORE MATERIAL", "Núcleo Mágico Extraído", "purple"); }
+            else if(r < 75) { s.mats.blood += 2; showModal("🩸 ALQUIMIA", "Gotas de Sangre de Monstruo", "red"); }
+            else { s.mats.dark += 1; showModal("🌑 LORE MATERIAL", "Fragmento de Sombra", "black"); }
+            save();
+        }
+
+        function nav(tab) { s.currentTab = tab; render(); }
+        function setSubTab(st) { s.subTabs[s.currentTab] = st; render(); }
+
+        function UITut(tab, txt) {
+            if(s.tuts[tab]) return '';
+            return `<div class="bg-blue-900/30 border border-blue-500/50 p-3 rounded-lg mb-4 flex justify-between items-start text-[10px]">
+                <p class="text-blue-200">${txt}</p>
+                <button onclick="s.tuts['${tab}']=true; save();" class="text-blue-400 font-bold ml-2 p-1">X</button>
+            </div>`;
+        }
+
+        function render() {
+            const mc = document.getElementById('main-content');
+            let h = ""; const t = s.currentTab;
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.querySelector('span:last-child').classList.remove('text-[var(--mint)]'));
+            document.getElementById(`nav-${t}`).querySelector('span:last-child').classList.add('text-[var(--mint)]');
+
+            if(t === 'home') {
+                const st = s.subTabs[t] || 'main';
+                h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
+                    <button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Campamento</button>
+                    <button onclick="setSubTab('story')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='story'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Historia</button>
+                </div>`;
+
+                if(st === 'main') {
+                    h += UITut('home', "Registra tus minutos de carrera para ganar EXP y Oro. Misiones diarias dan bonos. En tu Inventario verás lo recolectado.");
+                    let wAtk = getActiveWeapon().atk;
+                    h += `<div class="grid grid-cols-2 gap-2 mb-4 text-xs font-bold font-sys text-center">
+                        <div class="bg-black/30 py-3 rounded-lg border border-[var(--border-glass)]">💰 <span class="text-[var(--gold)]">${Math.floor(s.gold)}G</span></div>
+                        <div class="bg-black/30 py-3 rounded-lg border border-[var(--border-glass)]">⚔️ <span class="text-[var(--pink)]">ATK: ${s.atk + wAtk}</span></div>
+                    </div>`;
+
+                    h += `<div class="glass-panel p-5 mb-4">
+                            <div class="flex gap-2">
+                                <input id="in-race" type="number" placeholder="Minutos..." class="w-full bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm">
+                                <button onclick="let v=parseFloat(document.getElementById('in-race').value); if(v){ gain('exp', 300); gain('gold', 300); toast('CARRERA REGISTRADA'); }" class="btn-aaa px-6 rounded-xl font-bold">GO</button>
+                            </div>
+                        </div>`;
+
+                    let btnDaily = "";
+                    if(s.dailyStatus === 0) btnDaily = `<button onclick="s.dailyStatus=1; gain('exp',200); gain('gold',150); toast('DIARIAS HECHAS');" class="w-full py-3 rounded-xl border border-[var(--border-glass)] bg-black/30 text-xs font-bold uppercase">Completar Físico</button>`;
+                    else if(s.dailyStatus === 1) btnDaily = `<div class="w-full py-3 rounded-xl border border-[var(--mint)] bg-[var(--mint)]/10 text-[var(--mint)] text-center text-xs font-bold uppercase">COMPLETADAS</div>`;
+                    else btnDaily = `<div class="w-full py-3 rounded-xl border border-red-500/50 bg-red-900/20 text-red-400 text-center text-xs font-bold uppercase">SACRIFICADO AL ABISMO</div>`;
+
+                    h += `<div class="glass-panel p-5 mb-4"><h2 class="text-[10px] font-sys text-[var(--lavender)] mb-3 uppercase tracking-widest">Misiones Diarias</h2>${btnDaily}</div>`;
+                    
+                    h += `<div class="glass-panel p-4 mb-4">
+                        <h2 class="text-[10px] font-sys text-[var(--mint)] mb-3 uppercase tracking-widest border-b border-[var(--border-glass)] pb-2">Inventario de Materiales</h2>
+                        <div class="grid grid-cols-3 gap-2 text-[10px] text-center">
+                            <div class="bg-black/40 p-2 rounded border border-gray-800">⛏️ Acero<br><span class="font-bold text-white">${s.mats.steel}</span></div>
+                            <div class="bg-black/40 p-2 rounded border border-gray-800">🐉 Escamas<br><span class="font-bold text-orange-300">${s.mats.scales}</span></div>
+                            <div class="bg-black/40 p-2 rounded border border-gray-800">✨ P.Estelar<br><span class="font-bold text-yellow-100">${s.mats.dust}</span></div>
+                            <div class="bg-black/40 p-2 rounded border border-gray-800">🔮 Núcleos<br><span class="font-bold text-purple-400">${s.mats.cores}</span></div>
+                            <div class="bg-black/40 p-2 rounded border border-gray-800">🩸 S.Monstruo<br><span class="font-bold text-red-400">${s.mats.blood}</span></div>
+                            <div class="bg-black/40 p-2 rounded border border-gray-800">🌑 M.Oscura<br><span class="font-bold text-gray-500">${s.mats.dark}</span></div>
+                        </div>
+                    </div>`;
+                } else {
+                    h += UITut('story', "La historia se desbloquea al subir de nivel (1 por nivel hasta 10). Tu enemigo final es el Rey Aric. Reclama el oro de cada capítulo leído.");
+                    STORY_TEXT.forEach((txt, i) => {
+                        const reqLvl = i + 1;
+                        if(s.lvl >= reqLvl) {
+                            let btn = s.storyClaimed[i] ? `<span class="text-[8px] text-[var(--mint)] border border-[var(--mint)] px-2 py-1 rounded">LEÍDO</span>` : `<button onclick="s.storyClaimed[${i}]=true; gain('gold',50); save();" class="text-[8px] bg-[var(--gold)] text-black font-bold px-2 py-1 rounded">RECLAMAR 50G</button>`;
+                            h += `<div class="glass-panel p-4 mb-3 border-[var(--gold)]/20">
+                                <div class="flex justify-between mb-2"><h3 class="text-[10px] font-sys text-[var(--gold)]">Capítulo ${reqLvl}</h3>${btn}</div>
+                                <p class="text-xs text-gray-300 italic">"${txt}"</p>
+                            </div>`;
+                        } else {
+                            h += `<div class="glass-panel p-4 mb-3 opacity-30 text-center"><span class="text-xl">🔒</span><p class="text-[10px] mt-1">Requiere Nivel ${reqLvl}</p></div>`;
+                        }
+                    });
+                }
+            }
+            else if(t === 'lab') {
+                if(s.lvl < REQS.lab) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--pink)] mt-2 text-xs">Nivel ${REQS.lab} Requerido</p></div>`; } else {
+                    const st = s.subTabs[t] || 'main';
+                    h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl"><button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Lab Personal</button><button onclick="${s.lvl>=REQS.secLab?`setSubTab('sec')`:`toast('Nv.${REQS.secLab}')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='sec'?'bg-[var(--pink)]/20 text-[var(--pink)]':'opacity-50'}">Lab Secreto</button></div>`;
+                    
+                    if(st === 'main') {
+                        h += `<div class="glass-panel p-5"><div class="flex gap-2 mb-4"><input id="in-lab" type="text" placeholder="Tarea..." class="w-full bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm"><button onclick="let v=document.getElementById('in-lab').value; if(v) { s.labTasks.push(v); save(); }" class="btn-aaa px-4 rounded-xl text-xs font-bold">ADD</button></div>`;
+                        s.labTasks.forEach((tsk, i) => { h += `<div class="flex justify-between items-center bg-black/30 p-3 rounded-lg mb-2 border border-[var(--border-glass)]"><span class="text-xs">${tsk}</span><button onclick="s.labTasks.splice(${i},1); gain('exp',50); save();" class="text-[10px] text-[var(--mint)] font-bold">PURIFICAR</button></div>`; });
+                        h += `</div>`;
+                    } else {
+                        let btnAlq = `<button onclick="toast('Debes completar las diarias primero')" class="w-full py-4 bg-gray-900 border border-gray-700 rounded-xl text-xs font-bold text-gray-500">Destilar (Requiere Diaria Hecha)</button>`;
+                        if(s.dailyStatus === 1) btnAlq = `<button onclick="s.potions.expB=1.5; s.dailyStatus=2; showModal('🧪 ALQUIMIA', 'Poción x1.5 Creada', 'var(--pink)'); save();" class="w-full py-4 bg-[var(--pink)]/10 border border-[var(--pink)]/50 rounded-xl text-xs font-bold text-[var(--pink)] animate-pulse">SACRIFICAR DIARIA -> Poción x1.5</button>`;
+                        else if(s.dailyStatus === 2) btnAlq = `<div class="w-full py-4 bg-red-900/10 border border-red-900/50 rounded-xl text-xs font-bold text-red-500 text-center uppercase tracking-widest">Ya Sacrificado Hoy</div>`;
+                        
+                        h += `<div class="glass-panel p-5 border-[var(--pink)]/30"><h3 class="font-sys text-[var(--pink)] text-sm mb-2">Alquimia Oscura</h3><p class="text-[10px] opacity-70 mb-4">Sacrifica la energía de tus misiones para ganar x1.5 Exp (siguiente carrera).</p>${btnAlq}</div>`;
+                    }
+                }
+            }
+            else if(t === 'dungeon') {
+                if(s.lvl < REQS.dungeon) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--pink)] mt-2 text-xs">Nivel ${REQS.dungeon} Requerido</p></div>`; } else {
+                    const st = s.subTabs[t] || 'main';
+                    h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl"><button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Portal Estándar</button><button onclick="${s.lvl>=REQS.secDungeon?`setSubTab('sec')`:`toast('Nv.${REQS.secDungeon}')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='sec'?'bg-[var(--pink)]/20 text-[var(--pink)]':'opacity-50'}">Abismo Profundo</button></div>`;
+                    
+                    if(st === 'main') {
+                        let bossPer = (s.boss.hp / s.boss.maxHp) * 100;
+                        let mCost = 2;
+                        let w = getActiveWeapon();
+                        if(w.passives?.manaCost) mCost += parseInt(w.passives.manaCost);
+                        if(mCost < 0) mCost = 0;
+
+                        h += `<div class="glass-panel p-6 text-center">
+                            <h3 class="font-sys text-red-500 text-xl font-bold uppercase mb-1 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">${s.boss.name}</h3>
+                            <p class="text-[9px] opacity-60 mb-4">Nv. Jefe ${s.boss.lvl}</p>
+                            <div class="h-6 w-full bg-gray-900 rounded-full border border-red-900 relative overflow-hidden mb-6">
+                                <div class="progress-bar h-full bg-red-600 shadow-[0_0_10px_red]" style="width: ${bossPer}%"></div>
+                                <div class="absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase text-white drop-shadow-md">HP: ${s.boss.hp} / ${s.boss.maxHp}</div>
+                            </div>
+                            <button onclick="if(s.mana>=${mCost}){ s.mana-=${mCost}; s.boss.hp -= (s.atk + (s.weapons.find(w=>w.active)?.atk||0)); if(s.boss.hp <= 0) { gain('exp', 800); gain('gold', 500); s.boss.lvl++; s.boss.maxHp+=200; s.boss.hp=s.boss.maxHp; s.boss.name=BOSS_NAMES[Math.min(s.boss.lvl-1, BOSS_NAMES.length-1)]; showModal('☠️ JEFE DERROTADO', '+800 EXP / +500G', 'red'); } save(); } else toast('Maná Insuficiente');" class="btn-aaa w-full py-6 rounded-2xl font-sys font-bold text-lg border-red-500/50 text-red-400">⚔️ ATACAR (${mCost} Maná)</button>
+                        </div>`;
+                    } else {
+                        const isCooldown = s.abismoCooldown === virtualTime.toLocaleDateString();
+                        h += `<div class="glass-panel p-6 text-center border-purple-500/30">
+                            <h3 class="font-sys text-purple-400 text-lg font-bold uppercase mb-4">Gacha de Ruinas</h3>
+                            <p class="text-[10px] opacity-60 mb-6">${isCooldown ? 'Regresa a medianoche.' : '1 intento diario (Botín de 50 items). Coste: 5 Maná'}</p>
+                            <button onclick="pullDungeonGacha()" class="w-full py-5 rounded-2xl border border-purple-500/50 bg-purple-900/20 text-purple-300 font-bold tracking-widest ${isCooldown ? 'opacity-30' : ''}">🔮 EXPLORAR (5 MANÁ)</button>
+                        </div>`;
+                    }
+                }
+            }
+            else if(t === 'forge') {
+                if(s.lvl < REQS.forge) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--pink)] mt-2 text-xs">Nivel ${REQS.forge} Requerido</p></div>`; } else {
+                    const st = s.subTabs[t] || 'equip';
+                    h += UITut('equip', "Forja: En 'Equipo' activas tu arma principal (solo 1). En 'Mejora' subes de nivel tus armas usando Oro/Maná. En 'Primigenia' crafteas aleatoriamente entre 50 objetos.");
+                    h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
+                        <button onclick="setSubTab('equip')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='equip'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Equipo</button>
+                        <button onclick="setSubTab('up')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='up'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Mejora</button>
+                        <button onclick="${s.lvl>=REQS.secForge?`setSubTab('sec')`:`toast('Nv.${REQS.secForge}')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='sec'?'bg-[var(--pink)]/20 text-[var(--pink)]':'opacity-50'}">Primigenia</button>
+                    </div>`;
+                    
+                    if(st === 'equip' || st === 'up') {
+                        h += `<div class="glass-panel p-4 max-h-[60vh] overflow-y-auto">`;
+                        s.weapons.forEach((w, i) => {
+                            let pTxt = w.passives && Object.keys(w.passives).length>0 ? '<span class="text-[var(--gold)] ml-1">✨</span>' : '';
+                            if(st === 'equip') {
+                                h += `<div class="bg-black/40 border ${w.active?'border-[var(--mint)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-2 flex justify-between items-center">
+                                    <div><p class="text-xs font-bold ${w.active?'text-[var(--mint)]':''}">${w.name} ${pTxt}</p><p class="text-[9px] opacity-60">Atk: ${w.atk} | Lv.${w.lvl}</p></div>
+                                    <button onclick="s.weapons.forEach(x=>x.active=false); s.weapons[${i}].active=true; save();" class="text-[10px] ${w.active?'bg-[var(--mint)] text-black':'border border-gray-600'} font-bold px-3 py-1 rounded">${w.active?'EQUIPADO':'USAR'}</button>
+                                </div>`;
+                            } else {
+                                let upC = w.lvl * 150; let upM = w.lvl * 2;
+                                h += `<div class="bg-black/40 border border-[var(--border-glass)] p-3 rounded-xl mb-2 flex justify-between items-center">
+                                    <div><p class="text-xs font-bold">${w.name} <span class="text-[var(--pink)]">Lv.${w.lvl}</span> ${pTxt}</p><p class="text-[9px] opacity-60">Atk: ${w.atk} | Coste UP: ${upC}G + ${upM}M</p></div>
+                                    <button onclick="if(s.gold>=${upC} && s.mana>=${upM}){ s.gold-=${upC}; s.mana-=${upM}; s.weapons[${i}].lvl++; s.weapons[${i}].atk+=5; save(); } else toast('Faltan Recursos')" class="bg-[var(--gold)]/20 text-[var(--gold)] border border-[var(--gold)]/50 px-3 py-1 rounded text-[10px] font-bold">⚒️ UP</button>
+                                </div>`;
+                            }
+                        });
+                        h += `</div>`;
+                    } else if(st === 'sec') {
+                        h += `<div class="glass-panel p-6 text-center border-orange-500/30">
+                            <h3 class="font-sys text-orange-400 text-lg font-bold mb-4">Forja Rúnica</h3>
+                            <p class="text-[10px] opacity-60 mb-4">Sintetiza de entre 50 objetos legendarios.<br>Coste: 50 Acero + 20 Escamas + 5 Polvo</p>
+                            <button onclick="if(s.mats.steel>=50 && s.mats.scales>=20 && s.mats.dust>=5){ s.mats.steel-=50; s.mats.scales-=20; s.mats.dust-=5; let nw = rollItem(FORGE_LOOT); showModal('⚒️ ARMA FORJADA', nw.name, 'orange'); save(); } else toast('Faltan Materiales');" class="w-full py-5 rounded-xl border border-orange-500/50 bg-orange-900/20 text-orange-300 font-bold">⚒️ FUNDIR RECURSOS</button>
+                        </div>`;
+                    }
+                }
+            }
+            else if(t === 'shop') {
+                const st = s.subTabs[t] || 'main';
+                h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl"><button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--mint)]':'opacity-50'}">Mercado</button><button onclick="${s.lvl>=REQS.secShop?`setSubTab('sec')`:`toast('Nv.${REQS.secShop}')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='sec'?'bg-[var(--pink)]/20 text-[var(--pink)]':'opacity-50'}">Bazar Oscuro</button></div>`;
+                
+                let adminUI = `<div class="mt-6 border border-red-900/50 bg-black/80 rounded-xl p-3 shadow-inner"><p class="text-[8px] font-sys text-red-500 mb-2">CONSOLA ADMIN</p><input id="admin-in" type="text" placeholder="Código..." class="w-full bg-transparent border-b border-red-900/50 px-2 py-1 text-xs text-center focus:outline-none focus:border-red-500 text-white" oninput="let b=document.getElementById('admin-btns'); if(this.value==='Admin'){ b.classList.remove('hidden'); b.classList.add('grid'); } else { b.classList.add('hidden'); b.classList.remove('grid'); }">
+                <div id="admin-btns" class="hidden grid-cols-2 gap-2 mt-3">
+                    <button onclick="gain('exp', 1000); toast('+1000 EXP')" class="bg-blue-900/50 py-2 rounded text-[10px] border border-blue-500/30">+1000 EXP</button>
+                    <button onclick="s.exp=MAX_EXP(); s.lvl=10; s.mana=MAX_MANA(); save(); toast('Nivel 10 Alcanzado')" class="bg-purple-900/50 py-2 rounded text-[10px] border border-purple-500/30">MAX LVL (10)</button>
+                    <button onclick="s.timeOffset+=3600000; checkTime(); toast('Reloj: +1 Hora')" class="bg-yellow-900/50 py-2 rounded text-[10px] border border-yellow-500/30">+1H Reloj</button>
+                    <button onclick="if(confirm('¿RESET TOTAL?')){ localStorage.removeItem(DB_KEY); location.reload(); }" class="bg-red-900/80 py-2 rounded text-[10px] text-white font-bold">WIPE SAVE</button>
+                </div></div>`;
+
+                if(st === 'main') {
+                    h += `<div class="grid grid-cols-2 gap-3">
+                        <button onclick="if(s.gold>=500){s.gold-=500; s.mats.steel+=10; save(); toast('Comprado');} else toast('Sin oro')" class="glass-panel p-4 text-center"><span class="text-xl">⛏️</span><p class="text-[10px] mt-2">10x Acero</p><p class="text-[9px] text-[var(--gold)] mt-1 font-bold">500G</p></button>
+                        <button onclick="if(s.gold>=800){s.gold-=800; s.mats.scales+=5; save(); toast('Comprado');} else toast('Sin oro')" class="glass-panel p-4 text-center"><span class="text-xl">🐉</span><p class="text-[10px] mt-2">5x Escamas</p><p class="text-[9px] text-[var(--gold)] mt-1 font-bold">800G</p></button>
+                    </div>` + adminUI;
+                } else {
+                    h += `<div class="glass-panel p-4 border-red-900/50 bg-red-900/10 mb-4"><h3 class="text-red-400 text-xs font-bold mb-2 uppercase">Bienes Prohibidos</h3>
+                    <button onclick="if(s.gold>=3000){s.gold-=3000; s.mats.dark+=1; save(); toast('Comprado');} else toast('Sin oro')" class="w-full flex justify-between items-center bg-black/50 p-3 rounded border border-red-900/30 mb-2"><span class="text-xs">Materia Oscura</span><span class="text-[var(--gold)] text-[10px] font-bold">3000G</span></button>
+                    <button onclick="if(s.gold>=5000){s.gold-=5000; s.potions.illegal+=1; s.potions.expB=10.0; save(); toast('¡Bono x10 Activo!');} else toast('Sin oro')" class="w-full flex justify-between items-center bg-black/50 p-3 rounded border border-red-900/30"><span class="text-xs text-[var(--pink)]">Extracto Ilegal (x10 EXP)</span><span class="text-[var(--gold)] text-[10px] font-bold">5000G</span></button></div>`;
+                }
+
+                if(s.lvl >= REQS.prestige) {
+                    h += `<button onclick="if(confirm('¿Renacer? Perderás oro, nv y armas. Ganarás un multiplicador de exp y oro permanente.')){ s.prestige++; s.lvl=1; s.exp=0; s.gold=0; s.weapons=[{id:'w1',name:'Daga',atk:2,lvl:1,active:true}]; s.storyClaimed.fill(false); save(); showModal('🌌 PRESTIGIO ALCANZADO', 'Tus ganancias han sido multiplicadas', 'var(--mint)'); }" class="mt-6 w-full py-4 bg-gradient-to-r from-blue-900 to-[var(--mint)] rounded-xl font-sys text-white text-xs tracking-widest border border-blue-400 shadow-[0_0_15px_rgba(0,0,255,0.3)]">🌌 ASCENSIÓN (PRESTIGIO)</button>`;
+                } else {
+                    h += `<div class="mt-6 glass-panel p-4 text-center opacity-40 border-dashed border-[var(--border-glass)]"><p class="font-sys text-[10px] uppercase tracking-widest text-gray-500">ASCENSIÓN BLOQUEADA <br><span class="text-[8px]">(Nivel 10)</span></p></div>`;
+                }
+            }
+            mc.innerHTML = `<div class="active-tab">${h}</div>`;
+        }
+
+        // INIT
+        checkTime();
+        save();
+    </script>
+</body>
+</html>
