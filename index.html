@@ -14,7 +14,7 @@
         :root {
             --bg-base: #0c0c12; 
             --sys-blue: #60a5fa;   /* Mazmorra / Maná / Base */
-            --sys-red: #f87171;    /* Maldita / Reloj / Error */
+            --sys-red: #f87171;    /* Maldita / Reloj / Errores */
             --sys-purple: #c084fc; /* Abismo / EXP */
             --gold: #fcd34d; 
             --dia: #2dd4bf;        /* Diamantes */
@@ -117,7 +117,7 @@
     </div>
 
     <script>
-        const DB_KEY = 'system_v09_safe_save_1'; // Clave nueva para evitar bugs en la nada
+        const DB_KEY = 'sys_v0_9_data'; 
         const TIERS = {1:'I', 2:'H', 3:'G', 4:'F', 5:'E', 6:'D', 7:'C', 8:'B', 9:'A', 10:'S'};
         const EXP_NEEDED = [0, 400, 1000, 3000, 7500, 15000, 30000, 50000, 75000, 100000];
 
@@ -179,22 +179,37 @@
         let defaultMats = {}; ALL_MATS.forEach(m => defaultMats[m[0]] = 0);
 
         let s = JSON.parse(localStorage.getItem(DB_KEY));
-        if(!s || s.v !== "0.9.1") {
-            s = {
-                v: "0.9.1",
-                lvl: 1, exp: 0, gold: 0, diamonds: 0, prestige: 0, mana: 10,
-                lastDate: null, timeOffset: 0,
-                objective: "Objetivo: Menor tiempo posible", races: [], diaClaimedToday: false,
-                dailies: [{name: "Entrenamiento Físico", done: false}], dailySacrificed: false,
-                storyClaimed: Array(10).fill(false),
-                potions: { expB: 1.0 }, potionInv: {},
-                mats: defaultMats,
-                weapons: [ALL_WEAPONS[0]], armors: [],
-                activeWeps: ['w_sys_1', null], activeArmors: {head:null, chest:null, legs:null, acc:null},
-                bosses: { b1: { name: BOSSES_T1[0], hp: 500, maxHp: 500, lvl: 1 }, b2: { name: BOSSES_T2[0], hp: 5000, maxHp: 5000, lvl: 11 }, b3: { name: BOSSES_T3[0], hp: 20000, maxHp: 20000, lvl: 21 } },
-                currentTab: 'home', subTabs: {}, dailyShopIds: []
-            };
-        }
+
+        // Vacuna contra el bug "Aparecer en la nada": Migración forzada si faltan variables.
+        if (!s) s = {};
+        if (s.lvl === undefined) s.lvl = 1;
+        if (s.exp === undefined) s.exp = 0;
+        if (s.gold === undefined) s.gold = 0;
+        if (s.diamonds === undefined) s.diamonds = 0;
+        if (s.prestige === undefined) s.prestige = 0;
+        if (s.mana === undefined) s.mana = 10;
+        if (s.atk === undefined) s.atk = 10;
+        if (s.timeOffset === undefined) s.timeOffset = 0;
+        if (s.objective === undefined) s.objective = "Objetivo: Menor tiempo posible";
+        if (s.diaClaimedToday === undefined) s.diaClaimedToday = false;
+        if (!s.races) s.races = [];
+        if (!s.dailies || s.dailies.length === 0) s.dailies = [{name: "Entrenamiento Físico", done: false}];
+        if (s.dailySacrificed === undefined) s.dailySacrificed = false;
+        if (!s.storyClaimed) s.storyClaimed = Array(10).fill(false);
+        if (!s.potions) s.potions = { expB: 1.0 };
+        if (!s.potionInv) s.potionInv = {};
+        if (!s.mats) s.mats = defaultMats;
+        if (!s.weapons) s.weapons = [ALL_WEAPONS[0]];
+        if (!s.armors) s.armors = [];
+        if (!s.activeWeps) s.activeWeps = [s.activeWepId || 'w_sys_1', null];
+        if (!s.activeArmors) s.activeArmors = {head:null, chest:null, legs:null, acc:null};
+        if (!s.bosses) s.bosses = { b1: { name: BOSSES_T1[0], hp: 500, maxHp: 500, lvl: 1 }, b2: { name: BOSSES_T2[0], hp: 5000, maxHp: 5000, lvl: 11 }, b3: { name: BOSSES_T3[0], hp: 20000, maxHp: 20000, lvl: 21 } };
+        if (!s.currentTab) s.currentTab = 'home';
+        if (!s.subTabs) s.subTabs = {};
+        if (!s.dailyShopIds) s.dailyShopIds = [];
+        
+        // Sincronizar todos los mats por si se añadieron nuevos
+        ALL_MATS.forEach(m => { if(s.mats[m[0]] === undefined) s.mats[m[0]] = 0; });
 
         const MAX_MANA = () => 10 + (s.lvl * 2);
         let virtualTime = new Date(); let modalTimer = null; let modalCountdown = 0;
@@ -216,15 +231,16 @@
             let m = Math.floor((rem%3600000)/60000).toString().padStart(2, '0');
             let sec = Math.floor((rem%60000)/1000).toString().padStart(2, '0');
             let tStr = `${h}:${m}:${sec}`;
+            
             document.getElementById('sys-countdown').innerText = tStr;
-
             let shopC = document.getElementById('shop-countdown');
             if(shopC) shopC.innerText = tStr;
 
             const strDate = virtualTime.toLocaleDateString();
             if(s.lastDate !== strDate) { 
                 s.dailySacrificed = false; s.diaClaimedToday = false;
-                s.dailies.forEach(d => d.done = false); s.labCraftsToday = 0;
+                s.dailies.forEach(d => d.done = false);
+                s.labCraftsToday = 0;
                 rollShop(); s.lastDate = strDate; save(); 
             }
         }
@@ -250,10 +266,11 @@
                 if(a) { md += a.manaDiscount; counts[a.setName] = (counts[a.setName]||0) + 1; }
             });
 
+            // Set Bonus: x2 descuento si tiene 4/4
             for(let setName in counts) {
                 if(counts[setName] === 4) {
                     let sample = s.armors.find(x => x.setName === setName);
-                    if(sample) md += (sample.manaDiscount * 4); // Set x2
+                    if(sample) md += (sample.manaDiscount * 4); 
                 }
             }
             return { atk, manaDiscount: md, setCounts: counts };
@@ -271,9 +288,10 @@
                     reqExp = EXP_NEEDED[s.lvl]; 
                 }
                 if(s.lvl >= 10) { s.lvl = 10; s.exp = EXP_NEEDED[9]; }
+                toast(`+${Math.floor(amount)} EXP`, "var(--sys-purple)");
             }
-            if(type === 'gold') s.gold += amount * mult;
-            if(type === 'dia') s.diamonds += amount;
+            if(type === 'gold') { s.gold += amount * mult; toast(`+${Math.floor(amount)} G`, "var(--gold)"); }
+            if(type === 'dia') { s.diamonds += amount; toast(`+${amount} Diamantes`, "var(--dia)"); }
             save();
         }
 
@@ -441,7 +459,7 @@
                                 <div class="flex gap-2 items-center mb-2">
                                     <input id="in-min" type="number" placeholder="Min" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--sys-blue)] outline-none text-white">
                                     <input id="in-sec" type="number" placeholder="Seg" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--sys-blue)] outline-none text-white">
-                                    <button onclick="let m=parseInt(document.getElementById('in-min').value)||0; let sc=parseInt(document.getElementById('in-sec').value)||0; let tot=(m*60)+sc; if(tot>0){ s.races.push({val:tot, date:Date.now()}); gain('exp', 1500); gain('gold', 3000); if(!s.diaClaimedToday){ gain('dia', 300); s.diaClaimedToday=true; } toast('CARRERA REGISTRADA'); save(); } else toast('Introduce tiempo', 'var(--sys-red)');" class="btn-aaa px-6 py-3 rounded-xl font-bold">GO</button>
+                                    <button onclick="let m=parseInt(document.getElementById('in-min').value)||0; let sc=parseInt(document.getElementById('in-sec').value)||0; let tot=(m*60)+sc; if(tot>0){ s.races.push({val:tot, date:Date.now()}); gain('exp', 1500); gain('gold', 3000); if(!s.diaClaimedToday){ gain('dia', 300); s.diaClaimedToday=true; } save(); } else toast('Introduce tiempo', 'var(--sys-red)');" class="btn-aaa px-6 py-3 rounded-xl font-bold">GO</button>
                                 </div>
                                 ${generateLineChart()}
                                 <div class="mt-4 max-h-[120px] overflow-y-auto pr-2 space-y-1 border-t border-[var(--border-glass)] pt-2">`;
@@ -470,7 +488,7 @@
                                 let color = d.done ? 'text-[var(--sys-blue)] border-[var(--sys-blue)]/50' : 'text-gray-300 border-[var(--border-glass)]';
                                 h += `<div class="flex gap-2 items-center mb-2 bg-black/30 p-2 rounded-lg border ${color}">
                                     <input type="text" value="${d.name}" onchange="s.dailies[${i}].name=this.value; save();" class="w-full bg-transparent outline-none text-xs ${d.done?'opacity-50 line-through text-[var(--sys-blue)]':'text-gray-300'}" ${d.done?'disabled':''}>
-                                    ${!d.done ? `<button onclick="s.dailies[${i}].done=true; gain('exp', 1000); gain('gold',5000); gain('dia',50); toast('Misión Completada', 'var(--sys-blue)'); save();" class="text-[var(--sys-blue)] text-xs px-2 py-1 bg-[var(--sys-blue)]/10 rounded border border-[var(--sys-blue)]/50">✔️</button>` : ''}
+                                    ${!d.done ? `<button onclick="s.dailies[${i}].done=true; gain('exp', 1000); gain('gold',5000); gain('dia',50); save();" class="text-[var(--sys-blue)] text-xs px-2 py-1 bg-[var(--sys-blue)]/10 rounded border border-[var(--sys-blue)]/50">✔️</button>` : ''}
                                     <button onclick="if(s.dailies[${i}].done) { toast('Solo al reinicio', 'var(--sys-red)'); } else { s.dailies.splice(${i},1); save(); }" class="text-[var(--sys-red)] text-xs px-2 py-1 bg-[var(--sys-red)]/10 rounded border border-[var(--sys-red)]/50">❌</button>
                                 </div>`;
                             });
@@ -558,7 +576,7 @@
                                 if(s.potionInv[p] > 0) {
                                     has = true; let mult = parseFloat(p.match(/x(\d+\.\d+)/)[1]) || 1.2;
                                     h += `<div class="flex justify-between items-center bg-black/40 p-3 rounded mb-2 border border-[var(--border-glass)]">
-                                        <div><p class="text-xs font-bold text-gray-200">${p}</p><p class="text-[9px] text-gray-400 mt-1">Cantidad: <span class="text-[var(--sys-blue)] font-bold">${s.potionInv[p]}</span></p></div>
+                                        <div><p class="text-xs font-bold text-[var(--lavender)]">${p}</p><p class="text-[9px] text-gray-400 mt-1">Cantidad: <span class="text-[var(--sys-blue)] font-bold">${s.potionInv[p]}</span></p></div>
                                         <button onclick="if(s.potions.expB>1.0){ if(!confirm('Ya tienes un efecto de poción activo y lo vas a reemplazar. ¿Continuar?')) return; } s.potionInv['${p}']--; s.potions.expB=${mult}; toast('Poción Activada', 'var(--sys-blue)'); save();" class="bg-[var(--sys-blue)]/20 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-4 py-2 rounded text-xs font-bold uppercase">Tomar</button>
                                     </div>`;
                                 }
