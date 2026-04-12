@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYSTEM V0.9.8: THE GYM UPDATE</title>
+    <title>SYSTEM V0.9.9: PRERELEASE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@300;500;700&display=swap');
@@ -59,7 +59,7 @@
         
         <div class="flex justify-between items-start mb-4 relative z-10">
             <div>
-                <h1 class="font-sys font-bold text-lg sm:text-xl text-[var(--sys-blue)] tracking-wider">SYSTEM<span class="text-[var(--sys-red)] text-[10px] sm:text-xs ml-1">v0.9.8</span></h1>
+                <h1 class="font-sys font-bold text-lg sm:text-xl text-[var(--sys-blue)] tracking-wider">SYSTEM<span class="text-[var(--sys-red)] text-[10px] sm:text-xs ml-1">v0.9.9</span></h1>
                 <div class="flex gap-3 mt-1">
                     <p class="text-[10px] font-bold uppercase text-[var(--gold)]">💰 <span id="hud-gold">0</span></p>
                     <p class="text-[10px] font-bold uppercase text-[var(--dia)]">💎 <span id="hud-dia">0</span></p>
@@ -108,7 +108,7 @@
     <nav class="fixed bottom-0 left-0 w-full glass-panel border-t-0 rounded-t-3xl rounded-b-none p-2 sm:p-4 grid grid-cols-6 gap-1 z-40">
         <button onclick="nav('home')" class="flex flex-col items-center nav-btn" id="nav-home"><span class="text-lg sm:text-xl mb-1">⛺</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider text-[var(--sys-blue)]">Camp</span></button>
         <button onclick="nav('lab')" class="flex flex-col items-center nav-btn opacity-40" id="nav-lab"><span class="text-lg sm:text-xl mb-1">⚗️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Lab</span></button>
-        <button onclick="nav('dungeon')" class="flex flex-col items-center nav-btn opacity-40" id="nav-dungeon"><span class="text-lg sm:text-xl mb-1">⛩️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Avent</span></button>
+        <button onclick="nav('dungeon')" class="flex flex-col items-center nav-btn opacity-40" id="nav-dungeon"><span class="text-lg sm:text-xl mb-1">⛩️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Lucha</span></button>
         <button onclick="nav('forge')" class="flex flex-col items-center nav-btn opacity-40" id="nav-forge"><span class="text-lg sm:text-xl mb-1">⚒️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Forja</span></button>
         <button onclick="nav('shop')" class="flex flex-col items-center nav-btn" id="nav-shop"><span class="text-lg sm:text-xl mb-1">⚖️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Tienda</span></button>
         <button onclick="nav('map')" class="flex flex-col items-center nav-btn opacity-40" id="nav-map"><span class="text-lg sm:text-xl mb-1">🗺️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Mapa</span></button>
@@ -151,7 +151,7 @@
         }
         
         const sfx = {
-            click: () => playTone(600, 'sine', 0.1, 0.05),
+            click: () => { playTone(500, 'sine', 0.05, 0.05); setTimeout(()=>playTone(700, 'sine', 0.05, 0.05), 50); },
             hit: () => playTone(200, 'square', 0.15, 0.1),
             error: () => playTone(150, 'sawtooth', 0.3, 0.1),
             success: () => { playTone(400, 'sine', 0.1, 0.05); setTimeout(()=>playTone(600, 'sine', 0.2, 0.05), 100); },
@@ -160,7 +160,7 @@
             gachaLegendary: () => { playTone(400, 'square', 0.2, 0.1); setTimeout(()=>playTone(600, 'square', 0.2, 0.1), 200); setTimeout(()=>playTone(800, 'square', 0.5, 0.1), 400); }
         };
 
-        const DB_KEY = 'sys_v0_9_8_full'; 
+        const DB_KEY = 'sys_v0_9_9_prerelease'; 
         const TIERS = {1:'I', 2:'H', 3:'G', 4:'F', 5:'E', 6:'D', 7:'C', 8:'B', 9:'A', 10:'S'};
         
         function getReqExp(lvl) {
@@ -186,13 +186,11 @@
             'Natación': { ic: '🏊', in: [{id:'in-1', p:'Metros'}, {id:'in-2', p:'Min'}], calc: (i1, i2) => (parseInt(i2)||0)*60, txt: (i1, i2) => `${i1}m | ${i2}m` },
             'Pesas': { ic: '🏋️', in: [{id:'in-1', p:'Series'}, {id:'in-2', p:'Reps'}], calc: (i1, i2) => (parseInt(i1)||0)*(parseInt(i2)||0)*4, txt: (i1, i2) => `${i1}x${i2}` },
             'Calistenia': { ic: '🤸', in: [{id:'in-1', p:'Minutos'}], calc: (i1) => (parseInt(i1)||0)*60, txt: (i1) => `${i1}m` },
-            'Yoga': { ic: '🧘', in: [{id:'in-1', p:'Minutos'}], calc: (i1) => (parseInt(i1)||0)*60, txt: (i1) => `${i1}m` },
-            'Boxeo': { ic: '🥊', in: [{id:'in-1', p:'Asaltos'}, {id:'in-2', p:'Min/Asalto'}], calc: (i1, i2) => (parseInt(i1)||0)*(parseInt(i2)||0)*60, txt: (i1, i2) => `${i1} rnds x ${i2}m` },
-            'Cuerda': { ic: '🪢', in: [{id:'in-1', p:'Saltos'}, {id:'in-2', p:'Min'}], calc: (i1, i2) => (parseInt(i2)||0)*60, txt: (i1, i2) => `${i1} saltos | ${i2}m` },
-            'Caminar': { ic: '🚶', in: [{id:'in-1', p:'Km'}, {id:'in-2', p:'Min'}], calc: (i1, i2) => (parseInt(i2)||0)*60, txt: (i1, i2) => `${i1}Km | ${i2}m` },
-            'HIIT': { ic: '⏱️', in: [{id:'in-1', p:'Minutos'}], calc: (i1) => (parseInt(i1)||0)*60, txt: (i1) => `${i1}m` },
-            'Escalada': { ic: '🧗', in: [{id:'in-1', p:'Grado'}, {id:'in-2', p:'Min'}], calc: (i1, i2) => (parseInt(i2)||0)*60, txt: (i1, i2) => `Grado ${i1} | ${i2}m` },
-            'Remo': { ic: '🚣', in: [{id:'in-1', p:'Metros'}, {id:'in-2', p:'Min'}], calc: (i1, i2) => (parseInt(i2)||0)*60, txt: (i1, i2) => `${i1}m | ${i2}m` }
+            'Fútbol': { ic: '⚽', in: [{id:'in-1', p:'Goles'}, {id:'in-2', p:'Minutos'}], calc: (i1, i2) => (parseInt(i2)||0)*60, txt: (i1, i2) => `${i1} goles | ${i2}m` },
+            'Baloncesto': { ic: '🏀', in: [{id:'in-1', p:'Puntos'}, {id:'in-2', p:'Minutos'}], calc: (i1, i2) => (parseInt(i2)||0)*60, txt: (i1, i2) => `${i1} pts | ${i2}m` },
+            'Tenis': { ic: '🎾', in: [{id:'in-1', p:'Sets'}, {id:'in-2', p:'Minutos'}], calc: (i1, i2) => (parseInt(i2)||0)*60, txt: (i1, i2) => `${i1} sets | ${i2}m` },
+            'Pádel': { ic: '🏓', in: [{id:'in-1', p:'Sets'}, {id:'in-2', p:'Minutos'}], calc: (i1, i2) => (parseInt(i2)||0)*60, txt: (i1, i2) => `${i1} sets | ${i2}m` },
+            'Voleibol': { ic: '🏐', in: [{id:'in-1', p:'Sets'}, {id:'in-2', p:'Minutos'}], calc: (i1, i2) => (parseInt(i2)||0)*60, txt: (i1, i2) => `${i1} sets | ${i2}m` }
         };
 
         let ALL_WEAPONS = [];
@@ -290,7 +288,7 @@
         const STORY_TITLES_2 = ["La Verdad Oculta", "El Parásito", "La Cura Falsa", "El Sacrificio de un Hermano", "Los Señores Mienten", "La Cicatriz Sello", "El Plan Maestro", "Prisionero de Obsidiana", "La Oración Silenciosa", "La Maldición de la Corona"];
         const STORY_TEXT_2 = ["Años después de sentarte en el trono, encontraste el diario oculto de Aric en las mazmorras secretas. La primera página te heló la sangre. 'La grieta se está abriendo', decía su letra temblorosa. La verdad te golpeó como un mazo: Aric no consumió la magia del reino por avaricia ni por sed de poder. Descubrió una falla dimensional bajo el castillo por la que horrores cósmicos iban a devorar el mundo entero. Para sellarla, tuvo que absorber todo el maná disponible, convirtiéndose en el pilar que mantenía la realidad intacta.", "El diario detallaba la naturaleza del 'Abismo'. No era simplemente una dimensión paralela o un infierno terrenal, era una entidad viva. Un parásito interdimensional masivo que se alimentaba de la estabilidad de las realidades. Una vez que enganchaba sus tentáculos metafísicos a un mundo, drenaba sus leyes físicas y su vida. Aric, al darse cuenta de esto, intentó desesperadamente buscar un remedio arcano, pero se dio cuenta de que la única forma de frenarlo era alimentarlo con un recipiente infinito de poder: él mismo.", "Los temidos 'Impuestos de Sangre' que diezmaron las aldeas no fueron una tiranía egoísta. Aric descubrió que la Plaga del Abismo ya había infectado a los campesinos sin que lo supieran. Estaban incubando horrores invisibles en sus almas. El Rey ordenó a los Perros de Sangre extraer ese maná corrupto para purificar a los ciudadanos, asumiendo él todo el peso del pecado y la mala fama, y almacenando toda esa bilis oscura en su propia sangre para evitar una pandemia apocalíptica.", "Aric escribió sobre la noche de tu exilio. Las páginas estaban manchadas de lágrimas secas. Sabía que el parásito acabaría por devorar su mente y que tarde o temprano perdería el control y aniquilaría el reino él mismo. Te exilió, te despojó de todo y te humilló públicamente no por odio, sino para apartarte del radar del Abismo. Te obligó a sobrevivir en las peores condiciones para que, a través de la furia y la supervivencia extrema, te convirtieras en la única hoja afilada capaz de matarle cuando llegara el momento.", "Los Señores del Abismo no hicieron un trato de poder con él; le ofrecieron una trampa que Aric tuvo que aceptar sabiendo que estaba amañada. Prometieron no invadir el reino si él se convertía en el recipiente de su corrupción. Él aceptó ganar tiempo, sabiendo que mentirían. Cada día que pasó en el trono fue un infierno psicológico, luchando internamente contra millones de voces alienígenas que intentaban doblegar su voluntad, comprando valiosos años para que tú en los páramos te hicieras fuerte.", "Aquel encuentro en los páramos donde te emboscó... El diario reveló su verdadera intención. Aric sintió que el Abismo intentaba poseerte a distancia al detectar tu creciente poder. Se vio obligado a intervenir personalmente. La espantosa herida y cicatriz que te dejó en el pecho no fue un intento de asesinato, fue un intrincado sello arcano pintado a espada. Esa quemadura que sientes al usar maná es el sello bloqueando la corrupción del Abismo, protegiendo tu mente de la locura que a él lo consumió.", "Su plan maestro fue meticuloso y suicida. Orquestó su propia caída, sembrando rumores sobre sus atrocidades, enviando a los Perros de Sangre para entrenarte mediante el combate letal, y dejando pistas para que encontraras la Forja Primigenia. Construyó su papel de villano definitivo para unir a todo un reino fracturado bajo una sola bandera: la tuya. Sabía que el mundo solo sobreviviría si se unificaba contra un mal común.", "En sus últimos meses, Aric relató cómo perdió el control de su cuerpo. Relataba estar atrapado detrás de sus propios ojos, viendo cómo sus manos firmaban órdenes crueles de las que no era dueño. Se había convertido en un prisionero dentro de la armadura de obsidiana, gritando en silencio, rezando todos los días para que su plan hubiera funcionado y que el 'Héroe de los Exiliados' irrumpiera por las puertas para acabar con su tormento.", "El último párrafo del diario estaba escrito a escasos minutos de tu asalto final a la Sala del Trono. La tinta estaba manchada y errática. 'Escucho los tambores de guerra. Es mi hermano. Lo ha conseguido. Dioses, ruego que su hoja sea firme y no vacile por amor. Ruego que me mate rápido antes de que la Cosa que habita en mí tome el control total'. Aric murió sabiendo que había salvado el mundo, sin esperar redención ni honor alguno.", "Cerraste el diario, temblando. Miraste la Corona de Obsidiana que ahora descansaba en tus sienes. El sacrificio de Aric fue monumental, pero la amenaza no había desaparecido. Al ponerte la corona, heredaste el sello. Las voces primigenias del Abismo comenzaron a susurrarte desde las sombras de la sala. El Rey está muerto, pero el parásito sigue hambriento, acechando bajo tus pies. Tu verdadero reinado no ha hecho más que empezar. La maldición de la corona ahora es tuya para soportarla."];
 
-        const QUEST_TYPES = [{ id: 'q_boss', desc: "Gremio de Cazadores: Extermina 1 Jefe", req: 1, type: 'boss' },{ id: 'q_boss3', desc: "Gremio de Élite: Purga 3 Jefes", req: 3, type: 'boss' },{ id: 'q_pot', desc: "Alquimista Loco: Destila 1 Poción", req: 1, type: 'pot' },{ id: 'q_race', desc: "Explorador: Haz 1 Entrenamiento", req: 1, type: 'race' },{ id: 'q_gacha', desc: "Mercader: Realiza 1 Invocación", req: 1, type: 'gacha' }];
+        const QUEST_TYPES = [{ id: 'q_boss', desc: "Gremio de Cazadores: Extermina 1 Jefe en Lucha", req: 1, type: 'boss' },{ id: 'q_boss3', desc: "Gremio de Élite: Purga 3 Jefes en Lucha", req: 3, type: 'boss' },{ id: 'q_pot', desc: "Alquimista Loco: Destila 1 Poción", req: 1, type: 'pot' },{ id: 'q_race', desc: "Explorador: Haz 1 Entrenamiento", req: 1, type: 'race' },{ id: 'q_gacha', desc: "Mercader: Realiza 1 Invocación", req: 1, type: 'gacha' }];
         const SHOP_POOL = [{ id:'s1', mat:'m1', qty:10, cost:5000, reqLvl: 1 }, { id:'s2', mat:'m10', qty:15, cost:8000, reqLvl: 1 }, { id:'s3', mat:'m11', qty:5, cost:3000, reqLvl: 1 }, { id:'s4', mat:'m4', qty:5, cost:15000, reqLvl: 2 }, { id:'s5', mat:'m5', qty:3, cost:20000, reqLvl: 2 }, { id:'s6', mat:'m24', qty:2, cost:30000, reqLvl: 3 }, { id:'s7', mat:'m31', qty:1, cost:80000, reqLvl: 5 }, { id:'s8', mat:'m8', qty:1, cost:60000, reqLvl: 4 }];
         const REQS = { 'home': 1, 'shop': 1, 'forge': 2, 'dungeon': 3, 'lab': 4, 'map': 1 };
 
@@ -300,6 +298,8 @@
         s.timeOffset = s.timeOffset || 0; s.lastManaHour = s.lastManaHour || Math.floor((Date.now() + s.timeOffset) / 3600000);
         s.objective = s.objective || "Objetivo: Menor tiempo posible";
         
+        s.tut = s.tut || { home: true, lab: true, dungeon: true, forge: true, shop: true, map: true };
+
         s.races = s.races || []; s.gymSessionsToday = s.gymSessionsToday || 0;
         s.activeSport = s.activeSport || null;
 
@@ -314,11 +314,40 @@
         s.currentTab = s.currentTab || 'home'; s.subTabs = s.subTabs || {};
         s.dailyShopIds = s.dailyShopIds || []; s.herreroItems = s.herreroItems || []; s.dailyTrades = s.dailyTrades || [];
         s.sideQuests = s.sideQuests || []; s.activeCrafts = s.activeCrafts || {}; s.labCraftsToday = s.labCraftsToday || 0;
-        
-        s.mapProgress = s.mapProgress || { z1: 0, z2: 0, z3: 0 };
 
         const MAX_MANA = () => 10 + (s.lvl * 2);
         let virtualTime = new Date(); let modalTimer = null; let modalCount = 0;
+
+        function getZP(zoneIndex) {
+            let totalLevels = s.prestige * 10 + (s.lvl - 1); 
+            let b = (zoneIndex - 1) * 40; 
+            let progress = ((totalLevels - b) / 40) * 100;
+            return Math.max(0, Math.min(100, Math.floor(progress)));
+        }
+
+        function showLockMsg(reqP) {
+            sfx.error();
+            showModal("🔒 BLOQUEADO", `Requiere Prestigio ${reqP}.<br><br><span style="color:var(--gold); font-size:10px;">¿Cómo ganar Prestigio?</span><br><span style="font-size:9px; color:#aaa;">Sube de nivel combinando entrenamientos, lucha y pociones hasta alcanzar el Tier S (Nivel 10). Luego, usa la opción 'Ascensión' en la Tienda.</span>`, "var(--sys-red)");
+        }
+
+        function renderTutorial(tab) {
+            if(!s.tut[tab]) return "";
+            let data = {
+                'home': ['Campamento & Entrenamiento', 'Registra tus sesiones en el Gimnasio para ganar EXP y Oro. Mide tu rendimiento con precisión y avanza en la Historia.'],
+                'lab': ['Laboratorio', 'Destila pociones usando los materiales que encuentres. Las pociones te darán multiplicadores de EXP, Oro o restaurarán tu Maná.'],
+                'dungeon': ['Lucha', 'Gasta Maná para enfrentarte a Jefes cada vez más poderosos. Si no tienes Maná, puedes hacer una Exploración usando tus misiones Diarias.'],
+                'forge': ['Forja', 'Equípate armas y armaduras para ganar estadísticas. A mayor nivel de Prestigio, más herreros y forjas malditas descubrirás.'],
+                'shop': ['Tienda y Ascensión', 'Compra materiales, prueba suerte en el Gacha y, cuando llegues a Nivel 10 (Tier S), utiliza el botón de Ascensión para ganar Prestigio.'],
+                'map': ['Mapa del Reino', 'Explora las zonas de Aethelgard. Cada 4 niveles de Prestigio conquistarás el 100% de una zona y desbloquearás la siguiente.']
+            };
+            if(!data[tab]) return "";
+            return `
+            <div class="glass-panel p-3 mb-4 border-[var(--sys-blue)]/50 relative bg-[var(--sys-blue)]/10">
+                <button onclick="sfx.click(); s.tut['${tab}']=false; save(); render();" class="absolute top-2 right-3 text-[var(--sys-blue)] font-bold text-sm">✕</button>
+                <h4 class="text-[10px] font-sys text-[var(--sys-blue)] font-bold mb-1">TUTORIAL: ${data[tab][0]}</h4>
+                <p class="text-[9px] text-gray-300 leading-relaxed pr-4">${data[tab][1]}</p>
+            </div>`;
+        }
 
         function getTotalPotions() {
             let total = 0;
@@ -558,7 +587,7 @@
         function tryPrestige() {
             sfx.click();
             if(s.lvl < 10) { sfx.error(); return toast('Requiere Tier S', 'var(--sys-red)'); }
-            let msg = "¿Ascender a Prestigio?\n\nBENEFICIOS:\n- Desbloquearás nuevas zonas, historia y destilaciones.\n- Multiplicador base x"+(s.prestige+2)+"\n\nPÉRDIDAS:\n- Pierdes TODO el Oro, Diamantes, EXP, Nivel, Armas, Armaduras y Materiales.\n- Cuesta el DOBLE de exp escalar a Tiers altos.\n\n¿Estás seguro?";
+            let msg = "¿Ascender a Prestigio?\n\nBENEFICIOS:\n- Desbloquearás nuevas zonas, historia y destilaciones (Pueblo, Herrero, Rey...).\n- Multiplicador base x"+(s.prestige+2)+"\n\nPÉRDIDAS:\n- Pierdes TODO el Oro, Diamantes, EXP, Nivel, Armas, Armaduras y Materiales.\n- Cuesta el DOBLE de exp escalar a Tiers altos.\n\n¿Estás seguro?";
             if(confirm(msg)) {
                 s.prestige++; s.lvl=1; s.exp=0; s.gold=0; s.diamonds=0; s.weapons=[ALL_WEAPONS[0]]; s.armors=[]; s.activeWeps=['w_sys_1',null]; s.activeArmors={head:null,chest:null,legs:null,acc:null}; s.storyClaimed.fill(false); s.storyClaimed2.fill(false); s.potionInv={}; ALL_MATS.forEach(m => s.mats[m[0]] = 0); s.activeCrafts={};
                 sfx.gachaLegendary(); save(); render(); showModal('🌌 ASCENSIÓN', `Has renacido en Prestigio ${s.prestige}`, 'var(--sys-purple)');
@@ -590,8 +619,12 @@
             Object.keys(REQS).forEach(id => {
                 const btn = document.getElementById(`nav-${id}`);
                 if(btn) {
-                    if(id === 'map') { if(s.prestige >= 1) btn.classList.remove('opacity-40'); else btn.classList.add('opacity-40'); }
-                    else { if(s.lvl >= REQS[id] || s.prestige > 0) btn.classList.remove('opacity-40'); else btn.classList.add('opacity-40'); }
+                    let locked = false;
+                    if(id === 'map') locked = (s.prestige < 1);
+                    else locked = (s.lvl < REQS[id] && s.prestige === 0);
+                    
+                    if(locked) btn.classList.add('opacity-40');
+                    else btn.classList.remove('opacity-40');
                 }
             });
         }
@@ -611,17 +644,19 @@
         }
         function closeModal() { clearInterval(modalTimer); const m = document.getElementById('modal'); if(m) { m.classList.add('hidden'); m.style.display = ''; } }
 
-        function generateLineChart() {
-            if(!s.races || s.races.length < 2) return `<div class="text-[10px] text-center opacity-50 py-10 uppercase tracking-widest text-[var(--sys-blue)] border border-dashed border-[var(--sys-blue)]/30 rounded-xl mt-4">Aparece a partir de 2 entrenamientos</div>`;
-            let max = Math.max(...s.races.map(r => r.val)); let min = Math.min(...s.races.map(r => r.val)); let range = (max - min) || 1;
+        function generateLineChart(sportFilter = null) {
+            let filtered = sportFilter ? s.races.filter(r => r.sp === sportFilter) : s.races;
+            if(!filtered || filtered.length < 2) return `<div class="text-[10px] text-center opacity-50 py-10 uppercase tracking-widest text-[var(--sys-blue)] border border-dashed border-[var(--sys-blue)]/30 rounded-xl mt-4">Aparece a partir de 2 entrenamientos</div>`;
+            
+            let max = Math.max(...filtered.map(r => r.val)); let min = Math.min(...filtered.map(r => r.val)); let range = (max - min) || 1;
             let w = 100; let h = 60; 
-            let points = s.races.map((r, i) => { let x = (i / (s.races.length - 1)) * w; let y = h - ((r.val - min) / range * (h-10) + 5); return `${x},${y}`; }).join(' ');
-            let sDate = new Date(s.races[0].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
-            let eDate = new Date(s.races[s.races.length-1].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
+            let points = filtered.map((r, i) => { let x = (i / (filtered.length - 1)) * w; let y = h - ((r.val - min) / range * (h-10) + 5); return `${x},${y}`; }).join(' ');
+            let sDate = new Date(filtered[0].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
+            let eDate = new Date(filtered[filtered.length-1].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
 
             return `
             <div class="relative w-full h-[120px] flex items-end mt-6 mb-6 border-l border-b border-[var(--sys-blue)]/50 pb-4 pl-8">
-                <div class="absolute left-0 top-0 bottom-4 flex flex-col justify-between text-[8px] text-[var(--sys-blue)] font-sys"><span>${Math.ceil(max/60)}m</span><span>${Math.floor(min/60)}m</span></div>
+                <div class="absolute left-0 top-0 bottom-4 flex flex-col justify-between text-[8px] text-[var(--sys-blue)] font-sys"><span>${Math.ceil(max/60)}</span><span>${Math.floor(min/60)}</span></div>
                 <svg viewBox="0 0 ${w} ${h}" class="chart-svg" preserveAspectRatio="none"><polyline points="${points}"/></svg>
                 <div class="absolute bottom-[-16px] left-8 right-0 flex justify-between text-[8px] text-[var(--sys-blue)] font-sys"><span>${sDate}</span><span>${eDate}</span></div>
             </div>`;
@@ -797,8 +832,17 @@
         function closeGacha() { let m = document.getElementById('gacha-modal'); m.classList.add('hidden'); m.style.display = ''; render(); }
 
         function nav(tab) {
-            if(tab === 'map') { if(s.prestige < 1) { sfx.error(); return toast(`Requiere Prestigio 1`, 'var(--sys-red)'); } }
-            else if(s.lvl < REQS[tab] && s.prestige === 0) { sfx.error(); return toast(`Requiere Tier ${TIERS[REQS[tab]]}`, 'var(--sys-red)'); }
+            let req = tab === 'map' ? 1 : REQS[tab];
+            let isLocked = false;
+            
+            if(tab === 'map') isLocked = (s.prestige < 1);
+            else isLocked = (s.lvl < req && s.prestige === 0);
+
+            if(isLocked) {
+                if(tab === 'map') showLockMsg("1");
+                else showLockMsg(`0 y Tier ${TIERS[req]}`);
+                return;
+            }
             sfx.click(); s.currentTab = tab; save(); render(); 
         }
         function setSubTab(st) { sfx.click(); s.subTabs[s.currentTab] = st; save(); render(); }
@@ -812,18 +856,20 @@
             let activeNav = document.getElementById(`nav-${t}`);
             if(activeNav) { let sp = activeNav.querySelector('span:last-child'); if(sp) sp.classList.add('text-[var(--sys-blue)]'); }
 
+            h += renderTutorial(t);
+
             if(t === 'home') {
                 const st = s.subTabs[t] || 'main';
                 h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
                     <button onclick="setSubTab('main')" class="px-4 py-2 rounded-lg text-[9px] sm:text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Gimnasio</button>
-                    ${s.prestige>=2 ? `<button onclick="setSubTab('pueblo')" class="px-4 py-2 rounded-lg text-[9px] sm:text-[10px] uppercase font-bold ${st==='pueblo'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Pueblo</button>` : `<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P2</button>`}
+                    <button onclick="${s.prestige>=2 ? `setSubTab('pueblo')` : `showLockMsg('2')`}" class="px-4 py-2 rounded-lg text-[9px] sm:text-[10px] uppercase font-bold ${st==='pueblo'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">${s.prestige>=2?'Pueblo':'🔒 P2'}</button>
                     <button onclick="setSubTab('story')" class="px-4 py-2 rounded-lg text-[9px] sm:text-[10px] uppercase font-bold ${st==='story'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Historia</button>
                 </div>`;
 
                 if(st === 'main') {
                     h += `<div class="glass-panel p-5 mb-4 border-[var(--sys-blue)]/30">
                             <div class="flex justify-between items-center mb-4 border-b border-gray-800 pb-2">
-                                <span class="text-[12px] text-[var(--sys-blue)] font-bold uppercase tracking-widest">Alto Rendimiento</span>
+                                <span class="text-[12px] text-[var(--sys-blue)] font-bold uppercase tracking-widest">${s.activeSport ? 'Entrenamiento' : 'Alto Rendimiento'}</span>
                                 <span class="text-[10px] text-[var(--sys-red)] font-bold">${s.gymSessionsToday}/4 Sesiones</span>
                             </div>`;
                             
@@ -837,6 +883,7 @@
                                 </div>`;
                             }
                             h += `</div>`;
+                            h += generateLineChart();
                         } else {
                             let spData = SPORTS[s.activeSport];
                             h += `<div class="bg-black/30 p-4 rounded-xl mb-4 border border-[var(--sys-blue)]/30 text-center">
@@ -849,52 +896,16 @@
                             });
                             
                             h += `</div>
-                                <div class="flex gap-2">
+                                <div class="flex gap-2 mb-4">
                                     <button onclick="s.activeSport=null; render();" class="w-1/3 py-2 rounded-xl text-[9px] font-bold uppercase border border-gray-600 text-gray-400">Volver</button>
                                     <button onclick="submitWorkout()" class="w-2/3 btn-aaa py-2 rounded-xl text-[10px] font-bold uppercase">Entrenar</button>
                                 </div>
+                                ${generateLineChart(s.activeSport)}
                             </div>`;
                         }
                     } else {
                         h += `<div class="w-full py-4 bg-[var(--sys-red)]/10 border border-[var(--sys-red)]/30 text-[var(--sys-red)] text-center rounded-xl text-[10px] font-bold uppercase tracking-widest mb-4">Músculos Agotados (Vuelve Mañana)</div>`;
-                    }
-                            
-                    h += `<div class="max-h-[120px] overflow-y-auto pr-2 space-y-1 border-t border-[var(--border-glass)] pt-2">`;
-                    if(!s.races || s.races.length === 0) { h += `<p class="text-[9px] opacity-50 text-center py-4">Sin registros de entrenamiento.</p>`; }
-                    else {
-                        s.races.slice().reverse().forEach(r => {
-                            let spInfo = SPORTS[r.sp] || SPORTS['Correr'];
-                            h += `<div class="flex justify-between items-center text-[10px] py-2 border-b border-[var(--border-glass)] text-gray-300">
-                                <span class="flex items-center gap-2"><span class="text-sm">${spInfo.ic}</span> ${new Date(r.date).toLocaleDateString()}</span>
-                                <span class="text-[var(--sys-blue)] font-bold">${r.desc}</span>
-                            </div>`;
-                        });
-                    }
-                    h += `</div></div>`;
-
-                    let allDone = s.dailies.length > 0 && s.dailies.every(d => d.done);
-                    h += `<div class="glass-panel p-5 mb-4">
-                        <h2 class="text-[10px] font-sys text-[var(--sys-purple)] mb-3 uppercase tracking-widest flex justify-between">
-                            <span>Misiones Diarias</span> <span class="text-[var(--sys-red)]">${s.dailies.filter(d=>d.done).length}/${s.dailies.length}</span>
-                        </h2>`;
-                    
-                    if(s.dailySacrificed) {
-                        h += `<div class="w-full py-4 rounded-xl border border-[var(--sys-red)]/50 bg-[var(--sys-red)]/20 text-[var(--sys-red)] text-center text-xs font-bold uppercase tracking-widest">SACRIFICADO AL ABISMO</div>`;
-                    } else {
-                        s.dailies.forEach((d, i) => {
-                            let color = d.done ? 'text-[var(--sys-blue)] border-[var(--sys-blue)]/50' : 'text-gray-300 border-[var(--border-glass)]';
-                            h += `<div class="flex gap-2 items-center mb-2 bg-black/30 p-2 rounded-lg border ${color}">
-                                <input type="text" value="${d.name}" onchange="s.dailies[${i}].name=this.value; save();" class="w-full bg-transparent outline-none text-xs ${d.done?'opacity-50 line-through text-[var(--sys-blue)]':'text-gray-300'}" ${d.done?'disabled':''}>
-                                ${!d.done ? `<button onclick="if(s.dailiesCompletedToday < 3){ sfx.success(); s.dailiesCompletedToday++; gain('exp', 100); gain('gold',2000); gain('dia',50); toast('Misión Completada'); } else { sfx.error(); toast('Límite: 3/Día', 'var(--sys-red)'); } s.dailies[${i}].done=true; save(); render();" class="text-[var(--sys-blue)] text-xs px-2 py-1 bg-[var(--sys-blue)]/10 rounded border border-[var(--sys-blue)]/50">✔️</button>` : ''}
-                                <button onclick="sfx.click(); if(s.dailies[${i}].done) { toast('Solo al reinicio', 'var(--sys-red)'); } else { s.dailies.splice(${i},1); save(); render(); }" class="text-[var(--sys-red)] text-xs px-2 py-1 bg-[var(--sys-red)]/10 rounded border border-[var(--sys-red)]/50">❌</button>
-                            </div>`;
-                        });
-                        
-                        let btns = `<div class="flex gap-2 mt-3">`;
-                        if(s.dailies.length < 3) btns += `<button onclick="sfx.click(); s.dailies.push({name:'Nueva Misión', done:false}); save(); render();" class="flex-1 py-2 border border-[var(--border-glass)] rounded bg-black/30 text-xs font-bold text-gray-400 hover:bg-white/5">+</button>`;
-                        if(allDone) btns += `<div class="flex-1 py-2 border border-[var(--sys-blue)] bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] text-center text-[10px] font-bold uppercase tracking-widest rounded flex items-center justify-center">COMPLETADAS</div>`;
-                        btns += `</div>`;
-                        h += btns;
+                        h += generateLineChart(s.activeSport);
                     }
                     h += `</div>`;
                 } else if(st === 'pueblo') {
@@ -941,7 +952,7 @@
                 } else if(st === 'story') {
                     h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
                         <button onclick="s.subTabs.storySub='1'; render();" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${(!s.subTabs.storySub||s.subTabs.storySub==='1')?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Tomo I</button>
-                        ${s.prestige>=2 ? `<button onclick="s.subTabs.storySub='2'; render();" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${s.subTabs.storySub==='2'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Tomo II</button>` : `<button class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold opacity-30">🔒 P2</button>`}
+                        <button onclick="${s.prestige>=2 ? `s.subTabs.storySub='2'; render();` : `showLockMsg('2')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${s.subTabs.storySub==='2'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">${s.prestige>=2?'Tomo II':'🔒 P2'}</button>
                     </div>`;
 
                     let sub = s.subTabs.storySub || '1';
@@ -965,35 +976,37 @@
                 }
             }
             else if(t === 'map') {
-                let pBosque = s.mapProgress.z1;
-                let pCuevas = s.mapProgress.z2;
-                let pCima = s.mapProgress.z3;
+                let p1 = getZP(1);
+                let p2 = getZP(2);
+                let p3 = getZP(3);
+                let p4 = getZP(4);
+                let globalProg = ((p1+p2+p3+p4) / 400 * 100).toFixed(1);
 
-                let bBosqueLocked = s.prestige < 4;
-                let bCuevasLocked = pBosque < 100;
-                let bCimaLocked = pCuevas < 100;
+                let z2Locked = p1 < 100;
+                let z3Locked = p2 < 100;
+                let z4Locked = p3 < 100;
 
                 h += `<div class="glass-panel p-6 text-center mb-4">
                     <h2 class="font-sys text-xl text-[var(--gold)] mb-2 uppercase tracking-widest">Reino de Aethelgard</h2>
-                    <p class="text-[10px] text-[var(--dia)] mb-4 font-bold">(Lugar Actual)</p>
+                    <p class="text-[10px] text-gray-400 mb-4">Progreso del Reino: <span class="text-[var(--dia)] font-bold">${globalProg}%</span></p>
                     <div class="grid grid-cols-2 gap-4">
                         <button class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/50 bg-[var(--sys-blue)]/10 flex flex-col items-center">
-                            <span>Pueblo Inicios</span><span class="text-white mt-2">100%</span>
+                            <span>Pueblo Inicios</span><span class="text-white mt-2">${p1}%</span>
                         </button>`;
                         
-                h += `<button onclick="${bBosqueLocked ? `toast('Requiere Prestigio 4', 'var(--sys-red)')` : `s.mapProgress.z1=Math.min(100, s.mapProgress.z1+10); save(); render();`}" class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/30 flex flex-col items-center ${bBosqueLocked?'opacity-50 grayscale':''}">
-                            <span>${bBosqueLocked?'🔒 Zona 1':'Bosque Novatos'}</span>
-                            <span class="text-white mt-2">${bBosqueLocked?'Req: P4':pBosque+'%'}</span>
+                h += `<button onclick="${z2Locked ? `showLockMsg(4)` : ``}" class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/${z2Locked?'30':'50'} flex flex-col items-center ${z2Locked?'opacity-50 grayscale':''}">
+                            <span>${z2Locked?'🔒 Zona 2':'Bosque Novatos'}</span>
+                            <span class="text-white mt-2">${z2Locked?'Req: P4':p2+'%'}</span>
                       </button>`;
                 
-                h += `<button onclick="${bCuevasLocked ? `toast('Requiere Bosque 100%', 'var(--sys-red)')` : `s.mapProgress.z2=Math.min(100, s.mapProgress.z2+10); save(); render();`}" class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/30 flex flex-col items-center ${bCuevasLocked?'opacity-50 grayscale':''}">
-                            <span>${bCuevasLocked?'🔒 Zona 2':'Cuevas Cristal'}</span>
-                            <span class="text-white mt-2">${bCuevasLocked?'Req: Bosque 100%':pCuevas+'%'}</span>
+                h += `<button onclick="${z3Locked ? `showLockMsg(8)` : ``}" class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/${z3Locked?'30':'50'} flex flex-col items-center ${z3Locked?'opacity-50 grayscale':''}">
+                            <span>${z3Locked?'🔒 Zona 3':'Cuevas Cristal'}</span>
+                            <span class="text-white mt-2">${z3Locked?'Req: P8':p3+'%'}</span>
                       </button>`;
 
-                h += `<button onclick="${bCimaLocked ? `toast('Requiere Cuevas 100%', 'var(--sys-red)')` : `s.mapProgress.z3=Math.min(100, s.mapProgress.z3+10); save(); render();`}" class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/30 flex flex-col items-center ${bCimaLocked?'opacity-50 grayscale':''}">
-                            <span>${bCimaLocked?'🔒 Zona 3':'Cima del Eco'}</span>
-                            <span class="text-white mt-2">${bCimaLocked?'Req: Cuevas 100%':pCima+'%'}</span>
+                h += `<button onclick="${z4Locked ? `showLockMsg(12)` : ``}" class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/${z4Locked?'30':'50'} flex flex-col items-center ${z4Locked?'opacity-50 grayscale':''}">
+                            <span>${z4Locked?'🔒 Zona 4':'Cima del Eco'}</span>
+                            <span class="text-white mt-2">${z4Locked?'Req: P12':p4+'%'}</span>
                       </button>`;
 
                 h += `</div></div>`;
@@ -1021,9 +1034,9 @@
                 h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
                     <button onclick="setSubTab('inv')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='inv'?'bg-white/10 text-white':'opacity-50'}">Inventario</button>
                     <button onclick="setSubTab('main')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='main'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Base</button>
-                    ${s.prestige>=1?`<button onclick="setSubTab('mana')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='mana'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Maná</button>`:`<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P1</button>`}
-                    ${s.prestige>=2?`<button onclick="setSubTab('exo')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='exo'?'bg-[var(--exotic)]/20 text-[var(--exotic)]':'opacity-50'}">Exótica</button>`:`<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P2</button>`}
-                    ${s.prestige>=3?`<button onclick="setSubTab('div')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='div'?'bg-[var(--divine)]/20 text-[var(--divine)]':'opacity-50'}">Divina</button>`:`<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P3</button>`}
+                    <button onclick="${s.prestige>=1?`setSubTab('mana')`:`showLockMsg('1')`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='mana'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">${s.prestige>=1?'Maná':'🔒 P1'}</button>
+                    <button onclick="${s.prestige>=2?`setSubTab('exo')`:`showLockMsg('2')`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='exo'?'bg-[var(--exotic)]/20 text-[var(--exotic)]':'opacity-50'}">${s.prestige>=2?'Exótica':'🔒 P2'}</button>
+                    <button onclick="${s.prestige>=3?`setSubTab('div')`:`showLockMsg('3')`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='div'?'bg-[var(--divine)]/20 text-[var(--divine)]':'opacity-50'}">${s.prestige>=3?'Divina':'🔒 P3'}</button>
                     <button onclick="setSubTab('sec')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='sec'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Oscura</button>
                 </div>`;
                 
@@ -1154,10 +1167,10 @@
             else if(t === 'dungeon') {
                 const st = s.subTabs[t] || 'd1';
                 h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
-                    <button onclick="setSubTab('d1')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d1'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Mazmorra</button>
-                    ${s.prestige >= 1 ? `<button onclick="setSubTab('d2')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d2'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Maldita</button>` : `<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P1</button>`}
-                    ${s.prestige >= 1 ? `<button onclick="setSubTab('d3')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d3'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Abismo</button>` : `<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P1</button>`}
-                    ${s.prestige >= 3 ? `<button onclick="setSubTab('d4')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d4'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">El Rey</button>` : `<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30 hidden">🔒 P3</button>`}
+                    <button onclick="setSubTab('d1')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d1'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Lucha</button>
+                    <button onclick="${s.prestige >= 1 ? `setSubTab('d2')` : `showLockMsg('1')`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d2'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">${s.prestige >= 1 ? 'Maldita' : '🔒 P1'}</button>
+                    <button onclick="${s.prestige >= 1 ? `setSubTab('d3')` : `showLockMsg('1')`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d3'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">${s.prestige >= 1 ? 'Abismo' : '🔒 P1'}</button>
+                    <button onclick="${s.prestige >= 3 ? `setSubTab('d4')` : `showLockMsg('3')`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d4'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">${s.prestige >= 3 ? 'El Rey' : '🔒 P3'}</button>
                 </div>`;
 
                 let cfg = { id:'b1', arr: BOSSES_T1, mCost: 2, tLvl: 1, col: 'var(--sys-blue)', drops: "Acero, Cobre, Hierro, Madera...", matRange: [0, 11] };
@@ -1177,7 +1190,7 @@
                             <div class="progress-bar h-full bg-red-600 shadow-[0_0_10px_red]" style="width: ${p}%"></div>
                             <div class="absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase text-white drop-shadow-md">HP: ${b.hp} / ${b.maxHp}</div>
                         </div>
-                        <button onclick="attackBoss('${cfg.id}', ${cfg.mCost}, [${cfg.arr.map(x=>`'${x}'`).join(',')}], [${cfg.matRange.join(',')}])" class="w-full py-4 rounded-xl border border-[${cfg.col}]/50 bg-[${cfg.col}]/10 text-[${cfg.col}] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(0,0,0,0.5)]">⚔️ ATACAR (${finalCost.toFixed(1)} Maná)</button>
+                        <button onclick="attackBoss('${cfg.id}', ${cfg.mCost}, [${cfg.arr.map(x=>`'${x}'`).join(',')}], [${cfg.matRange.join(',')}])" class="w-full py-4 rounded-xl border border-[${cfg.col}]/50 bg-[${cfg.col}]/10 text-[${cfg.col}] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(0,0,0,0.5)]">⚔️ LUCHAR (${finalCost.toFixed(1)} Maná)</button>
                     </div>
                     <hr class="border-gray-800 mb-6">
                     <div>
@@ -1192,8 +1205,8 @@
                 h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
                     <button onclick="setSubTab('wep')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='wep'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Armas</button>
                     <button onclick="setSubTab('arm')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='arm'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Armaduras</button>
-                    ${s.prestige>=2?`<button onclick="setSubTab('herr')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='herr'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Herrero</button>`:`<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P2</button>`}
-                    ${s.prestige>=3?`<button onclick="setSubTab('mald')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='mald'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Forja Maldita</button>`:`<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P3</button>`}
+                    <button onclick="${s.prestige>=2?`setSubTab('herr')`:`showLockMsg('2')`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='herr'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">${s.prestige>=2?'Herrero':'🔒 P2'}</button>
+                    <button onclick="${s.prestige>=3?`setSubTab('mald')`:`showLockMsg('3')`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='mald'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">${s.prestige>=3?'Forja Maldita':'🔒 P3'}</button>
                 </div>`;
                 
                 if(st === 'wep') {
@@ -1209,170 +1222,4 @@
                     h += `<div class="glass-panel p-4 max-h-[50vh] overflow-y-auto pr-2"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-3 border-b border-gray-800 pb-2">Inventario de Armas</p>`;
                     s.weapons.forEach((w) => {
                         let isW1 = s.activeWeps[0] === w.id; let isW2 = s.activeWeps[1] === w.id; let active = isW1 || isW2;
-                        h += `<div class="bg-black/60 border ${active?'border-[var(--sys-blue)] shadow-[0_0_8px_var(--sys-blue)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-3">
-                            <div class="flex justify-between items-center mb-2">
-                                <p class="text-xs font-bold ${active?'text-[var(--sys-blue)]':'text-gray-300'}">⚔️ ${w.name}</p>
-                                <div class="flex gap-1">
-                                    <button onclick="sfx.click(); s.activeWeps[0]='${w.id}'; if(s.activeWeps[1]==='${w.id}') s.activeWeps[1]=null; save(); render();" class="text-[8px] font-bold border px-2 py-1 rounded ${isW1?'bg-[var(--sys-blue)] text-black border-[var(--sys-blue)]':'border-gray-600 text-gray-400'}">SLOT 1</button>
-                                    <button onclick="sfx.click(); s.activeWeps[1]='${w.id}'; if(s.activeWeps[0]==='${w.id}') s.activeWeps[0]=null; save(); render();" class="text-[8px] font-bold border px-2 py-1 rounded ${isW2?'bg-[var(--sys-blue)] text-black border-[var(--sys-blue)]':'border-gray-600 text-gray-400'}">SLOT 2</button>
-                                </div>
-                            </div>
-                            <p class="text-[9px] text-gray-400 uppercase tracking-widest">ATK: <span class="text-white">${w.atk}</span> | Tier ${TIERS[w.reqTier]}</p>
-                        </div>`;
-                    });
-                    h += `</div>`;
-                } else if(st === 'arm') {
-                    let slots = [ {id:'head', n:'Casco', v:s.activeArmors.head, i:'🛡️'}, {id:'chest', n:'Peto', v:s.activeArmors.chest, i:'👕'}, {id:'legs', n:'Grebas', v:s.activeArmors.legs, i:'👖'}, {id:'acc', n:'Amuleto', v:s.activeArmors.acc, i:'🧿'} ];
-                    let eq = getEquipStats();
-                    
-                    h += `<div class="glass-panel p-4 mb-4 border-[var(--gold)]/30">
-                        <div class="flex justify-between items-center border-b border-[var(--gold)]/30 pb-2 mb-2">
-                            <span class="text-[10px] text-[var(--gold)] font-bold uppercase tracking-widest">Equipado</span>
-                            <div class="flex gap-2 items-center">
-                                <span class="text-[9px] text-[var(--gold)]">Desc. Maná: <span class="text-white">${eq.manaDiscount}%</span></span>
-                                <button onclick="autoEquipArm()" class="text-[8px] bg-[var(--gold)]/20 text-[var(--gold)] px-2 py-1 rounded font-bold uppercase">Auto-Equipar</button>
-                            </div>
-                        </div>
-                    <div class="grid grid-cols-2 gap-2 text-[9px] text-gray-300 text-center">`;
-                    slots.forEach(sl => { let item = s.armors.find(x=>x.id===sl.v); h+=`<div class="bg-black/50 p-2 border border-gray-800 rounded"> <span class="block text-gray-500 mb-1">${sl.i} ${sl.n}</span> <span class="truncate font-bold">${item?item.name:'Vacío'}</span></div>`; });
-                    h += `</div>`;
-                    
-                    let setsActivos = Object.entries(eq.setCounts).filter(([_,c])=>c>0).map(([n,c])=>`<span class="${c===4?'text-[var(--gold)] font-bold':'text-gray-400'}">${n} ${c}/4 ${c===4?'(Bono x2)':''}</span>`).join(' | ');
-                    if(setsActivos) h += `<div class="mt-3 text-[9px] uppercase tracking-widest text-center bg-black/30 py-2 border border-[var(--gold)]/20 rounded">${setsActivos}</div>`;
-                    h += `</div>`;
-
-                    h += `<div class="glass-panel p-4 max-h-[40vh] overflow-y-auto pr-2"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-3 border-b border-gray-800 pb-2">Inventario de Armaduras</p>`;
-                    s.armors.forEach((a) => {
-                        let act = s.activeArmors[a.slot] === a.id;
-                        h += `<div class="bg-black/60 border ${act?'border-[var(--gold)] shadow-[0_0_8px_var(--gold)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-3">
-                            <div class="flex justify-between items-center mb-2">
-                                <p class="text-xs font-bold ${act?'text-[var(--gold)]':'text-gray-300'}">${a.ic||'🛡️'} ${a.name}</p>
-                                <button onclick="sfx.click(); s.activeArmors['${a.slot}']='${a.id}'; save(); render();" class="text-[9px] font-bold border px-3 py-1 rounded ${act?'bg-[var(--gold)] text-black border-[var(--gold)]':'border-gray-600 text-gray-400'} uppercase tracking-widest">${act?'Equipado':'Equipar'}</button>
-                            </div>
-                            <p class="text-[9px] text-gray-400 uppercase tracking-widest">Desc. Maná: <span class="text-[var(--sys-blue)]">${a.manaDiscount}%</span> | Tier ${TIERS[a.reqTier]}</p>
-                        </div>`;
-                    });
-                    if(s.armors.length===0) h += `<p class="text-[10px] opacity-50 text-center py-6 border border-dashed border-gray-700 rounded-xl mt-2">Invoca armaduras en la tienda.</p>`;
-                    h += `</div>`;
-                } else if(st === 'herr') {
-                    h += `<div class="glass-panel p-4 mb-4 border-[var(--sys-purple)]/30">
-                        <div class="flex justify-between items-center border-b border-[var(--sys-purple)]/30 pb-2 mb-3">
-                            <h2 class="text-[10px] uppercase font-sys text-[var(--sys-purple)]">Armamento Premium</h2>
-                            <div class="flex items-center gap-2">
-                                <button onclick="sfx.click(); if(s.diamonds>=50){s.diamonds-=50; rollHerrero(); save(); render(); toast('Herrero Renovado', 'var(--dia)');}else { sfx.error(); toast('Faltan 50💎','var(--sys-red)'); }" class="bg-[var(--dia)]/20 text-[var(--dia)] border border-[var(--dia)]/50 px-2 py-1 rounded text-[8px] font-bold uppercase tracking-widest">Reroll (50💎)</button>
-                                <span class="text-[8px] text-[var(--sys-red)] font-bold tracking-widest" id="herrero-countdown">--:--:--</span>
-                            </div>
-                        </div>
-                        <div class="space-y-2 max-h-[400px] overflow-y-auto pr-1">`;
-                    s.herreroItems.forEach((hi, idx) => {
-                        let w = hi.w; let tCol = getTierColor(w.reqTier);
-                        let finalPrice = hi.basePrice; let discBadge = "";
-                        if(hi.disc && hi.disc.p > 0) {
-                            finalPrice = Math.floor(hi.basePrice * (1 - (hi.disc.p/100)));
-                            discBadge = `<span class="bg-[var(--sys-red)] text-white px-1 py-[2px] rounded text-[7px] ml-2 animate-pulse">-${hi.disc.p}% (Tier ${hi.disc.t})</span>`;
-                        }
-                        h += `<div class="flex flex-col text-[10px] bg-black/40 p-3 rounded border border-gray-800">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="font-bold flex items-center" style="color:${tCol}">⚔️ ${w.name} ${discBadge}</span>
-                                <span class="text-[8px] text-gray-500">Tier ${TIERS[w.reqTier]}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-[9px] text-gray-400">ATK: <span class="text-white">${w.atk}</span></span>
-                                <button onclick="sfx.click(); if(s.gold>=${finalPrice}){ s.gold-=${finalPrice}; s.weapons.push(Object.assign({}, ${JSON.stringify(w).replace(/"/g, "'")}, {id:'w_herr_'+Date.now()+'_${idx}'})); s.herreroItems.splice(${idx},1); save(); render(); toast('Arma Comprada', 'var(--gold)'); sfx.gachaWin(); } else { sfx.error(); toast('Oro Insuficiente', 'var(--sys-red)'); }" class="text-[var(--gold)] font-bold border border-[var(--gold)]/50 px-3 py-1 rounded bg-[var(--gold)]/10 font-sys">${finalPrice}G</button>
-                            </div>
-                        </div>`;
-                    });
-                    if(s.herreroItems.length===0) h += `<p class="text-[10px] opacity-50 text-center py-4">Todo comprado.</p>`;
-                    h += `</div></div>`;
-                } else if(st === 'mald') {
-                    h += `<div class="glass-panel p-6 text-center border-[var(--sys-red)]/30 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-red-900/10 blur-xl"></div>
-                        <span class="text-4xl block mb-4 relative z-10 animate-bounce">🔥</span>
-                        <h3 class="font-sys text-[var(--sys-red)] text-lg font-bold uppercase tracking-widest mb-2 relative z-10">FORJA MALDITA</h3>
-                        <p class="text-[9px] text-[var(--sys-red)] opacity-80 mb-6 border-b border-[var(--sys-red)]/30 pb-4 leading-relaxed relative z-10">Garantizado Tier D o Superior.<br>Tier D(40%) | Tier C(30%) | Tier B(15%)<br>Tier A(10%) | <span class="text-[var(--gold)] font-bold">Tier S(5%)</span></p>
-                        <div class="flex gap-2 mb-2 relative z-10">
-                            <button onclick="pullGacha('W', 1, true)" class="w-1/2 py-4 rounded-xl border border-[var(--sys-red)]/50 bg-[var(--sys-red)]/10 text-[var(--sys-red)] font-bold uppercase tracking-widest text-[9px] shadow-[0_0_10px_var(--sys-red)]">ARMA<br>(800 💎)</button>
-                            <button onclick="pullGacha('A', 1, true)" class="w-1/2 py-4 rounded-xl border border-[var(--sys-red)]/50 bg-[var(--sys-red)]/10 text-[var(--sys-red)] font-bold uppercase tracking-widest text-[9px] shadow-[0_0_10px_var(--sys-red)]">ARMADURA<br>(800 💎)</button>
-                        </div>
-                    </div>`;
-                }
-            }
-            else if(t === 'shop') {
-                const st = s.subTabs[t] || 'base';
-                h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
-                    <button onclick="setSubTab('base')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='base'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Tienda</button>
-                    <button onclick="setSubTab('gacW')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='gacW'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Gacha Arma</button>
-                    <button onclick="setSubTab('gacA')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='gacA'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Gacha Armor</button>
-                    <button onclick="setSubTab('admin')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='admin'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Hacker</button>
-                </div>`;
-
-                if(st === 'base') {
-                    h += `<div class="glass-panel p-4 mb-4 border-[var(--gold)]/30">
-                        <div class="flex justify-between items-center border-b border-[var(--gold)]/30 pb-2 mb-3">
-                            <h2 class="text-[10px] uppercase font-sys text-[var(--gold)]">Ofertas</h2>
-                            <div class="flex items-center gap-2">
-                                <button onclick="sfx.click(); if(s.diamonds>=50){s.diamonds-=50; rollShop(); save(); render(); toast('Tienda Renovada', 'var(--dia)');}else { sfx.error(); toast('Faltan 50💎','var(--sys-red)'); }" class="bg-[var(--dia)]/20 text-[var(--dia)] border border-[var(--dia)]/50 px-2 py-1 rounded text-[8px] font-bold uppercase tracking-widest">Reroll (50💎)</button>
-                                <span class="text-[8px] text-[var(--sys-red)] font-bold tracking-widest" id="shop-countdown">--:--:--</span>
-                            </div>
-                        </div>
-                        <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1">`;
-                    (s.dailyShopIds || []).forEach((itemObj, idx) => {
-                        let item = SHOP_POOL.find(x => x.id === itemObj.id);
-                        if(item) {
-                            let mInfo = ALL_MATS.find(m => m[0] === item.mat);
-                            let finalCost = item.cost;
-                            let discBadge = "";
-                            if(itemObj.discT && itemObj.discP > 0) {
-                                finalCost = Math.floor(item.cost * (1 - (itemObj.discP / 100)));
-                                discBadge = `<span class="bg-[var(--sys-red)] text-white px-1 py-[2px] rounded text-[7px] ml-2 animate-pulse">-${itemObj.discP}% (Tier ${itemObj.discT})</span>`;
-                            }
-                            h += `<div class="flex justify-between items-center text-[10px] bg-black/40 p-3 rounded border border-gray-800">
-                                <span class="text-gray-200 font-bold flex items-center">${mInfo[1]} ${item.qty}x ${mInfo[2]} ${discBadge}</span>
-                                <button onclick="buyShop(${idx})" class="text-[var(--gold)] font-bold border border-[var(--gold)]/50 px-3 py-1 rounded bg-[var(--gold)]/10 font-sys">${finalCost}G</button>
-                            </div>`;
-                        }
-                    });
-                    h += `</div></div>`;
-                } else if(st === 'gacW' || st === 'gacA') {
-                    let isW = st === 'gacW'; let col = isW ? 'var(--sys-blue)' : 'var(--sys-purple)';
-                    h += `<div class="glass-panel p-6 text-center border-[${col}]/30">
-                        <span class="text-4xl block mb-4 animate-pulse">🔮</span>
-                        <h3 class="font-sys text-[${col}] text-lg font-bold uppercase tracking-widest mb-2">Invocación</h3>
-                        <div class="flex gap-2 mb-6">
-                            <button onclick="pullGacha('${isW?'W':'A'}', 1)" class="w-1/2 py-4 rounded-xl border border-[${col}]/50 bg-[${col}]/10 text-[${col}] font-bold uppercase tracking-widest text-[9px] shadow-[0_0_10px_${col}]">1 TIRADA<br>(160 💎)</button>
-                            <button onclick="pullGacha('${isW?'W':'A'}', 10)" class="w-1/2 py-4 rounded-xl border border-[var(--gold)]/50 bg-[var(--gold)]/10 text-[var(--gold)] font-bold uppercase tracking-widest text-[9px] shadow-[0_0_10px_var(--gold)]">10 TIRADAS<br>(1600 💎)</button>
-                        </div>
-                        <div class="text-[8px] text-[var(--lavender)] opacity-70 border border-gray-800 rounded p-2 text-left grid grid-cols-2 gap-1">
-                            <span class="col-span-2 text-center mb-1 text-[var(--sys-blue)] font-bold">PROBABILIDADES</span>
-                            <span>Tier I: 20%</span> <span>Tier D: 5%</span>
-                            <span>Tier H: 20%</span> <span>Tier C: 5%</span>
-                            <span>Tier G: 17%</span> <span>Tier B: 3%</span>
-                            <span>Tier F: 17%</span> <span>Tier A: 2%</span>
-                            <span>Tier E: 10%</span> <span class="text-[var(--gold)] font-bold">Tier S: 1%</span>
-                        </div>
-                    </div>`;
-                } else {
-                    h += `<div class="border border-red-900/50 bg-black/80 rounded-xl p-4 shadow-inner mb-4"><p class="text-[9px] font-sys text-red-500 mb-3 text-center tracking-widest">HACKER MENU</p>
-                    <div class="flex flex-col gap-2">
-                        <button onclick="sfx.click(); s.weapons=[...ALL_WEAPONS]; s.armors=[...ALL_ARMORS]; save(); toast('Todo Desbloqueado', 'var(--sys-blue)');" class="bg-[var(--sys-purple)]/40 py-3 rounded-lg text-[10px] border border-[var(--sys-purple)]/30 text-[var(--sys-purple)] font-bold uppercase">Desbloquear Todo (Armas/Armaduras)</button>
-                        <button onclick="sfx.click(); s.exp=getReqExp(9); s.lvl=10; save(); render(); toast('Max Level', 'var(--sys-blue)');" class="bg-blue-900/40 py-3 rounded-lg text-[10px] border border-blue-500/30 text-blue-300 font-bold uppercase">Nivel 10 (Max)</button>
-                        <button onclick="sfx.click(); gain('exp', 50000);" class="bg-purple-900/40 py-3 rounded-lg text-[10px] border border-purple-500/30 text-purple-300 font-bold uppercase">+50,000 EXP</button>
-                        <button onclick="sfx.click(); gain('gold', 500000);" class="bg-yellow-900/40 py-3 rounded-lg text-[10px] border border-yellow-500/30 text-yellow-300 font-bold uppercase">+500,000 Oro</button>
-                        <button onclick="sfx.click(); gain('dia', 5000);" class="bg-[var(--dia)]/20 py-3 rounded-lg text-[10px] border border-[var(--dia)]/50 text-[var(--dia)] font-bold uppercase">+5000 Diamantes</button>
-                        <button onclick="sfx.click(); ALL_MATS.forEach(m => s.mats[m[0]]=999); save(); toast('Materiales Max', 'var(--sys-blue)');" class="bg-green-900/40 py-3 rounded-lg text-[10px] border border-green-500/30 text-green-300 font-bold uppercase">Materiales Máximos</button>
-                        <div class="grid grid-cols-2 gap-2 mt-1">
-                            <button onclick="sfx.click(); s.timeOffset+=3600000; checkTime(); toast('Reloj: +1 Hora', 'var(--sys-red)')" class="bg-gray-800 py-3 rounded text-[9px] border border-gray-600 text-gray-300 font-bold uppercase">+1H Reloj</button>
-                            <button onclick="sfx.error(); if(confirm('¿BORRAR TODO EL PROGRESO?')){ localStorage.removeItem(DB_KEY); location.reload(); }" class="bg-red-900/50 py-3 rounded text-[9px] border border-[var(--sys-red)] text-[var(--sys-red)] font-bold uppercase">Hard Reset</button>
-                        </div>
-                    </div></div>`;
-                }
-
-                h += `<button onclick="tryPrestige()" class="w-full py-5 glass-panel text-xs tracking-widest font-bold uppercase transition-all mt-4 ${s.lvl>=10?'border-[var(--sys-blue)] text-[var(--sys-blue)] shadow-[0_0_15px_var(--sys-blue)]':'opacity-30 border-gray-800 text-gray-500'}">ASCENSIÓN PRESTIGIO</button>`;
-            }
-            mc.innerHTML = h;
-        }
-
-        render(); checkTime();
-    </script>
-</body>
-</html>
+                        h
