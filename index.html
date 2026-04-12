@@ -14,7 +14,7 @@
         :root {
             --bg-base: #0c0c12; 
             --sys-blue: #60a5fa;   /* Mazmorra / Maná / Base */
-            --sys-red: #f87171;    /* Maldita / Reloj / Errores */
+            --sys-red: #f87171;    /* Maldita / Reloj / Error */
             --sys-purple: #c084fc; /* Abismo / EXP */
             --gold: #fcd34d; 
             --dia: #2dd4bf;        /* Diamantes */
@@ -117,7 +117,8 @@
     </div>
 
     <script>
-        const DB_KEY = 'sys_v0_9_data'; 
+        // Nueva clave robusta. Esto ignorará cualquier guardado antiguo corrupto.
+        const DB_KEY = 'sys_v0_9_stable_dive'; 
         const TIERS = {1:'I', 2:'H', 3:'G', 4:'F', 5:'E', 6:'D', 7:'C', 8:'B', 9:'A', 10:'S'};
         const EXP_NEEDED = [0, 400, 1000, 3000, 7500, 15000, 30000, 50000, 75000, 100000];
 
@@ -178,40 +179,44 @@
 
         let defaultMats = {}; ALL_MATS.forEach(m => defaultMats[m[0]] = 0);
 
+        // Inicialización Anti-Void
         let s = JSON.parse(localStorage.getItem(DB_KEY));
-
-        // Vacuna contra el bug "Aparecer en la nada": Migración forzada si faltan variables.
-        if (!s) s = {};
-        if (s.lvl === undefined) s.lvl = 1;
-        if (s.exp === undefined) s.exp = 0;
-        if (s.gold === undefined) s.gold = 0;
-        if (s.diamonds === undefined) s.diamonds = 0;
-        if (s.prestige === undefined) s.prestige = 0;
-        if (s.mana === undefined) s.mana = 10;
-        if (s.atk === undefined) s.atk = 10;
-        if (s.timeOffset === undefined) s.timeOffset = 0;
-        if (s.objective === undefined) s.objective = "Objetivo: Menor tiempo posible";
-        if (s.diaClaimedToday === undefined) s.diaClaimedToday = false;
-        if (!s.races) s.races = [];
-        if (!s.dailies || s.dailies.length === 0) s.dailies = [{name: "Entrenamiento Físico", done: false}];
-        if (s.dailySacrificed === undefined) s.dailySacrificed = false;
-        if (!s.storyClaimed) s.storyClaimed = Array(10).fill(false);
-        if (!s.potions) s.potions = { expB: 1.0 };
-        if (!s.potionInv) s.potionInv = {};
-        if (!s.mats) s.mats = defaultMats;
-        if (!s.weapons) s.weapons = [ALL_WEAPONS[0]];
-        if (!s.armors) s.armors = [];
-        if (!s.activeWeps) s.activeWeps = [s.activeWepId || 'w_sys_1', null];
-        if (!s.activeArmors) s.activeArmors = {head:null, chest:null, legs:null, acc:null};
-        if (!s.bosses) s.bosses = { b1: { name: BOSSES_T1[0], hp: 500, maxHp: 500, lvl: 1 }, b2: { name: BOSSES_T2[0], hp: 5000, maxHp: 5000, lvl: 11 }, b3: { name: BOSSES_T3[0], hp: 20000, maxHp: 20000, lvl: 21 } };
-        if (!s.currentTab) s.currentTab = 'home';
-        if (!s.subTabs) s.subTabs = {};
-        if (!s.dailyShopIds) s.dailyShopIds = [];
+        if (!s || typeof s !== 'object') s = {};
         
-        // Sincronizar todos los mats por si se añadieron nuevos
+        s.lvl = s.lvl || 1;
+        s.exp = s.exp || 0;
+        s.gold = s.gold || 0;
+        s.diamonds = s.diamonds || 0;
+        s.prestige = s.prestige || 0;
+        s.mana = s.mana || 10;
+        s.atk = s.atk || 10;
+        s.timeOffset = s.timeOffset || 0;
+        s.objective = s.objective || "Objetivo: Menor tiempo posible";
+        s.races = s.races || [];
+        s.diaClaimedToday = s.diaClaimedToday || false;
+        s.dailies = s.dailies || [{name: "Entrenamiento Físico", done: false}];
+        s.dailiesCompletedToday = s.dailiesCompletedToday || 0; // Fix del exploit de oro infinito
+        s.dailySacrificed = s.dailySacrificed || false;
+        s.storyClaimed = s.storyClaimed || Array(10).fill(false);
+        s.potions = s.potions || { expB: 1.0 };
+        s.potionInv = s.potionInv || {};
+        s.mats = s.mats || {};
         ALL_MATS.forEach(m => { if(s.mats[m[0]] === undefined) s.mats[m[0]] = 0; });
+        s.weapons = s.weapons || [ALL_WEAPONS[0]];
+        s.armors = s.armors || [];
+        s.activeWeps = s.activeWeps || ['w_sys_1', null];
+        s.activeArmors = s.activeArmors || {head:null, chest:null, legs:null, acc:null};
+        s.bosses = s.bosses || { 
+            b1: { name: BOSSES_T1[0], hp: 500, maxHp: 500, lvl: 1 }, 
+            b2: { name: BOSSES_T2[0], hp: 5000, maxHp: 5000, lvl: 11 }, 
+            b3: { name: BOSSES_T3[0], hp: 20000, maxHp: 20000, lvl: 21 } 
+        };
+        s.currentTab = s.currentTab || 'home';
+        s.subTabs = s.subTabs || {};
+        s.dailyShopIds = s.dailyShopIds || [];
 
         const MAX_MANA = () => 10 + (s.lvl * 2);
+
         let virtualTime = new Date(); let modalTimer = null; let modalCountdown = 0;
 
         function rollShop() {
@@ -238,10 +243,14 @@
 
             const strDate = virtualTime.toLocaleDateString();
             if(s.lastDate !== strDate) { 
-                s.dailySacrificed = false; s.diaClaimedToday = false;
-                s.dailies.forEach(d => d.done = false);
+                s.dailySacrificed = false; 
+                s.diaClaimedToday = false;
+                s.dailiesCompletedToday = 0;
+                s.dailies.forEach(d => d.done = false); 
                 s.labCraftsToday = 0;
-                rollShop(); s.lastDate = strDate; save(); 
+                rollShop(); 
+                s.lastDate = strDate; 
+                save(); 
             }
         }
         setInterval(checkTime, 1000);
@@ -266,11 +275,10 @@
                 if(a) { md += a.manaDiscount; counts[a.setName] = (counts[a.setName]||0) + 1; }
             });
 
-            // Set Bonus: x2 descuento si tiene 4/4
             for(let setName in counts) {
                 if(counts[setName] === 4) {
                     let sample = s.armors.find(x => x.setName === setName);
-                    if(sample) md += (sample.manaDiscount * 4); 
+                    if(sample) md += (sample.manaDiscount * 4); // Bono x2 si es Set 4/4
                 }
             }
             return { atk, manaDiscount: md, setCounts: counts };
@@ -338,7 +346,7 @@
             }, 1000);
         }
 
-        function closeModal() { clearInterval(modalTimer); document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').style.display = ''; }
+        function closeModal() { clearInterval(modalTimer); document.getElementById('modal').classList.add('hidden'); }
 
         function generateLineChart() {
             if(!s.races || s.races.length < 2) return `<div class="text-[10px] text-center opacity-50 py-10 uppercase tracking-widest text-[var(--sys-blue)] border border-dashed border-[var(--sys-blue)]/30 rounded-xl mt-4">Aparece a partir de 2 carreras</div>`;
@@ -422,7 +430,7 @@
             item.id = `g_${Date.now()}`;
             if(type === 'W') s.weapons.push(item); else s.armors.push(item);
             
-            showModal(`🔮 GACHA: ${rank}`, `Obtenido:<br><br><span style="color:${color}; font-size:16px; font-weight:bold; letter-spacing:2px;">${item.name}</span><br><br>Tier ${TIERS[item.reqTier]}`, color);
+            showModal(`🔮 GACHA: ${rank}`, `Obtenido:<br><br><span style="color:${color}; font-size:16px; font-weight:bold; letter-spacing:2px;">${item.name}</span><br><br>Poder de Tier ${TIERS[item.reqTier]}`, color);
             save();
         }
 
@@ -430,11 +438,11 @@
         function setSubTab(st) { s.subTabs[s.currentTab] = st; render(); }
 
         function render() {
-            const mc = document.getElementById('main-content'); let h = ""; 
-            if(!s.currentTab) s.currentTab = 'home';
-            const t = s.currentTab;
-
+            const mc = document.getElementById('main-content');
             try {
+                let h = ""; 
+                const t = s.currentTab || 'home';
+
                 document.querySelectorAll('.nav-btn').forEach(b => {
                     let sp = b.querySelector('span:last-child');
                     if(sp) sp.classList.remove('text-[var(--sys-blue)]');
@@ -443,7 +451,7 @@
                 if(activeNav) activeNav.querySelector('span:last-child').classList.add('text-[var(--sys-blue)]');
 
                 if(t === 'home') {
-                    const st = s.subTabs[t] || 'main';
+                    const st = (s.subTabs && s.subTabs[t]) ? s.subTabs[t] : 'main';
                     h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
                         <button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Campamento</button>
                         <button onclick="setSubTab('story')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='story'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Historia</button>
@@ -459,7 +467,7 @@
                                 <div class="flex gap-2 items-center mb-2">
                                     <input id="in-min" type="number" placeholder="Min" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--sys-blue)] outline-none text-white">
                                     <input id="in-sec" type="number" placeholder="Seg" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--sys-blue)] outline-none text-white">
-                                    <button onclick="let m=parseInt(document.getElementById('in-min').value)||0; let sc=parseInt(document.getElementById('in-sec').value)||0; let tot=(m*60)+sc; if(tot>0){ s.races.push({val:tot, date:Date.now()}); gain('exp', 1500); gain('gold', 3000); if(!s.diaClaimedToday){ gain('dia', 300); s.diaClaimedToday=true; } save(); } else toast('Introduce tiempo', 'var(--sys-red)');" class="btn-aaa px-6 py-3 rounded-xl font-bold">GO</button>
+                                    <button onclick="let m=parseInt(document.getElementById('in-min').value)||0; let sc=parseInt(document.getElementById('in-sec').value)||0; let tot=(m*60)+sc; if(tot>0){ s.races.push({val:tot, date:Date.now()}); gain('exp', 1500); gain('gold', 3000); if(!s.diaClaimedToday){ gain('dia', 300); s.diaClaimedToday=true; } toast('CARRERA REGISTRADA'); save(); } else toast('Introduce tiempo', 'var(--sys-red)');" class="btn-aaa px-6 py-3 rounded-xl font-bold">GO</button>
                                 </div>
                                 ${generateLineChart()}
                                 <div class="mt-4 max-h-[120px] overflow-y-auto pr-2 space-y-1 border-t border-[var(--border-glass)] pt-2">`;
@@ -488,7 +496,7 @@
                                 let color = d.done ? 'text-[var(--sys-blue)] border-[var(--sys-blue)]/50' : 'text-gray-300 border-[var(--border-glass)]';
                                 h += `<div class="flex gap-2 items-center mb-2 bg-black/30 p-2 rounded-lg border ${color}">
                                     <input type="text" value="${d.name}" onchange="s.dailies[${i}].name=this.value; save();" class="w-full bg-transparent outline-none text-xs ${d.done?'opacity-50 line-through text-[var(--sys-blue)]':'text-gray-300'}" ${d.done?'disabled':''}>
-                                    ${!d.done ? `<button onclick="s.dailies[${i}].done=true; gain('exp', 1000); gain('gold',5000); gain('dia',50); save();" class="text-[var(--sys-blue)] text-xs px-2 py-1 bg-[var(--sys-blue)]/10 rounded border border-[var(--sys-blue)]/50">✔️</button>` : ''}
+                                    ${!d.done ? `<button onclick="if(s.dailiesCompletedToday < 3){ s.dailiesCompletedToday++; gain('exp', 1000); gain('gold',5000); gain('dia',50); toast('Misión Completada'); } else { toast('Límite de 3 recompensas diarias superado', 'var(--sys-red)'); } s.dailies[${i}].done=true; save();" class="text-[var(--sys-blue)] text-xs px-2 py-1 bg-[var(--sys-blue)]/10 rounded border border-[var(--sys-blue)]/50">✔️</button>` : ''}
                                     <button onclick="if(s.dailies[${i}].done) { toast('Solo al reinicio', 'var(--sys-red)'); } else { s.dailies.splice(${i},1); save(); }" class="text-[var(--sys-red)] text-xs px-2 py-1 bg-[var(--sys-red)]/10 rounded border border-[var(--sys-red)]/50">❌</button>
                                 </div>`;
                             });
@@ -530,7 +538,7 @@
                 }
                 else if(t === 'lab') {
                     if(s.lvl < 2) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier H<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
-                        const st = s.subTabs[t] || 'main';
+                        const st = (s.subTabs && s.subTabs[t]) ? s.subTabs[t] : 'main';
                         h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl"><button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Alquimia Base</button><button onclick="${s.lvl>=4?`setSubTab('sec')`:`toast('Requiere Tier F', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='sec'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Alquimia Oscura</button><button onclick="setSubTab('inv')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='inv'?'bg-[var(--lavender)]/20 text-[var(--lavender)]':'opacity-50'}">Pociones</button></div>`;
                         
                         if(st === 'main') {
@@ -588,7 +596,7 @@
                 }
                 else if(t === 'dungeon') {
                     if(s.lvl < 3) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier G<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
-                        const st = s.subTabs[t] || 'd1';
+                        const st = (s.subTabs && s.subTabs[t]) ? s.subTabs[t] : 'd1';
                         h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
                             <button onclick="setSubTab('d1')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d1'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Mazmorra</button>
                             <button onclick="${s.lvl>=5?`setSubTab('d2')`:`toast('Requiere Tier E', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d2'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Maldita</button>
@@ -623,7 +631,7 @@
                 }
                 else if(t === 'forge') {
                     if(s.lvl < 4) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier F<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
-                        const st = s.subTabs[t] || 'wep';
+                        const st = (s.subTabs && s.subTabs[t]) ? s.subTabs[t] : 'wep';
                         h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
                             <button onclick="setSubTab('wep')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='wep'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Armas</button>
                             <button onclick="setSubTab('arm')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='arm'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Armaduras</button>
@@ -679,7 +687,7 @@
                     }
                 }
                 else if(t === 'shop') {
-                    const st = s.subTabs[t] || 'base';
+                    const st = (s.subTabs && s.subTabs[t]) ? s.subTabs[t] : 'base';
                     h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
                         <button onclick="setSubTab('base')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='base'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Tienda</button>
                         <button onclick="setSubTab('gacW')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='gacW'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Gacha Arma</button>
@@ -728,7 +736,11 @@
                 }
                 mc.innerHTML = `<div class="active-tab">${h}</div>`;
             } catch(e) {
-                mc.innerHTML = `<div class="p-5 text-red-500 border border-red-500 bg-red-900/20 rounded m-4 text-xs font-bold font-sys">CRITICAL ERROR:<br><br>${e.message}<br><br>Ve a la tienda > Hacker Menu > Hard Reset.</div>`;
+                mc.innerHTML = `<div class="p-6 m-4 text-center border-red-500 border bg-black/80 rounded-xl">
+                    <p class="text-red-500 font-bold mb-4 font-sys">CRITICAL ERROR</p>
+                    <p class="text-xs text-gray-400 mb-6">${e.message}</p>
+                    <button onclick="localStorage.removeItem('${DB_KEY}'); location.reload();" class="btn-aaa w-full py-4 rounded text-xs font-bold uppercase tracking-widest">HARD RESET AHORA</button>
+                </div>`;
                 console.error(e);
             }
         }
