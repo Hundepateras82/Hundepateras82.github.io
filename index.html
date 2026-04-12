@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYSTEM V0.9.b: THE DEEP DIVE</title>
+    <title>SYSTEM V0.9.c: THE DEEP DIVE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@300;500;700&display=swap');
         
         :root {
             --bg-base: #0c0c12; 
-            --sys-blue: #60a5fa;   /* Mazmorra / Maná / HUD Base */
-            --sys-red: #f87171;    /* Maldita / Reloj / Error */
-            --sys-purple: #c084fc; /* Abismo / EXP */
-            --gold: #fcd34d; 
+            --sys-blue: #3b82f6;   /* Azul Mazmorra / Base / Maná */
+            --sys-red: #ef4444;    /* Rojo Maldita / Reloj / Errores */
+            --sys-purple: #a855f7; /* Morado Abismo / EXP */
+            --gold: #fcd34d;       /* Oro / Legendario */
             --dia: #2dd4bf;        /* Diamantes */
             --border-glass: rgba(255,255,255,0.12);
         }
@@ -30,7 +30,7 @@
             backdrop-filter: blur(8px); border-radius: 16px;
         }
         .btn-aaa {
-            background: linear-gradient(90deg, rgba(96,165,250,0.1), rgba(192,132,252,0.1));
+            background: linear-gradient(90deg, rgba(59,130,246,0.1), rgba(168,85,247,0.1));
             border: 1px solid var(--border-glass); color: var(--sys-blue); transition: all 0.2s;
         }
         .btn-aaa:active { transform: scale(0.97); }
@@ -39,8 +39,8 @@
         .story-claimable { border: 1px solid #fff700 !important; box-shadow: 0 0 12px rgba(255, 247, 0, 0.5); cursor: pointer; animation: pulseGlow 2s infinite; }
         @keyframes pulseGlow { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
         
-        .editable-objective { border-bottom: 1px dashed var(--sys-blue); background: rgba(96,165,250,0.05); transition: 0.2s; padding: 6px; border-radius: 6px 6px 0 0; }
-        .editable-objective:focus { background: rgba(96,165,250,0.15); outline: none; border-bottom-style: solid; }
+        .editable-objective { border-bottom: 1px dashed var(--sys-blue); background: rgba(59,130,246,0.05); transition: 0.2s; padding: 6px; border-radius: 4px 4px 0 0; }
+        .editable-objective:focus { background: rgba(59,130,246,0.15); outline: none; border-bottom-style: solid; }
 
         .chart-svg { width: 100%; height: 100%; stroke: var(--sys-blue); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -54,7 +54,7 @@
         
         <div class="flex justify-between items-start mb-4 relative z-10">
             <div>
-                <h1 class="font-sys font-bold text-xl text-[var(--sys-blue)] tracking-wider">SYS<span class="text-[var(--sys-red)] text-xs ml-1">v0.9.b</span></h1>
+                <h1 class="font-sys font-bold text-xl text-[var(--sys-blue)] tracking-wider">SYS<span class="text-[var(--sys-red)] text-xs ml-1">v0.9.c</span></h1>
                 <div class="flex gap-3 mt-1">
                     <p class="text-[10px] font-bold uppercase text-[var(--gold)]">💰 <span id="hud-gold">0</span></p>
                     <p class="text-[10px] font-bold uppercase text-[var(--dia)]">💎 <span id="hud-dia">0</span></p>
@@ -95,7 +95,7 @@
     <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 glass-panel !rounded-full px-6 py-3 text-xs font-bold uppercase tracking-widest text-white opacity-0 pointer-events-none transition-opacity duration-300 z-50">GUARDADO</div>
 
     <nav class="fixed bottom-0 left-0 w-full glass-panel border-t-0 rounded-t-3xl rounded-b-none p-4 grid grid-cols-5 gap-1 z-40">
-        <button onclick="nav('home')" class="flex flex-col items-center nav-btn" id="nav-home"><span class="text-xl mb-1">⛺</span><span class="text-[8px] font-bold uppercase tracking-wider">Refugio</span></button>
+        <button onclick="nav('home')" class="flex flex-col items-center nav-btn" id="nav-home"><span class="text-xl mb-1">⛺</span><span class="text-[8px] font-bold uppercase tracking-wider text-[var(--sys-blue)]">Refugio</span></button>
         <button onclick="nav('lab')" class="flex flex-col items-center nav-btn opacity-40" id="nav-lab"><span class="text-xl mb-1">⚗️</span><span class="text-[8px] font-bold uppercase tracking-wider">Lab</span></button>
         <button onclick="nav('dungeon')" class="flex flex-col items-center nav-btn opacity-40" id="nav-dungeon"><span class="text-xl mb-1">⛩️</span><span class="text-[8px] font-bold uppercase tracking-wider">Abismo</span></button>
         <button onclick="nav('forge')" class="flex flex-col items-center nav-btn opacity-40" id="nav-forge"><span class="text-xl mb-1">⚒️</span><span class="text-[8px] font-bold uppercase tracking-wider">Forja</span></button>
@@ -114,21 +114,19 @@
     </div>
 
     <script>
-        const DB_KEY = 'sys_v0_9_b_core'; 
+        const DB_KEY = 'sys_v0_9_c_safe'; 
         const TIERS = {1:'I', 2:'H', 3:'G', 4:'F', 5:'E', 6:'D', 7:'C', 8:'B', 9:'A', 10:'S'};
         const EXP_NEEDED = [0, 400, 1000, 3000, 7500, 15000, 30000, 50000, 75000, 100000];
 
-        // --- ARMAS (100) ---
+        // --- ARMAS Y ARMADURAS ---
         let ALL_WEAPONS = [];
         const W_P1 = ["Filo", "Espada", "Hacha", "Cuerno", "Garra", "Martillo", "Daga", "Lanza", "Cetro", "Guadaña"];
         const W_P2 = ["del Demonio", "Vampiresco", "Roto", "de Luz", "Sombrío", "del Rey", "Abisal", "Sangriento", "Maldito", "Antiguo"];
         for(let i=1; i<=100; i++) {
-            let n = `${W_P1[i%10]} ${W_P2[Math.floor((i-1)/10)%10]}`;
-            if(i === 1) n = "Daga Oxidada";
+            let n = i===1 ? "Daga Oxidada" : `${W_P1[i%10]} ${W_P2[Math.floor((i-1)/10)%10]}`;
             ALL_WEAPONS.push({id:`w_sys_${i}`, type:'weapon', name: n, atk: i*20, reqTier: Math.ceil(i/10)});
         }
 
-        // --- ARMADURAS (10 Sets x 4 = 40) ---
         let ALL_ARMORS = [];
         const ARMOR_SETS = [
             {n:"Hierro Oscuro", t:1}, {n:"Cuero Bestia", t:2}, {n:"Hueso Maldito", t:3},
@@ -138,10 +136,7 @@
         const SLOTS = [{id:'head', n:'Casco'}, {id:'chest', n:'Peto'}, {id:'legs', n:'Grebas'}, {id:'acc', n:'Amuleto'}];
         ARMOR_SETS.forEach(set => {
             SLOTS.forEach(sl => {
-                ALL_ARMORS.push({
-                    id: `ar_${set.t}_${sl.id}`, type: 'armor', slot: sl.id, setName: set.n,
-                    name: `${sl.n} de ${set.n}`, manaDiscount: set.t * 2, reqTier: set.t
-                });
+                ALL_ARMORS.push({ id: `ar_${set.t}_${sl.id}`, type: 'armor', slot: sl.id, setName: set.n, name: `${sl.n} de ${set.n}`, manaDiscount: set.t * 2, reqTier: set.t });
             });
         });
 
@@ -173,44 +168,40 @@
             { id:'s7', mat:'m31', qty:1, cost:80000, reqLvl: 5 }, { id:'s8', mat:'m8', qty:1, cost:60000, reqLvl: 4 }
         ];
 
-        let defaultMats = {}; ALL_MATS.forEach(m => defaultMats[m[0]] = 0);
-
-        // Sanitización agresiva y Auto-reparación
-        let s = JSON.parse(localStorage.getItem(DB_KEY));
-        if (!s || typeof s !== 'object' || !s.sys_version) {
-            s = {
-                sys_version: "0.9.b",
-                lvl: 1, exp: 0, gold: 0, diamonds: 0, prestige: 0, mana: 10, atk: 10,
-                lastDate: null, timeOffset: 0,
-                objective: "Objetivo: Menor tiempo posible", races: [],
-                dailies: [{name: "Entrenamiento Físico", done: false}], dailySacrificed: false, diaClaimedToday: false,
-                storyClaimed: Array(10).fill(false),
-                potions: { expB: 1.0 }, potionInv: {},
-                mats: defaultMats,
-                weapons: [ALL_WEAPONS[0]], armors: [],
-                activeWeps: ['w_sys_1', null], activeArmors: {head:null, chest:null, legs:null, acc:null},
-                bosses: { 
-                    b1: { name: BOSSES_T1[0], hp: 500, maxHp: 500, lvl: 1 }, 
-                    b2: { name: BOSSES_T2[0], hp: 5000, maxHp: 5000, lvl: 11 }, 
-                    b3: { name: BOSSES_T3[0], hp: 20000, maxHp: 20000, lvl: 21 } 
-                },
-                currentTab: 'home', subTabs: {}, dailyShopIds: []
-            };
-        }
+        // --- SISTEMA ANTI-VOID (Garantiza que nunca haya un undefined al arrancar) ---
+        let s = JSON.parse(localStorage.getItem(DB_KEY)) || {};
         
-        // Garantizar que ninguna variable sea undefined (Anti-Void)
+        s.lvl = s.lvl || 1;
+        s.exp = s.exp || 0;
+        s.gold = s.gold || 0;
+        s.diamonds = s.diamonds || 0;
+        s.prestige = s.prestige || 0;
+        s.mana = s.mana || 10;
+        s.atk = s.atk || 10;
+        s.timeOffset = s.timeOffset || 0;
         s.objective = s.objective || "Objetivo: Menor tiempo posible";
         s.races = s.races || [];
-        s.dailies = s.dailies || [];
+        s.diaClaimedToday = s.diaClaimedToday || false;
+        s.dailies = (s.dailies && s.dailies.length > 0) ? s.dailies : [{name: "Entrenamiento Físico", done: false}];
+        s.dailiesCompletedToday = s.dailiesCompletedToday || 0; 
+        s.dailySacrificed = s.dailySacrificed || false;
+        s.storyClaimed = s.storyClaimed || Array(10).fill(false);
         s.potions = s.potions || { expB: 1.0 };
         s.potionInv = s.potionInv || {};
+        s.mats = s.mats || {};
+        ALL_MATS.forEach(m => { if(s.mats[m[0]] === undefined) s.mats[m[0]] = 0; });
+        s.weapons = (s.weapons && s.weapons.length > 0) ? s.weapons : [ALL_WEAPONS[0]];
         s.armors = s.armors || [];
-        s.weapons = s.weapons || [ALL_WEAPONS[0]];
         s.activeWeps = s.activeWeps || ['w_sys_1', null];
         s.activeArmors = s.activeArmors || {head:null, chest:null, legs:null, acc:null};
-        s.dailyShopIds = s.dailyShopIds || [];
+        s.bosses = s.bosses || { 
+            b1: { name: "Duende Ladrón", hp: 500, maxHp: 500, lvl: 1 }, 
+            b2: { name: "Caballero Caído", hp: 5000, maxHp: 5000, lvl: 11 }, 
+            b3: { name: "Dragón de Hueso", hp: 20000, maxHp: 20000, lvl: 21 } 
+        };
+        s.currentTab = s.currentTab || 'home';
         s.subTabs = s.subTabs || {};
-        ALL_MATS.forEach(m => { if(s.mats[m[0]] === undefined) s.mats[m[0]] = 0; });
+        s.dailyShopIds = s.dailyShopIds || [];
 
         const MAX_MANA = () => 10 + (s.lvl * 2);
         let virtualTime = new Date(); let modalTimer = null; let modalCountdown = 0;
@@ -221,11 +212,15 @@
             let shuffled = available.sort(() => 0.5 - Math.random());
             s.dailyShopIds = shuffled.slice(0, 4).map(x => x.id);
         }
+        
+        // Anti-Crash Tienda en el arranque
+        if(s.dailyShopIds.length === 0) rollShop();
 
         function checkTime() {
             virtualTime = new Date(Date.now() + s.timeOffset);
             let msSinceMidnight = virtualTime.getHours()*3600000 + virtualTime.getMinutes()*60000 + virtualTime.getSeconds()*1000;
-            document.getElementById('hud-time-bar').style.width = `${(msSinceMidnight / 86400000) * 100}%`;
+            let timeBar = document.getElementById('hud-time-bar');
+            if(timeBar) timeBar.style.width = `${(msSinceMidnight / 86400000) * 100}%`;
 
             let rem = 86400000 - msSinceMidnight;
             let h = Math.floor(rem/3600000).toString().padStart(2, '0');
@@ -233,15 +228,21 @@
             let sec = Math.floor((rem%60000)/1000).toString().padStart(2, '0');
             let tStr = `${h}:${m}:${sec}`;
             
-            document.getElementById('sys-countdown').innerText = tStr;
+            let sc = document.getElementById('sys-countdown');
+            if(sc) sc.innerText = tStr;
             let shopC = document.getElementById('shop-countdown');
             if(shopC) shopC.innerText = tStr;
 
             const strDate = virtualTime.toLocaleDateString();
             if(s.lastDate !== strDate) { 
-                s.dailySacrificed = false; s.diaClaimedToday = false;
-                s.dailies.forEach(d => d.done = false); s.labCraftsToday = 0;
-                rollShop(); s.lastDate = strDate; save(); 
+                s.dailySacrificed = false; 
+                s.diaClaimedToday = false;
+                s.dailiesCompletedToday = 0;
+                s.dailies.forEach(d => d.done = false); 
+                s.labCraftsToday = 0;
+                rollShop(); 
+                s.lastDate = strDate; 
+                save(); 
             }
         }
         setInterval(checkTime, 1000);
@@ -267,7 +268,7 @@
                 if(a) { md += a.manaDiscount; counts[a.setName] = (counts[a.setName]||0) + 1; }
             });
 
-            // Set Bonus: x2 descuento total del set
+            // Set Bonus: x2 de maná si tiene las 4
             for(let setName in counts) {
                 if(counts[setName] === 4) {
                     let sample = s.armors.find(x => x.setName === setName);
@@ -284,14 +285,15 @@
                 s.potions.expB = 1.0; 
                 let reqExp = EXP_NEEDED[s.lvl];
                 while(s.exp >= reqExp && s.lvl < 10) { 
-                    s.exp -= reqExp; s.lvl++; s.mana = MAX_MANA(); 
+                    s.exp -= reqExp; s.lvl++; s.atk += 10; s.mana = MAX_MANA(); 
                     showModal("✨ TIER AUMENTADO", `TIER ${TIERS[s.lvl]} ALCANZADO`, "var(--sys-blue)"); 
                     reqExp = EXP_NEEDED[s.lvl]; 
                 }
                 if(s.lvl >= 10) { s.lvl = 10; s.exp = EXP_NEEDED[9]; }
+                toast(`+${Math.floor(amount)} EXP`, "var(--sys-purple)");
             }
-            if(type === 'gold') s.gold += amount * mult;
-            if(type === 'dia') s.diamonds += amount;
+            if(type === 'gold') { s.gold += amount * mult; toast(`+${Math.floor(amount)} G`, "var(--gold)"); }
+            if(type === 'dia') { s.diamonds += amount; toast(`+${amount} Diamantes`, "var(--dia)"); }
             save();
         }
 
@@ -341,6 +343,22 @@
         }
 
         function closeModal() { clearInterval(modalTimer); document.getElementById('modal').classList.add('hidden'); }
+
+        function runRace() {
+            let m = parseInt(document.getElementById('in-min').value) || 0;
+            let sc = parseInt(document.getElementById('in-sec').value) || 0;
+            let tot = (m * 60) + sc;
+            if(tot > 0) {
+                s.races.push({val: tot, date: Date.now()});
+                gain('exp', 1500); 
+                gain('gold', 3000); 
+                if(!s.diaClaimedToday){ gain('dia', 300); s.diaClaimedToday = true; } 
+                toast('CARRERA REGISTRADA', 'var(--sys-blue)'); 
+                save(); // Refresca automáticamente la gráfica
+            } else {
+                toast('Introduce tiempo', 'var(--sys-red)');
+            }
+        }
 
         function generateLineChart() {
             if(!s.races || s.races.length < 2) return `<div class="text-[10px] text-center opacity-50 py-10 uppercase tracking-widest text-[var(--sys-blue)] border border-dashed border-[var(--sys-blue)]/30 rounded-xl mt-4">Aparece a partir de 2 carreras</div>`;
@@ -433,318 +451,308 @@
 
         function render() {
             const mc = document.getElementById('main-content'); let h = ""; 
-            if(!s.currentTab) s.currentTab = 'home';
             const t = s.currentTab;
 
-            try {
-                document.querySelectorAll('.nav-btn').forEach(b => {
-                    let sp = b.querySelector('span:last-child');
-                    if(sp) sp.classList.remove('text-[var(--sys-blue)]');
-                });
-                let activeNav = document.getElementById(`nav-${t}`);
-                if(activeNav) {
-                    let sp = activeNav.querySelector('span:last-child');
-                    if(sp) sp.classList.add('text-[var(--sys-blue)]');
-                }
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                let sp = b.querySelector('span:last-child');
+                if(sp) sp.classList.remove('text-[var(--sys-blue)]');
+            });
+            let activeNav = document.getElementById(`nav-${t}`);
+            if(activeNav) {
+                let sp = activeNav.querySelector('span:last-child');
+                if(sp) sp.classList.add('text-[var(--sys-blue)]');
+            }
 
-                if(t === 'home') {
-                    const st = s.subTabs[t] || 'main';
-                    h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
-                        <button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Campamento</button>
-                        <button onclick="setSubTab('story')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='story'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Historia</button>
-                    </div>`;
+            if(t === 'home') {
+                const st = s.subTabs[t] || 'main';
+                h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
+                    <button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Campamento</button>
+                    <button onclick="setSubTab('story')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='story'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Historia</button>
+                </div>`;
 
-                    if(st === 'main') {
-                        h += `<div class="glass-panel p-5 mb-4 border-[var(--sys-blue)]/30">
-                                <div class="flex items-center mb-4 bg-[var(--sys-blue)]/5 rounded border-b border-[var(--sys-blue)]/30">
-                                    <span class="ml-2 text-[var(--sys-blue)]">🎯</span>
-                                    <input type="text" value="${s.objective}" onchange="s.objective=this.value; save();" class="w-full bg-transparent text-[10px] text-[var(--sys-blue)] uppercase tracking-widest font-bold outline-none editable-objective text-center" placeholder="Escribe tu objetivo aquí...">
-                                    <span class="mr-2 text-[var(--sys-blue)] opacity-50 text-[10px]">✏️</span>
-                                </div>
-                                <div class="flex gap-2 items-center mb-2">
-                                    <input id="in-min" type="number" placeholder="Min" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--sys-blue)] outline-none text-white">
-                                    <input id="in-sec" type="number" placeholder="Seg" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--sys-blue)] outline-none text-white">
-                                    <button onclick="let m=parseFloat(document.getElementById('in-min').value)||0; let sc=parseFloat(document.getElementById('in-sec').value)||0; let tot=(m*60)+sc; if(tot>0){ s.races.push({val:tot, date:Date.now()}); toast('CARRERA REGISTRADA'); gain('exp', 1500); gain('gold', 3000); if(!s.diaClaimedToday){ gain('dia', 300); s.diaClaimedToday=true; } save(); } else toast('Introduce tiempo', 'var(--sys-red)');" class="btn-aaa px-6 py-3 rounded-xl font-bold">GO</button>
-                                </div>
-                                ${generateLineChart()}
-                                <div class="mt-4 max-h-[120px] overflow-y-auto pr-2 space-y-1 border-t border-[var(--border-glass)] pt-2">`;
-                                
-                                if(!s.races || s.races.length === 0) { h += `<p class="text-[9px] opacity-50">Sin registros</p>`; }
-                                else {
-                                    s.races.slice().reverse().forEach(r => {
-                                        h += `<div class="flex justify-between items-center text-[10px] py-2 border-b border-[var(--border-glass)] text-gray-300">
-                                            <span>${new Date(r.date).toLocaleDateString()}</span>
-                                            <span>${Math.floor(r.val/60)}m ${r.val%60}s</span>
-                                        </div>`;
-                                    });
-                                }
-                        h += `</div></div>`;
-
-                        let allDone = s.dailies.length > 0 && s.dailies.every(d => d.done);
-                        h += `<div class="glass-panel p-5 mb-4">
-                            <h2 class="text-[10px] font-sys text-[var(--sys-purple)] mb-3 uppercase tracking-widest flex justify-between">
-                                <span>Misiones Diarias</span> <span class="text-[var(--sys-red)]">${s.dailies.filter(d=>d.done).length}/${s.dailies.length}</span>
-                            </h2>`;
-                        
-                        if(s.dailySacrificed) {
-                            h += `<div class="w-full py-4 rounded-xl border border-[var(--sys-red)]/50 bg-[var(--sys-red)]/20 text-[var(--sys-red)] text-center text-xs font-bold uppercase tracking-widest">SACRIFICADO AL ABISMO</div>`;
-                        } else {
-                            s.dailies.forEach((d, i) => {
-                                let color = d.done ? 'text-[var(--sys-blue)] border-[var(--sys-blue)]/50' : 'text-gray-300 border-[var(--border-glass)]';
-                                h += `<div class="flex gap-2 items-center mb-2 bg-black/30 p-2 rounded-lg border ${color}">
-                                    <input type="text" value="${d.name}" onchange="s.dailies[${i}].name=this.value; save();" class="w-full bg-transparent outline-none text-xs ${d.done?'opacity-50 line-through text-[var(--sys-blue)]':'text-gray-300'}" ${d.done?'disabled':''}>
-                                    ${!d.done ? `<button onclick="s.dailies[${i}].done=true; toast('Misión Completada'); gain('exp', 1000); gain('gold',5000); gain('dia',50); save();" class="text-[var(--sys-blue)] text-xs px-2 py-1 bg-[var(--sys-blue)]/10 rounded border border-[var(--sys-blue)]/50">✔️</button>` : ''}
-                                    <button onclick="if(s.dailies[${i}].done) { toast('Solo al reinicio', 'var(--sys-red)'); } else { s.dailies.splice(${i},1); save(); }" class="text-[var(--sys-red)] text-xs px-2 py-1 bg-[var(--sys-red)]/10 rounded border border-[var(--sys-red)]/50">❌</button>
-                                </div>`;
-                            });
+                if(st === 'main') {
+                    h += `<div class="glass-panel p-5 mb-4 border-[var(--sys-blue)]/30">
+                            <div class="flex items-center mb-4 bg-[var(--sys-blue)]/5 rounded border-b border-[var(--sys-blue)]/30">
+                                <span class="ml-2 text-[var(--sys-blue)]">🎯</span>
+                                <input type="text" value="${s.objective}" onchange="s.objective=this.value; save();" class="w-full bg-transparent text-[10px] text-[var(--sys-blue)] uppercase tracking-widest font-bold outline-none editable-objective text-center" placeholder="Escribe tu objetivo aquí...">
+                                <span class="mr-2 text-[var(--sys-blue)] opacity-50 text-[10px]">✏️ EDITAR</span>
+                            </div>
+                            <div class="flex gap-2 items-center mb-2">
+                                <input id="in-min" type="number" placeholder="Min" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--sys-blue)] outline-none text-white">
+                                <input id="in-sec" type="number" placeholder="Seg" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--sys-blue)] outline-none text-white">
+                                <button onclick="runRace()" class="btn-aaa px-6 py-3 rounded-xl font-bold">GO</button>
+                            </div>
+                            ${generateLineChart()}
+                            <div class="mt-4 max-h-[120px] overflow-y-auto pr-2 space-y-1 border-t border-[var(--border-glass)] pt-2">`;
                             
-                            let btns = `<div class="flex gap-2 mt-3">`;
-                            if(s.dailies.length < 3) btns += `<button onclick="s.dailies.push({name:'Nueva Misión', done:false}); save();" class="flex-1 py-2 border border-[var(--border-glass)] rounded bg-black/30 text-xs font-bold text-gray-400 hover:bg-white/5">+</button>`;
-                            if(allDone) btns += `<div class="flex-1 py-2 border border-[var(--sys-blue)] bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] text-center text-[10px] font-bold uppercase tracking-widest rounded flex items-center justify-center">COMPLETADAS</div>`;
-                            btns += `</div>`;
-                            h += btns;
-                        }
-                        h += `</div>`;
-                        
-                        h += `<div class="glass-panel p-4 mb-4">
-                            <h2 class="text-[10px] font-sys text-[var(--sys-blue)] mb-3 uppercase tracking-widest border-b border-[var(--border-glass)] pb-2">Materiales (36)</h2>
-                            <div class="grid grid-cols-4 gap-2 text-[9px] text-center">`;
-                        ALL_MATS.forEach(m => {
-                            let qty = s.mats[m[0]] || 0;
-                            let op = qty > 0 ? 'opacity-100' : 'opacity-30 grayscale';
-                            h += `<div onclick="showModal('${m[1]} ${m[2]}', '${m[3]}<br><br>Cantidad poseída: ${qty}', 'white', 'CERRAR')" class="bg-black/60 p-2 rounded border border-gray-800 ${op} active:scale-95 transition-transform flex flex-col items-center justify-center min-h-[60px]">
-                                <span class="text-lg mb-1">${m[1]}</span><span class="font-bold text-white">${qty}</span>
+                            if(!s.races || s.races.length === 0) { h += `<p class="text-[9px] opacity-50">Sin registros</p>`; }
+                            else {
+                                s.races.slice().reverse().forEach(r => {
+                                    h += `<div class="flex justify-between items-center text-[10px] py-2 border-b border-[var(--border-glass)] text-gray-300">
+                                        <span>${new Date(r.date).toLocaleDateString()}</span>
+                                        <span>${Math.floor(r.val/60)}m ${r.val%60}s</span>
+                                    </div>`;
+                                });
+                            }
+                    h += `</div></div>`;
+
+                    let allDone = s.dailies.length > 0 && s.dailies.every(d => d.done);
+                    h += `<div class="glass-panel p-5 mb-4">
+                        <h2 class="text-[10px] font-sys text-[var(--sys-purple)] mb-3 uppercase tracking-widest flex justify-between">
+                            <span>Misiones Diarias</span> <span class="text-[var(--sys-red)]">${s.dailies.filter(d=>d.done).length}/${s.dailies.length}</span>
+                        </h2>`;
+                    
+                    if(s.dailySacrificed) {
+                        h += `<div class="w-full py-4 rounded-xl border border-[var(--sys-red)]/50 bg-[var(--sys-red)]/20 text-[var(--sys-red)] text-center text-xs font-bold uppercase tracking-widest">SACRIFICADO AL ABISMO</div>`;
+                    } else {
+                        s.dailies.forEach((d, i) => {
+                            let color = d.done ? 'text-[var(--sys-blue)] border-[var(--sys-blue)]/50' : 'text-gray-300 border-[var(--border-glass)]';
+                            h += `<div class="flex gap-2 items-center mb-2 bg-black/30 p-2 rounded-lg border ${color}">
+                                <input type="text" value="${d.name}" onchange="s.dailies[${i}].name=this.value; save();" class="w-full bg-transparent outline-none text-xs ${d.done?'opacity-50 line-through text-[var(--sys-blue)]':'text-gray-300'}" ${d.done?'disabled':''}>
+                                ${!d.done ? `<button onclick="if(s.dailiesCompletedToday < 3){ s.dailiesCompletedToday++; gain('exp', 1000); gain('gold',5000); gain('dia',50); toast('Misión Completada'); } else { toast('Límite: 3/Día', 'var(--sys-red)'); } s.dailies[${i}].done=true; save();" class="text-[var(--sys-blue)] text-xs px-2 py-1 bg-[var(--sys-blue)]/10 rounded border border-[var(--sys-blue)]/50">✔️</button>` : ''}
+                                <button onclick="if(s.dailies[${i}].done) { toast('Solo al reinicio', 'var(--sys-red)'); } else { s.dailies.splice(${i},1); save(); }" class="text-[var(--sys-red)] text-xs px-2 py-1 bg-[var(--sys-red)]/10 rounded border border-[var(--sys-red)]/50">❌</button>
                             </div>`;
                         });
-                        h += `</div></div>`;
-                    } else if(st === 'story') {
-                        STORY_TEXT.forEach((txt, i) => {
-                            const reqLvl = i + 1;
-                            if(s.lvl >= reqLvl) {
-                                let isClaimed = s.storyClaimed[i];
-                                let extra = !isClaimed ? 'story-claimable' : 'border-[var(--border-glass)]';
-                                h += `<div onclick="if(!${isClaimed}){ s.storyClaimed[${i}]=true; toast('Recompensa obtenida'); gain('gold', 10000); save(); }" class="glass-panel p-4 mb-3 transition-all ${extra}">
-                                    <div class="flex justify-between items-center mb-2"><h3 class="text-[10px] font-sys text-[var(--gold)] uppercase tracking-wider">Capítulo ${reqLvl}: ${STORY_TITLES[i]}</h3>${isClaimed?'<span class="text-[8px] text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-2 py-1 rounded">LEÍDO</span>':'<span class="text-[8px] text-[var(--gold)] animate-pulse font-bold">RECLAMAR 10k G</span>'}</div>
-                                    <p class="text-[11px] text-gray-300 italic leading-relaxed">"${txt}"</p>
+                        
+                        let btns = `<div class="flex gap-2 mt-3">`;
+                        if(s.dailies.length < 3) btns += `<button onclick="s.dailies.push({name:'Nueva Misión', done:false}); save();" class="flex-1 py-2 border border-[var(--border-glass)] rounded bg-black/30 text-xs font-bold text-gray-400 hover:bg-white/5">+</button>`;
+                        if(allDone) btns += `<div class="flex-1 py-2 border border-[var(--sys-blue)] bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] text-center text-[10px] font-bold uppercase tracking-widest rounded flex items-center justify-center">COMPLETADAS</div>`;
+                        btns += `</div>`;
+                        h += btns;
+                    }
+                    h += `</div>`;
+                    
+                    h += `<div class="glass-panel p-4 mb-4">
+                        <h2 class="text-[10px] font-sys text-[var(--sys-blue)] mb-3 uppercase tracking-widest border-b border-[var(--border-glass)] pb-2">Materiales (36)</h2>
+                        <div class="grid grid-cols-4 gap-2 text-[9px] text-center">`;
+                    ALL_MATS.forEach(m => {
+                        let qty = s.mats[m[0]] || 0;
+                        let op = qty > 0 ? 'opacity-100' : 'opacity-30 grayscale';
+                        h += `<div onclick="showModal('${m[1]} ${m[2]}', '${m[3]}<br><br>Cantidad poseída: ${qty}', 'white', 'CERRAR')" class="bg-black/60 p-2 rounded border border-gray-800 ${op} active:scale-95 transition-transform flex flex-col items-center justify-center min-h-[60px]">
+                            <span class="text-lg mb-1">${m[1]}</span><span class="font-bold text-white">${qty}</span>
+                        </div>`;
+                    });
+                    h += `</div></div>`;
+                } else if(st === 'story') {
+                    STORY_TEXT.forEach((txt, i) => {
+                        const reqLvl = i + 1;
+                        if(s.lvl >= reqLvl) {
+                            let isClaimed = s.storyClaimed[i];
+                            let extra = !isClaimed ? 'story-claimable' : 'border-[var(--border-glass)]';
+                            h += `<div onclick="if(!${isClaimed}){ s.storyClaimed[${i}]=true; gain('gold', 10000); save(); }" class="glass-panel p-4 mb-3 transition-all ${extra}">
+                                <div class="flex justify-between items-center mb-2"><h3 class="text-[10px] font-sys text-[var(--gold)] uppercase tracking-wider">Capítulo ${reqLvl}: ${STORY_TITLES[i]}</h3>${isClaimed?'<span class="text-[8px] text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-2 py-1 rounded">LEÍDO</span>':'<span class="text-[8px] text-[var(--gold)] animate-pulse font-bold">RECLAMAR 10k G</span>'}</div>
+                                <p class="text-[11px] text-gray-300 italic leading-relaxed">"${txt}"</p>
+                            </div>`;
+                        } else {
+                            h += `<div class="glass-panel p-4 mb-3 opacity-30 text-center border-dashed border-gray-800"><p class="text-[10px] uppercase tracking-widest text-[var(--sys-red)]">Requiere Tier ${TIERS[reqLvl]} <span class="text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`;
+                        }
+                    });
+                }
+            }
+            else if(t === 'lab') {
+                if(s.lvl < 2) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier H<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
+                    const st = s.subTabs[t] || 'main';
+                    h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl"><button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Alquimia Base</button><button onclick="${s.lvl>=4?`setSubTab('sec')`:`toast('Requiere Tier F', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='sec'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Alquimia Oscura</button><button onclick="setSubTab('inv')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='inv'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Pociones</button></div>`;
+                    
+                    if(st === 'main') {
+                        h += `<div class="glass-panel p-5 text-center">
+                            <h3 class="font-sys text-[var(--sys-blue)] text-sm mb-2 uppercase tracking-widest flex justify-between items-center"><span>Destilación Básica</span> <span class="text-[10px] bg-black px-2 py-1 rounded text-[var(--sys-blue)] border border-[var(--sys-blue)]/30">${s.labCraftsToday}/3 Hoy</span></h3>
+                            <p class="text-[10px] opacity-70 mb-4 text-left text-gray-300">Las pociones creadas se guardarán en tu inventario para usarlas cuando quieras.</p>`;
+                            
+                        let potions = [
+                            { n: "Poción Menor (x1.2)", m: 1.2, cost: {m11:2}, req: 2 },
+                            { n: "Poción Verde (x1.5)", m: 1.5, cost: {m11:3, m13:1}, req: 3 },
+                            { n: "Poción Fuerte (x2.0)", m: 2.0, cost: {m13:2, m15:1}, req: 4 },
+                            { n: "Poción Mística (x2.5)", m: 2.5, cost: {m24:2, m9:1}, req: 5 },
+                            { n: "Poción Maestra (x3.0)", m: 3.0, cost: {m24:5, m23:1}, req: 7 }
+                        ];
+
+                        potions.forEach(p => {
+                            if(s.lvl >= p.req) {
+                                h += `<div class="bg-black/50 p-3 rounded-xl border border-[var(--border-glass)] mb-2 flex justify-between items-center">
+                                    <p class="text-[10px] font-bold text-gray-200">${p.n}</p>
+                                    <button onclick="if(s.labCraftsToday<3){ let ok=true; for(let m in ${JSON.stringify(p.cost).replace(/"/g, "'")}){if(s.mats[m]<${JSON.stringify(p.cost).replace(/"/g, "'")}[m]) ok=false;} if(!ok) return toast('Faltan Materiales','var(--sys-red)'); for(let m in ${JSON.stringify(p.cost).replace(/"/g, "'")}){s.mats[m]-=${JSON.stringify(p.cost).replace(/"/g, "'")}[m];} s.labCraftsToday++; s.potionInv['${p.n}']=(s.potionInv['${p.n}']||0)+1; toast('Guardada en Inventario', 'var(--sys-blue)'); save(); } else toast('Límite 3/Día', 'var(--sys-red)');" class="bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">Crear</button>
                                 </div>`;
                             } else {
-                                h += `<div class="glass-panel p-4 mb-3 opacity-30 text-center border-dashed border-gray-800"><p class="text-[10px] uppercase tracking-widest text-[var(--sys-red)]">Requiere Tier ${TIERS[reqLvl]} <span class="text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`;
+                                h += `<div class="bg-black/20 p-3 rounded-xl border border-gray-800 mb-2 text-left opacity-40"><p class="text-[10px] font-bold text-gray-500">🔒 Requiere Tier ${TIERS[p.req]} <span class="text-[8px]">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`;
                             }
                         });
-                    }
-                }
-                else if(t === 'lab') {
-                    if(s.lvl < 2) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier H<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
-                        const st = s.subTabs[t] || 'main';
-                        h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl"><button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Alquimia Base</button><button onclick="${s.lvl>=4?`setSubTab('sec')`:`toast('Requiere Tier F', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='sec'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Alquimia Oscura</button><button onclick="setSubTab('inv')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='inv'?'bg-white/10 text-white':'opacity-50'}">Pociones</button></div>`;
-                        
-                        if(st === 'main') {
-                            h += `<div class="glass-panel p-5 text-center">
-                                <h3 class="font-sys text-[var(--sys-blue)] text-sm mb-2 uppercase tracking-widest flex justify-between items-center"><span>Destilación Básica</span> <span class="text-[10px] bg-black px-2 py-1 rounded text-[var(--sys-blue)] border border-[var(--sys-blue)]/30">${s.labCraftsToday}/3 Hoy</span></h3>
-                                <p class="text-[10px] opacity-70 mb-4 text-left text-gray-300">Las pociones creadas se guardarán en tu inventario para usarlas cuando quieras.</p>`;
-                                
-                            let potions = [
-                                { n: "Poción Menor (x1.2)", m: 1.2, cost: {m11:2}, req: 2 },
-                                { n: "Poción Verde (x1.5)", m: 1.5, cost: {m11:3, m13:1}, req: 3 },
-                                { n: "Poción Fuerte (x2.0)", m: 2.0, cost: {m13:2, m15:1}, req: 4 },
-                                { n: "Poción Mística (x2.5)", m: 2.5, cost: {m24:2, m9:1}, req: 5 },
-                                { n: "Poción Maestra (x3.0)", m: 3.0, cost: {m24:5, m23:1}, req: 7 }
-                            ];
-
-                            potions.forEach(p => {
-                                if(s.lvl >= p.req) {
-                                    h += `<div class="bg-black/50 p-3 rounded-xl border border-[var(--border-glass)] mb-2 flex justify-between items-center">
-                                        <p class="text-[10px] font-bold text-gray-200">${p.n}</p>
-                                        <button onclick="if(s.labCraftsToday<3){ let ok=true; for(let m in ${JSON.stringify(p.cost).replace(/"/g, "'")}){if(s.mats[m]<${JSON.stringify(p.cost).replace(/"/g, "'")}[m]) ok=false;} if(!ok) return toast('Faltan Materiales','var(--sys-red)'); for(let m in ${JSON.stringify(p.cost).replace(/"/g, "'")}){s.mats[m]-=${JSON.stringify(p.cost).replace(/"/g, "'")}[m];} s.labCraftsToday++; s.potionInv['${p.n}']=(s.potionInv['${p.n}']||0)+1; toast('Guardada en Inventario', 'var(--sys-blue)'); save(); } else toast('Límite 3/Día', 'var(--sys-red)');" class="bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">Crear</button>
-                                    </div>`;
-                                } else {
-                                    h += `<div class="bg-black/20 p-3 rounded-xl border border-gray-800 mb-2 text-left opacity-40"><p class="text-[10px] font-bold text-gray-500">🔒 Requiere Tier ${TIERS[p.req]} <span class="text-[8px]">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`;
-                                }
-                            });
-                            h += `</div>`;
-                        } else if(st === 'sec') {
-                            h += `<div class="glass-panel p-5 border-[var(--sys-purple)]/30 text-center">
-                                <h3 class="font-sys text-[var(--sys-purple)] text-sm mb-4 uppercase tracking-widest">Magia Prohibida</h3>
-                                <div class="bg-black/50 p-4 rounded-xl border border-gray-800 mb-4">
-                                    <p class="text-[11px] font-bold text-[var(--sys-purple)] mb-3">Poción Oscura (x5.0 EXP)</p>
-                                    <button onclick="if(s.mats.m22>=5 && s.mats.m32>=5){ s.mats.m22-=5; s.mats.m32-=5; s.potionInv['Poción Oscura (x5.0)']= (s.potionInv['Poción Oscura (x5.0)']||0)+1; toast('Destilada en Inventario', 'var(--sys-purple)'); save(); } else toast('Faltan Materiales', 'var(--sys-red)');" class="w-full py-3 bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)]/50 rounded text-[10px] font-bold text-[var(--sys-purple)] uppercase tracking-widest">Crear (Tier A)</button>
-                                </div>
-                                <div class="bg-black/50 p-4 rounded-xl border border-[var(--sys-purple)]/30 mb-4">
-                                    <p class="text-[11px] font-bold text-white mb-3">Lágrima Abismo (x10.0 EXP)</p>
-                                    <button onclick="if(s.mats.m34>=1 && s.mats.m23>=10 && s.mats.m31>=10){ s.mats.m34-=1; s.mats.m23-=10; s.mats.m31-=10; s.potionInv['Lágrima Abismo (x10.0)']= (s.potionInv['Lágrima Abismo (x10.0)']||0)+1; toast('Lágrima en Inventario', 'var(--sys-blue)'); save(); } else toast('Faltan Materiales', 'var(--sys-red)');" class="w-full py-3 bg-white/10 border border-white/50 rounded text-[10px] font-bold text-white uppercase tracking-widest">Crear (Tier S)</button>
-                                </div>
-                            </div>`;
-                        } else if(st === 'inv') {
-                            h += `<div class="glass-panel p-4 h-[60vh] overflow-y-auto"><h3 class="font-sys text-[var(--sys-blue)] text-sm mb-4 uppercase tracking-widest border-b border-[var(--border-glass)] pb-2">Inventario de Pociones</h3>`;
-                            let has = false;
-                            for(let p in s.potionInv) {
-                                if(s.potionInv[p] > 0) {
-                                    has = true; let mult = parseFloat(p.match(/x(\d+\.\d+)/)[1]) || 1.2;
-                                    h += `<div class="flex justify-between items-center bg-black/40 p-3 rounded mb-2 border border-[var(--border-glass)]">
-                                        <div><p class="text-xs font-bold text-gray-200">${p}</p><p class="text-[9px] text-gray-400 mt-1">Cantidad: <span class="text-[var(--sys-blue)] font-bold">${s.potionInv[p]}</span></p></div>
-                                        <button onclick="if(s.potions.expB>1.0){ if(!confirm('Ya tienes un efecto de poción activo y lo vas a reemplazar. ¿Continuar?')) return; } s.potionInv['${p}']--; s.potions.expB=${mult}; toast('Poción Activada', 'var(--sys-blue)'); save();" class="bg-[var(--sys-blue)]/20 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-4 py-2 rounded text-xs font-bold uppercase">Tomar</button>
-                                    </div>`;
-                                }
+                        h += `</div>`;
+                    } else if(st === 'sec') {
+                        h += `<div class="glass-panel p-5 border-[var(--sys-purple)]/30 text-center">
+                            <h3 class="font-sys text-[var(--sys-purple)] text-sm mb-4 uppercase tracking-widest">Magia Prohibida</h3>
+                            <div class="bg-black/50 p-4 rounded-xl border border-gray-800 mb-4">
+                                <p class="text-[11px] font-bold text-[var(--sys-purple)] mb-3">Poción Oscura (x5.0 EXP)</p>
+                                <button onclick="if(s.mats.m22>=5 && s.mats.m32>=5){ s.mats.m22-=5; s.mats.m32-=5; s.potionInv['Poción Oscura (x5.0)']= (s.potionInv['Poción Oscura (x5.0)']||0)+1; toast('Destilada en Inventario', 'var(--sys-purple)'); save(); } else toast('Faltan Materiales', 'var(--sys-red)');" class="w-full py-3 bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)]/50 rounded text-[10px] font-bold text-[var(--sys-purple)] uppercase tracking-widest">Crear (Tier A)</button>
+                            </div>
+                            <div class="bg-black/50 p-4 rounded-xl border border-[var(--sys-purple)]/30 mb-4">
+                                <p class="text-[11px] font-bold text-white mb-3">Lágrima Abismo (x10.0 EXP)</p>
+                                <button onclick="if(s.mats.m34>=1 && s.mats.m23>=10 && s.mats.m31>=10){ s.mats.m34-=1; s.mats.m23-=10; s.mats.m31-=10; s.potionInv['Lágrima Abismo (x10.0)']= (s.potionInv['Lágrima Abismo (x10.0)']||0)+1; toast('Lágrima en Inventario', 'var(--sys-purple)'); save(); } else toast('Faltan Materiales', 'var(--sys-red)');" class="w-full py-3 bg-white/10 border border-white/50 rounded text-[10px] font-bold text-white uppercase tracking-widest">Crear (Tier S)</button>
+                            </div>
+                        </div>`;
+                    } else if(st === 'inv') {
+                        h += `<div class="glass-panel p-4 h-[60vh] overflow-y-auto"><h3 class="font-sys text-[var(--sys-blue)] text-sm mb-4 uppercase tracking-widest border-b border-[var(--border-glass)] pb-2">Inventario de Pociones</h3>`;
+                        let has = false;
+                        for(let p in s.potionInv) {
+                            if(s.potionInv[p] > 0) {
+                                has = true; let mult = parseFloat(p.match(/x(\d+\.\d+)/)[1]) || 1.2;
+                                h += `<div class="flex justify-between items-center bg-black/40 p-3 rounded mb-2 border border-[var(--border-glass)]">
+                                    <div><p class="text-xs font-bold text-[var(--sys-blue)]">${p}</p><p class="text-[9px] text-gray-400 mt-1">Cantidad: <span class="text-[var(--sys-blue)] font-bold">${s.potionInv[p]}</span></p></div>
+                                    <button onclick="if(s.potions.expB>1.0){ if(!confirm('Ya tienes un efecto de poción activo y lo vas a reemplazar. ¿Continuar?')) return; } s.potionInv['${p}']--; s.potions.expB=${mult}; toast('Poción Activada', 'var(--sys-blue)'); save();" class="bg-[var(--sys-blue)]/20 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-4 py-2 rounded text-xs font-bold uppercase">Tomar</button>
+                                </div>`;
                             }
-                            if(!has) h += `<p class="text-[10px] text-gray-500 text-center uppercase tracking-widest py-10 border border-dashed border-gray-800 rounded-xl">Inventario vacío</p>`;
-                            h += `</div>`;
                         }
+                        if(!has) h += `<p class="text-[10px] text-gray-500 text-center uppercase tracking-widest py-10 border border-dashed border-gray-800 rounded-xl">Inventario vacío</p>`;
+                        h += `</div>`;
                     }
                 }
-                else if(t === 'dungeon') {
-                    if(s.lvl < 3) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier G<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
-                        const st = s.subTabs[t] || 'd1';
-                        h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
-                            <button onclick="setSubTab('d1')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d1'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Mazmorra</button>
-                            <button onclick="${s.lvl>=5?`setSubTab('d2')`:`toast('Requiere Tier E', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d2'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Maldita</button>
-                            <button onclick="${s.lvl>=7?`setSubTab('d3')`:`toast('Requiere Tier C', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d3'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Abismo</button>
-                        </div>`;
-
-                        let cfg = { id:'b1', arr: BOSSES_T1, mCost: 2, tLvl: 1, col: 'var(--sys-blue)' };
-                        if(st==='d2') cfg = { id:'b2', arr: BOSSES_T2, mCost: 4, tLvl: 2, col: 'var(--sys-red)' };
-                        if(st==='d3') cfg = { id:'b3', arr: BOSSES_T3, mCost: 6, tLvl: 3, col: 'var(--sys-purple)' };
-
-                        let b = s.bosses[cfg.id]; let p = (b.hp / b.maxHp) * 100;
-                        let eq = getEquipStats(); let finalCost = Math.max(1, cfg.mCost * (1 - (eq.manaDiscount/100)));
-
-                        h += `<div class="glass-panel p-6 text-center border-[${cfg.col}]/30">
-                            <div class="mb-8">
-                                <h3 class="font-sys text-[${cfg.col}] text-xl font-bold uppercase mb-1 drop-shadow-[0_0_8px_${cfg.col}]">${b.name}</h3>
-                                <p class="text-[9px] opacity-60 mb-4 uppercase tracking-widest text-gray-300">Ataque Total: ${s.atk + eq.atk + (s.lvl*5)}</p>
-                                <div class="h-8 w-full bg-black rounded-full border border-[${cfg.col}]/50 relative overflow-hidden mb-4 shadow-inner">
-                                    <div class="progress-bar h-full bg-[${cfg.col}]/80" style="width: ${p}%"></div>
-                                    <div class="absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase text-white drop-shadow-md">HP: ${b.hp} / ${b.maxHp}</div>
-                                </div>
-                                <button onclick="attackBoss('${cfg.id}', ${cfg.mCost}, [${cfg.arr.map(x=>`'${x}'`).join(',')}])" class="w-full py-4 rounded-xl border border-[${cfg.col}]/50 bg-[${cfg.col}]/10 text-[${cfg.col}] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(0,0,0,0.5)]">⚔️ ATACAR (${finalCost.toFixed(1)} Maná)</button>
-                            </div>
-                            <hr class="border-gray-800 mb-6">
-                            <div>
-                                <h4 class="text-xs font-bold text-gray-300 mb-2 uppercase tracking-widest">Exploración Autónoma</h4>
-                                <p class="text-[9px] text-gray-400 opacity-60 mb-4 leading-relaxed">No gasta Maná. Sacrifica TODAS tus Diarias creadas a cambio de 3 materiales aleatorios de este Tier.</p>
-                                <button onclick="exploreAbyss(${cfg.tLvl})" class="w-full py-3 rounded-xl border border-gray-600 bg-gray-900 text-gray-300 text-[10px] font-bold uppercase tracking-widest ${(s.dailies.length>0 && s.dailies.every(d=>d.done)) && !s.dailySacrificed?'':'opacity-30'}">⛺ EXPLORAR (Req. Diarias Completadas)</button>
-                            </div>
-                        </div>`;
-                    }
-                }
-                else if(t === 'forge') {
-                    if(s.lvl < 4) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier F<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
-                        const st = s.subTabs[t] || 'wep';
-                        h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
-                            <button onclick="setSubTab('wep')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='wep'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Armas</button>
-                            <button onclick="setSubTab('arm')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='arm'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Armaduras</button>
-                        </div>`;
-                        
-                        if(st === 'wep') {
-                            let w1 = s.weapons.find(x=>x.id===s.activeWeps[0]); let w2 = s.weapons.find(x=>x.id===s.activeWeps[1]);
-                            h += `<div class="glass-panel p-4 mb-4 border-[var(--sys-blue)]/30"><p class="text-[10px] text-[var(--sys-blue)] font-bold uppercase tracking-widest border-b border-[var(--sys-blue)]/30 pb-2 mb-2">Equipado (Máx 2)</p>
-                            <div class="flex justify-between text-xs text-gray-300"><span class="truncate w-1/2">${w1?w1.name:'Vacio'}</span><span class="truncate w-1/2 text-right">${w2?w2.name:'Vacio'}</span></div></div>`;
-
-                            h += `<div class="glass-panel p-4 max-h-[50vh] overflow-y-auto pr-2"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-3 border-b border-gray-800 pb-2">Inventario de Armas</p>`;
-                            s.weapons.forEach((w) => {
-                                let isW1 = s.activeWeps[0] === w.id; let isW2 = s.activeWeps[1] === w.id; let active = isW1 || isW2;
-                                h += `<div class="bg-black/60 border ${active?'border-[var(--sys-blue)] shadow-[0_0_8px_var(--sys-blue)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-3">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <p class="text-xs font-bold ${active?'text-[var(--sys-blue)]':'text-gray-300'}">${w.name}</p>
-                                        <div class="flex gap-1">
-                                            <button onclick="s.activeWeps[0]='${w.id}'; if(s.activeWeps[1]==='${w.id}') s.activeWeps[1]=null; save();" class="text-[8px] font-bold border px-2 py-1 rounded ${isW1?'bg-[var(--sys-blue)] text-black border-[var(--sys-blue)]':'border-gray-600 text-gray-400'}">SLOT 1</button>
-                                            <button onclick="s.activeWeps[1]='${w.id}'; if(s.activeWeps[0]==='${w.id}') s.activeWeps[0]=null; save();" class="text-[8px] font-bold border px-2 py-1 rounded ${isW2?'bg-[var(--sys-blue)] text-black border-[var(--sys-blue)]':'border-gray-600 text-gray-400'}">SLOT 2</button>
-                                        </div>
-                                    </div>
-                                    <p class="text-[9px] text-gray-400 uppercase tracking-widest">ATK: <span class="text-white">${w.atk}</span> | Tier ${TIERS[w.reqTier]}</p>
-                                </div>`;
-                            });
-                            h += `</div>`;
-                        } else {
-                            let slots = [ {id:'head', n:'Casco', v:s.activeArmors.head}, {id:'chest', n:'Peto', v:s.activeArmors.chest}, {id:'legs', n:'Grebas', v:s.activeArmors.legs}, {id:'acc', n:'Amuleto', v:s.activeArmors.acc} ];
-                            let eq = getEquipStats();
-                            
-                            h += `<div class="glass-panel p-4 mb-4 border-[var(--gold)]/30"><div class="flex justify-between text-[10px] text-[var(--gold)] font-bold uppercase tracking-widest border-b border-[var(--gold)]/30 pb-2 mb-2"><span>Equipado</span><span>Desc. Maná: <span class="text-white">${eq.manaDiscount}%</span></span></div>
-                            <div class="grid grid-cols-2 gap-2 text-[9px] text-gray-300 text-center">`;
-                            slots.forEach(sl => { let item = s.armors.find(x=>x.id===sl.v); h+=`<div class="bg-black/50 p-2 border border-gray-800 rounded"> <span class="block text-gray-500 mb-1">${sl.n}</span> <span class="truncate font-bold">${item?item.name:'Vacío'}</span></div>`; });
-                            h += `</div>`;
-                            
-                            let setsActivos = Object.entries(eq.setCounts).filter(([_,c])=>c>0).map(([n,c])=>`<span class="${c===4?'text-[var(--gold)] font-bold':'text-gray-400'}">${n} ${c}/4 ${c===4?'(x2)':''}</span>`).join(' | ');
-                            if(setsActivos) h += `<div class="mt-3 text-[9px] uppercase tracking-widest text-center bg-black/30 py-2 border border-[var(--gold)]/20 rounded">${setsActivos}</div>`;
-                            h += `</div>`;
-
-                            h += `<div class="glass-panel p-4 max-h-[40vh] overflow-y-auto pr-2"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-3 border-b border-gray-800 pb-2">Inventario de Armaduras</p>`;
-                            s.armors.forEach((a) => {
-                                let act = s.activeArmors[a.slot] === a.id;
-                                h += `<div class="bg-black/60 border ${act?'border-[var(--gold)] shadow-[0_0_8px_var(--gold)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-3">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <p class="text-xs font-bold ${act?'text-[var(--gold)]':'text-gray-300'}">${a.name}</p>
-                                        <button onclick="s.activeArmors['${a.slot}']='${a.id}'; save();" class="text-[9px] font-bold border px-3 py-1 rounded ${act?'bg-[var(--gold)] text-black border-[var(--gold)]':'border-gray-600 text-gray-400'} uppercase tracking-widest">${act?'Equipado':'Equipar'}</button>
-                                    </div>
-                                    <p class="text-[9px] text-gray-400 uppercase tracking-widest">Desc. Maná: <span class="text-white">${a.manaDiscount}%</span> | Tier ${TIERS[a.reqTier]}</p>
-                                </div>`;
-                            });
-                            if(s.armors.length===0) h += `<p class="text-[10px] opacity-50 text-center py-6 border border-dashed border-gray-700 rounded-xl mt-2">Invoca armaduras en la tienda.</p>`;
-                            h += `</div>`;
-                        }
-                    }
-                }
-                else if(t === 'shop') {
-                    const st = s.subTabs[t] || 'base';
+            }
+            else if(t === 'dungeon') {
+                if(s.lvl < 3) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier G<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
+                    const st = s.subTabs[t] || 'd1';
                     h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
-                        <button onclick="setSubTab('base')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='base'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Tienda</button>
-                        <button onclick="setSubTab('gacW')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='gacW'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Gacha Arma</button>
-                        <button onclick="setSubTab('gacA')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='gacA'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Gacha Armor</button>
-                        <button onclick="setSubTab('admin')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='admin'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Hacker</button>
+                        <button onclick="setSubTab('d1')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d1'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Mazmorra</button>
+                        <button onclick="${s.lvl>=5?`setSubTab('d2')`:`toast('Requiere Tier E', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d2'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Maldita</button>
+                        <button onclick="${s.lvl>=7?`setSubTab('d3')`:`toast('Requiere Tier C', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d3'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Abismo</button>
                     </div>`;
 
-                    if(st === 'base') {
-                        h += `<div class="glass-panel p-4 mb-4 border-[var(--gold)]/30"><div class="flex justify-between items-center border-b border-[var(--gold)]/30 pb-2 mb-3"><h2 class="text-[10px] uppercase font-sys text-[var(--gold)]">Ofertas</h2><span class="text-[8px] text-[var(--sys-red)] font-bold tracking-widest" id="shop-countdown">--:--:--</span></div><div class="space-y-2 max-h-[300px] overflow-y-auto pr-1">`;
-                        (s.dailyShopIds || []).forEach(id => {
-                            let item = SHOP_POOL.find(x => x.id === id);
-                            if(item) {
-                                let mInfo = ALL_MATS.find(m => m[0] === item.mat);
-                                h += `<div class="flex justify-between items-center text-[10px] bg-black/40 p-3 rounded border border-gray-800">
-                                    <span class="text-gray-200 font-bold">${mInfo[1]} ${item.qty}x ${mInfo[2]}</span>
-                                    <button onclick="if(s.gold>=${item.cost}){ s.gold-=${item.cost}; s.mats['${item.mat}']+=${item.qty}; save(); toast('Comprado', 'var(--gold)'); } else toast('Oro Insuficiente', 'var(--sys-red)')" class="text-[var(--gold)] font-bold border border-[var(--gold)]/50 px-3 py-1 rounded bg-[var(--gold)]/10 font-sys">${item.cost}G</button>
-                                </div>`;
-                            }
-                        });
-                        h += `</div></div>`;
-                    } else if(st === 'gacW' || st === 'gacA') {
-                        let isW = st === 'gacW';
-                        let col = isW ? 'var(--sys-blue)' : 'var(--sys-purple)';
-                        h += `<div class="glass-panel p-6 text-center border-[${col}]/30">
-                            <span class="text-4xl block mb-4">🔮</span>
-                            <h3 class="font-sys text-[${col}] text-lg font-bold uppercase tracking-widest mb-2">Invocación</h3>
-                            <p class="text-[9px] text-[var(--lavender)] opacity-70 mb-6 border-b border-[${col}]/30 pb-4">Probabilidades: < Tier D (60%) | Tier D-A (38%) | Tier S (2%)</p>
-                            <button onclick="pullGacha('${isW?'W':'A'}')" class="w-full py-5 rounded-xl border border-[${col}]/50 bg-[${col}]/10 text-[${col}] font-bold uppercase tracking-widest text-xs shadow-[0_0_15px_${col}]">TIRADA (160 💎)</button>
-                        </div>`;
-                    } else {
-                        h += `<div class="border border-red-900/50 bg-black/80 rounded-xl p-4 shadow-inner mb-4"><p class="text-[9px] font-sys text-red-500 mb-3 text-center tracking-widest">HACKER MENU</p>
-                        <div class="flex flex-col gap-2">
-                            <button onclick="s.exp=EXP_NEEDED[9]; s.lvl=10; save(); toast('Max Level', 'var(--sys-blue)');" class="bg-blue-900/40 py-3 rounded-lg text-[10px] border border-blue-500/30 text-blue-300 font-bold uppercase">Nivel 10 (Max)</button>
-                            <button onclick="gain('exp', 50000);" class="bg-purple-900/40 py-3 rounded-lg text-[10px] border border-purple-500/30 text-purple-300 font-bold uppercase">+50,000 EXP</button>
-                            <button onclick="gain('gold', 500000);" class="bg-yellow-900/40 py-3 rounded-lg text-[10px] border border-yellow-500/30 text-yellow-300 font-bold uppercase">+500,000 Oro</button>
-                            <button onclick="gain('dia', 5000);" class="bg-[var(--dia)]/20 py-3 rounded-lg text-[10px] border border-[var(--dia)]/50 text-[var(--dia)] font-bold uppercase">+5000 Diamantes</button>
-                            <button onclick="ALL_MATS.forEach(m => s.mats[m[0]]=999); save(); toast('Materiales Max', 'var(--sys-blue)');" class="bg-green-900/40 py-3 rounded-lg text-[10px] border border-green-500/30 text-green-300 font-bold uppercase">Materiales Máximos</button>
-                            <div class="grid grid-cols-2 gap-2 mt-1">
-                                <button onclick="s.timeOffset+=3600000; checkTime(); toast('Reloj: +1 Hora', 'var(--sys-red)')" class="bg-gray-800 py-3 rounded text-[9px] border border-gray-600 text-gray-300 font-bold uppercase">+1H Reloj</button>
-                                <button onclick="if(confirm('¿BORRAR TODO EL PROGRESO?')){ localStorage.removeItem(DB_KEY); location.reload(); }" class="bg-red-900/50 py-3 rounded text-[9px] border border-red-500 text-red-300 font-bold uppercase">Hard Reset</button>
-                            </div>
-                        </div></div>`;
-                    }
+                    let cfg = { id:'b1', arr: BOSSES_T1, mCost: 2, tLvl: 1, col: 'var(--sys-blue)' };
+                    if(st==='d2') cfg = { id:'b2', arr: BOSSES_T2, mCost: 4, tLvl: 2, col: 'var(--sys-red)' };
+                    if(st==='d3') cfg = { id:'b3', arr: BOSSES_T3, mCost: 6, tLvl: 3, col: 'var(--sys-purple)' };
 
-                    h += `<button onclick="if(s.lvl<10) { toast('Requiere Tier S (Eres Tier '+TIERS[s.lvl]+')', 'var(--sys-red)'); return; } if(confirm('¿Ascender?')){ s.prestige++; s.lvl=1; s.exp=0; s.gold=0; s.diamonds=0; s.weapons=[ALL_WEAPONS[0]]; s.armors=[]; s.activeWeps=['w_sys_1',null]; s.activeArmors={head:null,chest:null,legs:null,acc:null}; s.storyClaimed.fill(false); save(); showModal('ASCENSIÓN', 'Has renacido', 'var(--sys-blue)'); }" class="w-full py-5 glass-panel text-xs tracking-widest font-bold uppercase transition-all mt-4 ${s.lvl>=10?'border-[var(--sys-blue)] text-[var(--sys-blue)] shadow-[0_0_15px_var(--sys-blue)]':'opacity-30 border-gray-800 text-gray-500'}">ASCENSIÓN PRESTIGIO</button>`;
+                    let b = s.bosses[cfg.id]; let p = (b.hp / b.maxHp) * 100;
+                    let eq = getEquipStats(); let finalCost = Math.max(1, cfg.mCost * (1 - (eq.manaDiscount/100)));
+
+                    h += `<div class="glass-panel p-6 text-center border-[${cfg.col}]/30">
+                        <div class="mb-8">
+                            <h3 class="font-sys text-[${cfg.col}] text-xl font-bold uppercase mb-1 drop-shadow-[0_0_8px_${cfg.col}]">${b.name}</h3>
+                            <p class="text-[9px] opacity-60 mb-4 uppercase tracking-widest text-[var(--sys-blue)]">Ataque Total: ${s.atk + eq.atk + (s.lvl*5)}</p>
+                            <div class="h-8 w-full bg-black rounded-full border border-[${cfg.col}]/50 relative overflow-hidden mb-4 shadow-inner">
+                                <div class="progress-bar h-full bg-[${cfg.col}]/80" style="width: ${p}%"></div>
+                                <div class="absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase text-white drop-shadow-md">HP: ${b.hp} / ${b.maxHp}</div>
+                            </div>
+                            <button onclick="attackBoss('${cfg.id}', ${cfg.mCost}, [${cfg.arr.map(x=>`'${x}'`).join(',')}])" class="w-full py-4 rounded-xl border border-[${cfg.col}]/50 bg-[${cfg.col}]/10 text-[${cfg.col}] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(0,0,0,0.5)]">⚔️ ATACAR (${finalCost.toFixed(1)} Maná)</button>
+                        </div>
+                        <hr class="border-gray-800 mb-6">
+                        <div>
+                            <h4 class="text-xs font-bold text-[var(--sys-blue)] mb-2 uppercase tracking-widest">Exploración Autónoma</h4>
+                            <p class="text-[9px] text-[var(--sys-blue)] opacity-60 mb-4 leading-relaxed">No gasta Maná. Sacrifica TODAS tus Diarias creadas a cambio de 3 materiales aleatorios de este Tier.</p>
+                            <button onclick="exploreAbyss(${cfg.tLvl})" class="w-full py-3 rounded-xl border border-gray-600 bg-gray-900 text-gray-300 text-[10px] font-bold uppercase tracking-widest ${(s.dailies.length>0 && s.dailies.every(d=>d.done)) && !s.dailySacrificed?'':'opacity-30'}">⛺ EXPLORAR (Req. Diarias Completadas)</button>
+                        </div>
+                    </div>`;
                 }
-                mc.innerHTML = `<div class="active-tab">${h}</div>`;
-            } catch(e) {
-                // FALLBACK ABSOLUTO SI ALGO FALLA (Nunca te quedarás en la nada)
-                mc.innerHTML = `<div class="p-6 m-4 text-center border-red-500 border bg-black/80 rounded-xl">
-                    <p class="text-red-500 font-bold mb-4 font-sys">CRITICAL ERROR</p>
-                    <p class="text-xs text-gray-400 mb-6">${e.message}</p>
-                    <button onclick="localStorage.removeItem('${DB_KEY}'); location.reload();" class="btn-aaa w-full py-4 rounded text-xs font-bold uppercase tracking-widest">HARD RESET AHORA</button>
-                </div>`;
-                console.error(e);
             }
+            else if(t === 'forge') {
+                if(s.lvl < 4) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier F<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
+                    const st = s.subTabs[t] || 'wep';
+                    h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
+                        <button onclick="setSubTab('wep')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='wep'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Armas</button>
+                        <button onclick="setSubTab('arm')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='arm'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Armaduras</button>
+                    </div>`;
+                    
+                    if(st === 'wep') {
+                        let w1 = s.weapons.find(x=>x.id===s.activeWeps[0]); let w2 = s.weapons.find(x=>x.id===s.activeWeps[1]);
+                        h += `<div class="glass-panel p-4 mb-4 border-[var(--sys-blue)]/30"><p class="text-[10px] text-[var(--sys-blue)] font-bold uppercase tracking-widest border-b border-[var(--sys-blue)]/30 pb-2 mb-2">Equipado (Máx 2)</p>
+                        <div class="flex justify-between text-xs text-gray-300"><span class="truncate w-1/2">${w1?w1.name:'Vacio'}</span><span class="truncate w-1/2 text-right">${w2?w2.name:'Vacio'}</span></div></div>`;
+
+                        h += `<div class="glass-panel p-4 max-h-[50vh] overflow-y-auto pr-2"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-3 border-b border-gray-800 pb-2">Inventario de Armas</p>`;
+                        s.weapons.forEach((w) => {
+                            let isW1 = s.activeWeps[0] === w.id; let isW2 = s.activeWeps[1] === w.id; let active = isW1 || isW2;
+                            h += `<div class="bg-black/60 border ${active?'border-[var(--sys-blue)] shadow-[0_0_8px_var(--sys-blue)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-3">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-xs font-bold ${active?'text-[var(--sys-blue)]':'text-gray-300'}">${w.name}</p>
+                                    <div class="flex gap-1">
+                                        <button onclick="s.activeWeps[0]='${w.id}'; if(s.activeWeps[1]==='${w.id}') s.activeWeps[1]=null; save();" class="text-[8px] font-bold border px-2 py-1 rounded ${isW1?'bg-[var(--sys-blue)] text-black border-[var(--sys-blue)]':'border-gray-600 text-gray-400'}">SLOT 1</button>
+                                        <button onclick="s.activeWeps[1]='${w.id}'; if(s.activeWeps[0]==='${w.id}') s.activeWeps[0]=null; save();" class="text-[8px] font-bold border px-2 py-1 rounded ${isW2?'bg-[var(--sys-blue)] text-black border-[var(--sys-blue)]':'border-gray-600 text-gray-400'}">SLOT 2</button>
+                                    </div>
+                                </div>
+                                <p class="text-[9px] text-gray-400 uppercase tracking-widest">ATK: <span class="text-white">${w.atk}</span> | Tier ${TIERS[w.reqTier]}</p>
+                            </div>`;
+                        });
+                        h += `</div>`;
+                    } else {
+                        let slots = [ {id:'head', n:'Casco', v:s.activeArmors.head}, {id:'chest', n:'Peto', v:s.activeArmors.chest}, {id:'legs', n:'Grebas', v:s.activeArmors.legs}, {id:'acc', n:'Amuleto', v:s.activeArmors.acc} ];
+                        let eq = getEquipStats();
+                        
+                        h += `<div class="glass-panel p-4 mb-4 border-[var(--gold)]/30"><div class="flex justify-between text-[10px] text-[var(--gold)] font-bold uppercase tracking-widest border-b border-[var(--gold)]/30 pb-2 mb-2"><span>Equipado</span><span>Desc. Maná: <span class="text-white">${eq.manaDiscount}%</span></span></div>
+                        <div class="grid grid-cols-2 gap-2 text-[9px] text-gray-300 text-center">`;
+                        slots.forEach(sl => { let item = s.armors.find(x=>x.id===sl.v); h+=`<div class="bg-black/50 p-2 border border-gray-800 rounded"> <span class="block text-gray-500 mb-1">${sl.n}</span> <span class="truncate font-bold">${item?item.name:'Vacío'}</span></div>`; });
+                        h += `</div>`;
+                        
+                        let setsActivos = Object.entries(eq.setCounts).filter(([_,c])=>c>0).map(([n,c])=>`<span class="${c===4?'text-[var(--gold)] font-bold':'text-gray-400'}">${n} ${c}/4 ${c===4?'(x2)':''}</span>`).join(' | ');
+                        if(setsActivos) h += `<div class="mt-3 text-[9px] uppercase tracking-widest text-center bg-black/30 py-2 border border-[var(--gold)]/20 rounded">${setsActivos}</div>`;
+                        h += `</div>`;
+
+                        h += `<div class="glass-panel p-4 max-h-[40vh] overflow-y-auto pr-2"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-3 border-b border-gray-800 pb-2">Inventario de Armaduras</p>`;
+                        s.armors.forEach((a) => {
+                            let act = s.activeArmors[a.slot] === a.id;
+                            h += `<div class="bg-black/60 border ${act?'border-[var(--gold)] shadow-[0_0_8px_var(--gold)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-3">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-xs font-bold ${act?'text-[var(--gold)]':'text-gray-300'}">${a.name}</p>
+                                    <button onclick="s.activeArmors['${a.slot}']='${a.id}'; save();" class="text-[9px] font-bold border px-3 py-1 rounded ${act?'bg-[var(--gold)] text-black border-[var(--gold)]':'border-gray-600 text-gray-400'} uppercase tracking-widest">${act?'Equipado':'Equipar'}</button>
+                                </div>
+                                <p class="text-[9px] text-gray-400 uppercase tracking-widest">Desc. Maná: <span class="text-[var(--sys-blue)]">${a.manaDiscount}%</span> | Tier ${TIERS[a.reqTier]}</p>
+                            </div>`;
+                        });
+                        if(s.armors.length===0) h += `<p class="text-[10px] opacity-50 text-center py-6 border border-dashed border-gray-700 rounded-xl mt-2">Invoca armaduras en la tienda.</p>`;
+                        h += `</div>`;
+                    }
+                }
+            }
+            else if(t === 'shop') {
+                const st = s.subTabs[t] || 'base';
+                h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
+                    <button onclick="setSubTab('base')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='base'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Tienda</button>
+                    <button onclick="setSubTab('gacW')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='gacW'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Gacha Arma</button>
+                    <button onclick="setSubTab('gacA')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='gacA'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Gacha Armor</button>
+                    <button onclick="setSubTab('admin')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='admin'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Hacker</button>
+                </div>`;
+
+                if(st === 'base') {
+                    h += `<div class="glass-panel p-4 mb-4 border-[var(--gold)]/30"><div class="flex justify-between items-center border-b border-[var(--gold)]/30 pb-2 mb-3"><h2 class="text-[10px] uppercase font-sys text-[var(--gold)]">Ofertas</h2><span class="text-[8px] text-[var(--sys-red)] font-bold tracking-widest" id="shop-countdown">--:--:--</span></div><div class="space-y-2 max-h-[300px] overflow-y-auto pr-1">`;
+                    s.dailyShopIds.forEach(id => {
+                        let item = SHOP_POOL.find(x => x.id === id);
+                        if(item) {
+                            let mInfo = ALL_MATS.find(m => m[0] === item.mat);
+                            h += `<div class="flex justify-between items-center text-[10px] bg-black/40 p-3 rounded border border-gray-800">
+                                <span class="text-gray-200 font-bold">${mInfo[1]} ${item.qty}x ${mInfo[2]}</span>
+                                <button onclick="if(s.gold>=${item.cost}){ s.gold-=${item.cost}; s.mats['${item.mat}']+=${item.qty}; save(); toast('Comprado', 'var(--gold)'); } else toast('Oro Insuficiente', 'var(--sys-red)')" class="text-[var(--gold)] font-bold border border-[var(--gold)]/50 px-3 py-1 rounded bg-[var(--gold)]/10 font-sys">${item.cost}G</button>
+                            </div>`;
+                        }
+                    });
+                    h += `</div></div>`;
+                } else if(st === 'gacW' || st === 'gacA') {
+                    let isW = st === 'gacW';
+                    let col = isW ? 'var(--sys-blue)' : 'var(--sys-purple)';
+                    h += `<div class="glass-panel p-6 text-center border-[${col}]/30">
+                        <span class="text-4xl block mb-4">🔮</span>
+                        <h3 class="font-sys text-[${col}] text-lg font-bold uppercase tracking-widest mb-2">Invocación</h3>
+                        <p class="text-[9px] text-[var(--sys-blue)] opacity-70 mb-6 border-b border-[${col}]/30 pb-4">Probabilidades: < Tier D (60%) | Tier D-A (38%) | Tier S (2%)</p>
+                        <button onclick="pullGacha('${isW?'W':'A'}')" class="w-full py-5 rounded-xl border border-[${col}]/50 bg-[${col}]/10 text-[${col}] font-bold uppercase tracking-widest text-xs shadow-[0_0_15px_${col}]">TIRADA (160 💎)</button>
+                    </div>`;
+                } else {
+                    h += `<div class="border border-red-900/50 bg-black/80 rounded-xl p-4 shadow-inner mb-4"><p class="text-[9px] font-sys text-[var(--sys-red)] mb-3 text-center tracking-widest">HACKER MENU</p>
+                    <div class="flex flex-col gap-2">
+                        <button onclick="s.exp=EXP_NEEDED[9]; s.lvl=10; save(); toast('Max Level', 'var(--sys-blue)');" class="bg-blue-900/40 py-3 rounded-lg text-[10px] border border-blue-500/30 text-[var(--sys-blue)] font-bold uppercase">Nivel 10 (Max)</button>
+                        <button onclick="gain('exp', 50000);" class="bg-purple-900/40 py-3 rounded-lg text-[10px] border border-purple-500/30 text-[var(--sys-purple)] font-bold uppercase">+50,000 EXP</button>
+                        <button onclick="gain('gold', 500000);" class="bg-yellow-900/40 py-3 rounded-lg text-[10px] border border-yellow-500/30 text-[var(--gold)] font-bold uppercase">+500,000 Oro</button>
+                        <button onclick="gain('dia', 5000);" class="bg-[var(--dia)]/20 py-3 rounded-lg text-[10px] border border-[var(--dia)]/50 text-[var(--dia)] font-bold uppercase">+5000 Diamantes</button>
+                        <button onclick="ALL_MATS.forEach(m => s.mats[m[0]]=999); save(); toast('Materiales Max', 'var(--sys-blue)');" class="bg-green-900/40 py-3 rounded-lg text-[10px] border border-green-500/30 text-green-300 font-bold uppercase">Materiales Máximos</button>
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            <button onclick="s.timeOffset+=3600000; checkTime(); toast('Reloj: +1 Hora', 'var(--sys-red)')" class="bg-gray-800 py-3 rounded text-[9px] border border-gray-600 text-gray-300 font-bold uppercase">+1H Reloj</button>
+                            <button onclick="if(confirm('¿BORRAR TODO EL PROGRESO?')){ localStorage.removeItem(DB_KEY); location.reload(); }" class="bg-red-900/50 py-3 rounded text-[9px] border border-[var(--sys-red)] text-[var(--sys-red)] font-bold uppercase">Hard Reset</button>
+                        </div>
+                    </div></div>`;
+                }
+
+                h += `<button onclick="if(s.lvl<10) { toast('Requiere Tier S (Eres Tier '+TIERS[s.lvl]+')', 'var(--sys-red)'); return; } if(confirm('¿Ascender?')){ s.prestige++; s.lvl=1; s.exp=0; s.gold=0; s.diamonds=0; s.weapons=[ALL_WEAPONS[0]]; s.armors=[]; s.activeWeps=['w_sys_1',null]; s.activeArmors={head:null,chest:null,legs:null,acc:null}; s.storyClaimed.fill(false); save(); showModal('ASCENSIÓN', 'Has renacido', 'var(--sys-blue)'); }" class="w-full py-5 glass-panel text-xs tracking-widest font-bold uppercase transition-all mt-4 ${s.lvl>=10?'border-[var(--sys-blue)] text-[var(--sys-blue)] shadow-[0_0_15px_var(--sys-blue)]':'opacity-30 border-gray-800 text-gray-500'}">ASCENSIÓN PRESTIGIO</button>`;
+            }
+            mc.innerHTML = h;
         }
 
+        render();
         if(s.dailyShopIds.length === 0) rollShop();
-        checkTime(); save();
+        checkTime();
     </script>
 </body>
 </html>
