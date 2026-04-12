@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYSTEM V0.9.a: THE DEEP DIVE</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SYSTEM 0.9">
+    <title>SYSTEM V0.9: THE DEEP DIVE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@300;500;700&display=swap');
         
         :root {
             --bg-base: #0c0c12; 
-            --sys-blue: #3b82f6;   /* Mazmorra / Maná / Colores Base */
-            --sys-red: #ef4444;    /* Maldita / Reloj / Errores */
-            --sys-purple: #a855f7; /* Abismo / EXP */
-            --gold: #c8b98a; 
+            --sys-blue: #60a5fa;   /* Mazmorra / Maná / Base */
+            --sys-red: #f87171;    /* Maldita / Reloj / Error */
+            --sys-purple: #c084fc; /* Abismo / EXP */
+            --gold: #fcd34d; 
             --dia: #2dd4bf;        /* Diamantes */
-            --border-glass: rgba(255,255,255,0.1);
+            --border-glass: rgba(255,255,255,0.12);
         }
         body { 
             background: var(--bg-base); color: #e2e8f0; font-family: 'Space Grotesk', sans-serif; 
@@ -30,7 +33,7 @@
             backdrop-filter: blur(8px); border-radius: 16px;
         }
         .btn-aaa {
-            background: linear-gradient(90deg, rgba(59,130,246,0.1), rgba(168,85,247,0.1));
+            background: linear-gradient(90deg, rgba(96,165,250,0.1), rgba(192,132,252,0.1));
             border: 1px solid var(--border-glass); color: var(--sys-blue); transition: all 0.2s;
         }
         .btn-aaa:active { transform: scale(0.97); }
@@ -39,8 +42,8 @@
         .story-claimable { border: 1px solid #fff700 !important; box-shadow: 0 0 12px rgba(255, 247, 0, 0.5); cursor: pointer; animation: pulseGlow 2s infinite; }
         @keyframes pulseGlow { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
         
-        .editable-objective { border-bottom: 1px dashed var(--sys-blue); background: rgba(59,130,246,0.05); transition: 0.2s; }
-        .editable-objective:focus { background: rgba(59,130,246,0.15); outline: none; border-bottom-style: solid; }
+        .editable-objective { border-bottom: 1px dashed var(--sys-blue); background: rgba(96,165,250,0.05); transition: 0.2s; padding: 4px; border-radius: 4px 4px 0 0; }
+        .editable-objective:focus { background: rgba(96,165,250,0.15); outline: none; border-bottom-style: solid; }
 
         .chart-svg { width: 100%; height: 100%; stroke: var(--sys-blue); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -54,12 +57,12 @@
         
         <div class="flex justify-between items-start mb-4 relative z-10">
             <div>
-                <h1 class="font-sys font-bold text-xl text-[var(--sys-blue)] tracking-wider">SYS<span class="text-[var(--sys-red)] text-xs ml-1">v0.9.a</span></h1>
+                <h1 class="font-sys font-bold text-xl text-[var(--sys-blue)] tracking-wider">SYS<span class="text-[var(--sys-red)] text-xs ml-1">v0.9</span></h1>
                 <div class="flex gap-3 mt-1">
                     <p class="text-[10px] font-bold uppercase text-[var(--gold)]">💰 <span id="hud-gold">0</span></p>
                     <p class="text-[10px] font-bold uppercase text-[var(--dia)]">💎 <span id="hud-dia">0</span></p>
                 </div>
-                <p id="hud-bonus-txt" class="text-[8px] font-bold mt-1 uppercase text-yellow-400 hidden animate-pulse">⚡ Bono Activo</p>
+                <p id="hud-bonus-txt" class="text-[8px] font-bold mt-1 uppercase text-[var(--gold)] hidden animate-pulse">⚡ Bono Activo</p>
             </div>
             <div class="text-right">
                 <p class="font-sys font-bold text-3xl text-[var(--sys-purple)]">Tier <span id="hud-tier" class="text-white">I</span></p>
@@ -104,16 +107,17 @@
 
     <div id="modal" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col justify-center items-center p-6 text-center">
         <div class="glass-panel w-full p-8 relative overflow-hidden">
-            <h3 id="modal-title" class="font-sys text-[16px] font-bold tracking-[0.2em] mb-4 text-[var(--sys-blue)]">...</h3>
-            <p id="modal-desc" class="text-sm text-gray-300 mb-8 font-sys leading-relaxed">...</p>
-            <button onclick="closeModal()" class="btn-aaa w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest bg-black/50">
+            <div id="modal-glow" class="absolute inset-0 opacity-20 blur-2xl"></div>
+            <h3 id="modal-title" class="font-sys text-[16px] font-bold tracking-[0.2em] mb-4 relative z-10 text-[var(--sys-blue)]">...</h3>
+            <p id="modal-desc" class="text-sm text-gray-300 mb-8 font-sys leading-relaxed relative z-10">...</p>
+            <button onclick="closeModal()" class="btn-aaa w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest relative z-10 bg-black/50">
                 ACEPTAR (<span id="modal-timer">5</span>s)
             </button>
         </div>
     </div>
 
     <script>
-        const DB_KEY = 'sys_v0_9_a_save'; // NUEVA CLAVE PARA EVITAR CORRUPCIÓN
+        const DB_KEY = 'system_v09_safe_save_1'; // Clave nueva para evitar bugs en la nada
         const TIERS = {1:'I', 2:'H', 3:'G', 4:'F', 5:'E', 6:'D', 7:'C', 8:'B', 9:'A', 10:'S'};
         const EXP_NEEDED = [0, 400, 1000, 3000, 7500, 15000, 30000, 50000, 75000, 100000];
 
@@ -174,34 +178,25 @@
 
         let defaultMats = {}; ALL_MATS.forEach(m => defaultMats[m[0]] = 0);
 
-        // DEFAULT SAFE STATE 0.9.a
-        const DEFAULT_SAVE = {
-            version: "0.9.a",
-            lvl: 1, exp: 0, gold: 0, diamonds: 0, prestige: 0, mana: 10,
-            lastDate: null, timeOffset: 0,
-            objective: "Objetivo: Menor tiempo posible", races: [], diaClaimedToday: false,
-            dailies: [{name: "Entrenamiento Físico", done: false}], dailySacrificed: false,
-            storyClaimed: Array(10).fill(false),
-            potions: { expB: 1.0 }, potionInv: {},
-            mats: defaultMats,
-            weapons: [ALL_WEAPONS[0]], armors: [],
-            activeWeps: ['w_sys_1', null], activeArmors: {head:null, chest:null, legs:null, acc:null},
-            bosses: { 
-                b1: { name: BOSSES_T1[0], hp: 500, maxHp: 500, lvl: 1 }, 
-                b2: { name: BOSSES_T2[0], hp: 5000, maxHp: 5000, lvl: 11 }, 
-                b3: { name: BOSSES_T3[0], hp: 20000, maxHp: 20000, lvl: 21 } 
-            },
-            currentTab: 'home', subTabs: {}, dailyShopIds: []
-        };
-
         let s = JSON.parse(localStorage.getItem(DB_KEY));
-        if (!s || s.version !== "0.9.a") {
-            s = DEFAULT_SAVE;
-            localStorage.setItem(DB_KEY, JSON.stringify(s));
+        if(!s || s.v !== "0.9.1") {
+            s = {
+                v: "0.9.1",
+                lvl: 1, exp: 0, gold: 0, diamonds: 0, prestige: 0, mana: 10,
+                lastDate: null, timeOffset: 0,
+                objective: "Objetivo: Menor tiempo posible", races: [], diaClaimedToday: false,
+                dailies: [{name: "Entrenamiento Físico", done: false}], dailySacrificed: false,
+                storyClaimed: Array(10).fill(false),
+                potions: { expB: 1.0 }, potionInv: {},
+                mats: defaultMats,
+                weapons: [ALL_WEAPONS[0]], armors: [],
+                activeWeps: ['w_sys_1', null], activeArmors: {head:null, chest:null, legs:null, acc:null},
+                bosses: { b1: { name: BOSSES_T1[0], hp: 500, maxHp: 500, lvl: 1 }, b2: { name: BOSSES_T2[0], hp: 5000, maxHp: 5000, lvl: 11 }, b3: { name: BOSSES_T3[0], hp: 20000, maxHp: 20000, lvl: 21 } },
+                currentTab: 'home', subTabs: {}, dailyShopIds: []
+            };
         }
 
         const MAX_MANA = () => 10 + (s.lvl * 2);
-
         let virtualTime = new Date(); let modalTimer = null; let modalCountdown = 0;
 
         function rollShop() {
@@ -221,16 +216,15 @@
             let m = Math.floor((rem%3600000)/60000).toString().padStart(2, '0');
             let sec = Math.floor((rem%60000)/1000).toString().padStart(2, '0');
             let tStr = `${h}:${m}:${sec}`;
-            
             document.getElementById('sys-countdown').innerText = tStr;
+
             let shopC = document.getElementById('shop-countdown');
             if(shopC) shopC.innerText = tStr;
 
             const strDate = virtualTime.toLocaleDateString();
             if(s.lastDate !== strDate) { 
                 s.dailySacrificed = false; s.diaClaimedToday = false;
-                if(s.dailies) s.dailies.forEach(d => d.done = false);
-                s.labCraftsToday = 0;
+                s.dailies.forEach(d => d.done = false); s.labCraftsToday = 0;
                 rollShop(); s.lastDate = strDate; save(); 
             }
         }
@@ -256,11 +250,10 @@
                 if(a) { md += a.manaDiscount; counts[a.setName] = (counts[a.setName]||0) + 1; }
             });
 
-            // Set Bonus: x2 descuento si tiene 4/4
             for(let setName in counts) {
                 if(counts[setName] === 4) {
                     let sample = s.armors.find(x => x.setName === setName);
-                    if(sample) md += (sample.manaDiscount * 4); 
+                    if(sample) md += (sample.manaDiscount * 4); // Set x2
                 }
             }
             return { atk, manaDiscount: md, setCounts: counts };
@@ -278,10 +271,9 @@
                     reqExp = EXP_NEEDED[s.lvl]; 
                 }
                 if(s.lvl >= 10) { s.lvl = 10; s.exp = EXP_NEEDED[9]; }
-                toast(`+${Math.floor(amount)} EXP`, "var(--sys-purple)");
             }
-            if(type === 'gold') { s.gold += amount * mult; toast(`+${Math.floor(amount)} G`, "var(--gold)"); }
-            if(type === 'dia') { s.diamonds += amount; toast(`+${amount} Diamantes`, "var(--dia)"); }
+            if(type === 'gold') s.gold += amount * mult;
+            if(type === 'dia') s.diamonds += amount;
             save();
         }
 
@@ -299,7 +291,7 @@
             document.getElementById('hud-mana-txt').innerText = `${Math.floor(s.mana)}/${MAX_MANA()}`;
 
             const bt = document.getElementById('hud-bonus-txt');
-            if(s.potions && s.potions.expB > 1.0) { bt.classList.remove('hidden'); bt.innerText = `✨ EXP x${s.potions.expB}`; } 
+            if(s.potions.expB > 1.0) { bt.classList.remove('hidden'); bt.innerText = `✨ EXP x${s.potions.expB}`; } 
             else { bt.classList.add('hidden'); }
 
             ['lab', 'dungeon', 'forge', 'shop'].forEach((id, idx) => {
@@ -328,10 +320,10 @@
             }, 1000);
         }
 
-        function closeModal() { clearInterval(modalTimer); document.getElementById('modal').classList.add('hidden'); }
+        function closeModal() { clearInterval(modalTimer); document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').style.display = ''; }
 
         function generateLineChart() {
-            if(!s.races || s.races.length < 2) return `<div class="text-[10px] text-center opacity-50 py-10 uppercase tracking-widest text-[var(--sys-blue)] border border-dashed border-[var(--border-glass)] rounded-xl mt-4">Aparece a partir de 2 carreras</div>`;
+            if(!s.races || s.races.length < 2) return `<div class="text-[10px] text-center opacity-50 py-10 uppercase tracking-widest text-[var(--sys-blue)] border border-dashed border-[var(--sys-blue)]/30 rounded-xl mt-4">Aparece a partir de 2 carreras</div>`;
             
             let max = Math.max(...s.races.map(r => r.val));
             let min = Math.min(...s.races.map(r => r.val));
@@ -348,7 +340,7 @@
             let eDate = new Date(s.races[s.races.length-1].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
 
             return `
-            <div class="relative w-full h-[120px] flex items-end mt-6 mb-6 border-l border-b border-[var(--border-glass)] pb-4 pl-8">
+            <div class="relative w-full h-[120px] flex items-end mt-6 mb-6 border-l border-b border-[var(--sys-blue)]/50 pb-4 pl-8">
                 <div class="absolute left-0 top-0 bottom-4 flex flex-col justify-between text-[8px] text-[var(--sys-blue)] font-sys">
                     <span>${Math.ceil(max/60)}m</span>
                     <span>${Math.floor(min/60)}m</span>
@@ -361,7 +353,7 @@
         }
 
         function exploreAbyss(tierLvl) {
-            let allDone = s.dailies && s.dailies.length > 0 && s.dailies.every(d => d.done);
+            let allDone = s.dailies.length > 0 && s.dailies.every(d => d.done);
             if(!allDone) return toast("Requiere Diarias Completadas", "var(--sys-red)");
             if(s.dailySacrificed) return toast("Ya sacrificado hoy", "var(--sys-red)");
             
@@ -383,7 +375,7 @@
             if(s.mana < finalCost) return toast("Maná Insuficiente", "var(--sys-red)");
             
             s.mana -= finalCost;
-            b.hp -= (s.lvl*10 + eq.atk);
+            b.hp -= (s.atk + eq.atk + (s.lvl*5));
             if(b.hp <= 0) {
                 let e = cost * 1000; let g = cost * 5000;
                 b.lvl++; b.maxHp = Math.floor(b.maxHp * 1.5); b.hp = b.maxHp;
@@ -443,7 +435,7 @@
                         h += `<div class="glass-panel p-5 mb-4 border-[var(--sys-blue)]/30">
                                 <div class="flex items-center mb-4 bg-[var(--sys-blue)]/5 p-2 rounded border-b border-[var(--sys-blue)]/30">
                                     <span class="mr-2 text-[var(--sys-blue)]">🎯</span>
-                                    <input type="text" value="${s.objective}" onchange="s.objective=this.value; save();" class="w-full bg-transparent text-[10px] text-[var(--sys-blue)] uppercase tracking-widest outline-none editable-objective" placeholder="Escribe tu objetivo...">
+                                    <input type="text" value="${s.objective}" onchange="s.objective=this.value; save();" class="w-full bg-transparent text-[10px] text-[var(--sys-blue)] uppercase tracking-widest font-bold outline-none editable-objective" placeholder="Escribe tu objetivo aquí...">
                                     <span class="ml-2 text-[var(--sys-blue)] opacity-50 text-[10px]">✏️ EDITAR</span>
                                 </div>
                                 <div class="flex gap-2 items-center mb-2">
@@ -465,7 +457,7 @@
                                 }
                         h += `</div></div>`;
 
-                        let allDone = s.dailies && s.dailies.length > 0 && s.dailies.every(d => d.done);
+                        let allDone = s.dailies.length > 0 && s.dailies.every(d => d.done);
                         h += `<div class="glass-panel p-5 mb-4">
                             <h2 class="text-[10px] font-sys text-[var(--sys-purple)] mb-3 uppercase tracking-widest flex justify-between">
                                 <span>Misiones Diarias</span> <span class="text-[var(--sys-red)]">${s.dailies.filter(d=>d.done).length}/${s.dailies.length}</span>
@@ -478,7 +470,7 @@
                                 let color = d.done ? 'text-[var(--sys-blue)] border-[var(--sys-blue)]/50' : 'text-gray-300 border-[var(--border-glass)]';
                                 h += `<div class="flex gap-2 items-center mb-2 bg-black/30 p-2 rounded-lg border ${color}">
                                     <input type="text" value="${d.name}" onchange="s.dailies[${i}].name=this.value; save();" class="w-full bg-transparent outline-none text-xs ${d.done?'opacity-50 line-through text-[var(--sys-blue)]':'text-gray-300'}" ${d.done?'disabled':''}>
-                                    ${!d.done ? `<button onclick="s.dailies[${i}].done=true; gain('exp', 1000); gain('gold',5000); gain('dia',50); toast('Misión Completada'); save();" class="text-[var(--sys-blue)] text-xs px-2 py-1 bg-[var(--sys-blue)]/10 rounded border border-[var(--sys-blue)]/50">✔️</button>` : ''}
+                                    ${!d.done ? `<button onclick="s.dailies[${i}].done=true; gain('exp', 1000); gain('gold',5000); gain('dia',50); toast('Misión Completada', 'var(--sys-blue)'); save();" class="text-[var(--sys-blue)] text-xs px-2 py-1 bg-[var(--sys-blue)]/10 rounded border border-[var(--sys-blue)]/50">✔️</button>` : ''}
                                     <button onclick="if(s.dailies[${i}].done) { toast('Solo al reinicio', 'var(--sys-red)'); } else { s.dailies.splice(${i},1); save(); }" class="text-[var(--sys-red)] text-xs px-2 py-1 bg-[var(--sys-red)]/10 rounded border border-[var(--sys-red)]/50">❌</button>
                                 </div>`;
                             });
@@ -718,7 +710,7 @@
                 }
                 mc.innerHTML = `<div class="active-tab">${h}</div>`;
             } catch(e) {
-                mc.innerHTML = `<div class="p-5 text-red-500 border border-red-500 bg-red-900/20 rounded">Error renderizando: ${e.message}</div>`;
+                mc.innerHTML = `<div class="p-5 text-red-500 border border-red-500 bg-red-900/20 rounded m-4 text-xs font-bold font-sys">CRITICAL ERROR:<br><br>${e.message}<br><br>Ve a la tienda > Hacker Menu > Hard Reset.</div>`;
                 console.error(e);
             }
         }
