@@ -3,52 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYSTEM V0.9.8: THE GYM UPDATE</title>
+    <title>SYSTEM V1.0: OFFICIAL RELEASE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@300;500;700&display=swap');
-        
-        :root {
-            --bg-base: #0c0c12; 
-            --sys-blue: #60a5fa;   
-            --sys-red: #f87171;    
-            --sys-purple: #c084fc; 
-            --gold: #fcd34d;       
-            --dia: #2dd4bf;        
-            --exotic: #facc15; 
-            --divine: #38bdf8; 
-            --border-glass: rgba(255,255,255,0.12);
-        }
-        body { 
-            background: var(--bg-base); color: #e2e8f0; font-family: 'Space Grotesk', sans-serif; 
-            -webkit-tap-highlight-color: transparent; overflow-x: hidden;
-            padding-top: calc(env(safe-area-inset-top) + 5px);
-            padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
-        }
+        :root { --bg-base: #0c0c12; --sys-blue: #60a5fa; --sys-red: #f87171; --sys-purple: #c084fc; --gold: #fcd34d; --dia: #2dd4bf; --exotic: #facc15; --divine: #38bdf8; --border-glass: rgba(255,255,255,0.12); }
+        body { background: var(--bg-base); color: #e2e8f0; font-family: 'Space Grotesk', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; padding-top: calc(env(safe-area-inset-top) + 5px); padding-bottom: calc(env(safe-area-inset-bottom) + 80px); }
         .font-sys { font-family: 'Orbitron', sans-serif; }
-        .glass-panel {
-            background: linear-gradient(145deg, rgba(18,18,24,0.9) 0%, rgba(12,12,18,0.95) 100%);
-            border: 1px solid var(--border-glass); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px); border-radius: 16px;
-        }
-        .btn-aaa {
-            background: linear-gradient(90deg, rgba(96,165,250,0.1), rgba(192,132,252,0.1));
-            border: 1px solid var(--border-glass); color: var(--sys-blue); transition: all 0.2s;
-        }
+        .glass-panel { background: linear-gradient(145deg, rgba(18,18,24,0.9) 0%, rgba(12,12,18,0.95) 100%); border: 1px solid var(--border-glass); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); border-radius: 16px; }
+        .btn-aaa { background: linear-gradient(90deg, rgba(96,165,250,0.1), rgba(192,132,252,0.1)); border: 1px solid var(--border-glass); color: var(--sys-blue); transition: all 0.2s; }
         .btn-aaa:active { transform: scale(0.97); }
         .progress-bar { transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-        
         .story-claimable { border: 1px solid #fff700 !important; box-shadow: 0 0 12px rgba(255, 247, 0, 0.5); cursor: pointer; animation: pulseGlow 2s infinite; }
         .quest-claimable { background-color: rgba(252, 211, 77, 0.2) !important; border-color: var(--gold) !important; color: var(--gold) !important; animation: pulseGlow 2s infinite; cursor: pointer; }
         @keyframes pulseGlow { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
-        
         .editable-objective { border-bottom: 1px dashed var(--sys-blue); background: rgba(59,130,246,0.05); transition: 0.2s; padding: 6px; border-radius: 4px 4px 0 0; }
         .editable-objective:focus { background: rgba(59,130,246,0.15); outline: none; border-bottom-style: solid; }
-
         .chart-svg { width: 100%; height: 100%; stroke: var(--sys-blue); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-        
         .art-icon { display: inline-flex; justify-content: center; align-items: center; width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(0,0,0,0.5)); border: 1px solid rgba(255,255,255,0.2); font-size: 24px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
-
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -56,10 +28,9 @@
 
     <header class="glass-panel p-4 sm:p-5 mb-6 relative overflow-hidden">
         <div class="absolute top-0 right-0 w-32 h-32 bg-[var(--sys-blue)] opacity-5 blur-[60px] rounded-full"></div>
-        
         <div class="flex justify-between items-start mb-4 relative z-10">
             <div>
-                <h1 class="font-sys font-bold text-lg sm:text-xl text-[var(--sys-blue)] tracking-wider">SYSTEM<span class="text-[var(--sys-red)] text-[10px] sm:text-xs ml-1">v0.9.8</span></h1>
+                <h1 class="font-sys font-bold text-lg sm:text-xl text-[var(--sys-blue)] tracking-wider">SYSTEM<span class="text-[var(--sys-red)] text-[10px] sm:text-xs ml-1">v1.0</span></h1>
                 <div class="flex gap-3 mt-1">
                     <p class="text-[10px] font-bold uppercase text-[var(--gold)]">💰 <span id="hud-gold">0</span></p>
                     <p class="text-[10px] font-bold uppercase text-[var(--dia)]">💎 <span id="hud-dia">0</span></p>
@@ -76,27 +47,18 @@
         <div class="space-y-3 relative z-10">
             <div>
                 <div class="flex justify-between text-[9px] sm:text-[10px] font-bold mb-1 uppercase text-[var(--sys-red)]"><span>Reloj Solar</span> <span id="sys-countdown">--:--:--</span></div>
-                <div class="h-1.5 w-full bg-black/50 rounded-full overflow-hidden">
-                    <div id="hud-time-bar" class="progress-bar h-full bg-[var(--sys-red)] shadow-[0_0_8px_var(--sys-red)]" style="width: 0%"></div>
-                </div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full overflow-hidden"><div id="hud-time-bar" class="progress-bar h-full bg-[var(--sys-red)] shadow-[0_0_8px_var(--sys-red)]" style="width: 0%"></div></div>
             </div>
             <div>
                 <div class="flex justify-between text-[9px] sm:text-[10px] font-bold mb-1 uppercase text-[var(--sys-purple)]"><span>EXP</span> <span id="hud-exp-txt">0/500</span></div>
-                <div class="h-1.5 w-full bg-black/50 rounded-full overflow-hidden">
-                    <div id="hud-exp-bar" class="progress-bar h-full bg-[var(--sys-purple)] shadow-[0_0_8px_var(--sys-purple)]" style="width: 0%"></div>
-                </div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full overflow-hidden"><div id="hud-exp-bar" class="progress-bar h-full bg-[var(--sys-purple)] shadow-[0_0_8px_var(--sys-purple)]" style="width: 0%"></div></div>
             </div>
             <div>
                 <div class="flex justify-between text-[9px] sm:text-[10px] font-bold mb-1 uppercase text-[var(--sys-blue)]">
                     <span>MANÁ</span> 
-                    <div class="flex gap-2 items-center">
-                        <span id="mana-regen-timer" class="text-[7px] sm:text-[8px] text-[var(--sys-blue)] opacity-70">(MAX)</span>
-                        <span id="hud-mana-txt">10/10</span>
-                    </div>
+                    <div class="flex gap-2 items-center"><span id="mana-regen-timer" class="text-[7px] sm:text-[8px] text-[var(--sys-blue)] opacity-70">(MAX)</span><span id="hud-mana-txt">10/10</span></div>
                 </div>
-                <div class="h-1.5 w-full bg-black/50 rounded-full overflow-hidden">
-                    <div id="hud-mana-bar" class="progress-bar h-full bg-[var(--sys-blue)] shadow-[0_0_8px_var(--sys-blue)]" style="width: 100%"></div>
-                </div>
+                <div class="h-1.5 w-full bg-black/50 rounded-full overflow-hidden"><div id="hud-mana-bar" class="progress-bar h-full bg-[var(--sys-blue)] shadow-[0_0_8px_var(--sys-blue)]" style="width: 100%"></div></div>
             </div>
         </div>
     </header>
@@ -106,12 +68,12 @@
     <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 glass-panel !rounded-full px-6 py-3 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white opacity-0 pointer-events-none transition-opacity duration-300 z-50">GUARDADO</div>
 
     <nav class="fixed bottom-0 left-0 w-full glass-panel border-t-0 rounded-t-3xl rounded-b-none p-2 sm:p-4 grid grid-cols-6 gap-1 z-40">
-        <button onclick="nav('home')" class="flex flex-col items-center nav-btn" id="nav-home"><span class="text-lg sm:text-xl mb-1">⛺</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider text-[var(--sys-blue)]">Camp</span></button>
-        <button onclick="nav('lab')" class="flex flex-col items-center nav-btn opacity-40" id="nav-lab"><span class="text-lg sm:text-xl mb-1">⚗️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Lab</span></button>
-        <button onclick="nav('dungeon')" class="flex flex-col items-center nav-btn opacity-40" id="nav-dungeon"><span class="text-lg sm:text-xl mb-1">⛩️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Avent</span></button>
-        <button onclick="nav('forge')" class="flex flex-col items-center nav-btn opacity-40" id="nav-forge"><span class="text-lg sm:text-xl mb-1">⚒️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Forja</span></button>
-        <button onclick="nav('shop')" class="flex flex-col items-center nav-btn" id="nav-shop"><span class="text-lg sm:text-xl mb-1">⚖️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Tienda</span></button>
-        <button onclick="nav('map')" class="flex flex-col items-center nav-btn opacity-40" id="nav-map"><span class="text-lg sm:text-xl mb-1">🗺️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Mapa</span></button>
+        <button onclick="nav('home')" class="flex flex-col items-center nav-btn transition-all" id="nav-home"><span class="text-lg sm:text-xl mb-1">⛺</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Camp</span></button>
+        <button onclick="nav('lab')" class="flex flex-col items-center nav-btn transition-all" id="nav-lab"><span class="text-lg sm:text-xl mb-1">⚗️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Lab</span></button>
+        <button onclick="nav('dungeon')" class="flex flex-col items-center nav-btn transition-all" id="nav-dungeon"><span class="text-lg sm:text-xl mb-1">⛩️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Lucha</span></button>
+        <button onclick="nav('forge')" class="flex flex-col items-center nav-btn transition-all" id="nav-forge"><span class="text-lg sm:text-xl mb-1">⚒️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Forja</span></button>
+        <button onclick="nav('shop')" class="flex flex-col items-center nav-btn transition-all" id="nav-shop"><span class="text-lg sm:text-xl mb-1">⚖️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Tienda</span></button>
+        <button onclick="nav('map')" class="flex flex-col items-center nav-btn transition-all" id="nav-map"><span class="text-lg sm:text-xl mb-1">🗺️</span><span class="text-[7px] sm:text-[8px] font-bold uppercase tracking-wider">Mapa</span></button>
     </nav>
 
     <div id="modal" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col justify-center items-center p-6 text-center">
@@ -160,7 +122,7 @@
             gachaLegendary: () => { playTone(400, 'square', 0.2, 0.1); setTimeout(()=>playTone(600, 'square', 0.2, 0.1), 200); setTimeout(()=>playTone(800, 'square', 0.5, 0.1), 400); }
         };
 
-        const DB_KEY = 'sys_v0_9_8_full'; 
+        const DB_KEY = 'sys_v1_0_0'; 
         const TIERS = {1:'I', 2:'H', 3:'G', 4:'F', 5:'E', 6:'D', 7:'C', 8:'B', 9:'A', 10:'S'};
         
         function getReqExp(lvl) {
@@ -204,93 +166,28 @@
         }
 
         let ALL_ARMORS = [];
-        const ARMOR_SETS = [{n:"Hierro Oscuro", t:1}, {n:"Cuero Bestia", t:2}, {n:"Hueso Maldito", t:3}, {n:"Plata Lunar", t:4}, {n:"Caballero Caído", t:5}, {n:"Escamas Dragón", t:6}, {n:"Sombra Profunda", t:7}, {n:"Fuego Infernal", t:8}, {n:"Viento Ártico", t:9}, {n:"Monarca Rey", t:10}];
+        const ARMOR_SETS = [{n:"Hierro", t:1}, {n:"Cuero", t:2}, {n:"Hueso", t:3}, {n:"Plata", t:4}, {n:"Caballero", t:5}, {n:"Escamas", t:6}, {n:"Sombra", t:7}, {n:"Fuego", t:8}, {n:"Ártico", t:9}, {n:"Monarca", t:10}];
         const SLOTS = [{id:'head', n:'Casco', ic:'🛡️'}, {id:'chest', n:'Peto', ic:'👕'}, {id:'legs', n:'Grebas', ic:'👖'}, {id:'acc', n:'Amuleto', ic:'🧿'}];
         ARMOR_SETS.forEach(set => { SLOTS.forEach(sl => { ALL_ARMORS.push({ id: `ar_${set.t}_${sl.id}`, type: 'armor', slot: sl.id, setName: set.n, name: `${sl.n} de ${set.n}`, manaDiscount: set.t * 2, reqTier: set.t, ic: sl.ic }); }); });
 
-        const BOSSES_T1 = ["Duende Ladrón", "Lobo Sombra", "Esqueleto Roto", "Orco Menor"];
-        const BOSSES_T2 = ["Caballero Caído", "Liche Menor", "Quimera", "Basilisco"];
-        const BOSSES_T3 = ["Dragón de Hueso", "Monarca Caído", "Guardián de Puerta", "General Abisal"];
+        const BOSSES_T1 = ["Duende", "Lobo", "Esqueleto", "Orco"];
+        const BOSSES_T2 = ["Caballero Caído", "Liche", "Quimera", "Basilisco"];
+        const BOSSES_T3 = ["Dragón Hueso", "Monarca Caído", "Guardián", "General Abisal"];
 
         const ALL_MATS = [
-            ["m1","⛏️","Acero","Mineral básico refinado. Se usa en herramientas simples y pociones rudimentarias. Común en cuevas y dropeado por duendes menores."],
-            ["m2","🐉","Escamas","Restos de piel endurecida de reptiles o crías de dragón. Resisten altas temperaturas."],
-            ["m3","🧱","Cobre","Metal conductor de baja pureza, usado en mecanismos antiguos de la Forja."],
-            ["m4","🔩","Hierro","Metal pesado y duradero, abundante en las ruinas del antiguo ejército del Rey."],
-            ["m5","🪙","Plata","Metal puro capaz de retener energías lunares. Valioso en alquimia intermedia."],
-            ["m6","🥇","Oro Puro","Denso y codiciado. Usualmente monopolizado por la realeza, ahora disperso en el Abismo."],
-            ["m7","💎","Platino","Extremadamente denso y escaso. Su brillo no se apaga ni en la oscuridad del Abismo."],
-            ["m8","💠","Mithril","Metal de leyenda. Liviano como una pluma pero más duro que el acero enano."],
-            ["m9","🪨","P. Rúnica","Piedra con inscripciones antiguas que aún emiten una leve pulsación de maná."],
-            ["m10","🪵","Madera","Restos de los grandes bosques que fueron calcinados por las guerras iniciales."],
-            ["m11","🌿","H. Curativa","Planta silvestre con savia coagulante. Base de la alquimia menor."],
-            ["m12","☠️","R. Venenosa","Raíz oscura que segrega neurotoxinas. Usada por los asesinos del Rey."],
-            ["m13","🌸","F. Lunar","Solo florece cuando la luna llena baña las grietas del Abismo Profundo."],
-            ["m14","🌻","S. Solar","Semilla que emite un calor constante. Vital para restaurar maná agotado."],
-            ["m15","🍯","Savia","Savia viscosa de Ent, útil para espesar pociones y ungüentos curativos."],
-            ["m16","🦴","Hueso","Restos óseos de aventureros que fracasaron antes que tú."],
-            ["m17","🦷","Colmillo","Diente afilado extraído de lobos sombra. Muy cotizado por chamanes."],
-            ["m18","🐾","Piel","Piel gruesa arrancada de bestias del páramo. Aísla del frío espectral."],
-            ["m19","👁️","Ojo Araña","Globo ocular de arácnido gigante. Clave en pociones de visión y destilación."],
-            ["m20","🦇","Ala Murc.","Ala de los murciélagos ciegos que habitan las catacumbas profundas."],
-            ["m21","😈","Cuerno","Trofeo arrancado a demonios menores que escapan por las grietas malditas."],
-            ["m22","🩸","Sangre M.","Sangre corrupta de los Perros de Sangre del Rey. Muy volátil en alquimia."],
-            ["m23","🔮","Núcleo","Corazón palpitante de los gólems arcanos. Una pila de energía cruda."],
-            ["m24","✨","Polvo Est.","Residuos mágicos que flotan en las zonas de mayor concentración de maná."],
-            ["m25","🧊","C. Roto","Trozo de hielo perpetuo que nunca se derrite, proveniente de los liches gélidos."],
-            ["m26","🔥","E. Fuego","Una llama enclaustrada en cristal. Usada para alquimia de alta temperatura."],
-            ["m27","❄️","E. Hielo","Cristal escarchado que congela la humedad del aire a su alrededor."],
-            ["m28","🌪️","E. Viento","Una ráfaga de huracán sellada en un frasco de vacío."],
-            ["m29","🌍","E. Tierra","Terrón de la capa más profunda del mundo, pesadísimo e inamovible."],
-            ["m30","👻","Alma","El remanente espectral de un guerrero caído. Un sacrificio moralmente cuestionable."],
-            ["m31","🌑","M. Oscura","Fragmento del vacío absoluto. Anula la luz y absorbe todo el maná cercano."],
-            ["m32","⚱️","Ceniza","Polvo inerte recogido tras quemar objetos malditos en fuego bendito."],
-            ["m33","🧪","Ectoplasma","Residuo gelatinoso dejado por entes intangibles de la mazmorra maldita."],
-            ["m34","💧","Lágrima","La tristeza de un Dios sellada en líquido. El catalizador supremo de alquimia."],
-            ["m35","🧚","P. Hada","Escamas luminosas caídas de criaturas feéricas del Bosque Susurrante."],
-            ["m36","🌋","Azufre","Mineral volcánico de olor pestilente, esencial para invocar fuego infernal."],
-            ["m37","🍄","Seta Lumínica","Hongo bioluminiscente que crece sobre cadáveres en las profundidades."],
-            ["m38","🕸️","Seda Espectral","Hilo invisible que solo se puede tocar cuando se impregna de maná."],
-            ["m39","🐚","Concha Abisal","Cáscara de criaturas abisales que soportan presiones inimaginables."],
-            ["m40","🪸","Coral Muerto","Coral calcificado del antiguo mar interior, ahora convertido en desierto."],
-            ["m41","🌾","Raíz Antigua","Una raíz que late como un corazón, conectada a la red vital del mundo."],
-            ["m42","🪷","Loto de Sangre","Flor rojiza que solo brota donde se ha derramado sangre real."],
-            ["m43","🪶","Pluma Dorada","Pluma dejada por aves divinas. Su contacto inspira una codicia incontrolable."],
-            ["m44","☄️","Chispa Solar","Un fragmento literal de una estrella moribunda. Quema sin consumir oxígeno."],
-            ["m45","💧","Gota de Luna","Líquido plateado que pacifica la mente y frena la corrupción del Abismo."],
-            ["m46","🏺","Polvo de Rey","Las cenizas de los monarcas anteriores, robadas de sus urnas reales."],
-            ["m47","🧿","Orbe Roto","Artefacto de visión fragmentado. A veces proyecta imágenes de otros mundos."],
-            ["m48","🔔","Campana Muda","Campana de bronce que no emite sonido en nuestra dimensión, solo en el limbo."],
-            ["m49","🧬","Mutágeno","Cepa alquímica inestable capaz de alterar permanentemente tu biología interna."],
-            ["m50","🩸","Sangre Pura","Sangre sin la más mínima traza de corrupción. Extremadamente rara hoy en día."],
-            ["m51","🦠","Célula Caos","Materia viva que muta constantemente de forma, color y estado."],
-            ["m52","🧠","Cerebro Cíclope","Masa gris de seres colosales, usado para aumentar la percepción alquímica."],
-            ["m53","👑","Corona Rota","Fragmento de autoridad. Quien la porta siente el peso de los pecados pasados."],
-            ["m54","💍","Anillo Maldito","Joya atada permanentemente al alma de su anterior dueño."],
-            ["m55","🧵","Hilo de Plata","Material conductor perfecto para canalizar maná hacia pociones exóticas."],
-            ["m56","🪡","Aguja Destino","Herramienta mitológica que permite coser desgarros en la tela de la realidad."],
-            ["m57","🪢","Nudo Mágico","Una paradoja física que atrapa encantamientos en su interior infinitamente."],
-            ["m58","🧩","Fragmento Puzzle","Pieza cristalina que encaja en tu mente más que en tus manos."],
-            ["m59","🎲","Dado Trucado","Un artefacto que altera las leyes de probabilidad a tu alrededor."],
-            ["m60","🎭","Máscara Vacía","Careta de cerámica blanca que absorbe las emociones de quien la mira."],
-            ["m61","🎨","Pigmento Ilusión","Tinta iridiscente capaz de pintar objetos tridimensionales temporales."],
-            ["m62","🧶","Cuerda Ciega","Cordel tejido por las Moiras, usado para atar bestias incorpóreas."],
-            ["m63","🪙","Moneda Caronte","Moneda de pago oxidada. Tiene el poder de sobornar al mismísimo destino."],
-            ["m64","⏳","Arena Temporal","Granos de arena que caen hacia arriba. Ralentizan la degradación física."],
-            ["m65","🧭","Cristal Crono","Brújula cuya aguja apunta siempre hacia la mayor concentración de magia."],
-            ["m66","⚖️","Pesa de Almas","Balanza milenaria que evalúa el peso kármico de los materiales que toca."],
-            ["m67","🧲","Imán Cósmico","Meteorito polarizado que atrae partículas divinas del éter espacial."],
-            ["m68","🧬","Hélice Divina","Bloque fundamental de la creación de la vida. El pináculo de la alquimia universal."]
+            ["m1","⛏️","Acero"],["m2","🐉","Escamas"],["m3","🧱","Cobre"],["m4","🔩","Hierro"],["m5","🪙","Plata"],["m6","🥇","Oro Puro"],["m7","💎","Platino"],["m8","💠","Mithril"],["m9","🪨","P. Rúnica"],["m10","🪵","Madera"],["m11","🌿","H. Curativa"],["m12","☠️","R. Venenosa"],["m13","🌸","F. Lunar"],["m14","🌻","S. Solar"],["m15","🍯","Savia"],["m16","🦴","Hueso"],["m17","🦷","Colmillo"],["m18","🐾","Piel"],["m19","👁️","Ojo Araña"],["m20","🦇","Ala Murc."],["m21","😈","Cuerno"],["m22","🩸","Sangre M."],["m23","🔮","Núcleo"],["m24","✨","Polvo Est."],["m25","🧊","C. Roto"],["m26","🔥","E. Fuego"],["m27","❄️","E. Hielo"],["m28","🌪️","E. Viento"],["m29","🌍","E. Tierra"],["m30","👻","Alma"],["m31","🌑","M. Oscura"],["m32","⚱️","Ceniza"],["m33","🧪","Ectoplasma"],["m34","💧","Lágrima"],["m35","🧚","P. Hada"],["m36","🌋","Azufre"],
+            ["m37","🍄","Seta"],["m38","🕸️","Seda"],["m39","🐚","Concha"],["m40","🪸","Coral"],["m41","🌾","Raíz"],["m42","🪷","Loto"],["m43","🪶","Pluma"],["m44","☄️","Chispa"],["m45","💧","Gota"],["m46","🏺","Polvo Rey"],["m47","🧿","Orbe"],["m48","🔔","Campana"],["m49","🧬","Mutágeno"],["m50","🩸","Sangre P."],["m51","🦠","Célula"],["m52","🧠","Cerebro"],
+            ["m53","👑","Corona"],["m54","💍","Anillo"],["m55","🧵","Hilo"],["m56","🪡","Aguja"],["m57","🪢","Nudo"],["m58","🧩","Fragmento"],["m59","🎲","Dado"],["m60","🎭","Máscara"],["m61","🎨","Pigmento"],["m62","🧶","Cuerda"],["m63","🪙","Moneda"],["m64","⏳","Arena"],["m65","🧭","Cristal"],["m66","⚖️","Pesa"],["m67","🧲","Imán"],["m68","🧬","Hélice"]
         ];
         function getMatName(id) { let f = ALL_MATS.find(x => x[0] === id); return f ? f[2] : id; }
 
-        const STORY_TITLES = ["El Exilio", "Impuestos de Sangre", "Alianza Subterránea", "Cazadores Reales", "El Pacto Abisal", "Sangre y Barro", "Ecos Antiguos", "El Asedio", "La Guardia Caída", "Sangre de mi Sangre"];
-        const STORY_TEXT = ["Tu hermano, el Rey Aric, consumió la magia del reino para volverse aparentemente inmortal. Cuando intentaste advertir al consejo de nobles sobre su locura tiránica, te silenció. Te arrebató tus títulos, quemó tu blasón familiar frente a todo el castillo y te exilió a los páramos oscuros, un lugar donde la muerte es la única certeza. Ahora vagas entre las sombras, alimentándote de la escasa vida que aún resiste en este yermo de ceniza, mientras tu mente solo alberga una idea: sobrevivir para cobrar tu venganza contra la corona que una vez juraste defender.", "Sobreviviendo en los páramos, descubriste pronto la cruda y terrorífica verdad. El Rey Aric no utilizaba magia arcana convencional para mantener su juventud. Había instaurado los 'Impuestos de Sangre'. En secreto, sus guardias drenaban la fuerza vital de los campesinos y las aldeas periféricas para canalizarla hacia la Ciudadela de Obsidiana. El reino entero se marchitaba, los cultivos se secaban y los niños nacían enfermos, todo para que tu hermano pudiera brillar con una salud eterna e impía en su trono inmaculado.", "Tras semanas huyendo de los horrores de la superficie, la tierra cedió bajo tus pies y caíste en las antiguas catacumbas de Aethelgard. Lo que parecía tu tumba resultó ser tu salvación. Allí abajo, entre ruinas de un mundo olvidado, habitaban los marginados, los monstruos desertores y los exiliados. Tras demostrar tu fuerza aniquilando a un Gólem de Hierro con tus manos desnudas, te nombraron su campeón. Por primera vez desde tu destierro, tenías aliados y un propósito: derrocar a la tiranía.", "Tu supervivencia no pasó desapercibida. Aric se enteró de tu nueva alianza subterránea y envió a su élite personal: Los Perros de Sangre. Asesinos despiadados imbuidos con magia roja. Durante semanas, la oscuridad de las catacumbas se llenó de emboscadas, veneno y hojas ocultas. Las peleas fueron brutales y estuviste a punto de morir docenas de veces. Pero con cada asesino que caía bajo tu filo, absorbías parte de su equipo y su maná residual, volviéndote exponencialmente más letal.", "Fue interrogando a uno de los Perros de Sangre agonizantes cuando la pieza final del rompecabezas encajó. El asesino, con sus últimos alientos y vomitando icor negro, confesó el origen del poder de Aric. No fue un hechizo, fue un trato directo con los Señores del Abismo Profundo. Tu hermano había vendido no solo su alma, sino el destino de todo el reino a entidades primigenias de puro caos. Ya no era un Rey, era un recipiente humano para la oscuridad más absoluta.", "El encuentro fue inevitable. En un intento desesperado por cortar una línea de suministros mágicos, fuiste emboscado por el mismísimo Aric. La batalla destrozó la montaña. La fuerza de tu hermano era antinatural; sus golpes rompían la barrera del sonido y su magia derretía la roca. En un último choque, su espada mágica perforó tu pecho, dejándote una espantosa cicatriz en el esternón. Sobreviviste de milagro al caer por un risco, pero esa herida ahora quema intensamente cada vez que canalizas tu maná.", "Arrastrándote, ensangrentado y al borde de la muerte, encontraste lo que los mitos llamaban la Forja Primigenia, el lugar donde los Primeros Reyes crearon las armas del mundo. Allí, soportando el dolor agónico de tu cicatriz y el calor infernal de la forja magmática, fundiste tus armas destrozadas y tu propia sangre para crear equipo de leyenda. Cuando saliste de esa cámara ardiente, el poder que irradiabas hacía temblar las paredes. Ya estabas listo para rivalizar con la monstruosidad de tu hermano.", "La noticia de tu supervivencia y tu nuevo poder se extendió como un incendio forestal. Los estandartes rotos de las casas nobles traicionadas se alzaron en la noche, uniéndose a las bestias y exiliados de las catacumbas. El ejército más extraño jamás visto en Aethelgard comenzó a marchar. El suelo temblaba con los pasos de tu rebelión. A lo lejos, la gigantesca e intimidante silueta de la Ciudadela de Obsidiana recortaba la luz de la luna. No habría negociaciones. Solo habría sangre.", "Las inmensas puertas de la capital fueron derribadas en cuestión de horas. Avanzaste por los pasillos de mármol que una vez llamaste hogar. Ahora, los tapices estaban rasgados, los muros supuraban magia negra y el hedor a muerte lo impregnaba todo. Los guardias reales caían ante ti como trigo ante la guadaña. Sin mirar atrás, abriste a patadas las gigantescas puertas de madera de roble negro de la Sala del Trono. Al fondo, sentado en la oscuridad y esperándote, estaba tu hermano.", "El choque final fue leyenda. La Ciudadela se desmoronaba alrededor vuestra mientras vuestras hojas colisionaban. Al final, usando un estallido de maná crudo que casi te desgarra por dentro, partiste su espada y lo arrodillaste. Aric cayó a tus pies, tosiendo ceniza negra. Mientras expiraba, la pesada corona de obsidiana rodó por el suelo hasta detenerse frente a ti. Al tocarla, sentiste que la corona no estaba fría... murmuraba tu nombre, ofreciéndote susurros de poder absoluto e inmortalidad. El reino era tuyo. Pero la pregunta permanecía: ¿Serías el salvador, o el próximo monstruo?"];
+        const STORY_TITLES = ["El Exilio", "Impuestos", "Alianza", "Cazadores", "Pacto Abisal", "Sangre", "Ecos", "El Asedio", "La Guardia", "Sangre Real"];
+        const STORY_TEXT = ["El Rey Aric consumió la magia del reino. Te exilió a los páramos oscuros. Sobrevive.", "Descubriste la verdad: Aric drena la fuerza vital de los campesinos.", "Caíste en las catacumbas. Te uniste a los marginados y exiliados.", "Aric envió a los Perros de Sangre a cazarte.", "Aric hizo un trato con el Abismo Profundo.", "Aric te emboscó en persona. Te dejó una cicatriz que quema.", "Encontraste la Forja Primigenia.", "Tu ejército de exiliados marcha hacia la Ciudadela.", "Derribaste las puertas. La guardia real cayó.", "Aric ha caído. La corona es tuya."];
         
-        const STORY_TITLES_2 = ["La Verdad Oculta", "El Parásito", "La Cura Falsa", "El Sacrificio de un Hermano", "Los Señores Mienten", "La Cicatriz Sello", "El Plan Maestro", "Prisionero de Obsidiana", "La Oración Silenciosa", "La Maldición de la Corona"];
-        const STORY_TEXT_2 = ["Años después de sentarte en el trono, encontraste el diario oculto de Aric en las mazmorras secretas. La primera página te heló la sangre. 'La grieta se está abriendo', decía su letra temblorosa. La verdad te golpeó como un mazo: Aric no consumió la magia del reino por avaricia ni por sed de poder. Descubrió una falla dimensional bajo el castillo por la que horrores cósmicos iban a devorar el mundo entero. Para sellarla, tuvo que absorber todo el maná disponible, convirtiéndose en el pilar que mantenía la realidad intacta.", "El diario detallaba la naturaleza del 'Abismo'. No era simplemente una dimensión paralela o un infierno terrenal, era una entidad viva. Un parásito interdimensional masivo que se alimentaba de la estabilidad de las realidades. Una vez que enganchaba sus tentáculos metafísicos a un mundo, drenaba sus leyes físicas y su vida. Aric, al darse cuenta de esto, intentó desesperadamente buscar un remedio arcano, pero se dio cuenta de que la única forma de frenarlo era alimentarlo con un recipiente infinito de poder: él mismo.", "Los temidos 'Impuestos de Sangre' que diezmaron las aldeas no fueron una tiranía egoísta. Aric descubrió que la Plaga del Abismo ya había infectado a los campesinos sin que lo supieran. Estaban incubando horrores invisibles en sus almas. El Rey ordenó a los Perros de Sangre extraer ese maná corrupto para purificar a los ciudadanos, asumiendo él todo el peso del pecado y la mala fama, y almacenando toda esa bilis oscura en su propia sangre para evitar una pandemia apocalíptica.", "Aric escribió sobre la noche de tu exilio. Las páginas estaban manchadas de lágrimas secas. Sabía que el parásito acabaría por devorar su mente y que tarde o temprano perdería el control y aniquilaría el reino él mismo. Te exilió, te despojó de todo y te humilló públicamente no por odio, sino para apartarte del radar del Abismo. Te obligó a sobrevivir en las peores condiciones para que, a través de la furia y la supervivencia extrema, te convirtieras en la única hoja afilada capaz de matarle cuando llegara el momento.", "Los Señores del Abismo no hicieron un trato de poder con él; le ofrecieron una trampa que Aric tuvo que aceptar sabiendo que estaba amañada. Prometieron no invadir el reino si él se convertía en el recipiente de su corrupción. Él aceptó ganar tiempo, sabiendo que mentirían. Cada día que pasó en el trono fue un infierno psicológico, luchando internamente contra millones de voces alienígenas que intentaban doblegar su voluntad, comprando valiosos años para que tú en los páramos te hicieras fuerte.", "Aquel encuentro en los páramos donde te emboscó... El diario reveló su verdadera intención. Aric sintió que el Abismo intentaba poseerte a distancia al detectar tu creciente poder. Se vio obligado a intervenir personalmente. La espantosa herida y cicatriz que te dejó en el pecho no fue un intento de asesinato, fue un intrincado sello arcano pintado a espada. Esa quemadura que sientes al usar maná es el sello bloqueando la corrupción del Abismo, protegiendo tu mente de la locura que a él lo consumió.", "Su plan maestro fue meticuloso y suicida. Orquestó su propia caída, sembrando rumores sobre sus atrocidades, enviando a los Perros de Sangre para entrenarte mediante el combate letal, y dejando pistas para que encontraras la Forja Primigenia. Construyó su papel de villano definitivo para unir a todo un reino fracturado bajo una sola bandera: la tuya. Sabía que el mundo solo sobreviviría si se unificaba contra un mal común.", "En sus últimos meses, Aric relató cómo perdió el control de su cuerpo. Relataba estar atrapado detrás de sus propios ojos, viendo cómo sus manos firmaban órdenes crueles de las que no era dueño. Se había convertido en un prisionero dentro de la armadura de obsidiana, gritando en silencio, rezando todos los días para que su plan hubiera funcionado y que el 'Héroe de los Exiliados' irrumpiera por las puertas para acabar con su tormento.", "El último párrafo del diario estaba escrito a escasos minutos de tu asalto final a la Sala del Trono. La tinta estaba manchada y errática. 'Escucho los tambores de guerra. Es mi hermano. Lo ha conseguido. Dioses, ruego que su hoja sea firme y no vacile por amor. Ruego que me mate rápido antes de que la Cosa que habita en mí tome el control total'. Aric murió sabiendo que había salvado el mundo, sin esperar redención ni honor alguno.", "Cerraste el diario, temblando. Miraste la Corona de Obsidiana que ahora descansaba en tus sienes. El sacrificio de Aric fue monumental, pero la amenaza no había desaparecido. Al ponerte la corona, heredaste el sello. Las voces primigenias del Abismo comenzaron a susurrarte desde las sombras de la sala. El Rey está muerto, pero el parásito sigue hambriento, acechando bajo tus pies. Tu verdadero reinado no ha hecho más que empezar. La maldición de la corona ahora es tuya para soportarla."];
+        const STORY_TITLES_2 = ["La Verdad", "El Parásito", "Cura Falsa", "Sacrificio", "Mentiras", "La Cicatriz", "Plan Maestro", "Prisionero", "Oración", "Maldición"];
+        const STORY_TEXT_2 = ["Aric consumió magia para sellar una grieta dimensional.", "El Abismo es un parásito vivo.", "Aric drenaba a los campesinos para curarlos de la plaga.", "Te exilió para protegerte y fortalecerte.", "Aric aceptó ser el recipiente sabiendo que mentían.", "La cicatriz fue un sello protector.", "Orquestó su propia caída para unificarnos.", "Aric era un prisionero en su propio cuerpo.", "Aric rezaba para que lo mataras.", "Heredaste la corona y el parásito sigue bajo tus pies."];
 
-        const QUEST_TYPES = [{ id: 'q_boss', desc: "Gremio de Cazadores: Extermina 1 Jefe", req: 1, type: 'boss' },{ id: 'q_boss3', desc: "Gremio de Élite: Purga 3 Jefes", req: 3, type: 'boss' },{ id: 'q_pot', desc: "Alquimista Loco: Destila 1 Poción", req: 1, type: 'pot' },{ id: 'q_race', desc: "Explorador: Haz 1 Entrenamiento", req: 1, type: 'race' },{ id: 'q_gacha', desc: "Mercader: Realiza 1 Invocación", req: 1, type: 'gacha' }];
+        const QUEST_TYPES = [{ id: 'q_boss', desc: "Gremio: Extermina 1 Jefe", req: 1, type: 'boss' },{ id: 'q_boss3', desc: "Élite: Purga 3 Jefes", req: 3, type: 'boss' },{ id: 'q_pot', desc: "Alquimia: Destila 1 Poción", req: 1, type: 'pot' },{ id: 'q_race', desc: "Explorador: Haz 1 Entrenamiento", req: 1, type: 'race' },{ id: 'q_gacha', desc: "Mercader: Haz 1 Invocación", req: 1, type: 'gacha' }];
         const SHOP_POOL = [{ id:'s1', mat:'m1', qty:10, cost:5000, reqLvl: 1 }, { id:'s2', mat:'m10', qty:15, cost:8000, reqLvl: 1 }, { id:'s3', mat:'m11', qty:5, cost:3000, reqLvl: 1 }, { id:'s4', mat:'m4', qty:5, cost:15000, reqLvl: 2 }, { id:'s5', mat:'m5', qty:3, cost:20000, reqLvl: 2 }, { id:'s6', mat:'m24', qty:2, cost:30000, reqLvl: 3 }, { id:'s7', mat:'m31', qty:1, cost:80000, reqLvl: 5 }, { id:'s8', mat:'m8', qty:1, cost:60000, reqLvl: 4 }];
         const REQS = { 'home': 1, 'shop': 1, 'forge': 2, 'dungeon': 3, 'lab': 4, 'map': 1 };
 
@@ -298,33 +195,59 @@
         s.lvl = s.lvl || 1; s.exp = s.exp || 0; s.gold = s.gold || 0; s.diamonds = s.diamonds || 0;
         s.prestige = s.prestige || 0; s.mana = s.mana || 10; s.atk = s.atk || 10;
         s.timeOffset = s.timeOffset || 0; s.lastManaHour = s.lastManaHour || Math.floor((Date.now() + s.timeOffset) / 3600000);
-        s.objective = s.objective || "Objetivo: Menor tiempo posible";
         
+        s.tut = s.tut || { home: true, lab: true, dungeon: true, forge: true, shop: true, map: true };
         s.races = s.races || []; s.gymSessionsToday = s.gymSessionsToday || 0;
         s.activeSport = s.activeSport || null;
 
         s.dailies = (s.dailies && s.dailies.length>0) ? s.dailies : [{name: "Entrenamiento Físico", done: false}];
-        s.dailiesCompletedToday = s.dailiesCompletedToday || 0; s.dailySacrificed = s.dailySacrificed || false; s.diaClaimedToday = s.diaClaimedToday || false;
+        s.dailiesCompletedToday = s.dailiesCompletedToday || 0; s.dailySacrificed = s.dailySacrificed || false;
         s.storyClaimed = s.storyClaimed || Array(10).fill(false); s.storyClaimed2 = s.storyClaimed2 || Array(10).fill(false);
         s.potions = s.potions || { expB: 1.0, goldB: 1.0, diaB: 1.0 }; s.potionInv = s.potionInv || {};
         s.mats = s.mats || {}; ALL_MATS.forEach(m => { if(s.mats[m[0]] === undefined) s.mats[m[0]] = 0; });
         s.weapons = (s.weapons && s.weapons.length>0) ? s.weapons : [ALL_WEAPONS[0]]; s.armors = s.armors || [];
         s.activeWeps = s.activeWeps || ['w_sys_1', null]; s.activeArmors = s.activeArmors || {head:null, chest:null, legs:null, acc:null};
-        s.bosses = s.bosses || { b1: { name: BOSSES_T1[0], hp: 500, maxHp: 500, lvl: 1 }, b2: { name: BOSSES_T2[0], hp: 5000, maxHp: 5000, lvl: 11 }, b3: { name: BOSSES_T3[0], hp: 20000, maxHp: 20000, lvl: 21 }, b4: { name: "Rey Aric Dorado", hp: 1000000, maxHp: 1000000, lvl: 1 } };
+        s.bosses = s.bosses || { b1: { name: BOSSES_T1[0], hp: 500, maxHp: 500, lvl: 1 }, b2: { name: BOSSES_T2[0], hp: 5000, maxHp: 5000, lvl: 11 }, b3: { name: BOSSES_T3[0], hp: 20000, maxHp: 20000, lvl: 21 }, b4: { name: "Rey Aric", hp: 1000000, maxHp: 1000000, lvl: 1 } };
         s.currentTab = s.currentTab || 'home'; s.subTabs = s.subTabs || {};
         s.dailyShopIds = s.dailyShopIds || []; s.herreroItems = s.herreroItems || []; s.dailyTrades = s.dailyTrades || [];
         s.sideQuests = s.sideQuests || []; s.activeCrafts = s.activeCrafts || {}; s.labCraftsToday = s.labCraftsToday || 0;
-        
-        s.mapProgress = s.mapProgress || { z1: 0, z2: 0, z3: 0 };
 
         const MAX_MANA = () => 10 + (s.lvl * 2);
         let virtualTime = new Date(); let modalTimer = null; let modalCount = 0;
 
-        function getTotalPotions() {
-            let total = 0;
-            for(let k in s.potionInv) { total += s.potionInv[k]; }
-            return total;
+        function getZProg(reqPrestige) {
+            if (s.prestige >= reqPrestige + 4) return 100;
+            if (s.prestige < reqPrestige) return 0;
+            let diff = s.prestige - reqPrestige;
+            let pct = (diff * 25) + ((s.lvl - 1) * 2.77);
+            return Math.min(99, Math.floor(pct));
         }
+
+        function showLockMsg(reqP) {
+            sfx.error();
+            showModal("🔒 BLOQUEADO", `Requiere Prestigio ${reqP}.<br><br><span style="color:var(--gold); font-size:10px;">¿Cómo ganar Prestigio?</span><br><span style="font-size:9px; color:#aaa;">Sube de nivel combinando entrenamientos, lucha y pociones hasta alcanzar el Tier S (Nivel 10). Luego, usa la opción 'Ascensión' en la Tienda.</span>`, "var(--sys-red)");
+        }
+
+        function renderTutorial(tab) {
+            if(!s.tut[tab]) return "";
+            let data = {
+                'home': ['Campamento', 'Mide tu rendimiento en el Gimnasio para ganar EXP y Oro. Al avanzar de Rango, revisa la pestaña Prestigio para ver tus recompensas.'],
+                'lab': ['Laboratorio', 'Destila pociones con materiales. Recuerda que la mochila tiene un límite estricto de 3 pociones simultáneas.'],
+                'dungeon': ['Lucha', 'Gasta Maná para matar Jefes o sacrifica tus Misiones Diarias (⛺ Explorar) a cambio de materiales seguros.'],
+                'forge': ['Forja', 'Equipa armas (ataque) y armaduras (descuento de Maná). A mayor Prestigio, verás más funciones aquí.'],
+                'shop': ['Tienda', 'Compra materiales, tira el Gacha y, cuando seas Nivel 10, usa el botón de Ascensión para renacer más fuerte.'],
+                'map': ['Mapa', 'Muestra tu avance. Cada Zona requiere dominar la anterior. 1 Zona completa equivale a subir 4 veces de Prestigio.']
+            };
+            if(!data[tab]) return "";
+            return `
+            <div class="glass-panel p-3 mb-4 border-[var(--sys-blue)]/50 relative bg-[var(--sys-blue)]/10">
+                <button onclick="sfx.click(); s.tut['${tab}']=false; save(); render();" class="absolute top-2 right-3 text-[var(--sys-blue)] font-bold text-sm">✕</button>
+                <h4 class="text-[10px] font-sys text-[var(--sys-blue)] font-bold mb-1">TUTORIAL: ${data[tab][0]}</h4>
+                <p class="text-[9px] text-gray-300 leading-relaxed pr-4">${data[tab][1]}</p>
+            </div>`;
+        }
+
+        function getTotalPotions() { let total = 0; for(let k in s.potionInv) { total += s.potionInv[k]; } return total; }
 
         function rollShop() {
             let available = SHOP_POOL.filter(x => x.reqLvl <= s.lvl);
@@ -434,9 +357,8 @@
 
             const strDate = virtualTime.toLocaleDateString();
             if(s.lastDate !== strDate) { 
-                s.dailySacrificed = false; s.racesToday = 0; s.dailiesCompletedToday = 0; s.diaClaimedToday = false;
-                s.gymSessionsToday = 0;
-                s.dailies.forEach(d => d.done = false); s.labCraftsToday = 0;
+                s.dailySacrificed = false; s.racesToday = 0; s.dailiesCompletedToday = 0;
+                s.gymSessionsToday = 0; s.dailies.forEach(d => d.done = false); s.labCraftsToday = 0;
                 rollShop(); rollHerrero(); rollTrades(); rollQuests(); s.lastDate = strDate; save(); 
             }
         }
@@ -558,7 +480,7 @@
         function tryPrestige() {
             sfx.click();
             if(s.lvl < 10) { sfx.error(); return toast('Requiere Tier S', 'var(--sys-red)'); }
-            let msg = "¿Ascender a Prestigio?\n\nBENEFICIOS:\n- Desbloquearás nuevas zonas, historia y destilaciones.\n- Multiplicador base x"+(s.prestige+2)+"\n\nPÉRDIDAS:\n- Pierdes TODO el Oro, Diamantes, EXP, Nivel, Armas, Armaduras y Materiales.\n- Cuesta el DOBLE de exp escalar a Tiers altos.\n\n¿Estás seguro?";
+            let msg = "¿Ascender a Prestigio?\n\nBENEFICIOS:\n- Desbloquearás nuevas zonas, historia y destilaciones (Pueblo, Herrero, Rey...).\n- Multiplicador base x"+(s.prestige+2)+"\n\nPÉRDIDAS:\n- Pierdes TODO el Oro, Diamantes, EXP, Nivel, Armas, Armaduras y Materiales.\n- Cuesta el DOBLE de exp escalar a Tiers altos.\n\n¿Estás seguro?";
             if(confirm(msg)) {
                 s.prestige++; s.lvl=1; s.exp=0; s.gold=0; s.diamonds=0; s.weapons=[ALL_WEAPONS[0]]; s.armors=[]; s.activeWeps=['w_sys_1',null]; s.activeArmors={head:null,chest:null,legs:null,acc:null}; s.storyClaimed.fill(false); s.storyClaimed2.fill(false); s.potionInv={}; ALL_MATS.forEach(m => s.mats[m[0]] = 0); s.activeCrafts={};
                 sfx.gachaLegendary(); save(); render(); showModal('🌌 ASCENSIÓN', `Has renacido en Prestigio ${s.prestige}`, 'var(--sys-purple)');
@@ -590,8 +512,16 @@
             Object.keys(REQS).forEach(id => {
                 const btn = document.getElementById(`nav-${id}`);
                 if(btn) {
-                    if(id === 'map') { if(s.prestige >= 1) btn.classList.remove('opacity-40'); else btn.classList.add('opacity-40'); }
-                    else { if(s.lvl >= REQS[id] || s.prestige > 0) btn.classList.remove('opacity-40'); else btn.classList.add('opacity-40'); }
+                    let locked = false;
+                    if(id === 'map') locked = (s.prestige < 1);
+                    else locked = (s.lvl < REQS[id] && s.prestige === 0);
+                    
+                    if(locked) {
+                        btn.classList.add('opacity-30', 'grayscale');
+                        btn.classList.remove('opacity-60');
+                    } else {
+                        btn.classList.remove('opacity-30', 'grayscale');
+                    }
                 }
             });
         }
@@ -611,17 +541,19 @@
         }
         function closeModal() { clearInterval(modalTimer); const m = document.getElementById('modal'); if(m) { m.classList.add('hidden'); m.style.display = ''; } }
 
-        function generateLineChart() {
-            if(!s.races || s.races.length < 2) return `<div class="text-[10px] text-center opacity-50 py-10 uppercase tracking-widest text-[var(--sys-blue)] border border-dashed border-[var(--sys-blue)]/30 rounded-xl mt-4">Aparece a partir de 2 entrenamientos</div>`;
-            let max = Math.max(...s.races.map(r => r.val)); let min = Math.min(...s.races.map(r => r.val)); let range = (max - min) || 1;
+        function generateLineChart(sportFilter = null) {
+            let filtered = sportFilter ? s.races.filter(r => r.sp === sportFilter) : s.races;
+            if(!filtered || filtered.length < 2) return `<div class="text-[10px] text-center opacity-50 py-10 uppercase tracking-widest text-[var(--sys-blue)] border border-dashed border-[var(--sys-blue)]/30 rounded-xl mt-4">Requiere 2 registros</div>`;
+            
+            let max = Math.max(...filtered.map(r => r.val)); let min = Math.min(...filtered.map(r => r.val)); let range = (max - min) || 1;
             let w = 100; let h = 60; 
-            let points = s.races.map((r, i) => { let x = (i / (s.races.length - 1)) * w; let y = h - ((r.val - min) / range * (h-10) + 5); return `${x},${y}`; }).join(' ');
-            let sDate = new Date(s.races[0].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
-            let eDate = new Date(s.races[s.races.length-1].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
+            let points = filtered.map((r, i) => { let x = (i / (filtered.length - 1)) * w; let y = h - ((r.val - min) / range * (h-10) + 5); return `${x},${y}`; }).join(' ');
+            let sDate = new Date(filtered[0].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
+            let eDate = new Date(filtered[filtered.length-1].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
 
             return `
             <div class="relative w-full h-[120px] flex items-end mt-6 mb-6 border-l border-b border-[var(--sys-blue)]/50 pb-4 pl-8">
-                <div class="absolute left-0 top-0 bottom-4 flex flex-col justify-between text-[8px] text-[var(--sys-blue)] font-sys"><span>${Math.ceil(max/60)}m</span><span>${Math.floor(min/60)}m</span></div>
+                <div class="absolute left-0 top-0 bottom-4 flex flex-col justify-between text-[8px] text-[var(--sys-blue)] font-sys"><span>${Math.ceil(max)}</span><span>${Math.floor(min)}</span></div>
                 <svg viewBox="0 0 ${w} ${h}" class="chart-svg" preserveAspectRatio="none"><polyline points="${points}"/></svg>
                 <div class="absolute bottom-[-16px] left-8 right-0 flex justify-between text-[8px] text-[var(--sys-blue)] font-sys"><span>${sDate}</span><span>${eDate}</span></div>
             </div>`;
@@ -797,10 +729,20 @@
         function closeGacha() { let m = document.getElementById('gacha-modal'); m.classList.add('hidden'); m.style.display = ''; render(); }
 
         function nav(tab) {
-            if(tab === 'map') { if(s.prestige < 1) { sfx.error(); return toast(`Requiere Prestigio 1`, 'var(--sys-red)'); } }
-            else if(s.lvl < REQS[tab] && s.prestige === 0) { sfx.error(); return toast(`Requiere Tier ${TIERS[REQS[tab]]}`, 'var(--sys-red)'); }
+            let req = tab === 'map' ? 1 : REQS[tab];
+            let isLocked = false;
+            
+            if(tab === 'map') isLocked = (s.prestige < 1);
+            else isLocked = (s.lvl < req && s.prestige === 0);
+
+            if(isLocked) {
+                if(tab === 'map') showLockMsg(1);
+                else showLockMsg(`0 y Tier ${TIERS[req]}`);
+                return;
+            }
             sfx.click(); s.currentTab = tab; save(); render(); 
         }
+        
         function setSubTab(st) { sfx.click(); s.subTabs[s.currentTab] = st; save(); render(); }
 
         function render() {
@@ -808,22 +750,35 @@
             if(!s.currentTab) s.currentTab = 'home';
             const t = s.currentTab;
 
-            document.querySelectorAll('.nav-btn').forEach(b => { let sp = b.querySelector('span:last-child'); if(sp) sp.classList.remove('text-[var(--sys-blue)]'); });
+            document.querySelectorAll('.nav-btn').forEach(b => { 
+                b.classList.remove('text-[var(--sys-blue)]', 'drop-shadow-[0_0_8px_var(--sys-blue)]', 'opacity-100');
+                b.classList.add('text-gray-500', 'opacity-60');
+                let sp = b.querySelector('span:last-child'); 
+                if(sp) sp.classList.remove('text-[var(--sys-blue)]'); 
+            });
             let activeNav = document.getElementById(`nav-${t}`);
-            if(activeNav) { let sp = activeNav.querySelector('span:last-child'); if(sp) sp.classList.add('text-[var(--sys-blue)]'); }
+            if(activeNav) { 
+                activeNav.classList.remove('text-gray-500', 'opacity-60', 'opacity-30', 'grayscale');
+                activeNav.classList.add('text-[var(--sys-blue)]', 'drop-shadow-[0_0_8px_var(--sys-blue)]', 'opacity-100');
+                let sp = activeNav.querySelector('span:last-child'); 
+                if(sp) sp.classList.add('text-[var(--sys-blue)]'); 
+            }
+
+            h += renderTutorial(t);
 
             if(t === 'home') {
                 const st = s.subTabs[t] || 'main';
                 h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
                     <button onclick="setSubTab('main')" class="px-4 py-2 rounded-lg text-[9px] sm:text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Gimnasio</button>
-                    ${s.prestige>=2 ? `<button onclick="setSubTab('pueblo')" class="px-4 py-2 rounded-lg text-[9px] sm:text-[10px] uppercase font-bold ${st==='pueblo'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Pueblo</button>` : `<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P2</button>`}
+                    <button onclick="setSubTab('prestige')" class="px-4 py-2 rounded-lg text-[9px] sm:text-[10px] uppercase font-bold ${st==='prestige'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Prestigio</button>
+                    <button onclick="${s.prestige>=2 ? `setSubTab('pueblo')` : `showLockMsg(2)`}" class="px-4 py-2 rounded-lg text-[9px] sm:text-[10px] uppercase font-bold ${st==='pueblo'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">${s.prestige>=2?'Pueblo':'🔒 P2'}</button>
                     <button onclick="setSubTab('story')" class="px-4 py-2 rounded-lg text-[9px] sm:text-[10px] uppercase font-bold ${st==='story'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Historia</button>
                 </div>`;
 
                 if(st === 'main') {
                     h += `<div class="glass-panel p-5 mb-4 border-[var(--sys-blue)]/30">
                             <div class="flex justify-between items-center mb-4 border-b border-gray-800 pb-2">
-                                <span class="text-[12px] text-[var(--sys-blue)] font-bold uppercase tracking-widest">Alto Rendimiento</span>
+                                <span class="text-[12px] text-[var(--sys-blue)] font-bold uppercase tracking-widest">${s.activeSport ? 'Entrenamiento' : 'Alto Rendimiento'}</span>
                                 <span class="text-[10px] text-[var(--sys-red)] font-bold">${s.gymSessionsToday}/4 Sesiones</span>
                             </div>`;
                             
@@ -849,29 +804,20 @@
                             });
                             
                             h += `</div>
-                                <div class="flex gap-2">
+                                <div class="flex gap-2 mb-4">
                                     <button onclick="s.activeSport=null; render();" class="w-1/3 py-2 rounded-xl text-[9px] font-bold uppercase border border-gray-600 text-gray-400">Volver</button>
                                     <button onclick="submitWorkout()" class="w-2/3 btn-aaa py-2 rounded-xl text-[10px] font-bold uppercase">Entrenar</button>
                                 </div>
+                                ${generateLineChart(s.activeSport)}
                             </div>`;
                         }
                     } else {
                         h += `<div class="w-full py-4 bg-[var(--sys-red)]/10 border border-[var(--sys-red)]/30 text-[var(--sys-red)] text-center rounded-xl text-[10px] font-bold uppercase tracking-widest mb-4">Músculos Agotados (Vuelve Mañana)</div>`;
+                        if(s.activeSport) h += generateLineChart(s.activeSport);
                     }
-                            
-                    h += `<div class="max-h-[120px] overflow-y-auto pr-2 space-y-1 border-t border-[var(--border-glass)] pt-2">`;
-                    if(!s.races || s.races.length === 0) { h += `<p class="text-[9px] opacity-50 text-center py-4">Sin registros de entrenamiento.</p>`; }
-                    else {
-                        s.races.slice().reverse().forEach(r => {
-                            let spInfo = SPORTS[r.sp] || SPORTS['Correr'];
-                            h += `<div class="flex justify-between items-center text-[10px] py-2 border-b border-[var(--border-glass)] text-gray-300">
-                                <span class="flex items-center gap-2"><span class="text-sm">${spInfo.ic}</span> ${new Date(r.date).toLocaleDateString()}</span>
-                                <span class="text-[var(--sys-blue)] font-bold">${r.desc}</span>
-                            </div>`;
-                        });
-                    }
-                    h += `</div></div>`;
+                    h += `</div>`;
 
+                    // DAILIES RESTORED
                     let allDone = s.dailies.length > 0 && s.dailies.every(d => d.done);
                     h += `<div class="glass-panel p-5 mb-4">
                         <h2 class="text-[10px] font-sys text-[var(--sys-purple)] mb-3 uppercase tracking-widest flex justify-between">
@@ -889,7 +835,6 @@
                                 <button onclick="sfx.click(); if(s.dailies[${i}].done) { toast('Solo al reinicio', 'var(--sys-red)'); } else { s.dailies.splice(${i},1); save(); render(); }" class="text-[var(--sys-red)] text-xs px-2 py-1 bg-[var(--sys-red)]/10 rounded border border-[var(--sys-red)]/50">❌</button>
                             </div>`;
                         });
-                        
                         let btns = `<div class="flex gap-2 mt-3">`;
                         if(s.dailies.length < 3) btns += `<button onclick="sfx.click(); s.dailies.push({name:'Nueva Misión', done:false}); save(); render();" class="flex-1 py-2 border border-[var(--border-glass)] rounded bg-black/30 text-xs font-bold text-gray-400 hover:bg-white/5">+</button>`;
                         if(allDone) btns += `<div class="flex-1 py-2 border border-[var(--sys-blue)] bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] text-center text-[10px] font-bold uppercase tracking-widest rounded flex items-center justify-center">COMPLETADAS</div>`;
@@ -897,6 +842,25 @@
                         h += btns;
                     }
                     h += `</div>`;
+
+                } else if(st === 'prestige') {
+                    h += `<div class="glass-panel p-5 text-center">
+                        <h3 class="font-sys text-[var(--gold)] text-lg mb-2 uppercase tracking-widest">Senda de la Ascensión</h3>
+                        <p class="text-xs text-[var(--sys-blue)] mb-4 font-bold">Nivel Actual: Prestigio ${s.prestige}</p>
+                        
+                        <div class="bg-black/50 rounded-xl p-4 border border-gray-800 text-left space-y-3 mb-6">
+                            <p class="text-[10px]"><span class="text-[var(--sys-blue)] font-bold">Prestigio 1:</span> Mapa del Reino, M. Maldita, Abismo, Maná Complejo.</p>
+                            <p class="text-[10px]"><span class="text-[var(--gold)] font-bold">Prestigio 2:</span> Pueblo (Trueques), Herrero, Destilación Exótica, Historia II.</p>
+                            <p class="text-[10px]"><span class="text-[var(--sys-red)] font-bold">Prestigio 3:</span> El Rey, Forja Maldita, Secundarias, Destilación Divina.</p>
+                            <p class="text-[10px]"><span class="text-[var(--sys-purple)] font-bold">Prestigio 4+:</span> Desbloqueo progresivo de zonas en el Mapa (1 Zona = 4 Prestigios).</p>
+                        </div>
+                        
+                        <div class="mb-2 text-[10px] font-bold text-gray-400">Progreso a la siguiente Ascensión:</div>
+                        <div class="h-2 w-full bg-black/80 rounded-full border border-gray-700 overflow-hidden mb-2">
+                            <div class="h-full bg-[var(--gold)]" style="width: ${(s.lvl/10)*100}%"></div>
+                        </div>
+                        <p class="text-[9px] text-[var(--gold)]">Nivel ${s.lvl} / 10 (Tier S)</p>
+                    </div>`;
                 } else if(st === 'pueblo') {
                     h += `<div class="glass-panel p-4 mb-4 border-[var(--gold)]/30">
                         <div class="flex justify-between items-center border-b border-[var(--gold)]/30 pb-2 mb-3">
@@ -941,7 +905,7 @@
                 } else if(st === 'story') {
                     h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
                         <button onclick="s.subTabs.storySub='1'; render();" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${(!s.subTabs.storySub||s.subTabs.storySub==='1')?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Tomo I</button>
-                        ${s.prestige>=2 ? `<button onclick="s.subTabs.storySub='2'; render();" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${s.subTabs.storySub==='2'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Tomo II</button>` : `<button class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold opacity-30">🔒 P2</button>`}
+                        <button onclick="${s.prestige>=2 ? `s.subTabs.storySub='2'; render();` : `showLockMsg(2)`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${s.subTabs.storySub==='2'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">${s.prestige>=2?'Tomo II':'🔒 P2'}</button>
                     </div>`;
 
                     let sub = s.subTabs.storySub || '1';
@@ -965,65 +929,63 @@
                 }
             }
             else if(t === 'map') {
-                let pBosque = s.mapProgress.z1;
-                let pCuevas = s.mapProgress.z2;
-                let pCima = s.mapProgress.z3;
+                let p1 = getZProg(0); let p2 = getZProg(4); let p3 = getZProg(8); let p4 = getZProg(12); let p5 = getZProg(16); let p6 = getZProg(20);
+                let globalProg = ((p1+p2+p3+p4+p5+p6) / 600 * 100).toFixed(1);
 
-                let bBosqueLocked = s.prestige < 4;
-                let bCuevasLocked = pBosque < 100;
-                let bCimaLocked = pCuevas < 100;
+                let z2Locked = p1 < 100;
+                let z3Locked = p2 < 100;
+                let z4Locked = p3 < 100;
+                let z5Locked = p4 < 100;
+                let z6Locked = p5 < 100;
 
                 h += `<div class="glass-panel p-6 text-center mb-4">
                     <h2 class="font-sys text-xl text-[var(--gold)] mb-2 uppercase tracking-widest">Reino de Aethelgard</h2>
-                    <p class="text-[10px] text-[var(--dia)] mb-4 font-bold">(Lugar Actual)</p>
+                    <p class="text-[10px] text-gray-400 mb-4">Progreso Global: <span class="text-[var(--dia)] font-bold">${globalProg}%</span></p>
                     <div class="grid grid-cols-2 gap-4">
                         <button class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/50 bg-[var(--sys-blue)]/10 flex flex-col items-center">
-                            <span>Pueblo Inicios</span><span class="text-white mt-2">100%</span>
+                            <span>Pueblo Inicios</span><span class="text-white mt-2">${p1}%</span>
                         </button>`;
                         
-                h += `<button onclick="${bBosqueLocked ? `toast('Requiere Prestigio 4', 'var(--sys-red)')` : `s.mapProgress.z1=Math.min(100, s.mapProgress.z1+10); save(); render();`}" class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/30 flex flex-col items-center ${bBosqueLocked?'opacity-50 grayscale':''}">
-                            <span>${bBosqueLocked?'🔒 Zona 1':'Bosque Novatos'}</span>
-                            <span class="text-white mt-2">${bBosqueLocked?'Req: P4':pBosque+'%'}</span>
-                      </button>`;
+                h += `<button onclick="${z2Locked ? `showLockMsg(4)` : ``}" class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/${z2Locked?'30':'50'} flex flex-col items-center ${z2Locked?'opacity-50 grayscale':''}">
+                            <span>${z2Locked?'🔒 Zona 2':'Bosque Novatos'}</span>
+                            <span class="text-white mt-2">${z2Locked?'Req: P4':p2+'%'}</span>
+                      </button></div></div>`;
                 
-                h += `<button onclick="${bCuevasLocked ? `toast('Requiere Bosque 100%', 'var(--sys-red)')` : `s.mapProgress.z2=Math.min(100, s.mapProgress.z2+10); save(); render();`}" class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/30 flex flex-col items-center ${bCuevasLocked?'opacity-50 grayscale':''}">
-                            <span>${bCuevasLocked?'🔒 Zona 2':'Cuevas Cristal'}</span>
-                            <span class="text-white mt-2">${bCuevasLocked?'Req: Bosque 100%':pCuevas+'%'}</span>
-                      </button>`;
-
-                h += `<button onclick="${bCimaLocked ? `toast('Requiere Cuevas 100%', 'var(--sys-red)')` : `s.mapProgress.z3=Math.min(100, s.mapProgress.z3+10); save(); render();`}" class="glass-panel p-4 py-6 text-[var(--sys-blue)] font-sys font-bold text-[10px] border-[var(--sys-blue)]/30 flex flex-col items-center ${bCimaLocked?'opacity-50 grayscale':''}">
-                            <span>${bCimaLocked?'🔒 Zona 3':'Cima del Eco'}</span>
-                            <span class="text-white mt-2">${bCimaLocked?'Req: Cuevas 100%':pCima+'%'}</span>
-                      </button>`;
-
-                h += `</div></div>`;
-
-                h += `<div class="glass-panel p-6 text-center mb-4 opacity-70">
+                h += `<div class="glass-panel p-6 text-center mb-4">
                     <h2 class="font-sys text-xl text-[var(--sys-red)] mb-2 uppercase tracking-widest">Reino de Drakkaris</h2>
                     <p class="text-[10px] text-gray-500 mb-4">Tierras de fuego y escamas.</p>
                     <div class="grid grid-cols-2 gap-4">
-                        <button onclick="sfx.error(); showModal('???', 'Peaje de 0.99€ o pago único de 4.99€ para desbloquear todo lo actual y futuro.', 'var(--sys-red)')" class="glass-panel p-4 py-8 text-[var(--sys-red)] font-sys font-bold text-lg border-[var(--sys-red)]/30">???</button>
-                        <button onclick="sfx.error(); showModal('???', 'Peaje de 0.99€ o pago único de 4.99€ para desbloquear todo lo actual y futuro.', 'var(--sys-red)')" class="glass-panel p-4 py-8 text-[var(--sys-red)] font-sys font-bold text-lg border-[var(--sys-red)]/30">???</button>
-                    </div>
-                </div>`;
+                    <button onclick="${z3Locked ? `showLockMsg(8)` : ``}" class="glass-panel p-4 py-6 text-[var(--sys-red)] font-sys font-bold text-[10px] border-[var(--sys-red)]/${z3Locked?'30':'50'} flex flex-col items-center ${z3Locked?'opacity-50 grayscale':''}">
+                            <span>${z3Locked?'🔒 Zona 3':'Tierras Volcánicas'}</span>
+                            <span class="text-white mt-2">${z3Locked?'Req: P8':p3+'%'}</span>
+                      </button>
+                    <button onclick="${z4Locked ? `showLockMsg(12)` : ``}" class="glass-panel p-4 py-6 text-[var(--sys-red)] font-sys font-bold text-[10px] border-[var(--sys-red)]/${z4Locked?'30':'50'} flex flex-col items-center ${z4Locked?'opacity-50 grayscale':''}">
+                            <span>${z4Locked?'🔒 Zona 4':'Mar de Lava'}</span>
+                            <span class="text-white mt-2">${z4Locked?'Req: P12':p4+'%'}</span>
+                      </button></div></div>`;
 
-                h += `<div class="glass-panel p-6 text-center mb-4 opacity-70">
+                h += `<div class="glass-panel p-6 text-center mb-4">
                     <h2 class="font-sys text-xl text-[var(--divine)] mb-2 uppercase tracking-widest">Imperio Celestial</h2>
                     <p class="text-[10px] text-gray-500 mb-4">El dominio de los falsos dioses.</p>
                     <div class="grid grid-cols-2 gap-4">
-                        <button onclick="sfx.error(); showModal('???', 'Peaje de 0.99€ o pago único de 4.99€ para desbloquear todo lo actual y futuro.', 'var(--divine)')" class="glass-panel p-4 py-8 text-[var(--divine)] font-sys font-bold text-lg border-[var(--divine)]/30">???</button>
-                        <button onclick="sfx.error(); showModal('???', 'Peaje de 0.99€ o pago único de 4.99€ para desbloquear todo lo actual y futuro.', 'var(--divine)')" class="glass-panel p-4 py-8 text-[var(--divine)] font-sys font-bold text-lg border-[var(--divine)]/30">???</button>
-                    </div>
-                </div>`;
+                        <button onclick="${z5Locked ? `showLockMsg(16)` : ``}" class="glass-panel p-4 py-6 text-[var(--divine)] font-sys font-bold text-[10px] border-[var(--divine)]/${z5Locked?'30':'50'} flex flex-col items-center ${z5Locked?'opacity-50 grayscale':''}">
+                            <span>${z5Locked?'🔒 Zona 5':'Puertas del Cielo'}</span>
+                            <span class="text-white mt-2">${z5Locked?'Req: P16':p5+'%'}</span>
+                      </button>
+                      <button onclick="${z6Locked ? `showLockMsg(20)` : ``}" class="glass-panel p-4 py-6 text-[var(--divine)] font-sys font-bold text-[10px] border-[var(--divine)]/${z6Locked?'30':'50'} flex flex-col items-center ${z6Locked?'opacity-50 grayscale':''}">
+                            <span>${z6Locked?'🔒 Zona 6':'Trono Divino'}</span>
+                            <span class="text-white mt-2">${z6Locked?'Req: P20':p6+'%'}</span>
+                      </button>
+                    </div></div>`;
             }
             else if(t === 'lab') {
                 const st = s.subTabs[t] || 'inv';
                 h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
                     <button onclick="setSubTab('inv')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='inv'?'bg-white/10 text-white':'opacity-50'}">Inventario</button>
                     <button onclick="setSubTab('main')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='main'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Base</button>
-                    ${s.prestige>=1?`<button onclick="setSubTab('mana')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='mana'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Maná</button>`:`<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P1</button>`}
-                    ${s.prestige>=2?`<button onclick="setSubTab('exo')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='exo'?'bg-[var(--exotic)]/20 text-[var(--exotic)]':'opacity-50'}">Exótica</button>`:`<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P2</button>`}
-                    ${s.prestige>=3?`<button onclick="setSubTab('div')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='div'?'bg-[var(--divine)]/20 text-[var(--divine)]':'opacity-50'}">Divina</button>`:`<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P3</button>`}
+                    <button onclick="${s.prestige>=1?`setSubTab('mana')`:`showLockMsg(1)`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='mana'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">${s.prestige>=1?'Maná':'🔒 P1'}</button>
+                    <button onclick="${s.prestige>=2?`setSubTab('exo')`:`showLockMsg(2)`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='exo'?'bg-[var(--exotic)]/20 text-[var(--exotic)]':'opacity-50'}">${s.prestige>=2?'Exótica':'🔒 P2'}</button>
+                    <button onclick="${s.prestige>=3?`setSubTab('div')`:`showLockMsg(3)`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='div'?'bg-[var(--divine)]/20 text-[var(--divine)]':'opacity-50'}">${s.prestige>=3?'Divina':'🔒 P3'}</button>
                     <button onclick="setSubTab('sec')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='sec'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Oscura</button>
                 </div>`;
                 
@@ -1032,20 +994,15 @@
                         <h3 class="font-sys text-[var(--sys-blue)] text-sm mb-4 uppercase tracking-widest flex justify-between items-center"><span>Alquimia</span> <span class="text-[9px] bg-black px-2 py-1 rounded text-[var(--sys-blue)] border border-[var(--sys-blue)]/30">Max 3 Pociones</span></h3>`;
                         
                     ['p1', 'p2', 'p3'].forEach(pId => {
-                        let p = POTIONS_DB[pId];
-                        let n = pId==='p1'?"Poción Menor (x1.2 EXP)":pId==='p2'?"Poción Verde (x1.5 EXP)":"Poción Fuerte (x2.0 EXP)";
+                        let p = POTIONS_DB[pId]; let n = pId==='p1'?"Poción Menor (x1.2)":pId==='p2'?"Poción Verde (x1.5)":"Poción Fuerte (x2.0)";
                         let reqLvl = pId==='p1'?2:pId==='p2'?3:4;
-                        
                         if(s.lvl >= reqLvl || s.prestige > 0) {
-                            h += `<div class="bg-black/50 p-3 rounded-xl border border-[var(--border-glass)] mb-2 flex justify-between items-center">
-                                <div class="text-left w-2/3"><p class="text-[10px] font-bold text-gray-200 truncate">${n}</p></div>`;
+                            h += `<div class="bg-black/50 p-3 rounded-xl border border-[var(--border-glass)] mb-2 flex justify-between items-center"><div class="text-left w-2/3"><p class="text-[10px] font-bold text-gray-200 truncate">${n}</p></div>`;
                             if(s.activeCrafts[pId]) {
                                 let c = s.activeCrafts[pId];
                                 if(c.ready) h += `<button onclick="claimPotion('${pId}','${n}')" class="bg-[var(--gold)] text-black font-bold px-3 py-2 rounded text-[9px] uppercase animate-pulse">RECLAMAR</button>`;
                                 else h += `<button id="craft-btn-${pId}" disabled class="bg-gray-800 text-gray-400 px-3 py-1 rounded text-[8px] uppercase truncate w-1/3 text-center border border-gray-600">⏳ ${c.time}s<br><span class="text-[7px]">${c.ex}</span></button>`;
-                            } else {
-                                h += `<button onclick="startPotionCraft('${pId}', '${n}')" class="bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">CREAR</button>`;
-                            }
+                            } else { h += `<button onclick="startPotionCraft('${pId}', '${n}')" class="bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">CREAR</button>`; }
                             h += `</div>`;
                         }
                     });
@@ -1073,96 +1030,74 @@
                     h += `</div>`;
                 } else if(st === 'mana') {
                     h += `<div class="glass-panel p-5 border-[var(--sys-blue)]/30 text-center">
-                        <h3 class="font-sys text-[var(--sys-blue)] text-sm mb-4 uppercase tracking-widest">Destilación Compleja</h3>
-                        <p class="text-[9px] text-[var(--sys-blue)] opacity-70 mb-4">Pociones para recargar instantáneamente tu Maná.</p>`;
+                        <h3 class="font-sys text-[var(--sys-blue)] text-sm mb-4 uppercase tracking-widest">Destilación Compleja</h3>`;
                     ['m1','m2','m3'].forEach(pId => {
-                        let p = POTIONS_DB[pId];
                         let n = pId==='m1'?"Maná Menor (+2)":pId==='m2'?"Maná Fuerte (+10)":"Maná Maestro (+30)";
                         h += `<div class="bg-black/50 p-3 rounded-xl border border-gray-800 mb-2 flex justify-between items-center"><div class="text-left w-2/3"><p class="text-[10px] font-bold text-[var(--sys-blue)] truncate">${n}</p></div>`;
                         if(s.activeCrafts[pId]) {
                             let c = s.activeCrafts[pId];
                             if(c.ready) h += `<button onclick="claimPotion('${pId}','${n}')" class="bg-[var(--gold)] text-black font-bold px-3 py-2 rounded text-[9px] uppercase animate-pulse">RECLAMAR</button>`;
                             else h += `<button id="craft-btn-${pId}" disabled class="bg-gray-800 text-gray-400 px-3 py-1 rounded text-[8px] uppercase truncate w-1/3 text-center border border-gray-600">⏳ ${c.time}s<br><span class="text-[7px]">${c.ex}</span></button>`;
-                        } else {
-                            h += `<button onclick="startPotionCraft('${pId}', '${n}')" class="bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">PREPARAR</button>`;
-                        }
+                        } else { h += `<button onclick="startPotionCraft('${pId}', '${n}')" class="bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">PREPARAR</button>`; }
                         h += `</div>`;
                     });
                     h += `</div>`;
                 } else if(st === 'exo') {
                     h += `<div class="glass-panel p-5 border-[var(--exotic)]/30 text-center">
-                        <h3 class="font-sys text-[var(--exotic)] text-sm mb-4 uppercase tracking-widest">Destilación Exótica</h3>
-                        <p class="text-[9px] text-[var(--exotic)] opacity-70 mb-4">Multiplicadores de Oro masivos.</p>`;
+                        <h3 class="font-sys text-[var(--exotic)] text-sm mb-4 uppercase tracking-widest">Destilación Exótica</h3>`;
                     ['e1','e2'].forEach(pId => {
-                        let p = POTIONS_DB[pId];
                         let n = pId==='e1'?"Suerte Exótica (x1.5 ORO)":"Avaricia Exótica (x2.0 ORO)";
                         h += `<div class="bg-black/50 p-3 rounded-xl border border-[var(--exotic)]/30 mb-2 flex justify-between items-center"><div class="text-left w-2/3"><p class="text-[10px] font-bold text-[var(--exotic)] truncate">${n}</p></div>`;
                         if(s.activeCrafts[pId]) {
                             let c = s.activeCrafts[pId];
                             if(c.ready) h += `<button onclick="claimPotion('${pId}','${n}')" class="bg-[var(--gold)] text-black font-bold px-3 py-2 rounded text-[9px] uppercase animate-pulse">RECLAMAR</button>`;
                             else h += `<button id="craft-btn-${pId}" disabled class="bg-gray-800 text-gray-400 px-3 py-1 rounded text-[8px] uppercase truncate w-1/3 text-center border border-gray-600">⏳ ${c.time}s<br><span class="text-[7px]">${c.ex}</span></button>`;
-                        } else {
-                            h += `<button onclick="startPotionCraft('${pId}', '${n}')" class="bg-[var(--exotic)]/10 text-[var(--exotic)] border border-[var(--exotic)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">PREPARAR</button>`;
-                        }
+                        } else { h += `<button onclick="startPotionCraft('${pId}', '${n}')" class="bg-[var(--exotic)]/10 text-[var(--exotic)] border border-[var(--exotic)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">PREPARAR</button>`; }
                         h += `</div>`;
                     });
                     h += `</div>`;
                 } else if(st === 'div') {
                     h += `<div class="glass-panel p-5 border-[var(--divine)]/30 text-center">
-                        <h3 class="font-sys text-[var(--divine)] text-sm mb-4 uppercase tracking-widest">Destilación Divina</h3>
-                        <p class="text-[9px] text-[var(--divine)] opacity-70 mb-4">Multiplicadores de Diamantes.</p>`;
+                        <h3 class="font-sys text-[var(--divine)] text-sm mb-4 uppercase tracking-widest">Destilación Divina</h3>`;
                     ['d1','d2'].forEach(pId => {
-                        let p = POTIONS_DB[pId];
                         let n = pId==='d1'?"Favor Divino (x1.5 DIA)":"Milagro Divino (x2.0 DIA)";
                         h += `<div class="bg-black/50 p-3 rounded-xl border border-[var(--divine)]/30 mb-2 flex justify-between items-center"><div class="text-left w-2/3"><p class="text-[10px] font-bold text-[var(--divine)] truncate">${n}</p></div>`;
                         if(s.activeCrafts[pId]) {
                             let c = s.activeCrafts[pId];
                             if(c.ready) h += `<button onclick="claimPotion('${pId}','${n}')" class="bg-[var(--gold)] text-black font-bold px-3 py-2 rounded text-[9px] uppercase animate-pulse">RECLAMAR</button>`;
                             else h += `<button id="craft-btn-${pId}" disabled class="bg-gray-800 text-gray-400 px-3 py-1 rounded text-[8px] uppercase truncate w-1/3 text-center border border-gray-600">⏳ ${c.time}s<br><span class="text-[7px]">${c.ex}</span></button>`;
-                        } else {
-                            h += `<button onclick="startPotionCraft('${pId}', '${n}')" class="bg-[var(--divine)]/10 text-[var(--divine)] border border-[var(--divine)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">PREPARAR</button>`;
-                        }
+                        } else { h += `<button onclick="startPotionCraft('${pId}', '${n}')" class="bg-[var(--divine)]/10 text-[var(--divine)] border border-[var(--divine)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">PREPARAR</button>`; }
                         h += `</div>`;
                     });
                     h += `</div>`;
                 } else if(st === 'sec') {
                     h += `<div class="glass-panel p-5 border-[var(--sys-purple)]/30 text-center">
-                        <h3 class="font-sys text-[var(--sys-purple)] text-sm mb-4 uppercase tracking-widest">Magia Prohibida</h3>
-                        <div class="bg-black/50 p-4 rounded-xl border border-gray-800 mb-4 flex justify-between items-center">
-                            <div class="text-left w-2/3"><p class="text-[11px] font-bold text-[var(--sys-purple)] mb-1 truncate">Poción Oscura (x5.0 EXP)</p></div>`;
-                            if(s.activeCrafts['sec1']) {
-                                let c = s.activeCrafts['sec1'];
-                                if(c.ready) h += `<button onclick="claimPotion('sec1','Poción Oscura (x5.0 EXP)')" class="bg-[var(--gold)] text-black font-bold px-3 py-2 rounded text-[9px] uppercase animate-pulse">RECLAMAR</button>`;
-                                else h += `<button id="craft-btn-sec1" disabled class="bg-gray-800 text-gray-400 px-3 py-1 rounded text-[8px] uppercase truncate w-1/3 text-center border border-gray-600">⏳ ${c.time}s<br><span class="text-[7px]">${c.ex}</span></button>`;
-                            } else {
-                                h += `<button onclick="startPotionCraft('sec1', 'Poción Oscura (x5.0 EXP)')" class="bg-[var(--sys-purple)]/10 text-[var(--sys-purple)] border border-[var(--sys-purple)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">PREPARAR</button>`;
-                            }
-                        h += `</div>
-                        <div class="bg-black/50 p-4 rounded-xl border border-[var(--lavender)]/30 mb-4 flex justify-between items-center">
-                            <div class="text-left w-2/3"><p class="text-[11px] font-bold text-white mb-1 truncate">Lágrima Abismo (x10.0 EXP)</p></div>`;
-                            if(s.activeCrafts['sec2']) {
-                                let c = s.activeCrafts['sec2'];
-                                if(c.ready) h += `<button onclick="claimPotion('sec2','Lágrima Abismo (x10.0 EXP)')" class="bg-[var(--gold)] text-black font-bold px-3 py-2 rounded text-[9px] uppercase animate-pulse">RECLAMAR</button>`;
-                                else h += `<button id="craft-btn-sec2" disabled class="bg-gray-800 text-gray-400 px-3 py-1 rounded text-[8px] uppercase truncate w-1/3 text-center border border-gray-600">⏳ ${c.time}s<br><span class="text-[7px]">${c.ex}</span></button>`;
-                            } else {
-                                h += `<button onclick="startPotionCraft('sec2', 'Lágrima Abismo (x10.0 EXP)')" class="bg-white/10 text-white border border-white/50 px-3 py-2 rounded text-[9px] font-bold uppercase">PREPARAR</button>`;
-                            }
-                        h += `</div>
-                    </div>`;
+                        <h3 class="font-sys text-[var(--sys-purple)] text-sm mb-4 uppercase tracking-widest">Magia Prohibida</h3>`;
+                    ['sec1','sec2'].forEach(pId => {
+                        let n = pId==='sec1'?"Poción Oscura (x5.0 EXP)":"Lágrima Abismo (x10.0 EXP)";
+                        h += `<div class="bg-black/50 p-3 rounded-xl border border-gray-800 mb-2 flex justify-between items-center"><div class="text-left w-2/3"><p class="text-[10px] font-bold text-[var(--sys-purple)] truncate">${n}</p></div>`;
+                        if(s.activeCrafts[pId]) {
+                            let c = s.activeCrafts[pId];
+                            if(c.ready) h += `<button onclick="claimPotion('${pId}','${n}')" class="bg-[var(--gold)] text-black font-bold px-3 py-2 rounded text-[9px] uppercase animate-pulse">RECLAMAR</button>`;
+                            else h += `<button id="craft-btn-${pId}" disabled class="bg-gray-800 text-gray-400 px-3 py-1 rounded text-[8px] uppercase truncate w-1/3 text-center border border-gray-600">⏳ ${c.time}s<br><span class="text-[7px]">${c.ex}</span></button>`;
+                        } else { h += `<button onclick="startPotionCraft('${pId}', '${n}')" class="bg-[var(--sys-purple)]/10 text-[var(--sys-purple)] border border-[var(--sys-purple)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">PREPARAR</button>`; }
+                        h += `</div>`;
+                    });
+                    h += `</div>`;
                 }
             }
             else if(t === 'dungeon') {
                 const st = s.subTabs[t] || 'd1';
                 h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
                     <button onclick="setSubTab('d1')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d1'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Mazmorra</button>
-                    ${s.prestige >= 1 ? `<button onclick="setSubTab('d2')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d2'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Maldita</button>` : `<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P1</button>`}
-                    ${s.prestige >= 1 ? `<button onclick="setSubTab('d3')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d3'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Abismo</button>` : `<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P1</button>`}
-                    ${s.prestige >= 3 ? `<button onclick="setSubTab('d4')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d4'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">El Rey</button>` : `<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30 hidden">🔒 P3</button>`}
+                    <button onclick="${s.prestige >= 1 ? `setSubTab('d2')` : `showLockMsg(1)`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d2'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">${s.prestige >= 1 ? 'Maldita' : '🔒 P1'}</button>
+                    <button onclick="${s.prestige >= 1 ? `setSubTab('d3')` : `showLockMsg(1)`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d3'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">${s.prestige >= 1 ? 'Abismo' : '🔒 P1'}</button>
+                    <button onclick="${s.prestige >= 3 ? `setSubTab('d4')` : `showLockMsg(3)`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d4'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">${s.prestige >= 3 ? 'El Rey' : '🔒 P3'}</button>
                 </div>`;
 
-                let cfg = { id:'b1', arr: BOSSES_T1, mCost: 2, tLvl: 1, col: 'var(--sys-blue)', drops: "Acero, Cobre, Hierro, Madera...", matRange: [0, 11] };
-                if(st==='d2') cfg = { id:'b2', arr: BOSSES_T2, mCost: 4, tLvl: 2, col: 'var(--sys-red)', drops: "F. Lunar, S. Solar, Sangre...", matRange: [12, 23] };
-                if(st==='d3') cfg = { id:'b3', arr: BOSSES_T3, mCost: 6, tLvl: 3, col: 'var(--sys-purple)', drops: "C. Roto, Elementos Puros, Lágrimas...", matRange: [24, 35] };
+                let cfg = { id:'b1', arr: BOSSES_T1, mCost: 2, tLvl: 1, col: 'var(--sys-blue)', drops: "Acero, Cobre, Hierro...", matRange: [0, 11] };
+                if(st==='d2') cfg = { id:'b2', arr: BOSSES_T2, mCost: 4, tLvl: 2, col: 'var(--sys-red)', drops: "F. Lunar, S. Solar...", matRange: [12, 23] };
+                if(st==='d3') cfg = { id:'b3', arr: BOSSES_T3, mCost: 6, tLvl: 3, col: 'var(--sys-purple)', drops: "C. Roto, Elementos Puros...", matRange: [24, 35] };
                 if(st==='d4') cfg = { id:'b4', arr: ["Rey Aric Dorado", "Espejismo Divino"], mCost: 20, tLvl: 4, col: 'var(--gold)', drops: "Materiales Divinos (P1 y P2)", matRange: [36, 67] };
 
                 let b = s.bosses[cfg.id]; let p = (b.hp / b.maxHp) * 100;
@@ -1177,7 +1112,7 @@
                             <div class="progress-bar h-full bg-red-600 shadow-[0_0_10px_red]" style="width: ${p}%"></div>
                             <div class="absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase text-white drop-shadow-md">HP: ${b.hp} / ${b.maxHp}</div>
                         </div>
-                        <button onclick="attackBoss('${cfg.id}', ${cfg.mCost}, [${cfg.arr.map(x=>`'${x}'`).join(',')}], [${cfg.matRange.join(',')}])" class="w-full py-4 rounded-xl border border-[${cfg.col}]/50 bg-[${cfg.col}]/10 text-[${cfg.col}] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(0,0,0,0.5)]">⚔️ ATACAR (${finalCost.toFixed(1)} Maná)</button>
+                        <button onclick="attackBoss('${cfg.id}', ${cfg.mCost}, [${cfg.arr.map(x=>`'${x}'`).join(',')}], [${cfg.matRange.join(',')}])" class="w-full py-4 rounded-xl border border-[${cfg.col}]/50 bg-[${cfg.col}]/10 text-[${cfg.col}] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(0,0,0,0.5)]">⚔️ LUCHA (${finalCost.toFixed(1)} Maná)</button>
                     </div>
                     <hr class="border-gray-800 mb-6">
                     <div>
@@ -1192,8 +1127,8 @@
                 h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
                     <button onclick="setSubTab('wep')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='wep'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Armas</button>
                     <button onclick="setSubTab('arm')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='arm'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Armaduras</button>
-                    ${s.prestige>=2?`<button onclick="setSubTab('herr')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='herr'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Herrero</button>`:`<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P2</button>`}
-                    ${s.prestige>=3?`<button onclick="setSubTab('mald')" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='mald'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Forja Maldita</button>`:`<button class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold opacity-30">🔒 P3</button>`}
+                    <button onclick="${s.prestige>=2?`setSubTab('herr')`:`showLockMsg(2)`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='herr'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">${s.prestige>=2?'Herrero':'🔒 P2'}</button>
+                    <button onclick="${s.prestige>=3?`setSubTab('mald')`:`showLockMsg(3)`}" class="px-4 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='mald'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">${s.prestige>=3?'Forja Maldita':'🔒 P3'}</button>
                 </div>`;
                 
                 if(st === 'wep') {
@@ -1359,7 +1294,6 @@
                         <button onclick="sfx.click(); gain('exp', 50000);" class="bg-purple-900/40 py-3 rounded-lg text-[10px] border border-purple-500/30 text-purple-300 font-bold uppercase">+50,000 EXP</button>
                         <button onclick="sfx.click(); gain('gold', 500000);" class="bg-yellow-900/40 py-3 rounded-lg text-[10px] border border-yellow-500/30 text-yellow-300 font-bold uppercase">+500,000 Oro</button>
                         <button onclick="sfx.click(); gain('dia', 5000);" class="bg-[var(--dia)]/20 py-3 rounded-lg text-[10px] border border-[var(--dia)]/50 text-[var(--dia)] font-bold uppercase">+5000 Diamantes</button>
-                        <button onclick="sfx.click(); ALL_MATS.forEach(m => s.mats[m[0]]=999); save(); toast('Materiales Max', 'var(--sys-blue)');" class="bg-green-900/40 py-3 rounded-lg text-[10px] border border-green-500/30 text-green-300 font-bold uppercase">Materiales Máximos</button>
                         <div class="grid grid-cols-2 gap-2 mt-1">
                             <button onclick="sfx.click(); s.timeOffset+=3600000; checkTime(); toast('Reloj: +1 Hora', 'var(--sys-red)')" class="bg-gray-800 py-3 rounded text-[9px] border border-gray-600 text-gray-300 font-bold uppercase">+1H Reloj</button>
                             <button onclick="sfx.error(); if(confirm('¿BORRAR TODO EL PROGRESO?')){ localStorage.removeItem(DB_KEY); location.reload(); }" class="bg-red-900/50 py-3 rounded text-[9px] border border-[var(--sys-red)] text-[var(--sys-red)] font-bold uppercase">Hard Reset</button>
