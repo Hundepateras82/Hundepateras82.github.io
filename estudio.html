@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>LifeQuest AAA: V12 Cumbre</title>
+    <title>LifeQuest AAA: V15.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -36,7 +36,7 @@
         .bar-bg { width: 100%; height: 8px; background: var(--border-dark); border-radius: 4px; overflow: hidden; margin-top: 3px; position: relative;}
         .bar-fill { height: 100%; transition: width 0.3s ease; position: absolute; top:0; left:0;}
 
-        /* HUD MAPA FIJADO EN RELATIVE PARA NO TAPAR */
+        /* HUD MAPA FIJADO EN RELATIVE */
         #hud-minimal { background: var(--panel); border-bottom: 1px solid var(--border-dark); padding: 15px; display: none; justify-content: space-between; align-items: center; position: relative; width: 100%; z-index: 10; }
         .min-curr { background: var(--panel-light); padding: 5px 10px; border-radius: 12px; font-weight: 900; font-size: 12px; border: 1px solid var(--border-dark); }
 
@@ -61,13 +61,11 @@
         .equip-slot.filled { border-style: solid; background: var(--panel); }
         .equip-icon { font-size: 30px; margin-bottom: 5px; }
         .equip-name { font-size: 9px; font-weight: 900; text-transform: uppercase; }
-        .lvl-badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: black; font-size: 10px; padding: 2px 5px; border-radius: 10px; font-weight: 900;}
-
+        
         .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-dark); flex-wrap: wrap;}
         .item-icon { font-size: 30px; background: var(--panel-light); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); }
         .item-details { flex: 1; min-width: 120px; }
 
-        /* INVENTARIO DETALLADO */
         .inv-list-item { display: flex; align-items: center; gap: 15px; padding: 10px; background: var(--panel-light); border-radius: 10px; border: 1px solid var(--border-dark); margin-bottom: 8px;}
         .inv-icon { font-size: 24px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--panel); border-radius: 8px;}
         
@@ -78,21 +76,23 @@
         .node.unlocked { background: var(--blue); border-color: var(--blue-shadow); box-shadow: 0 6px 0 var(--blue-shadow); color: white; animation: pulse 2s infinite;}
         .node.boss { border-color: var(--red); border-width: 5px; }
 
-        /* COMBAT */
+        /* COMBAT FIX TOTAL IPHONE */
         .combat-container { display: flex; flex-direction: column; height: 100%; transition: background 0.3s; }
         .combat-header { padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border-dark); flex-shrink: 0;}
         .combat-progress-bg { flex: 1; height: 10px; background: var(--border-dark); border-radius: 10px; overflow: hidden; }
         .combat-progress-fill { height: 100%; background: var(--green); transition: width 0.3s ease; }
         
-        .combat-body { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 20px; }
-        .combat-footer { padding: 15px 20px; background: var(--panel); border-top: 1px solid var(--border-dark); flex-shrink: 0; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+        .combat-body { flex: 1; overflow-y: auto; padding: 20px; }
+        
+        /* El padding extra aquí empuja los botones hacia arriba lejos del borde de la pantalla */
+        .combat-footer { flex-shrink: 0; padding: 15px 20px; background: var(--panel); border-top: 1px solid var(--border-dark); padding-bottom: calc(40px + env(safe-area-inset-bottom)); z-index: 200; }
 
         .option { background: var(--panel-light); border: 2px solid var(--border-dark); border-radius: 12px; padding: 16px; margin-bottom: 10px; font-weight: 700; transition: 0.2s; cursor: pointer; }
         .option.selected { border-color: var(--blue); background: rgba(59,130,246,0.1); }
         .option.correct { border-color: var(--green); background: rgba(16,185,129,0.1); color: var(--green); }
         .option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); opacity: 0.5; }
 
-        /* NAV CON PADDING BOTTOM PARA iPHONE */
+        /* NAV */
         .nav { position: absolute; bottom: 0; width: 100%; display: flex; background: rgba(13,20,36,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border-dark); z-index: 100; padding-bottom: env(safe-area-inset-bottom); overflow-x: auto;}
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 9px; transition: 0.2s; min-width: 60px; padding: 10px 0;}
         .nav-item.active { color: var(--cyan); transform: translateY(-3px); }
@@ -106,7 +106,7 @@
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); } 70% { box-shadow: 0 0 0 15px rgba(59,130,246,0); } 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); } }
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 50% { transform: translateX(12px); } 75% { transform: translateX(-12px); } }
-        .floating-text { position: absolute; font-weight: 900; font-size: 26px; pointer-events: none; z-index: 1000; animation: floatUp 1s ease-out forwards; text-shadow: 2px 2px 0 #000; }
+        .floating-text { position: absolute; font-weight: 900; font-size: 20px; pointer-events: none; z-index: 1000; animation: floatUp 1s ease-out forwards; text-shadow: 2px 2px 0 #000; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-80px) scale(1.5); opacity: 0; } }
         #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,0,0,0.5); z-index: 999; display: none; pointer-events: none; mix-blend-mode: multiply; }
         
@@ -114,8 +114,12 @@
         .chest-anim { animation: chestAnim 1s ease-in-out forwards; }
         
         /* MINERIA IDLE */
-        .mine-rock { font-size: 100px; text-align: center; cursor: pointer; transition: 0.1s; user-select: none; margin: 20px 0;}
+        .mine-rock { font-size: 100px; text-align: center; cursor: pointer; transition: 0.1s; user-select: none; margin: 20px 0; position: relative;}
         .mine-rock:active { transform: scale(0.9); }
+        .heat-bar-bg { width: 150px; height: 10px; background: var(--border-dark); border-radius: 5px; margin: 0 auto; overflow: hidden; }
+        .heat-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--red)); width: 0%; transition: width 0.1s; }
+        .mine-event { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 50px; animation: pulse 1s infinite; z-index: 10; display: none;}
+        .depth-bg { background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px; text-align: center; border: 1px solid var(--border-dark); margin-bottom: 15px;}
     </style>
 </head>
 <body>
@@ -187,6 +191,12 @@
                 <div class="stat-box" style="color:var(--gold); border-color:var(--gold);">🍀 SUE<br><span id="stat-luck" style="font-size:18px; color:white;">5</span></div>
                 <div class="stat-box" style="color:var(--purple); border-color:var(--purple);">🔥 CRIT<br><span id="stat-crit" style="font-size:18px; color:white;">0%</span></div>
             </div>
+            
+            <div class="card" style="margin-top:15px; border-color:var(--green); text-align:center; background: rgba(16, 185, 129, 0.1);">
+                <h3 style="margin-top:0; color:var(--green); font-weight:900;">🏕️ El Campamento</h3>
+                <p style="font-size:12px; color:var(--text-main);">Quédate en esta pantalla. Recuperas 2 HP y 1 EN cada 2 segundos sin hacer nada.</p>
+                <div style="font-size:30px; transition:0.2s;" id="camp-fire">🔥</div>
+            </div>
 
             <h3 style="font-weight: 900; margin-bottom: 10px;">Equipamiento</h3>
             <div class="equip-grid">
@@ -198,6 +208,11 @@
 
             <h3 style="font-weight: 900; margin-bottom: 10px; margin-top: 20px;">Mochila & Inventario</h3>
             <div id="inventory-list-detailed" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            
+            <div style="margin-top: 40px; text-align: center; border-top: 1px solid var(--border-dark); padding-top: 20px;">
+                <p style="font-size:11px; color:var(--text-sub);">Opciones del Sistema</p>
+                <button class="btn btn-dark" style="border-color:var(--red); color:var(--red);" onclick="hardReset()">⚠️ REINICIAR TODO (BORRAR DATOS) ⚠️</button>
+            </div>
         </div>
     </div>
 
@@ -245,10 +260,11 @@
 
     <div id="screen-combat" class="screen" style="background:var(--panel);">
         <div class="combat-container" id="combat-container">
+            
             <div class="combat-header" id="combat-header">
-                <div style="font-size:20px; cursor:pointer; color:var(--text-sub);" onclick="fleeCombat()">✖</div>
-                <div class="combat-progress-bg"><div id="combat-prog-bar" class="combat-progress-fill" style="width:0%;"></div></div>
-                <div style="font-weight:900; color:var(--red);">❤️ <span id="combat-hp">100</span></div>
+                <div style="font-size:20px; cursor:pointer; color:var(--text-sub); padding-right:15px;" onclick="fleeCombat()">✖</div>
+                <div class="combat-progress-bg" id="ui-combat-prog"><div id="combat-prog-bar" class="combat-progress-fill" style="width:0%;"></div></div>
+                <div style="font-weight:900; color:var(--red);" id="ui-combat-hp">❤️ <span id="combat-hp">100</span></div>
             </div>
             
             <div class="combat-body">
@@ -257,8 +273,6 @@
                     <div style="width:100%; height:15px; background:#330; border:2px solid var(--red); border-radius:10px; overflow:hidden; margin-top:5px;"><div id="boss-hp-fill" style="height:100%; background:var(--red); width:100%; transition:0.3s;"></div></div>
                 </div>
                 
-                <button id="btn-reading-exit" class="btn btn-dark" style="display:none; margin-bottom:20px;" onclick="fleeCombat()">✖ SALIR</button>
-
                 <h2 id="question-text" style="font-weight:900; font-size:18px; margin-bottom:20px;">Cargando...</h2>
                 <div id="options-container"></div>
             </div>
@@ -269,6 +283,7 @@
                     <button class="btn btn-green" style="flex:0.5; padding:8px; font-size:11px;" onclick="usePotion()">💊 <span id="combat-pots">0</span></button>
                 </div>
                 <button id="btn-check" class="btn btn-dark" onclick="checkAnswer()">COMPROBAR</button>
+                <button id="btn-reading-done" class="btn btn-green" onclick="finishReading()" style="display:none;">¡LECCIÓN COMPLETADA!</button>
             </div>
         </div>
     </div>
@@ -317,37 +332,76 @@
 
     <div id="screen-mining" class="screen">
         <div class="content">
-            <h2 style="margin-top:0; color:var(--gold); font-weight:900;">⛏️ Mina de los Enanos</h2>
-            <p style="font-size:12px; color:var(--text-sub);">Pica la piedra. Tus mineros automáticos trabajan offline.</p>
+            <h2 style="margin-top:0; color:var(--gold); font-weight:900;">⛏️ Profundidades de Moria</h2>
             
-            <div class="mine-rock" onclick="mineRock()">🪨</div>
+            <div class="depth-bg">
+                <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;">
+                    <div>Profundidad: <span style="color:var(--cyan); font-size:14px; font-weight:bold;">-<span id="mine-depth">0</span>m</span></div>
+                    <div>Clics: <span id="mine-clicks" style="color:var(--gold);">0</span></div>
+                </div>
+                <div style="font-size:11px; color:var(--text-sub); text-align:left;">
+                    Producción Idle: <span id="idle-stone-rate" style="color:white; font-weight:bold;">0</span> 🪨/min | <span id="idle-iron-rate" style="color:white; font-weight:bold;">0</span> ⚪/min<br>
+                    Límite Offline: <span id="idle-cap-hrs" style="color:white; font-weight:bold;">2</span> horas
+                </div>
+            </div>
             
-            <div style="text-align:center; font-weight:900; font-size:18px; margin-bottom:20px;">
-                Piedra: <span id="mine-stone-qty" style="color:var(--text-sub);">0</span>
+            <div class="mine-rock" onclick="mineRock()">
+                🪨
+                <div class="mine-event" id="mine-event" onclick="event.stopPropagation(); clickEvent()">👹</div>
+            </div>
+            
+            <div class="heat-bar-bg"><div class="heat-bar-fill" id="heat-bar"></div></div>
+            <div style="text-align:center; font-size:10px; color:var(--red); font-weight:bold; margin-top:5px;" id="frenzy-txt">Calor del Pico</div>
+
+            <div style="text-align:center; font-weight:900; font-size:24px; margin:20px 0;">
+                <span id="mine-stone-qty" style="color:var(--text-main);">0</span> 🪨
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+                <button class="btn btn-dark" style="flex-direction:column; padding:10px;" onclick="openGeode()">
+                    <span style="font-size:20px;">🔮</span> Geodas: <span id="mine-geodes">0</span>
+                </button>
+                <button class="btn btn-dark" style="flex-direction:column; padding:10px;" onclick="useDrill()">
+                    <span style="font-size:20px;">⚡</span> Taladro (50 EN)
+                </button>
             </div>
 
             <div class="list-item">
                 <div class="item-icon">⛏️</div>
-                <div class="item-details"><div style="font-weight:900;">Mejorar Pico</div><div style="font-size:11px; color:var(--text-sub);">+1 Poder de Click (Nvl: <span id="mine-pick-lvl">1</span>)</div></div>
+                <div class="item-details"><div style="font-weight:900;">Mejorar Pico</div><div style="font-size:11px; color:var(--text-sub);">Poder de clic +1 (Nv: <span id="mine-pick-lvl">1</span>)</div></div>
                 <button class="btn btn-gold" style="width:auto; padding:8px;" id="btn-upg-pick" onclick="upgradePickaxe()">50 🪨</button>
             </div>
             <div class="list-item">
                 <div class="item-icon">👷</div>
-                <div class="item-details"><div style="font-weight:900;">Contratar Minero</div><div style="font-size:11px; color:var(--text-sub);">Pica automáticamente offline (Total: <span id="mine-auto-lvl">0</span>)</div></div>
+                <div class="item-details"><div style="font-weight:900;">Minero Auto</div><div style="font-size:11px; color:var(--text-sub);">+10 🪨 y +1 ⚪ /min (Total: <span id="mine-auto-lvl">0</span>)</div></div>
                 <button class="btn btn-blue" style="width:auto; padding:8px;" id="btn-upg-auto" onclick="buyAutoMiner()">100 🟡</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">🛒</div>
+                <div class="item-details"><div style="font-weight:900;">Vagoneta</div><div style="font-size:11px; color:var(--text-sub);">+2 Horas límite offline (Total: <span id="mine-cart-lvl">0</span>)</div></div>
+                <button class="btn btn-purple" style="width:auto; padding:8px;" id="btn-upg-cart" onclick="buyCart()">500 🟡</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">🧨</div>
+                <div class="item-details"><div style="font-weight:900;">Dinamita</div><div style="font-size:11px; color:var(--text-sub);">+1000 🪨 al instante.</div></div>
+                <button class="btn btn-red" style="width:auto; padding:8px;" onclick="buyDynamite()">500 🟡</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">✨</div>
+                <div class="item-details"><div style="font-weight:900;">Sintetizador</div><div style="font-size:11px; color:var(--text-sub);">Convierte 5000 🪨 en 1 Polvo Estelar.</div></div>
+                <button class="btn btn-dark" style="width:auto; padding:8px;" onclick="synthesizeStardust()">5000 🪨</button>
             </div>
         </div>
     </div>
 
-    <div class="nav">
+        <div class="nav">
+        <div class="nav-item" onclick="window.location.href='index.html'"><span>🌌</span>NEXO</div>
         <div class="nav-item active" id="tab-home" onclick="navTo('home')"><span>👤</span>PERFIL</div>
         <div class="nav-item" id="tab-worlds" onclick="navTo('worlds')"><span>🗺️</span>MAPA</div>
         <div class="nav-item" id="tab-mining" onclick="navTo('mining')"><span>⛏️</span>MINA</div>
         <div class="nav-item" id="tab-crafting" onclick="navTo('crafting')"><span>⚒️</span>FORJA</div>
         <div class="nav-item" id="tab-shop" onclick="navTo('shop')"><span>⚖️</span>TIENDA</div>
     </div>
-
-</div>
 
 <script>
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -365,6 +419,10 @@
             osc.type = 'square'; osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
             gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
             osc.start(); osc.stop(audioCtx.currentTime + 0.8);
+        } else if(type === 'mine') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(200 + Math.random()*50, audioCtx.currentTime); 
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
     }
 
@@ -376,12 +434,12 @@
         m4: {icon:'🟣', t:2, n:'Cristal Oscuro', desc:'Jefes o Fusión.'}, 
         m5: {icon:'🧵', t:2, n:'Hilo Mágico', desc:'Tienda Diaria.'}, 
         m6: {icon:'⚙️', t:2, n:'Acero', desc:'Forja de Hierro.'}, 
-        m7: {icon:'✨', t:3, n:'Polvo Estelar', desc:'Gacha Mítico o Jefes.'}, 
+        m7: {icon:'✨', t:3, n:'Polvo Estelar', desc:'Sintetizador o Jefes.'}, 
         m8: {icon:'🦴', t:3, n:'Hueso', desc:'Drops Raros.'}, 
         m9: {icon:'📀', t:3, n:'Oro Puro', desc:'Jefes de élite.'}, 
         m10: {icon:'👹', t:4, n:'Alma', desc:'Jefes Finales.'}, 
         m11: {icon:'🩸', t:4, n:'Sangre', desc:'Mercado Negro.'}, 
-        m12: {icon:'🐉', t:5, n:'Escama', desc:'Extremadamente Raro.'} 
+        m12: {icon:'🐉', t:5, n:'Escama', desc:'Capa 2 del Abismo.'} 
     };
     
     const gearDB = {
@@ -396,67 +454,159 @@
     };
     const rColor = { 1:'tier-1', 2:'tier-2', 3:'tier-3', 4:'tier-4', 5:'tier-5' };
 
-    // --- STATE ---
+    // --- STATE CORE & SANITIZATION (ANTI-NaN) ---
     let state = {
         lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 100, gems: 0, potions: 3, maxPots: 5, sp: 0,
         stats: { atk: 10, def: 10, luck: 5, crit: 0, dodge: 0 }, baseBonus: { atk: 0, def: 0 }, 
         skills: { hp: 0, atk: 0, def: 0, crit: 0, evasion: 0 },
         inventory: {}, equipment: { weapon: null, armor: null, accessory: null, pet: null }, ownedGear: [],
         worlds: [{ id: 0, name: "Mundo de Estudio", campaign: [], completed: [], unlocked: ['n1'] }], activeW: 0,
-        mining: { power: 1, auto: 0, stone: 0, lastMineTime: Date.now() },
+        mining: { power: 1, auto: 0, carts: 0, stone: 0, geodes: 0, totalClicks: 0, depth: 0, lastMineTime: Date.now() },
         dailyShopDate: "", dailyShopItems: []
     };
 
-    let currFilter = 'weapon'; 
+    let currFilter = 'weapon'; let campInterval = null; let heat = 0; let frenzyTime = 0;
     let combat = { active: false, node: null, qIndex: 0, selIdx: null, isDone: false, corrects: 0 };
 
     function init() {
-        try { const saved = localStorage.getItem('LifeQuest_V12'); if (saved) state = Object.assign(state, JSON.parse(saved)); } catch(e) {}
+        try { 
+            const saved = localStorage.getItem('LifeQuest_V15_1'); 
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state = { ...state, ...parsed };
+                // DEEP MERGE CRÍTICO PARA EVITAR NaN
+                state.mining = { power: 1, auto: 0, carts: 0, stone: 0, geodes: 0, totalClicks: 0, depth: 0, lastMineTime: Date.now(), ...(parsed.mining || {}) };
+                state.skills = { hp: 0, atk: 0, def: 0, crit: 0, evasion: 0, ...(parsed.skills || {}) };
+                state.inventory = { ...(parsed.inventory || {}) };
+                state.equipment = { weapon: null, armor: null, accessory: null, pet: null, ...(parsed.equipment || {}) };
+                
+                // Sanear basuras NaN si las hubiera
+                if(isNaN(state.gold)) state.gold = 0;
+                if(isNaN(state.mining.stone)) state.mining.stone = 0;
+                if(isNaN(state.mining.power)) state.mining.power = 1;
+                if(isNaN(state.gems)) state.gems = 0;
+            } 
+        } catch(e) { console.error("Save load error", e); }
         
         if(state.worlds[0].campaign.length === 0) {
             state.worlds[0].campaign = [
-                {id:'n1', type:'reading', title:'📖 Actualización AAA', content:'Ahora tienes recompensas por pregunta, un minijuego de minería, y animaciones Gacha. ¡Suerte!', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
-                {id:'n2', type:'test', title:'⚔️ Test Final', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿Cada correcta te da gemas ahora?', options:['Sí (10 Gemas)','No'], correct:0} ]}
+                {id:'n1', type:'reading', title:'📖 Pantalla Completa', content:'Hemos ocultado la barra de navegación inferior durante los combates y las lecturas. El botón de ¡LECCIÓN COMPLETADA! ahora se ve perfectamente y no se sale de tu pantalla.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
+                {id:'n2', type:'test', title:'⚔️ Test Estable', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿El botón de lectura funciona ahora?', options:['Sí','No'], correct:0} ]}
             ];
         }
 
         checkIdleMining(); generateDailyShop(false); recalcStats(); navTo('home');
-        setInterval(checkIdleMining, 60000);
+        
+        setInterval(checkIdleMining, 60000); 
+        setInterval(() => { 
+            if(frenzyTime > 0) frenzyTime--; 
+            else if(heat > 0) heat = Math.max(0, heat - 5); 
+            updateMineHeat(); 
+        }, 500);
     }
     
-    function save() { localStorage.setItem('LifeQuest_V12', JSON.stringify(state)); updateUI(); }
+    function save() { localStorage.setItem('LifeQuest_V15_1', JSON.stringify(state)); updateUI(); }
 
-    // --- IDLE MINING ---
+    function hardReset() {
+        if(confirm("🚨 ¿ESTÁS TOTALMENTE SEGURO?\nEsto borrará absolutamente todo tu progreso para siempre.")) {
+            localStorage.removeItem('LifeQuest_V15_1'); location.reload();
+        }
+    }
+
+    // --- IDLE MINING (AAA) ---
     function mineRock() {
-        playSound('click');
-        state.mining.stone += state.mining.power;
-        if(Math.random() < 0.1) { state.inventory.m1 = (state.inventory.m1||0)+1; showFloatingText("+1 Hierro", "var(--tier-1)"); }
-        else showFloatingText("+"+state.mining.power, "gray");
+        playSound('mine');
+        let multiplier = frenzyTime > 0 ? 2 : 1;
+        state.mining.stone += (state.mining.power * multiplier);
+        state.mining.totalClicks++;
+        
+        if(state.mining.totalClicks % 100 === 0) state.mining.depth++;
+
+        if(frenzyTime === 0) {
+            heat += 10;
+            if(heat >= 100) { heat = 100; frenzyTime = 10; showFloatingText("¡FRENESÍ x2!", "var(--gold)"); }
+        }
+
+        let r = Math.random();
+        if(r < 0.1) { state.inventory.m1 = (state.inventory.m1||0)+1; showFloatingText("+1 Hierro", "var(--tier-1)"); }
+        else if(r < 0.01) { state.mining.geodes++; showFloatingText("+1 Geoda 🔮", "var(--purple)"); }
+        else if(state.mining.depth >= 50 && r < 0.005) { state.gems++; showFloatingText("+1 Gema 💎", "var(--cyan)"); }
+        else if(state.mining.depth >= 100 && r < 0.001) { state.inventory.m12 = (state.inventory.m12||0)+1; showFloatingText("+1 Escama 🐉", "var(--tier-5)"); }
+        else showFloatingText("+" + (state.mining.power * multiplier), "gray");
+
+        if(Math.random() < 0.005) spawnMineEvent();
         updateMiningUI(); save();
     }
+    
+    function updateMineHeat() {
+        let b = document.getElementById('heat-bar'); let txt = document.getElementById('frenzy-txt');
+        if(!b) return;
+        b.style.width = heat + "%";
+        if(frenzyTime > 0) { b.style.background = "var(--cyan)"; txt.innerText = `¡FRENESÍ! (${frenzyTime}s)`; }
+        else { b.style.background = "linear-gradient(90deg, var(--gold), var(--red))"; txt.innerText = "Calor del Pico"; }
+    }
+
     function checkIdleMining() {
         if(state.mining.auto > 0) {
             let now = Date.now(); let mins = Math.floor((now - state.mining.lastMineTime) / 60000);
             if(mins > 0) {
-                state.mining.stone += (mins * state.mining.auto * 5);
-                state.inventory.m1 = (state.inventory.m1||0) + (mins * state.mining.auto); // 1 hierro por min por worker
+                let maxHours = 2 + (state.mining.carts * 2);
+                let effectiveMins = Math.min(mins, maxHours * 60);
+                
+                state.mining.stone += (effectiveMins * state.mining.auto * 10);
+                state.inventory.m1 = (state.inventory.m1||0) + (effectiveMins * state.mining.auto * 1);
                 state.mining.lastMineTime = now; save();
             }
         } else { state.mining.lastMineTime = Date.now(); }
     }
+
     function updateMiningUI() {
         const setT = (id,v) => {let e=document.getElementById(id); if(e) e.innerText=v;};
-        setT('mine-stone-qty', state.mining.stone); setT('mine-pick-lvl', state.mining.power); setT('mine-auto-lvl', state.mining.auto);
+        setT('mine-stone-qty', state.mining.stone); setT('mine-pick-lvl', state.mining.power); 
+        setT('mine-auto-lvl', state.mining.auto); setT('mine-cart-lvl', state.mining.carts);
+        setT('mine-geodes', state.mining.geodes); setT('mine-depth', state.mining.depth); setT('mine-clicks', state.mining.totalClicks);
+        setT('idle-stone-rate', state.mining.auto * 10); setT('idle-iron-rate', state.mining.auto * 1); setT('idle-cap-hrs', 2 + (state.mining.carts * 2));
+        
         let upgC = state.mining.power * 50; let btnP = document.getElementById('btn-upg-pick'); if(btnP) btnP.innerText = `${upgC} 🪨`;
         let autoC = (state.mining.auto + 1) * 100; let btnA = document.getElementById('btn-upg-auto'); if(btnA) btnA.innerText = `${autoC} 🟡`;
+        let cartC = (state.mining.carts + 1) * 500; let btnC = document.getElementById('btn-upg-cart'); if(btnC) btnC.innerText = `${cartC} 🟡`;
     }
-    function upgradePickaxe() {
-        let cost = state.mining.power * 50; if(state.mining.stone < cost) return alert("Falta Piedra.");
-        state.mining.stone -= cost; state.mining.power++; playSound('click'); updateMiningUI(); save();
+
+    function upgradePickaxe() { let cost = state.mining.power * 50; if(state.mining.stone < cost) return alert("Falta Piedra."); state.mining.stone -= cost; state.mining.power++; playSound('click'); updateMiningUI(); save(); }
+    function buyAutoMiner() { let cost = (state.mining.auto + 1) * 100; if(state.gold < cost) return alert("Falta Oro."); state.gold -= cost; state.mining.auto++; playSound('click'); updateMiningUI(); save(); }
+    function buyCart() { let cost = (state.mining.carts + 1) * 500; if(state.gold < cost) return alert("Falta Oro."); state.gold -= cost; state.mining.carts++; playSound('click'); updateMiningUI(); save(); }
+    function buyDynamite() { if(state.gold < 500) return alert("Falta Oro."); state.gold -= 500; state.mining.stone += 1000; playSound('gacha'); showFloatingText("💥 +1000 🪨", "var(--red)"); updateMiningUI(); save(); }
+    function synthesizeStardust() { if(state.mining.stone < 5000) return alert("Faltan 5000 🪨."); state.mining.stone -= 5000; state.inventory.m7 = (state.inventory.m7||0)+1; playSound('gacha'); showFloatingText("✨ +1 Polvo", "var(--gold)"); updateMiningUI(); save(); }
+    
+    function openGeode() {
+        if(state.mining.geodes <= 0) return alert("No tienes Geodas.");
+        state.mining.geodes--; playSound('gacha');
+        let r = Math.random(); let msg = "";
+        if(r < 0.5) { state.gold += 100; msg = "+100 Oro"; }
+        else if(r < 0.8) { state.inventory.m4 = (state.inventory.m4||0)+1; msg = "+1 Cristal Oscuro"; }
+        else { state.gems += 5; msg = "+5 Gemas 💎"; }
+        alert(`🔮 Geoda Abierta:\n${msg}`); updateMiningUI(); save();
     }
-    function buyAutoMiner() {
-        let cost = (state.mining.auto + 1) * 100; if(state.gold < cost) return alert("Falta Oro.");
-        state.gold -= cost; state.mining.auto++; playSound('click'); updateMiningUI(); save();
+
+    function useDrill() {
+        if(state.en < 50) return alert("Cuesta 50 EN.");
+        state.en -= 50; updateUI(); playSound('gacha');
+        let ticks = 30;
+        let drillInt = setInterval(() => { mineRock(); ticks--; if(ticks <= 0) clearInterval(drillInt); }, 200);
+    }
+
+    let currentEvent = null;
+    function spawnMineEvent() {
+        let ev = document.getElementById('mine-event'); if(!ev) return;
+        ev.style.display = 'block'; currentEvent = Math.random() < 0.5 ? 'gold' : 'boss';
+        ev.innerText = currentEvent === 'gold' ? '💎' : '👹';
+        setTimeout(() => { ev.style.display = 'none'; currentEvent = null; }, 3000);
+    }
+    function clickEvent() {
+        let ev = document.getElementById('mine-event'); ev.style.display = 'none';
+        if(currentEvent === 'gold') { state.gold += 500; showFloatingText("¡ORO PURO! +500 🟡", "var(--gold)"); }
+        if(currentEvent === 'boss') { state.inventory.m10 = (state.inventory.m10||0)+1; showFloatingText("¡JEFE MUERTO! +1 Alma 👹", "var(--red)"); }
+        currentEvent = null; save();
     }
 
     // --- DAILY SHOP ---
@@ -492,6 +642,20 @@
         state.gold -= item.cost; item.b = true; state.inventory[item.id] = (state.inventory[item.id]||0) + 1; save(); renderDailyShop();
     }
 
+    // --- CAMPAMENTO (IDLE HEAL) ---
+    function startCamp() {
+        if(campInterval) clearInterval(campInterval);
+        campInterval = setInterval(() => {
+            if(state.hp < state.maxHp || state.en < state.maxEn) {
+                state.hp = Math.min(state.maxHp, state.hp + 2);
+                state.en = Math.min(state.maxEn, state.en + 1);
+                updateUI();
+                let f = document.getElementById('camp-fire'); if(f) f.style.transform = `scale(${1 + Math.random()*0.2})`;
+            }
+        }, 2000);
+    }
+    function stopCamp() { if(campInterval) clearInterval(campInterval); }
+
     // --- STATS & SKILLS ---
     function recalcStats() {
         let bA = 10 + state.baseBonus.atk, bD = 10 + state.baseBonus.def, bL = 5, bC = 0, bE = 0;
@@ -513,19 +677,21 @@
     // --- NAV & UI ---
     function navTo(id) {
         playSound('click');
-        if(combat.active && id !== 'combat') return alert("⚔️ ¡SAL del combate primero (Usa la X o SALIR)!");
+        if(combat.active && id !== 'combat') return alert("⚔️ ¡SAL del combate primero (Usa la X o el Botón Verde)!");
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-' + id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
         const tab = document.getElementById('tab-' + id); if(tab) tab.classList.add('active');
         
         const hA = document.getElementById('hud-advanced'), hM = document.getElementById('hud-minimal');
-        if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; renderMap(); }
-        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; }
-        else { hA.style.display = 'flex'; hM.style.display = 'none'; }
+        const nBar = document.querySelector('.nav'); // CAPTURAMOS LA BARRA DE NAVEGACION
         
-        if(id === 'home') updateProfile();
-        if(id === 'skills') { const setT=(id,v)=>{let e=document.getElementById(id);if(e)e.innerText=v;}; setT('skill-points-display',state.sp); setT('skill-hp',state.skills.hp); setT('skill-atk',state.skills.atk); setT('skill-def',state.skills.def||0); setT('skill-crit',state.skills.crit||0); setT('skill-evasion',state.skills.evasion||0); }
+        if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; nBar.style.display = 'flex'; renderMap(); }
+        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; nBar.style.display = 'none'; } // MODO CONCENTRACION
+        else { hA.style.display = 'flex'; hM.style.display = 'none'; nBar.style.display = 'flex'; }
+        
+        if(id === 'home') { updateProfile(); startCamp(); } else stopCamp();
+        if(id === 'skills') { const setT=(i,v)=>{let e=document.getElementById(i);if(e)e.innerText=v;}; setT('skill-points-display',state.sp); setT('skill-hp',state.skills.hp); setT('skill-atk',state.skills.atk); setT('skill-def',state.skills.def||0); setT('skill-crit',state.skills.crit||0); setT('skill-evasion',state.skills.evasion||0); }
         if(id === 'crafting') renderCrafting(currFilter);
         if(id === 'shop') renderDailyShop();
         if(id === 'mining') updateMiningUI();
@@ -595,7 +761,7 @@
         } catch(e) { alert("❌ ERROR JSON: " + e.message); } 
     }
 
-    // --- COMBATE ---
+    // --- COMBATE / LECTURA (TOTALMENTE ARREGLADO) ---
     function startNode(id) {
         playSound('click'); const w = state.worlds[state.activeW];
         if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Bloqueado.");
@@ -603,18 +769,29 @@
         if (!node.questions && (node.type === 'test' || node.type === 'boss')) node.questions = [{ q: node.content||"P:", options: node.options||["A","B"], correct: node.correctAnswer||0 }];
 
         const isDone = w.completed.includes(id);
-        if(!isDone) { state.en = Math.max(0, state.en - node.energyCost); recalcStats(); save(); }
+        if(!isDone) { state.en = Math.max(0, state.en - (node.energyCost||0)); recalcStats(); save(); }
 
         combat = { active: true, node: node, qIndex: 0, selIdx: null, isDone: isDone, corrects: 0 };
         document.getElementById('boss-ui').style.display = node.type === 'boss' ? 'block' : 'none';
 
-        const hdr = document.getElementById('combat-header'); const ftr = document.getElementById('combat-footer'); const btnR = document.getElementById('btn-reading-exit');
+        const btnCheck = document.getElementById('btn-check');
+        const btnRead = document.getElementById('btn-reading-done');
+
         if(node.type === 'reading') {
-            hdr.style.display = 'none'; ftr.style.display = 'none'; btnR.style.display = 'block';
-            document.getElementById('question-text').innerHTML = node.content; document.getElementById('options-container').innerHTML = '';
-            // If completed, just read. If not, clicking Exit finishes it. We handle it in fleeCombat.
+            document.getElementById('active-skills').style.display = 'none';
+            document.getElementById('question-text').innerHTML = node.content; 
+            document.getElementById('options-container').innerHTML = '';
+            
+            // Apagamos los botones de combate y activamos el de lectura
+            btnCheck.style.display = 'none';
+            btnRead.style.display = 'flex'; 
         } else {
-            hdr.style.display = 'flex'; ftr.style.display = 'block'; btnR.style.display = 'none';
+            document.getElementById('active-skills').style.display = 'flex';
+            
+            // Apagamos el botón de lectura y encendemos los de combate
+            btnRead.style.display = 'none';
+            btnCheck.style.display = 'flex';
+            
             renderQuestion();
         }
         navTo('combat');
@@ -625,10 +802,10 @@
         const prog = (combat.qIndex / combat.node.questions.length) * 100; document.getElementById('combat-prog-bar').style.width = `${prog}%`;
         if(combat.node.type === 'boss') document.getElementById('boss-hp-fill').style.width = `${100-prog}%`;
 
-        document.getElementById('combat-hp').innerText = state.hp; document.getElementById('combat-pots').innerText = state.potions;
+        document.getElementById('combat-hp').innerText = state.hp;
         const opts = document.getElementById('options-container'); opts.innerHTML = '';
         q.options.forEach((o, i) => { opts.innerHTML += `<div class="option" id="opt-${i}" onclick="selectOpt(${i})">${o}</div>`; });
-        const btn = document.getElementById('btn-check'); btn.innerText = "ATACAR"; btn.className = "btn btn-dark"; btn.disabled = true; btn.onclick = checkAnswer; combat.selIdx = null;
+        const btn = document.getElementById('btn-check'); btn.innerText = "ATACAR"; btn.className = "btn btn-dark"; btn.disabled = true; combat.selIdx = null;
     }
 
     function selectOpt(idx) {
@@ -648,11 +825,13 @@
             else renderQuestion(); return;
         }
 
-        if(combat.selIdx === q.correct) {
+        let correctAns = q.correct !== undefined ? q.correct : 0;
+        if(combat.selIdx == correctAns) {
             combat.corrects++;
             let isCrit = Math.random() < (state.stats.crit * 0.01);
             if(isCrit) showFloatingText("¡CRÍTICO!", "var(--gold)");
             el.classList.replace('selected', 'correct'); btn.innerText = "CONTINUAR"; btn.className = "btn btn-green";
+            state.gems += 10; showFloatingText("+10 💎", "var(--cyan)");
         } else {
             let isDodge = Math.random() < (state.stats.dodge * 0.01);
             if(isDodge) {
@@ -670,6 +849,12 @@
         }
     }
 
+    function finishReading() {
+        playSound('click');
+        if(!combat.isDone) finishNode(combat.node);
+        else fleeCombat();
+    }
+
     function finishNode(node) {
         const w = state.worlds[state.activeW];
         if(!w.completed.includes(node.id)) {
@@ -677,23 +862,21 @@
             if(node.unlocks) node.unlocks.forEach(uid => { if(!w.unlocked.includes(uid)) w.unlocked.push(uid); });
 
             let multi = 1 + (state.stats.atk * 0.05);
-            let goldGain = Math.floor(node.rewardGold * multi); let xpGain = Math.floor(node.rewardXp * multi);
+            let goldGain = Math.floor((node.rewardGold || 0) * multi); 
+            let xpGain = Math.floor((node.rewardXp || 0) * multi);
             
             let gemsEarned = (combat.corrects || 0) * 10;
             state.gold += goldGain; gainXP(xpGain); state.gems += gemsEarned;
             
             if(Math.random() < 0.5) state.inventory.m1 = (state.inventory.m1||0)+1; 
             
-            save(); alert(`🏆 ¡COMPLETADO!\n+${goldGain} Oro | +${xpGain} XP\n💎 +${gemsEarned} Gemas (por aciertos)`); 
+            save(); alert(`🏆 ¡COMPLETADO!\n+${goldGain} Oro | +${xpGain} XP\n💎 +${gemsEarned} Gemas`); 
         }
         combat.active = false; navTo('worlds');
     }
 
     function fleeCombat() { 
         playSound('click');
-        if(combat.active && combat.node && combat.node.type === 'reading' && !combat.isDone) {
-            finishNode(combat.node); return;
-        }
         combat.active = false; navTo('worlds'); 
     }
 
@@ -714,33 +897,20 @@
     function craft(id) { playSound('click'); const g = gearDB[id]; if(!Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v)) return; Object.entries(g.cost).forEach(([k,v]) => state.inventory[k] -= v); if(!g.isConsumable) state.ownedGear.push(id); else state.inventory[g.gives] = (state.inventory[g.gives]||0)+1; save(); renderCrafting(currFilter); }
     function equip(id) { playSound('click'); const g = gearDB[id]; state.equipment[g.t] = id; recalcStats(); save(); renderCrafting(currFilter); }
 
-    // --- GACHA CON ANIMACIÓN Y EQUIPOS ---
-    function pullGacha(tier) {
+    function pullGacha(tier, isFree = false) {
         playSound('click'); let cost = tier===1?100:tier===2?500:50;
-        if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas 💎."); state.gems -= cost; } else { if(state.gold < cost) return alert("Falta Oro 🟡."); state.gold -= cost; }
-        
+        if(!isFree) { if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas 💎."); state.gems -= cost; } else { if(state.gold < cost) return alert("Falta Oro 🟡."); state.gold -= cost; } }
         let m = document.getElementById('modal-gacha'); m.style.display = 'flex';
         let c = document.getElementById('gacha-chest'); c.className = 'chest-anim'; playSound('gacha');
-        
         setTimeout(() => {
             m.style.display = 'none'; c.className = '';
             let r = Math.random(); let msg = "";
-            
-            // 5% a 15% de sacar Equipo Directo!
             let gearChance = tier === 1 ? 0.05 : tier === 2 ? 0.10 : 0.15;
-            if(Math.random() < gearChance) {
-                let possibleGears = Object.values(gearDB).filter(g => g.r <= tier + 2 && !g.isConsumable && !state.ownedGear.includes(g.id));
-                if(possibleGears.length > 0) {
-                    let won = possibleGears[Math.floor(Math.random() * possibleGears.length)];
-                    state.ownedGear.push(won.id); msg = `¡ÉPICO! Has obtenido Equipo: ${won.icon} ${won.name}`;
-                    save(); alert(`🎁 ¡BOOOM!\n${msg}`); return;
-                }
-            }
-
+            if(Math.random() < gearChance) { let pGears = Object.values(gearDB).filter(g => g.r <= tier + 2 && !g.isConsumable && !state.ownedGear.includes(g.id)); if(pGears.length > 0) { let won = pGears[Math.floor(Math.random() * pGears.length)]; state.ownedGear.push(won.id); msg = `¡ÉPICO! Equipo: ${won.icon} ${won.name}`; save(); alert(`🎁 ¡BOOOM!\n${msg}`); return; } }
             if(tier === 1) { if(r<0.6) { state.inventory.m1=(state.inventory.m1||0)+3; msg="3x Hierro"; } else { state.inventory.m4=(state.inventory.m4||0)+1; msg="1x Cristal Oscuro"; } }
             else if (tier === 2) { if(r<0.5) { state.inventory.m4=(state.inventory.m4||0)+3; msg="3x Cristal"; } else { state.inventory.m10=(state.inventory.m10||0)+1; msg="1x Alma Demonio"; } }
             else { if(r<0.5) { state.inventory.m10=(state.inventory.m10||0)+3; msg="3x Alma Demonio"; } else { state.inventory.m12=(state.inventory.m12||0)+1; msg="1x Escama Mítica 🐉"; } }
-            save(); alert(`📦 Botín: ${msg}`);
+            save(); if(!isFree) alert(`📦 Botín: ${msg}`);
         }, 1200);
     }
 
