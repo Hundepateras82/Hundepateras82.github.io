@@ -5,18 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>LifeQuest AAA: Abyss</title>
+    <title>LifeQuest AAA: V7 Infinito</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-page: #050914; --panel: #0d1424; --panel-light: #162032; 
             --text-main: #e2e8f0; --text-sub: #94a3b8; --border-dark: #1e293b;
             --green: #10b981; --blue: #3b82f6; --red: #ef4444; --purple: #a855f7; --gold: #f59e0b; --cyan: #06b6d4;
-            --tier-1: #94a3b8; /* Común */
-            --tier-2: #3b82f6; /* Raro */
-            --tier-3: #a855f7; /* Épico */
-            --tier-4: #f59e0b; /* Legendario */
-            --tier-5: #ef4444; /* Mítico */
+            --tier-1: #94a3b8; --tier-2: #3b82f6; --tier-3: #a855f7; --tier-4: #f59e0b; --tier-5: #ef4444;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -30,17 +26,17 @@
         
         .content { padding: 20px; flex: 1; padding-bottom: 90px; }
 
-        /* HUD MEJORADO (AAA) */
+        /* HUD MEJORADO */
         #hud-advanced { background: var(--panel); border-bottom: 2px solid var(--border-dark); padding: 15px; display: none; flex-direction: column; gap: 10px; z-index: 50; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
         .hud-top-row { display: flex; justify-content: space-between; align-items: center; }
         .hud-currencies { display: flex; gap: 10px; font-weight: 900; font-size: 13px; }
-        .hud-curr-box { background: var(--panel-light); padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border-dark); display: flex; align-items: center; gap: 5px; }
+        .hud-curr-box { background: var(--panel-light); padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border-dark); display: flex; align-items: center; gap: 5px; cursor: pointer;}
         .hud-bars-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .hud-bar-container { display: flex; flex-direction: column; font-size: 10px; font-weight: 900; color: var(--text-sub); }
         .bar-bg { width: 100%; height: 8px; background: var(--border-dark); border-radius: 4px; overflow: hidden; margin-top: 3px; }
         .bar-fill { height: 100%; transition: width 0.3s ease; }
 
-        /* HUD MAPA (MINIMAL) */
+        /* HUD MAPA */
         #hud-minimal { background: transparent; padding: 15px; display: none; justify-content: space-between; align-items: center; position: absolute; top: env(safe-area-inset-top); width: 100%; z-index: 10; pointer-events: none; }
         .min-curr { pointer-events: auto; background: rgba(13,20,36,0.8); backdrop-filter: blur(5px); padding: 5px 10px; border-radius: 12px; font-weight: 900; font-size: 12px; border: 1px solid var(--border-dark); }
 
@@ -53,40 +49,39 @@
         .btn-purple { background: var(--purple); color: white; box-shadow: 0 4px 0 #7e22ce; }
         .btn-gold { background: var(--gold); color: black; box-shadow: 0 4px 0 #b45309; }
         .btn-dark { background: var(--panel-light); color: var(--text-main); border: 1px solid var(--border-dark); box-shadow: 0 4px 0 var(--border-dark); }
-        .btn-mythic { background: linear-gradient(45deg, #ef4444, #f59e0b); color: white; box-shadow: 0 4px 0 #b91c1c; border: 1px solid #f87171; }
 
         /* CARDS & GRIDS */
         .card { background: var(--panel); border: 1px solid var(--border-dark); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; margin-bottom: 15px;}
-        .stat-box { background: var(--panel-light); padding: 12px 5px; border-radius: 12px; border: 1px solid var(--border-dark); font-weight: 900; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; margin-bottom: 15px;}
+        .stat-box { background: var(--panel-light); padding: 10px 5px; border-radius: 12px; border: 1px solid var(--border-dark); font-weight: 900; font-size: 11px;}
         
-        .equip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .equip-slot { background: var(--panel-light); border: 2px dashed var(--border-dark); border-radius: 12px; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 5px; cursor: pointer; transition: 0.2s;}
-        .equip-slot.filled { border-style: solid; background: var(--panel); }
-        .equip-icon { font-size: 32px; margin-bottom: 5px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
-        .equip-name { font-size: 10px; font-weight: 900; text-transform: uppercase; }
+        .equip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .equip-slot { background: var(--panel-light); border: 2px dashed var(--border-dark); border-radius: 12px; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 5px; transition: 0.2s;}
+        .equip-slot.filled { border-style: solid; background: var(--panel); position: relative; }
+        .equip-icon { font-size: 30px; margin-bottom: 5px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
+        .equip-name { font-size: 9px; font-weight: 900; text-transform: uppercase; }
+        .lvl-badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: black; font-size: 10px; padding: 2px 5px; border-radius: 10px; font-weight: 900;}
 
-        .syn-box { background: rgba(6, 182, 212, 0.1); border: 1px solid var(--cyan); padding: 10px; border-radius: 10px; font-size: 11px; color: var(--cyan); text-align: center; font-weight: 900; margin-top: 10px; display: none;}
-
-        /* CRAFTING & SHOP */
-        .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--border-dark); background: var(--panel); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-dark); }
-        .item-icon { font-size: 35px; background: var(--panel-light); border-radius: 12px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); }
-        .item-details { flex: 1; }
-        .item-mats { font-size: 10px; color: var(--gold); margin: 5px 0; font-weight: bold; }
-
-        .gacha-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .gacha-box { background: var(--panel); border: 1px solid var(--border-dark); padding: 15px 5px; border-radius: 12px; text-align: center; }
-
+        /* CRAFTING & LISTS */
+        .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-dark); flex-wrap: wrap;}
+        .item-icon { font-size: 30px; background: var(--panel-light); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); }
+        .item-details { flex: 1; min-width: 120px; }
+        .item-actions { display: flex; gap: 5px; width: 100%; margin-top: 10px; }
+        
         /* INVENTORY PILLS */
         .inv-grid { display: flex; flex-wrap: wrap; gap: 5px; }
         .loot-pill { background: var(--panel-light); border: 1px solid var(--border-dark); padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 4px;}
 
         /* MAP */
-        .node-path { display: flex; flex-direction: column; align-items: center; gap: 35px; padding: 60px 0; }
-        .node { width: 75px; height: 75px; border-radius: 50%; font-size: 28px; border: 4px solid var(--border-dark); background: var(--panel); display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 0 var(--border-dark); transition: 0.2s;}
+        .node-path { display: flex; flex-direction: column; align-items: center; gap: 35px; padding: 40px 0; }
+        .node { width: 70px; height: 70px; border-radius: 50%; font-size: 26px; border: 4px solid var(--border-dark); background: var(--panel); display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 0 var(--border-dark); transition: 0.2s;}
         .node.completed { background: var(--gold); border-color: var(--gold-shadow); box-shadow: 0 6px 0 var(--gold-shadow); color: black;}
         .node.unlocked { background: var(--blue); border-color: var(--blue-shadow); box-shadow: 0 6px 0 var(--blue-shadow); color: white; animation: pulse 2s infinite;}
         .node.boss { border-color: var(--red); border-width: 5px; }
+
+        /* LORE / READING VIEW */
+        .lore-box { background: var(--panel); border: 1px solid var(--border-dark); border-radius: 12px; padding: 20px; margin-bottom: 15px; font-size: 15px; line-height: 1.6; color: var(--text-main); }
+        .lore-title { color: var(--gold); font-weight: 900; font-size: 18px; margin-bottom: 10px; border-bottom: 1px solid var(--border-dark); padding-bottom: 5px;}
 
         /* COMBAT */
         .combat-header { padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border-dark); }
@@ -99,12 +94,15 @@
         .option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); opacity: 0.5; }
 
         /* NAV */
-        .nav { position: absolute; bottom: 0; width: 100%; display: flex; height: 70px; background: rgba(13,20,36,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border-dark); z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 10px; transition: 0.2s; }
+        .nav { position: absolute; bottom: 0; width: 100%; display: flex; height: 70px; background: rgba(13,20,36,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border-dark); z-index: 100; padding-bottom: env(safe-area-inset-bottom); overflow-x: auto;}
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 9px; transition: 0.2s; min-width: 60px;}
         .nav-item.active { color: var(--cyan); transform: translateY(-3px); }
-        .nav-item span { font-size: 22px; margin-bottom: 2px; }
+        .nav-item span { font-size: 20px; margin-bottom: 2px; }
 
-        /* FX */
+        /* MODALS & FX */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 200; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; text-align: center; }
+
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); } 70% { box-shadow: 0 0 0 15px rgba(59,130,246,0); } 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); } }
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 50% { transform: translateX(12px); } 75% { transform: translateX(-12px); } }
@@ -114,41 +112,58 @@
 </head>
 <body>
 
+<div id="modal-class" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="color:var(--gold); font-weight:900;">Elige tu Camino</h2>
+        <p style="font-size:14px; color:var(--text-sub);">Tu clase define tus atributos iniciales y bonificadores pasivos. No podrás cambiarla.</p>
+        <button class="btn btn-red" style="margin-bottom:10px;" onclick="selectClass('warrior')">⚔️ GUERRERO (+20% ATQ)</button>
+        <button class="btn btn-blue" style="margin-bottom:10px;" onclick="selectClass('defender')">🛡️ DEFENSOR (+20% DEF)</button>
+        <button class="btn btn-green" onclick="selectClass('rogue')">🗡️ PÍCARO (+20% SUE)</button>
+    </div>
+</div>
+
+<div id="modal-daily" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="color:var(--cyan); font-weight:900;">Recompensa Diaria</h2>
+        <div style="font-size:50px; margin: 20px 0;">🎁</div>
+        <p id="daily-text" style="font-weight:bold;">Has iniciado sesión X días seguidos.</p>
+        <button class="btn btn-gold" onclick="claimDaily()">RECLAMAR BOTÍN</button>
+    </div>
+</div>
+
 <div id="app-container">
 
     <div id="hud-advanced">
         <div class="hud-top-row">
-            <div style="font-weight:900; font-size:18px; color:var(--text-main);">Nivel <span id="ui-lvl" style="color:var(--cyan);">1</span></div>
+            <div style="font-weight:900; font-size:18px; color:var(--text-main);"><span id="class-icon"></span> Nivel <span id="ui-lvl" style="color:var(--cyan);">1</span></div>
             <div class="hud-currencies">
-                <div class="hud-curr-box">🟡 <span id="ui-gold">0</span></div>
+                <div class="hud-curr-box" onclick="investBank()">🟡 <span id="ui-gold">0</span></div>
                 <div class="hud-curr-box">💎 <span id="ui-gems">0</span></div>
             </div>
         </div>
         <div class="hud-bars-row">
-            <div class="hud-bar-container">HP: <span id="ui-hp-txt">100/100</span>
-                <div class="bar-bg"><div id="ui-hp-bar" class="bar-fill" style="background:var(--red); width:100%;"></div></div>
-            </div>
-            <div class="hud-bar-container">EN: <span id="ui-en-txt">50/50</span>
-                <div class="bar-bg"><div id="ui-en-bar" class="bar-fill" style="background:var(--gold); width:100%;"></div></div>
-            </div>
+            <div class="hud-bar-container">HP: <span id="ui-hp-txt">100/100</span><div class="bar-bg"><div id="ui-hp-bar" class="bar-fill" style="background:var(--red); width:100%;"></div></div></div>
+            <div class="hud-bar-container">EN: <span id="ui-en-txt">50/50</span><div class="bar-bg"><div id="ui-en-bar" class="bar-fill" style="background:var(--gold); width:100%;"></div></div></div>
         </div>
     </div>
 
     <div id="hud-minimal">
         <div class="min-curr" style="color:var(--cyan);">LVL <span id="ui-min-lvl">1</span></div>
-        <div style="display:flex; gap:10px;">
-            <div class="min-curr">🟡 <span id="ui-min-gold">0</span></div>
-            <div class="min-curr">💎 <span id="ui-min-gems">0</span></div>
-        </div>
+        <div style="display:flex; gap:10px;"><div class="min-curr">🟡 <span id="ui-min-gold">0</span></div><div class="min-curr">💎 <span id="ui-min-gems">0</span></div></div>
     </div>
 
     <div id="screen-home" class="screen active">
         <div class="content">
-            <h2 style="margin-top:0; color:var(--cyan); font-weight:900;">Atributos del Cazador</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin-top:0; color:var(--cyan); font-weight:900;" id="profile-rank">Rango: F</h2>
+                <span class="loot-pill">Banco: <span id="bank-amount" style="color:var(--gold);">0</span> 🟡</span>
+            </div>
+
             <div class="stats-grid">
-                <div class="stat-box" style="color:var(--red); border-color:var(--red);">⚔️ ATQ<br><span id="stat-atk" style="font-size:22px; color:white;">10</span></div>
-                <div class="stat-box" style="color:var(--blue); border-color:var(--blue);">🛡️ DEF<br><span id="stat-def" style="font-size:22px; color:white;">10</span></div>
-                <div class="stat-box" style="color:var(--gold); border-color:var(--gold);">🍀 SUE<br><span id="stat-luck" style="font-size:22px; color:white;">5</span></div>
+                <div class="stat-box" style="color:var(--red); border-color:var(--red);">⚔️ ATQ<br><span id="stat-atk" style="font-size:18px; color:white;">10</span></div>
+                <div class="stat-box" style="color:var(--blue); border-color:var(--blue);">🛡️ DEF<br><span id="stat-def" style="font-size:18px; color:white;">10</span></div>
+                <div class="stat-box" style="color:var(--gold); border-color:var(--gold);">🍀 SUE<br><span id="stat-luck" style="font-size:18px; color:white;">5</span></div>
+                <div class="stat-box" style="color:var(--purple); border-color:var(--purple);">🦇 KILLS<br><span id="stat-kills" style="font-size:18px; color:white;">0</span></div>
             </div>
 
             <h3 style="font-weight: 900; margin-bottom: 10px;">Equipamiento</h3>
@@ -156,17 +171,17 @@
                 <div class="equip-slot" id="slot-weapon"><div class="equip-icon">🗡️</div><div class="equip-name">Arma</div></div>
                 <div class="equip-slot" id="slot-armor"><div class="equip-icon">🛡️</div><div class="equip-name">Armadura</div></div>
                 <div class="equip-slot" id="slot-accessory"><div class="equip-icon">💍</div><div class="equip-name">Amuleto</div></div>
+                <div class="equip-slot" id="slot-pet"><div class="equip-icon">🥚</div><div class="equip-name">Mascota</div></div>
             </div>
-            <div id="synergy-box" class="syn-box"></div>
 
-            <h3 style="font-weight: 900; margin-bottom: 10px; margin-top: 25px;">Inventario</h3>
+            <h3 style="font-weight: 900; margin-bottom: 10px; margin-top: 20px;">Inventario Rápido</h3>
             <div class="inv-grid" id="inventory-list"></div>
         </div>
     </div>
 
     <div id="screen-worlds" class="screen">
         <div class="content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h2 style="margin:0; font-weight:900;" id="world-title">Mazmorra</h2>
                 <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForge()">⚒️ FORJA JSON</button>
             </div>
@@ -175,31 +190,44 @@
     </div>
 
     <div id="screen-combat" class="screen" style="background:var(--panel);">
-        <div class="combat-header">
+        <div class="combat-header" id="combat-header">
             <div style="font-size:20px; cursor:pointer; color:var(--text-sub);" onclick="fleeCombat()">✖</div>
             <div class="combat-progress-bg"><div id="combat-prog-bar" class="combat-progress-fill" style="width:0%;"></div></div>
             <div style="font-weight:900; color:var(--red);">❤️ <span id="combat-hp">100</span></div>
             <button class="btn btn-green" style="width:auto; margin:0; padding:5px 10px; font-size:10px;" onclick="usePotion()">💊 <span id="combat-pots">0</span></button>
         </div>
-        <div class="content" style="display:flex; flex-direction:column;">
+        
+        <div class="content" style="display:flex; flex-direction:column; padding-bottom:20px;">
             <div id="boss-ui" style="display:none; text-align:center; margin-bottom:20px;">
                 <div style="font-size:50px;">👹</div>
                 <div style="width:100%; height:15px; background:#330; border:2px solid var(--red); border-radius:10px; overflow:hidden; margin-top:5px;"><div id="boss-hp-fill" style="height:100%; background:var(--red); width:100%; transition:0.3s;"></div></div>
             </div>
-            <h2 id="question-text" style="font-weight:900; font-size:18px; margin-bottom:20px;">Pregunta</h2>
+            
+            <h2 id="question-text" style="font-weight:900; font-size:18px; margin-bottom:20px;">Cargando...</h2>
             <div id="options-container"></div>
+            
             <div style="margin-top:auto; padding-top:20px;">
                 <button id="btn-check" class="btn btn-dark" onclick="checkAnswer()">COMPROBAR</button>
             </div>
         </div>
     </div>
 
+    <div id="screen-lore" class="screen">
+        <div class="content">
+            <h2 style="margin-top:0; color:var(--gold); font-weight:900;">📚 Biblioteca de Lore</h2>
+            <p style="font-size:12px; color:var(--text-sub);">Aquí se guardan los manuscritos que has descubierto.</p>
+            <div id="lore-list"></div>
+        </div>
+    </div>
+
     <div id="screen-crafting" class="screen">
         <div class="content">
-            <div style="display:flex; gap:10px; margin-bottom: 20px;">
-                <button class="btn btn-dark" id="filter-weapon" onclick="renderCrafting('weapon')">🗡️ Armas</button>
-                <button class="btn btn-dark" id="filter-armor" onclick="renderCrafting('armor')">🛡️ Armaduras</button>
-                <button class="btn btn-dark" id="filter-accessory" onclick="renderCrafting('accessory')">💍 Amuletos</button>
+            <div style="display:flex; gap:5px; margin-bottom: 15px; overflow-x:auto; padding-bottom:5px;">
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-weapon" onclick="renderCrafting('weapon')">🗡️ Armas</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-armor" onclick="renderCrafting('armor')">🛡️ Armor</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-accessory" onclick="renderCrafting('accessory')">💍 Amu</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-pet" onclick="renderCrafting('pet')">🐉 Mascotas</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-alchemy" onclick="renderCrafting('alchemy')">🧪 Alquimia</button>
             </div>
             <div id="craft-list"></div>
         </div>
@@ -207,35 +235,22 @@
 
     <div id="screen-shop" class="screen">
         <div class="content">
-            <h2 style="margin-top:0; color:var(--gold); font-weight:900;">⏳ Tienda Diaria</h2>
-            <p style="font-size:12px; color:var(--text-sub);">Ofertas rotativas. Se reinicia cada día.</p>
-            <div id="daily-shop-list"></div>
+            <h2 style="margin-top:0; color:var(--gold); font-weight:900;">📜 Misiones Semanales</h2>
+            <div class="card" id="guild-quests"></div>
 
-            <h2 style="margin-top:30px; color:var(--purple); font-weight:900;">📦 Gacha de Materiales</h2>
-            <div class="gacha-grid">
-                <div class="gacha-box">
-                    <div style="font-size:30px;">🪵</div>
-                    <div style="font-weight:900; font-size:12px; margin:5px 0; color:var(--tier-1);">Cofre Madera</div>
-                    <button class="btn btn-dark" style="padding:8px;" onclick="pullGacha(1)">100 🟡</button>
-                </div>
-                <div class="gacha-box">
-                    <div style="font-size:30px;">🧰</div>
-                    <div style="font-weight:900; font-size:12px; margin:5px 0; color:var(--tier-2);">Cofre Hierro</div>
-                    <button class="btn btn-blue" style="padding:8px;" onclick="pullGacha(2)">500 🟡</button>
-                </div>
-                <div class="gacha-box">
-                    <div style="font-size:30px;">💎</div>
-                    <div style="font-weight:900; font-size:12px; margin:5px 0; color:var(--tier-5);">Cofre Divino</div>
-                    <button class="btn btn-mythic" style="padding:8px;" onclick="pullGacha(3)">50 💎</button>
-                </div>
+            <h2 style="margin-top:30px; color:var(--purple); font-weight:900;">📦 Gacha del Abismo</h2>
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <button class="btn btn-dark" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(1)"><span style="font-size:30px;">🪵</span>100 🟡</button>
+                <button class="btn btn-blue" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(2)"><span style="font-size:30px;">🧰</span>500 🟡</button>
+                <button class="btn btn-mythic" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(3)"><span style="font-size:30px;">💎</span>50 💎</button>
             </div>
-
-            <h2 style="margin-top:30px; font-weight:900;">Consumibles</h2>
-            <div class="card" style="padding:5px 15px;">
-                <div class="list-item" style="border:none; padding:10px 0;">
-                    <div><div style="font-weight:900;">❤️ Poción Curativa</div><div style="font-size:11px; color:var(--text-sub);">Cura 50 HP en combate.</div></div>
-                    <button class="btn btn-green" style="width:auto; padding:8px 12px;" onclick="buyItem('pot', 50)">🟡 50</button>
-                </div>
+            
+            <h2 style="margin-top:30px; font-weight:900;">Mercado Negro</h2>
+            <p style="font-size:12px; color:var(--text-sub);">El interés del banco (5% x Nivel completado) te dará riquezas.</p>
+            <div class="list-item">
+                <div class="item-icon">🩸</div>
+                <div class="item-details"><div style="font-weight:900;">Piedra de Resurrección</div><div style="font-size:11px; color:var(--text-sub);">Revive 1 vez contra Jefes.</div></div>
+                <button class="btn btn-mythic" style="width:auto; padding:8px 12px;" onclick="buyItem('ankh', 50)">💎 50</button>
             </div>
         </div>
     </div>
@@ -243,57 +258,58 @@
     <div class="nav">
         <div class="nav-item active" id="tab-home" onclick="navTo('home')"><span>👤</span>PERFIL</div>
         <div class="nav-item" id="tab-worlds" onclick="navTo('worlds')"><span>🗺️</span>MAPA</div>
+        <div class="nav-item" id="tab-lore" onclick="navTo('lore')"><span>📚</span>LORE</div>
         <div class="nav-item" id="tab-crafting" onclick="navTo('crafting')"><span>⚒️</span>FORJA</div>
-        <div class="nav-item" id="tab-shop" onclick="navTo('shop')"><span>🛒</span>TIENDA</div>
+        <div class="nav-item" id="tab-shop" onclick="navTo('shop')"><span>⚖️</span>GREMIO</div>
     </div>
 
 </div>
 
 <script>
-    // --- AAA DATABASE (50+ ITEMS) ---
+    // --- AAA DATABASE ---
     const matsDB = {
-        m1: {id:'m1', name:'Hierro', icon:'⚪', tier:1}, m2: {id:'m2', name:'Cuero', icon:'🟤', tier:1}, m3: {id:'m3', name:'Madera Ancestral', icon:'🪵', tier:1},
-        m4: {id:'m4', name:'Cristal Oscuro', icon:'🟣', tier:2}, m5: {id:'m5', name:'Hilo Rúnico', icon:'🧵', tier:2}, m6: {id:'m6', name:'Acero Refinado', icon:'⚙️', tier:2},
-        m7: {id:'m7', name:'Polvo Estelar', icon:'✨', tier:3}, m8: {id:'m8', name:'Hueso de Dragón', icon:'🦴', tier:3}, m9: {id:'m9', name:'Oro Puro', icon:'📀', tier:3},
-        m10: {id:'m10', name:'Alma de Demonio', icon:'👹', tier:4}, m11: {id:'m11', name:'Sangre de Titán', icon:'🩸', tier:4}, m12: {id:'m12', name:'Escama Mítica', icon:'🐉', tier:5}
+        m1: {name:'Hierro', icon:'⚪', t:1}, m2: {name:'Cuero', icon:'🟤', t:1}, m3: {name:'Madera', icon:'🪵', t:1},
+        m4: {name:'Cristal', icon:'🟣', t:2}, m5: {name:'Hilo', icon:'🧵', t:2}, m6: {name:'Acero', icon:'⚙️', t:2},
+        m7: {name:'Polvo Estelar', icon:'✨', t:3}, m8: {name:'Hueso', icon:'🦴', t:3}, m9: {name:'Oro Puro', icon:'📀', t:3},
+        m10: {name:'Alma Demonio', icon:'👹', t:4}, m11: {name:'Sangre Titán', icon:'🩸', t:4}, m12: {name:'Escama Mítica', icon:'🐉', t:5}
     };
 
     const gearDB = {
         // Armas
-        w1: { id:'w1', type:'weapon', name:'Daga de Novato', icon:'🗡️', rarity:1, stats:{atk:5}, cost:{m1:3, m3:2} },
-        w2: { id:'w2', type:'weapon', name:'Hoja del Cazador', icon:'⚔️', rarity:2, stats:{atk:15, luck:2}, cost:{m6:5, m2:5} },
-        w3: { id:'w3', type:'weapon', name:'Báculo del Sabio', icon:'🦯', rarity:3, stats:{atk:25}, cost:{m3:10, m7:5, m4:2} },
-        w4: { id:'w4', type:'weapon', name:'Katana del Vacío', icon:'🗡️', rarity:4, stats:{atk:50}, cost:{m6:15, m10:3, m8:2}, set:'void' },
-        w5: { id:'w5', type:'weapon', name:'Excalibur del Erudito', icon:'⚔️', rarity:5, stats:{atk:100, luck:10}, cost:{m9:10, m11:5, m12:2} },
-        // Armaduras
-        a1: { id:'a1', type:'armor', name:'Harapos', icon:'👕', rarity:1, stats:{def:5}, cost:{m2:4} },
-        a2: { id:'a2', type:'armor', name:'Malla de Hierro', icon:'🛡️', rarity:2, stats:{def:15}, cost:{m1:10, m2:5} },
-        a3: { id:'a3', type:'armor', name:'Túnica del Sabio', icon:'🧥', rarity:3, stats:{def:25, luck:5}, cost:{m5:10, m7:3} },
-        a4: { id:'a4', type:'armor', name:'Capa de Sombras', icon:'🧥', rarity:4, stats:{def:45}, cost:{m5:15, m4:10, m10:2}, set:'void' },
-        a5: { id:'a5', type:'armor', name:'Armadura Demonio', icon:'🛡️', rarity:5, stats:{def:90, atk:20}, cost:{m10:10, m11:5, m12:2} },
-        // Amuletos
-        ac1: { id:'ac1', type:'accessory', name:'Anillo de Madera', icon:'💍', rarity:1, stats:{luck:2}, cost:{m3:5} },
-        ac2: { id:'ac2', type:'accessory', name:'Collar Colmillo', icon:'📿', rarity:2, stats:{atk:10}, cost:{m2:5, m8:1} },
-        ac3: { id:'ac3', type:'accessory', name:'Anillo Astral', icon:'💍', rarity:3, stats:{luck:15}, cost:{m7:8, m9:2} },
-        ac4: { id:'ac4', type:'accessory', name:'Pendiente del Vacío', icon:'💎', rarity:4, stats:{atk:20, def:20}, cost:{m4:15, m10:3}, set:'void' },
-        ac5: { id:'ac5', type:'accessory', name:'Corona Liche', icon:'👑', rarity:5, stats:{atk:40, def:40, luck:20}, cost:{m11:5, m12:3, m9:10} }
+        w1: { id:'w1', t:'weapon', name:'Daga Novato', icon:'🗡️', r:1, stats:{atk:5}, cost:{m1:3, m3:2} },
+        w2: { id:'w2', t:'weapon', name:'Hoja Cazador', icon:'⚔️', r:2, stats:{atk:15}, cost:{m6:5, m2:5} },
+        w3: { id:'w3', t:'weapon', name:'Báculo Sabio', icon:'🦯', r:3, stats:{atk:25}, cost:{m3:10, m7:5, m4:2} },
+        w4: { id:'w4', t:'weapon', name:'Katana Vacío', icon:'🗡️', r:4, stats:{atk:50}, cost:{m6:15, m10:3, m8:2} },
+        w5: { id:'w5', t:'weapon', name:'Excalibur', icon:'⚔️', r:5, stats:{atk:100, luck:10}, cost:{m9:10, m11:5, m12:2} },
+        // Armor
+        a1: { id:'a1', t:'armor', name:'Harapos', icon:'👕', r:1, stats:{def:5}, cost:{m2:4} },
+        a2: { id:'a2', t:'armor', name:'Malla Hierro', icon:'🛡️', r:2, stats:{def:15}, cost:{m1:10, m2:5} },
+        a3: { id:'a3', t:'armor', name:'Túnica Sabio', icon:'🧥', r:3, stats:{def:25}, cost:{m5:10, m7:3} },
+        a4: { id:'a4', t:'armor', name:'Capa Sombras', icon:'🧥', r:4, stats:{def:45}, cost:{m5:15, m4:10, m10:2} },
+        a5: { id:'a5', t:'armor', name:'Armor Demonio', icon:'🛡️', r:5, stats:{def:90, atk:20}, cost:{m10:10, m11:5, m12:2} },
+        // Amu
+        ac1: { id:'ac1', t:'accessory', name:'Anillo Madera', icon:'💍', r:1, stats:{luck:2}, cost:{m3:5} },
+        ac2: { id:'ac2', t:'accessory', name:'Collar Garra', icon:'📿', r:2, stats:{atk:10}, cost:{m2:5, m8:1} },
+        ac3: { id:'ac3', t:'accessory', name:'Anillo Astral', icon:'💍', r:3, stats:{luck:15}, cost:{m7:8, m9:2} },
+        ac4: { id:'ac4', t:'accessory', name:'Pendiente Vacío', icon:'💎', r:4, stats:{atk:20, def:20}, cost:{m4:15, m10:3} },
+        // Pets
+        p1: { id:'p1', t:'pet', name:'Lobo Gris', icon:'🐺', r:2, stats:{atk:10}, cost:{m2:10, m8:5} },
+        p2: { id:'p2', t:'pet', name:'Búho Sabio', icon:'🦉', r:3, stats:{luck:20}, cost:{m7:10, m4:5} },
+        p3: { id:'p3', t:'pet', name:'Dragón Cría', icon:'🐉', r:5, stats:{atk:50, def:50}, cost:{m12:5, m11:10} },
+        // Alquimia (Consumibles)
+        al1: { id:'al1', t:'alchemy', name:'Poción HP', icon:'❤️', r:1, desc:'Crea 1 Poción', cost:{m2:2, m3:2}, isConsumable:true, gives:'pot' },
+        al2: { id:'al2', t:'alchemy', name:'Éter (Energía)', icon:'⚡', r:2, desc:'Crea 25 Energía', cost:{m4:2, m7:1}, isConsumable:true, gives:'en' }
     };
-
-    const synergies = {
-        void: { name: "Resonancia del Vacío", req: 3, effect: "ATQ y DEF +50%" }
-    };
-
     const rColor = { 1:'tier-1', 2:'tier-2', 3:'tier-3', 4:'tier-4', 5:'tier-5' };
 
     // --- STATE ---
     let state = {
-        lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 100, gems: 0, potions: 3,
-        stats: { atk: 10, def: 10, luck: 5 },
-        inventory: {}, // ej: { m1: 5 }
-        equipment: { weapon: null, armor: null, accessory: null },
-        ownedGear: [],
-        dailyShopDate: "", dailyShopItems: [],
-        worlds: [{ id: 0, name: "Tutorial AAA", campaign: [], completed: [], unlocked: ['n1'] }]
+        lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 100, gems: 0, potions: 3, ankhs: 0, bank: 0,
+        stats: { atk: 10, def: 10, luck: 5 }, kills: 0, loginStreak: 0, lastLogin: "", pClass: null,
+        inventory: {}, equipment: { weapon: null, armor: null, accessory: null, pet: null }, upgrades: {}, ownedGear: [],
+        lore: [], // ids of completed reading nodes
+        quests: { q1_p: 0, q1_r: 10, q2_p: 0, q2_r: 3 }, // kills and bosses
+        worlds: [{ id: 0, name: "Tutorial V7", campaign: [], completed: [], unlocked: ['n1'] }]
     };
 
     let activeW = 0; let currFilter = 'weapon';
@@ -301,211 +317,228 @@
 
     // --- INIT ---
     function init() {
-        const saved = localStorage.getItem('LifeQuest_MasterSave_V6');
-        if (saved) {
-            state = { ...state, ...JSON.parse(saved) };
-            if(typeof state.gems === 'undefined') state.gems = 0;
-            if(!state.inventory) state.inventory = {};
-        }
-
-        generateDailyShop();
+        const saved = localStorage.getItem('LifeQuest_V7');
+        if (saved) { state = { ...state, ...JSON.parse(saved) }; }
         
+        // Generate Default World if empty
         if(state.worlds[0].campaign.length === 0) {
             state.worlds[0].campaign = [
-                {id:'n1', type:'reading', title:'📖 Academia', content:'El conocimiento es poder. Las batallas son largas. Prepárate.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
-                {id:'n2', type:'test', title:'⚔️ Emboscada', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:['n3'], questions: [ {q:'¿Qué moneda se usa para el Gacha Supremo?', options:['Oro','Gemas','Plata'], correct:1}, {q:'¿Cuántas ranuras de equipo hay?', options:['1','2','3'], correct:2} ]},
-                {id:'n3', type:'boss', title:'👹 Rey Demonio', energyCost:10, rewardXp:200, rewardGold:100, damagePenalization:40, unlocks:[], questions: [ {q:'¿El ATQ aumenta la experiencia ganada?', options:['Sí','No'], correct:0}, {q:'La SUE (Suerte) mejora el Drop. ¿Verdadero?', options:['Sí','No'], correct:0} ]}
+                {id:'n1', type:'reading', title:'📖 Introducción', content:'Bienvenido a la V7. Ahora la teoría se lee directamente aquí, de forma inmersiva. Pulsa el botón de abajo para avanzar.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
+                {id:'n2', type:'test', title:'⚔️ Combate', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:['n3'], questions: [ {q:'¿Se puede mejorar el nivel de un arma forjada?', options:['Sí, en la Forja','No'], correct:0} ]},
+                {id:'n3', type:'boss', title:'👹 Rey', energyCost:10, rewardXp:200, rewardGold:100, damagePenalization:40, unlocks:[], questions: [ {q:'¿Qué hace la piedra de resurrección?', options:['Te revive si mueres','Da oro'], correct:0} ]}
             ];
         }
-        recalcStats(); navTo('home');
+
+        checkDaily();
+        if(!state.pClass) document.getElementById('modal-class').style.display = 'flex';
+        else { recalcStats(); navTo('home'); }
     }
-    function save() { localStorage.setItem('LifeQuest_MasterSave_V6', JSON.stringify(state)); updateUI(); }
+    function save() { localStorage.setItem('LifeQuest_V7', JSON.stringify(state)); updateUI(); }
+
+    function selectClass(c) {
+        state.pClass = c; document.getElementById('modal-class').style.display = 'none';
+        recalcStats(); navTo('home'); save();
+    }
+
+    function checkDaily() {
+        const today = new Date().toDateString();
+        if(state.lastLogin !== today) {
+            if(state.lastLogin) {
+                const diff = Math.ceil(Math.abs(new Date(today) - new Date(state.lastLogin)) / (1000*60*60*24));
+                state.loginStreak = (diff === 1) ? state.loginStreak + 1 : 1;
+            } else state.loginStreak = 1;
+            
+            state.lastLogin = today;
+            document.getElementById('modal-daily').style.display = 'flex';
+            document.getElementById('daily-text').innerText = `Has iniciado sesión ${state.loginStreak} días seguidos.`;
+            save();
+        }
+    }
+
+    function claimDaily() {
+        document.getElementById('modal-daily').style.display = 'none';
+        let goldG = state.loginStreak * 50; let gemsG = Math.floor(state.loginStreak / 3);
+        state.gold += goldG; state.gems += gemsG; state.inventory.m1 = (state.inventory.m1||0)+5;
+        alert(`🎁 RECIBIDO:\n+${goldG} Oro\n+${gemsG} Gemas\n+5 Hierro`);
+        save();
+    }
+
+    function getRank() {
+        let sc = state.lvl + (state.kills * 0.1);
+        if(sc < 5) return 'F'; if(sc < 15) return 'E'; if(sc < 30) return 'D';
+        if(sc < 50) return 'C'; if(sc < 80) return 'B'; if(sc < 120) return 'A'; return 'S';
+    }
 
     function recalcStats() {
-        let baseA = 10, baseD = 10, baseL = 5;
-        let sets = {};
+        let bA = 10, bD = 10, bL = 5;
+        if(state.pClass === 'warrior') bA = 15; if(state.pClass === 'defender') bD = 15; if(state.pClass === 'rogue') bL = 10;
+        
         Object.values(state.equipment).forEach(gId => {
             if(gId && gearDB[gId]) {
-                let g = gearDB[gId];
-                if(g.stats.atk) baseA += g.stats.atk;
-                if(g.stats.def) baseD += g.stats.def;
-                if(g.stats.luck) baseL += g.stats.luck;
-                if(g.set) sets[g.set] = (sets[g.set] || 0) + 1;
+                let g = gearDB[gId]; let upg = state.upgrades[gId] || 0; let mult = 1 + (upg * 0.1);
+                if(g.stats.atk) bA += Math.floor(g.stats.atk * mult);
+                if(g.stats.def) bD += Math.floor(g.stats.def * mult);
+                if(g.stats.luck) bL += Math.floor(g.stats.luck * mult);
             }
         });
 
-        // Aplicar sinergias
-        let synActive = null;
-        if(sets['void'] === 3) { baseA = Math.floor(baseA * 1.5); baseD = Math.floor(baseD * 1.5); synActive = synergies.void; }
+        // Fatiga check
+        if(state.en <= 0) { bD = Math.floor(bD * 0.5); } // Mitad de defensa si cansado
 
-        state.stats = { atk: baseA, def: baseD, luck: baseL };
+        state.stats = { atk: bA, def: bD, luck: bL };
         state.maxHp = 100 + (state.lvl * 10);
-        
-        const synBox = document.getElementById('synergy-box');
-        if(synActive) { synBox.style.display = 'block'; synBox.innerText = `Sinergia Activa: ${synActive.name} (${synActive.effect})`; }
-        else { synBox.style.display = 'none'; }
+        document.getElementById('profile-rank').innerText = `Rango: ${getRank()}`;
     }
 
-    // --- NAVEGACIÓN Y HUD ---
-    function navTo(screenId) {
-        if(combat.active && screenId !== 'combat') return alert("⚔️ ¡Huye del combate primero!");
+    // --- NAV ---
+    function navTo(id) {
+        if(combat.active && id !== 'combat') return alert("⚔️ ¡Huye del combate primero!");
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('screen-' + screenId).classList.add('active');
+        document.getElementById('screen-' + id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-        const tab = document.getElementById('tab-' + screenId); if(tab) tab.classList.add('active');
+        const tab = document.getElementById('tab-' + id); if(tab) tab.classList.add('active');
         
-        const hAdv = document.getElementById('hud-advanced');
-        const hMin = document.getElementById('hud-minimal');
-        if(screenId === 'worlds') { hAdv.style.display = 'none'; hMin.style.display = 'flex'; renderMap(); }
-        else if(screenId === 'combat') { hAdv.style.display = 'none'; hMin.style.display = 'none'; }
-        else { hAdv.style.display = 'flex'; hMin.style.display = 'none'; }
+        const hA = document.getElementById('hud-advanced'), hM = document.getElementById('hud-minimal');
+        if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; renderMap(); }
+        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; }
+        else { hA.style.display = 'flex'; hM.style.display = 'none'; }
         
-        if(screenId === 'home') updateProfile();
-        if(screenId === 'crafting') renderCrafting(currFilter);
-        if(screenId === 'shop') renderDailyShop();
+        if(id === 'home') updateProfile();
+        if(id === 'crafting') renderCrafting(currFilter);
+        if(id === 'lore') renderLore();
+        if(id === 'shop') renderGuild();
     }
 
     function updateProfile() {
-        document.getElementById('stat-atk').innerText = state.stats.atk;
-        document.getElementById('stat-def').innerText = state.stats.def;
-        document.getElementById('stat-luck').innerText = state.stats.luck;
+        document.getElementById('stat-atk').innerText = state.stats.atk; document.getElementById('stat-def').innerText = state.stats.def;
+        document.getElementById('stat-luck').innerText = state.stats.luck; document.getElementById('stat-kills').innerText = state.kills;
+        document.getElementById('class-icon').innerText = state.pClass === 'warrior'?'⚔️':state.pClass==='defender'?'🛡️':'🗡️';
+        document.getElementById('bank-amount').innerText = state.bank;
 
-        ['weapon', 'armor', 'accessory'].forEach(type => {
-            const slot = document.getElementById(`slot-${type}`);
-            const eqId = state.equipment[type];
+        ['weapon', 'armor', 'accessory', 'pet'].forEach(t => {
+            const slot = document.getElementById(`slot-${t}`); const eqId = state.equipment[t];
             if(eqId && gearDB[eqId]) {
-                const g = gearDB[eqId];
-                slot.className = `equip-slot filled`;
-                slot.style.borderColor = `var(--${rColor[g.rarity]})`;
-                slot.innerHTML = `<div class="equip-icon">${g.icon}</div><div class="equip-name" style="color:var(--${rColor[g.rarity]})">${g.name}</div>`;
-            } else {
-                slot.className = `equip-slot`; slot.style.borderColor = `var(--border-dark)`;
-                slot.innerHTML = `<div class="equip-icon">${type==='weapon'?'🗡️':type==='armor'?'🛡️':'💍'}</div><div class="equip-name">Vacío</div>`;
-            }
+                const g = gearDB[eqId]; let upg = state.upgrades[eqId] || 0;
+                slot.className = `equip-slot filled`; slot.style.borderColor = `var(--${rColor[g.r]})`;
+                slot.innerHTML = `<div class="equip-icon">${g.icon}</div><div class="equip-name" style="color:var(--${rColor[g.r]})">${g.name}</div>` + (upg>0?`<div class="lvl-badge">+${upg}</div>`:'');
+            } else { slot.className = `equip-slot`; slot.style.borderColor = `var(--border-dark)`; slot.innerHTML = `<div class="equip-icon">${t==='weapon'?'🗡️':t==='armor'?'🛡️':t==='pet'?'🥚':'💍'}</div><div class="equip-name">Vacío</div>`; }
         });
 
-        const inv = document.getElementById('inventory-list');
-        inv.innerHTML = '';
-        Object.entries(state.inventory).forEach(([k, v]) => {
-            if(v > 0 && matsDB[k]) inv.innerHTML += `<div class="loot-pill"><span style="color:var(--${rColor[matsDB[k].tier]})">${matsDB[k].icon} ${matsDB[k].name}</span>: ${v}</div>`;
-        });
-        if(state.potions > 0) inv.innerHTML += `<div class="loot-pill">💊 Pociones: ${state.potions}</div>`;
+        const inv = document.getElementById('inventory-list'); inv.innerHTML = '';
+        Object.entries(state.inventory).forEach(([k, v]) => { if(v > 0 && matsDB[k]) inv.innerHTML += `<div class="loot-pill"><span style="color:var(--${rColor[matsDB[k].t]})">${matsDB[k].icon}</span> ${v}</div>`; });
+        if(state.potions > 0) inv.innerHTML += `<div class="loot-pill">💊 ${state.potions}</div>`;
+        if(state.ankhs > 0) inv.innerHTML += `<div class="loot-pill" style="color:var(--red);">🩸 Ankhs: ${state.ankhs}</div>`;
     }
 
     function updateUI() {
         document.getElementById('ui-lvl').innerText = state.lvl; document.getElementById('ui-min-lvl').innerText = state.lvl;
         document.getElementById('ui-gold').innerText = state.gold; document.getElementById('ui-min-gold').innerText = state.gold;
         document.getElementById('ui-gems').innerText = state.gems; document.getElementById('ui-min-gems').innerText = state.gems;
-        
-        document.getElementById('ui-hp-txt').innerText = `${state.hp}/${state.maxHp}`;
-        document.getElementById('ui-hp-bar').style.width = `${(state.hp / state.maxHp) * 100}%`;
-        
-        document.getElementById('ui-en-txt').innerText = `${state.en}/${state.maxEn}`;
-        document.getElementById('ui-en-bar').style.width = `${(state.en / state.maxEn) * 100}%`;
+        document.getElementById('ui-hp-txt').innerText = `${state.hp}/${state.maxHp}`; document.getElementById('ui-hp-bar').style.width = `${(state.hp/state.maxHp)*100}%`;
+        document.getElementById('ui-en-txt').innerText = `${state.en}/${state.maxEn}`; document.getElementById('ui-en-bar').style.width = `${(state.en/state.maxEn)*100}%`;
     }
 
     // --- MAPA ---
     function renderMap() {
-        const w = state.worlds[activeW];
-        document.getElementById('world-title').innerText = w.name;
-        const c = document.getElementById('map-render');
-        c.innerHTML = w.campaign.length ? '' : '<div style="color:var(--text-sub);">Mazmorra vacía.</div>';
-        
+        const w = state.worlds[activeW]; document.getElementById('world-title').innerText = w.name;
+        const c = document.getElementById('map-render'); c.innerHTML = w.campaign.length ? '' : '<div style="color:var(--text-sub);">Vacío.</div>';
         w.campaign.forEach((n, i) => {
             const isDone = w.completed.includes(n.id); const isUnl = w.unlocked.includes(n.id);
-            let cls = isDone ? 'completed' : (isUnl ? 'unlocked' : '');
-            if(n.type === 'boss') cls += ' boss';
+            let cls = isDone ? 'completed' : (isUnl ? 'unlocked' : ''); if(n.type === 'boss') cls += ' boss';
             let icon = isDone ? '⭐' : (n.type === 'reading' ? '📖' : (n.type === 'boss' ? '👹' : '⚔️'));
-            const offset = (i % 2 !== 0) ? '20px' : '-20px';
-            c.innerHTML += `<div style="transform: translateX(${offset}); text-align:center;"><button class="node ${cls}" onclick="startNode('${n.id}')">${icon}</button><div style="font-weight:900; font-size:12px; margin-top:8px;">${n.title}</div></div>`;
+            c.innerHTML += `<div style="transform: translateX(${(i%2!==0)?'20px':'-20px'}); text-align:center;"><button class="node ${cls}" onclick="startNode('${n.id}')">${icon}</button><div style="font-weight:900; font-size:12px; margin-top:8px;">${n.title}</div></div>`;
         });
     }
 
-    // --- COMBATE ---
+    // --- COMBATE / LECTURA ---
     function startNode(id) {
         const w = state.worlds[activeW];
-        if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Zona bloqueada.");
+        if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Bloqueado.");
         const node = w.campaign.find(n => n.id === id);
         
-        // PARCHE DE MIGRACIÓN EN TIEMPO REAL: Si el nodo viene de la plantilla vieja (Reading o Test sin array de questions)
-        if (!node.questions && (node.type === 'test' || node.type === 'boss')) {
-            node.questions = [{ q: node.content || "Pregunta:", options: node.options || ["A","B"], correct: node.correctAnswer || 0 }];
-        }
+        if (!node.questions && (node.type === 'test' || node.type === 'boss')) node.questions = [{ q: node.content||"P:", options: node.options||["A","B"], correct: node.correctAnswer||0 }];
 
         const isDone = w.completed.includes(id);
-        if(!isDone && state.en < node.energyCost) return alert("⚡ Falta Energía.");
-        if(!isDone) { state.en -= node.energyCost; save(); }
-
-        if(node.type === 'reading') { alert(`📖 LECTURA:\n\n${node.content}`); if(!isDone) finishNode(node); return; }
+        if(!isDone && state.en <= 0 && !confirm("⚠️ Estás EXTENUADO (0 EN). Recibirás DOBLE daño. ¿Entrar?")) return;
+        if(!isDone) { state.en = Math.max(0, state.en - node.energyCost); recalcStats(); save(); }
 
         combat = { active: true, node: node, qIndex: 0, selIdx: null, isDone: isDone };
+        
+        const hdr = document.getElementById('combat-header'); const qTxt = document.getElementById('question-text'); const opts = document.getElementById('options-container'); const btn = document.getElementById('btn-check');
         document.getElementById('boss-ui').style.display = node.type === 'boss' ? 'block' : 'none';
-        navTo('combat'); renderQuestion();
+
+        if(node.type === 'reading') {
+            hdr.style.display = 'none'; qTxt.innerHTML = node.content; opts.innerHTML = '';
+            btn.innerText = "¡ENTENDIDO!"; btn.className = "btn btn-green"; btn.disabled = false;
+            btn.onclick = () => finishNode(node);
+            
+            // Add to lore if not there
+            let loreEntry = { title: node.title, content: node.content };
+            if(!state.lore.some(l => l.title === node.title)) state.lore.push(loreEntry);
+        } else {
+            hdr.style.display = 'flex'; renderQuestion();
+        }
+        navTo('combat');
     }
 
     function renderQuestion() {
         const q = combat.node.questions[combat.qIndex];
         document.getElementById('question-text').innerText = q.q;
-        
         const prog = (combat.qIndex / combat.node.questions.length) * 100;
         document.getElementById('combat-prog-bar').style.width = `${prog}%`;
-        
-        if(combat.node.type === 'boss') {
-            const hpLeft = 100 - prog;
-            document.getElementById('boss-hp-fill').style.width = `${hpLeft}%`;
-        }
+        if(combat.node.type === 'boss') document.getElementById('boss-hp-fill').style.width = `${100-prog}%`;
 
-        document.getElementById('combat-hp').innerText = state.hp;
-        document.getElementById('combat-pots').innerText = state.potions;
+        document.getElementById('combat-hp').innerText = state.hp; document.getElementById('combat-pots').innerText = state.potions;
         
         const opts = document.getElementById('options-container'); opts.innerHTML = '';
         q.options.forEach((o, i) => { opts.innerHTML += `<div class="option" id="opt-${i}" onclick="selectOpt(${i})">${o}</div>`; });
 
-        const btn = document.getElementById('btn-check');
-        btn.innerText = "COMPROBAR"; btn.className = "btn btn-dark"; btn.disabled = true; combat.selIdx = null;
+        const btn = document.getElementById('btn-check'); btn.innerText = "ATACAR"; btn.className = "btn btn-dark"; btn.disabled = true; btn.onclick = checkAnswer; combat.selIdx = null;
     }
 
     function selectOpt(idx) {
         if(combat.selIdx !== null && document.getElementById(`opt-${combat.selIdx}`).classList.contains('wrong')) return;
-        combat.selIdx = idx;
-        document.querySelectorAll('.option').forEach(c => c.classList.remove('selected'));
-        document.getElementById(`opt-${idx}`).classList.add('selected');
+        combat.selIdx = idx; document.querySelectorAll('.option').forEach(c => c.classList.remove('selected')); document.getElementById(`opt-${idx}`).classList.add('selected');
         const btn = document.getElementById('btn-check'); btn.disabled = false; btn.className = "btn btn-blue";
     }
 
     function usePotion() {
-        if(state.potions <= 0) return alert("Sin pociones.");
-        state.potions--; state.hp = Math.min(state.maxHp, state.hp + 50);
+        if(state.potions <= 0) return alert("Sin pociones."); state.potions--; state.hp = Math.min(state.maxHp, state.hp + 50);
         document.getElementById('combat-hp').innerText = state.hp; document.getElementById('combat-pots').innerText = state.potions; save();
     }
 
     function checkAnswer() {
-        const q = combat.node.questions[combat.qIndex];
-        const el = document.getElementById(`opt-${combat.selIdx}`);
-        const btn = document.getElementById('btn-check');
-
+        const q = combat.node.questions[combat.qIndex]; const el = document.getElementById(`opt-${combat.selIdx}`); const btn = document.getElementById('btn-check');
         if(btn.innerText === "CONTINUAR") {
             combat.qIndex++;
             if(combat.qIndex >= combat.node.questions.length) { if(!combat.isDone) finishNode(combat.node); else fleeCombat(); } 
-            else renderQuestion();
-            return;
+            else renderQuestion(); return;
         }
 
         if(combat.selIdx === q.correct) {
-            el.classList.replace('selected', 'correct');
-            btn.innerText = "CONTINUAR"; btn.className = "btn btn-green";
+            el.classList.replace('selected', 'correct'); btn.innerText = "CONTINUAR"; btn.className = "btn btn-green";
+            if(state.quests.q1_p < state.quests.q1_r) state.quests.q1_p++;
         } else {
-            el.classList.replace('selected', 'wrong');
-            btn.disabled = true; btn.className = "btn btn-dark"; btn.innerText = "FALLO";
-            
-            let rawDmg = combat.node.damagePenalization || 20;
-            let realDmg = Math.max(1, rawDmg - Math.floor(state.stats.def / 2)); 
+            // DODGE MECHANIC
+            if(Math.random() < state.stats.luck * 0.01) {
+                el.classList.replace('selected', 'wrong'); btn.disabled = true; btn.className = "btn btn-dark"; btn.innerText = "ESQUIVASTE";
+                return;
+            }
+
+            el.classList.replace('selected', 'wrong'); btn.disabled = true; btn.className = "btn btn-dark"; btn.innerText = "FALLO";
+            let realDmg = Math.max(1, (combat.node.damagePenalization||20) - Math.floor(state.stats.def/2)); 
+            if(state.en <= 0) realDmg *= 2; // Extenuado
             state.hp -= realDmg;
             document.getElementById('combat-hp').innerText = Math.max(0, state.hp);
             document.body.style.background = "red"; setTimeout(()=> document.body.style.background = "#000", 100);
 
-            if(state.hp <= 0) { setTimeout(() => { alert("💀 MUERTO."); state.hp = state.maxHp; save(); fleeCombat(); }, 500); } 
-            else save();
+            if(state.hp <= 0) {
+                if(state.ankhs > 0 && combat.node.type === 'boss') {
+                    state.ankhs--; state.hp = state.maxHp; alert("👼 LA PIEDRA DE RESURRECCIÓN TE HA SALVADO."); save(); renderQuestion();
+                } else {
+                    setTimeout(() => { alert("💀 HAS MUERTO."); state.hp = state.maxHp; save(); fleeCombat(); }, 500);
+                }
+            } else save();
         }
     }
 
@@ -519,23 +552,34 @@
             let goldGain = Math.floor(node.rewardGold * multi); let xpGain = Math.floor(node.rewardXp * multi);
             state.gold += goldGain; gainXP(xpGain);
             
-            // Recompensa en Gemas para Jefes
-            if(node.type === 'boss') state.gems += 5;
+            if(node.type !== 'reading') {
+                state.kills++;
+                if(node.type === 'boss') { state.gems += 5; if(state.quests.q2_p < state.quests.q2_r) state.quests.q2_p++; }
+            }
+            dropLoot(node.type === 'boss'); 
+            
+            // Interest Bank
+            if(state.bank > 0) { let inter = Math.floor(state.bank * 0.05); state.bank += inter; }
 
-            dropLoot(node.type === 'boss'); save();
-            alert(`🏆 ¡VICTORIA!\n+${goldGain} Oro | +${xpGain} XP`);
+            // Black Market
+            if(node.type === 'boss' && Math.random() < 0.2) {
+                alert("🌑 Has encontrado un Comerciante del Mercado Negro.\n(Te vende 1 Alma de Demonio por 50 Gemas)");
+                if(confirm("¿Comprar Alma de Demonio por 50 Gemas?")) {
+                    if(state.gems >= 50) { state.gems -= 50; state.inventory.m10 = (state.inventory.m10||0)+1; } else alert("Pobre.");
+                }
+            }
+            save(); alert(`🏆 ¡VICTORIA!\n+${goldGain} Oro | +${xpGain} XP`);
         }
         fleeCombat();
     }
 
     function dropLoot(isBoss) {
-        let luck = state.stats.luck; let msg = "";
-        if(Math.random() < 0.6 + (luck * 0.02)) { state.inventory.m1 = (state.inventory.m1||0)+1; msg += "⚪ Hierro\n"; }
-        if(Math.random() < 0.5 + (luck * 0.02)) { state.inventory.m2 = (state.inventory.m2||0)+1; msg += "🟤 Cuero\n"; }
-        if(Math.random() < 0.2 + (luck * 0.03) || isBoss) { state.inventory.m4 = (state.inventory.m4||0)+1; msg += "🟣 Cristal Oscuro\n"; }
-        if(Math.random() < 0.1 + (luck * 0.03) || isBoss) { state.inventory.m7 = (state.inventory.m7||0)+1; msg += "✨ Polvo Estelar\n"; }
-        if(isBoss && Math.random() < 0.3 + (luck * 0.05)) { state.inventory.m10 = (state.inventory.m10||0)+1; msg += "👹 Alma de Demonio\n"; }
-        if(msg !== "") setTimeout(()=>alert("🎁 BOTÍN:\n" + msg), 500);
+        let luck = state.stats.luck;
+        if(Math.random() < 0.6 + (luck * 0.01)) state.inventory.m1 = (state.inventory.m1||0)+1; 
+        if(Math.random() < 0.5 + (luck * 0.01)) state.inventory.m2 = (state.inventory.m2||0)+1;
+        if(Math.random() < 0.2 + (luck * 0.02) || isBoss) state.inventory.m4 = (state.inventory.m4||0)+1;
+        if(Math.random() < 0.1 + (luck * 0.02) || isBoss) state.inventory.m7 = (state.inventory.m7||0)+1;
+        if(isBoss && Math.random() < 0.3 + (luck * 0.05)) state.inventory.m10 = (state.inventory.m10||0)+1;
     }
 
     function fleeCombat() { combat.active = false; navTo('worlds'); }
@@ -545,118 +589,85 @@
         if(state.xp >= state.maxXp) {
             state.lvl++; state.xp -= state.maxXp; state.maxXp = Math.floor(state.maxXp * 1.5);
             recalcStats(); state.hp = state.maxHp; state.en = state.maxEn;
-            alert(`⚡ ¡NIVEL ${state.lvl}!`);
         }
     }
 
-    // --- TIENDA Y GACHA ---
-    function generateDailyShop() {
-        const today = new Date().toDateString();
-        if(state.dailyShopDate !== today) {
-            state.dailyShopDate = today;
-            const keys = Object.keys(matsDB);
-            state.dailyShopItems = [];
-            for(let i=0; i<3; i++) {
-                const k = keys[Math.floor(Math.random() * keys.length)];
-                const mat = matsDB[k];
-                state.dailyShopItems.push({ id: k, mat: mat, cost: mat.tier * 50, bought: false });
-            }
-            save();
-        }
+    // --- LORE ---
+    function renderLore() {
+        const list = document.getElementById('lore-list'); list.innerHTML = '';
+        if(state.lore.length === 0) list.innerHTML = "<p style='color:var(--text-sub);'>No has descubierto nada aún.</p>";
+        state.lore.forEach(l => { list.innerHTML += `<div class="lore-box"><div class="lore-title">${l.title}</div>${l.content}</div>`; });
     }
 
-    function renderDailyShop() {
-        const container = document.getElementById('daily-shop-list');
-        container.innerHTML = state.dailyShopItems.map((item, idx) => `
-            <div class="list-item">
-                <div class="item-icon" style="color:var(--${rColor[item.mat.tier]})">${item.mat.icon}</div>
-                <div class="item-details"><div style="font-weight:900; color:var(--${rColor[item.mat.tier]})">${item.mat.name}</div></div>
-                <button class="btn ${item.bought?'btn-dark':'btn-gold'}" style="width:auto; padding:8px 12px; font-size:11px;" onclick="buyDaily(${idx})" ${item.bought?'disabled':''}>${item.bought?'AGOTADO':'🟡 '+item.cost}</button>
-            </div>
-        `).join('');
-    }
-
-    function buyDaily(idx) {
-        const item = state.dailyShopItems[idx];
-        if(state.gold < item.cost) return alert("Falta Oro.");
-        state.gold -= item.cost; item.bought = true;
-        state.inventory[item.id] = (state.inventory[item.id]||0) + 1;
-        save(); renderDailyShop();
-    }
-
-    function buyItem(type, cost) {
-        if(state.gold < cost) return alert("Falta Oro.");
-        state.gold -= cost;
-        if(type === 'pot') state.potions++;
-        save();
-    }
-
-    function pullGacha(tier) {
-        let cost = tier===1 ? 100 : tier===2 ? 500 : 50;
-        if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas 💎."); state.gems -= cost; }
-        else { if(state.gold < cost) return alert("Falta Oro 🟡."); state.gold -= cost; }
-        
-        let roll = Math.random(); let msg = "";
-        if(tier === 1) {
-            if(roll<0.6) { state.inventory.m1=(state.inventory.m1||0)+3; msg="3x Hierro"; }
-            else if(roll<0.9) { state.inventory.m2=(state.inventory.m2||0)+3; msg="3x Cuero"; }
-            else { state.inventory.m4=(state.inventory.m4||0)+1; msg="1x Cristal Oscuro"; }
-        } else if (tier === 2) {
-            if(roll<0.5) { state.inventory.m4=(state.inventory.m4||0)+3; msg="3x Cristal Oscuro"; }
-            else if(roll<0.9) { state.inventory.m7=(state.inventory.m7||0)+2; msg="2x Polvo Estelar"; }
-            else { state.inventory.m10=(state.inventory.m10||0)+1; msg="1x Alma Demonio"; }
-        } else {
-            if(roll<0.4) { state.inventory.m10=(state.inventory.m10||0)+3; msg="3x Alma Demonio"; }
-            else if(roll<0.8) { state.inventory.m11=(state.inventory.m11||0)+2; msg="2x Sangre de Titán"; }
-            else { state.inventory.m12=(state.inventory.m12||0)+1; msg="1x Escama Mítica 🐉"; }
-        }
-        save(); alert(`📦 Abriendo cofre...\n¡Obtienes: ${msg}!`);
-    }
-
-    // --- HERRERÍA ---
-    function renderCrafting(filter) {
-        currFilter = filter;
-        document.querySelectorAll('#screen-crafting .btn').forEach(b => b.className='btn btn-dark');
-        document.getElementById('filter-'+filter).className='btn btn-blue';
+    // --- FORJA, MEJORAS Y ALQUIMIA ---
+    function renderCrafting(f) {
+        currFilter = f;
+        document.querySelectorAll('#screen-crafting .btn-dark, #screen-crafting .btn-blue').forEach(b => b.className='btn btn-dark');
+        document.getElementById('filter-'+f).className='btn btn-blue';
 
         const c = document.getElementById('craft-list');
-        c.innerHTML = Object.values(gearDB).filter(g => g.type === filter).map(g => {
-            let costStr = Object.entries(g.cost).map(([k,v]) => `${v} ${matsDB[k].icon}`).join(' ');
+        c.innerHTML = Object.values(gearDB).filter(g => g.t === f).map(g => {
+            let costStr = Object.entries(g.cost).map(([k,v]) => `${v} ${matsDB[k]?matsDB[k].icon:''}`).join(' ');
             let canCraft = Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v);
-            let isOwned = state.ownedGear.includes(g.id);
-            let isEq = state.equipment[g.type] === g.id;
-            let statsStr = Object.entries(g.stats).map(([k,v]) => `${k.toUpperCase()}+${v}`).join(' ');
+            let isOwned = state.ownedGear.includes(g.id); let isEq = state.equipment[g.t] === g.id;
+            let upg = state.upgrades[g.id] || 0; let sStr = g.stats?Object.entries(g.stats).map(([k,v]) => `${k.toUpperCase()}+${Math.floor(v*(1+upg*0.1))}`).join(' '):'';
 
+            if(g.isConsumable) {
+                return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div><div style="font-size:10px; color:var(--gold);">${costStr}</div><div style="font-size:11px;">${g.desc}</div></div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">CREAR</button></div>`;
+            }
             if(isOwned) {
-                return `<div class="list-item">
-                    <div class="item-icon" style="color:var(--${rColor[g.rarity]})">${g.icon}</div>
-                    <div class="item-details"><div style="font-weight:900; color:var(--${rColor[g.rarity]})">${g.name}</div><div style="font-size:11px; color:var(--green);">${statsStr}</div></div>
-                    <button class="btn ${isEq ? 'btn-dark' : 'btn-blue'}" style="width:auto; padding:8px 12px; font-size:11px;" onclick="equip('${g.id}')">${isEq ? 'EQUIPADO' : 'EQUIPAR'}</button>
-                </div>`;
+                let upgCost = (g.r * 2) + upg; let canUpg = (state.inventory.m1||0) >= upgCost;
+                return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name} <span style="color:var(--gold)">+${upg}</span></div><div style="font-size:11px; color:var(--green);">${sStr}</div>
+                <div class="item-actions"><button class="btn ${isEq?'btn-dark':'btn-blue'}" style="padding:5px; font-size:10px;" onclick="equip('${g.id}')">${isEq?'EQ':'EQUIPAR'}</button> <button class="btn ${canUpg?'btn-purple':'btn-dark'}" style="padding:5px; font-size:10px;" onclick="upgrade('${g.id}')">MEJORAR (${upgCost}⚪)</button> <button class="btn btn-red" style="padding:5px; font-size:10px;" onclick="salvage('${g.id}')">ROMPER</button></div></div></div>`;
             } else {
-                return `<div class="list-item">
-                    <div class="item-icon" style="color:var(--${rColor[g.rarity]})">${g.icon}</div>
-                    <div class="item-details"><div style="font-weight:900; color:var(--${rColor[g.rarity]})">${g.name}</div><div class="item-mats">${costStr}</div><div style="font-size:11px; color:var(--green);">${statsStr}</div></div>
-                    <button class="btn ${canCraft ? 'btn-gold' : 'btn-dark'}" style="width:auto; padding:8px 12px; font-size:11px;" onclick="craft('${g.id}')">FORJAR</button>
-                </div>`;
+                return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div><div style="font-size:10px; color:var(--gold);">${costStr}</div><div style="font-size:11px; color:var(--green);">${sStr}</div></div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">FORJAR</button></div>`;
             }
         }).join('');
     }
 
     function craft(id) {
-        const g = gearDB[id];
-        if(!Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v)) return;
+        const g = gearDB[id]; if(!Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v)) return;
         Object.entries(g.cost).forEach(([k,v]) => state.inventory[k] -= v);
-        state.ownedGear.push(id); save(); renderCrafting(currFilter); alert(`Forjado: ${g.name}`);
+        if(g.isConsumable) { if(g.gives==='pot') state.potions++; if(g.gives==='en') state.en = Math.min(state.maxEn, state.en+25); } 
+        else state.ownedGear.push(id);
+        save(); renderCrafting(currFilter);
+    }
+    function equip(id) { const g = gearDB[id]; state.equipment[g.t] = id; recalcStats(); save(); renderCrafting(currFilter); }
+    function upgrade(id) { const g = gearDB[id]; let cost = (g.r * 2) + (state.upgrades[id]||0); if((state.inventory.m1||0) < cost) return; state.inventory.m1 -= cost; state.upgrades[id] = (state.upgrades[id]||0)+1; recalcStats(); save(); renderCrafting(currFilter); }
+    function salvage(id) { const g = gearDB[id]; if(state.equipment[g.t] === id) state.equipment[g.t] = null; state.ownedGear = state.ownedGear.filter(x=>x!==id); state.inventory.m7 = (state.inventory.m7||0) + g.r; recalcStats(); save(); renderCrafting(currFilter); alert(`Obtienes ${g.r} Polvo Estelar ✨`); }
+
+    // --- GREMIO, GACHA Y BANCO ---
+    function renderGuild() {
+        document.getElementById('guild-quests').innerHTML = `
+            <div style="margin-bottom:10px;"><div style="display:flex; justify-content:space-between;"><b>Aciertos Seguidos</b> <span style="color:var(--gold)">100 🟡</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="background:var(--blue); width:${(state.quests.q1_p/state.quests.q1_r)*100}%"></div></div>
+            <button class="btn ${state.quests.q1_p>=state.quests.q1_r?'btn-blue':'btn-dark'}" style="padding:8px; margin-top:5px;" onclick="claimQ(1)" ${state.quests.q1_p>=state.quests.q1_r?'':'disabled'}>COBRAR</button></div>
+            
+            <div style="margin-bottom:10px;"><div style="display:flex; justify-content:space-between;"><b>Matar Jefes</b> <span style="color:var(--cyan)">10 💎</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="background:var(--purple); width:${(state.quests.q2_p/state.quests.q2_r)*100}%"></div></div>
+            <button class="btn ${state.quests.q2_p>=state.quests.q2_r?'btn-purple':'btn-dark'}" style="padding:8px; margin-top:5px;" onclick="claimQ(2)" ${state.quests.q2_p>=state.quests.q2_r?'':'disabled'}>COBRAR</button></div>
+        `;
+    }
+    function claimQ(id) { if(id===1) { state.gold += 100; state.quests.q1_p=0; state.quests.q1_r+=5; } if(id===2) { state.gems += 10; state.quests.q2_p=0; state.quests.q2_r+=1; } save(); renderGuild(); }
+
+    function pullGacha(tier) {
+        let cost = tier===1?100:tier===2?500:50;
+        if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas 💎."); state.gems -= cost; } else { if(state.gold < cost) return alert("Falta Oro 🟡."); state.gold -= cost; }
+        let r = Math.random(); let msg = "";
+        if(tier === 1) { if(r<0.6) { state.inventory.m1=(state.inventory.m1||0)+3; msg="3x Hierro"; } else { state.inventory.m4=(state.inventory.m4||0)+1; msg="1x Cristal Oscuro"; } }
+        else if (tier === 2) { if(r<0.5) { state.inventory.m4=(state.inventory.m4||0)+3; msg="3x Cristal"; } else { state.inventory.m10=(state.inventory.m10||0)+1; msg="1x Alma Demonio"; } }
+        else { if(r<0.5) { state.inventory.m10=(state.inventory.m10||0)+3; msg="3x Alma Demonio"; } else { state.inventory.m12=(state.inventory.m12||0)+1; msg="1x Escama Mítica 🐉"; } }
+        save(); alert(`📦 Botín: ${msg}`);
     }
 
-    function equip(id) { const g = gearDB[id]; state.equipment[g.type] = id; recalcStats(); save(); renderCrafting(currFilter); }
+    function buyItem(t, c) { if(state.gems < c) return; state.gems -= c; if(t==='ankh') state.ankhs++; save(); }
     
-    function openForge() {
-        const code = JSON.stringify(state.worlds[activeW].campaign, null, 2);
-        const newCode = prompt("⚒️ PEGA TU CÓDIGO JSON AQUÍ:", code);
-        if(newCode) { try { const p = JSON.parse(newCode); state.worlds[activeW].campaign = p; state.worlds[activeW].completed = []; state.worlds[activeW].unlocked = p.length?[p[0].id]:[]; save(); renderMap(); alert("Mazmorra cargada."); } catch(e) {alert("Error JSON");} }
+    function investBank() {
+        let amt = prompt(`Tienes ${state.gold} Oro.\n¿Cuánto quieres ingresar al banco para generar 5% de interés pasivo?`);
+        if(amt && !isNaN(amt) && amt > 0 && amt <= state.gold) { state.gold -= parseInt(amt); state.bank += parseInt(amt); save(); navTo('home'); }
     }
+
+    function openForge() { const code = JSON.stringify(state.worlds[activeW].campaign, null, 2); const newCode = prompt("⚒️ PEGA TU CÓDIGO JSON AQUÍ:", code); if(newCode) { try { const p = JSON.parse(newCode); state.worlds[activeW].campaign = p; state.worlds[activeW].completed = []; state.worlds[activeW].unlocked = p.length?[p[0].id]:[]; save(); renderMap(); alert("Mazmorra cargada."); } catch(e) {alert("Error JSON");} } }
 
     init();
 </script>
