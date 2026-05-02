@@ -3,756 +3,750 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYSTEM V0.9.c: THE DEEP DIVE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>LifeQuest AAA: V12 Cumbre</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@300;500;700&display=swap');
-        
         :root {
-            --bg-base: #0c0c12; 
-            --sys-blue: #3b82f6;   /* Azul Mazmorra / Base / Maná */
-            --sys-red: #ef4444;    /* Rojo Maldita / Reloj / Errores */
-            --sys-purple: #a855f7; /* Morado Abismo / EXP */
-            --gold: #fcd34d;       /* Oro / Legendario */
-            --dia: #2dd4bf;        /* Diamantes */
-            --border-glass: rgba(255,255,255,0.12);
+            --bg-page: #050914; --panel: #0d1424; --panel-light: #162032; 
+            --text-main: #e2e8f0; --text-sub: #94a3b8; --border-dark: #1e293b;
+            --green: #10b981; --blue: #3b82f6; --red: #ef4444; --purple: #a855f7; --gold: #f59e0b; --cyan: #06b6d4; --shield: #38bdf8;
+            --tier-1: #94a3b8; --tier-2: #3b82f6; --tier-3: #a855f7; --tier-4: #f59e0b; --tier-5: #ef4444;
         }
-        body { 
-            background: var(--bg-base); color: #e2e8f0; font-family: 'Space Grotesk', sans-serif; 
-            -webkit-tap-highlight-color: transparent; overflow-x: hidden;
-            padding-top: calc(env(safe-area-inset-top) + 5px);
-            padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
-        }
-        .font-sys { font-family: 'Orbitron', sans-serif; }
-        .glass-panel {
-            background: linear-gradient(145deg, rgba(18,18,24,0.9) 0%, rgba(12,12,18,0.95) 100%);
-            border: 1px solid var(--border-glass); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px); border-radius: 16px;
-        }
-        .btn-aaa {
-            background: linear-gradient(90deg, rgba(59,130,246,0.1), rgba(168,85,247,0.1));
-            border: 1px solid var(--border-glass); color: var(--sys-blue); transition: all 0.2s;
-        }
-        .btn-aaa:active { transform: scale(0.97); }
-        .progress-bar { transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-        
-        .story-claimable { border: 1px solid #fff700 !important; box-shadow: 0 0 12px rgba(255, 247, 0, 0.5); cursor: pointer; animation: pulseGlow 2s infinite; }
-        @keyframes pulseGlow { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; } }
-        
-        .editable-objective { border-bottom: 1px dashed var(--sys-blue); background: rgba(59,130,246,0.05); transition: 0.2s; padding: 6px; border-radius: 4px 4px 0 0; }
-        .editable-objective:focus { background: rgba(59,130,246,0.15); outline: none; border-bottom-style: solid; }
 
-        .chart-svg { width: 100%; height: 100%; stroke: var(--sys-blue); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Nunito', sans-serif; background: #000; display: flex; justify-content: center; height: 100dvh; width: 100vw; overflow: hidden; color: var(--text-main); }
 
-        ::-webkit-scrollbar { display: none; }
+        #app-container { width: 100%; max-width: 600px; height: 100dvh; background: var(--bg-page); display: flex; flex-direction: column; position: relative; padding-top: env(safe-area-inset-top); }
+
+        .screen { display: none; flex: 1; flex-direction: column; overflow-y: hidden; background: var(--bg-page); }
+        .screen.active { display: flex; animation: fade 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .content { padding: 20px; flex: 1; overflow-y: auto; padding-bottom: 120px; }
+
+        /* HUD MEJORADO */
+        #hud-advanced { background: var(--panel); border-bottom: 2px solid var(--border-dark); padding: 15px; display: none; flex-direction: column; gap: 10px; z-index: 50; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
+        .hud-top-row { display: flex; justify-content: space-between; align-items: center; }
+        .hud-currencies { display: flex; gap: 10px; font-weight: 900; font-size: 13px; }
+        .hud-curr-box { background: var(--panel-light); padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border-dark); display: flex; align-items: center; gap: 5px; cursor: pointer;}
+        .hud-bars-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .hud-bar-container { display: flex; flex-direction: column; font-size: 10px; font-weight: 900; color: var(--text-sub); }
+        .bar-bg { width: 100%; height: 8px; background: var(--border-dark); border-radius: 4px; overflow: hidden; margin-top: 3px; position: relative;}
+        .bar-fill { height: 100%; transition: width 0.3s ease; position: absolute; top:0; left:0;}
+
+        /* HUD MAPA FIJADO EN RELATIVE PARA NO TAPAR */
+        #hud-minimal { background: var(--panel); border-bottom: 1px solid var(--border-dark); padding: 15px; display: none; justify-content: space-between; align-items: center; position: relative; width: 100%; z-index: 10; }
+        .min-curr { background: var(--panel-light); padding: 5px 10px; border-radius: 12px; font-weight: 900; font-size: 12px; border: 1px solid var(--border-dark); }
+
+        /* BTNS */
+        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; font-size: 13px; text-transform: uppercase; cursor: pointer; transition: 0.1s; text-align: center; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn:active { transform: translateY(4px); margin-bottom: -4px; }
+        .btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+        .btn-green { background: var(--green); color: white; box-shadow: 0 4px 0 #047857; }
+        .btn-blue { background: var(--blue); color: white; box-shadow: 0 4px 0 #1d4ed8; }
+        .btn-purple { background: var(--purple); color: white; box-shadow: 0 4px 0 #7e22ce; }
+        .btn-gold { background: var(--gold); color: black; box-shadow: 0 4px 0 #b45309; }
+        .btn-red { background: var(--red); color: white; box-shadow: 0 4px 0 #b91c1c; }
+        .btn-dark { background: var(--panel-light); color: var(--text-main); border: 1px solid var(--border-dark); box-shadow: 0 4px 0 var(--border-dark); }
+
+        /* CARDS & GRIDS */
+        .card { background: var(--panel); border: 1px solid var(--border-dark); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; margin-bottom: 15px;}
+        .stat-box { background: var(--panel-light); padding: 10px 5px; border-radius: 12px; border: 1px solid var(--border-dark); font-weight: 900; font-size: 11px;}
+        
+        .equip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .equip-slot { background: var(--panel-light); border: 2px dashed var(--border-dark); border-radius: 12px; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 5px; transition: 0.2s; position: relative;}
+        .equip-slot.filled { border-style: solid; background: var(--panel); }
+        .equip-icon { font-size: 30px; margin-bottom: 5px; }
+        .equip-name { font-size: 9px; font-weight: 900; text-transform: uppercase; }
+        .lvl-badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: black; font-size: 10px; padding: 2px 5px; border-radius: 10px; font-weight: 900;}
+
+        .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-dark); flex-wrap: wrap;}
+        .item-icon { font-size: 30px; background: var(--panel-light); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); }
+        .item-details { flex: 1; min-width: 120px; }
+
+        /* INVENTARIO DETALLADO */
+        .inv-list-item { display: flex; align-items: center; gap: 15px; padding: 10px; background: var(--panel-light); border-radius: 10px; border: 1px solid var(--border-dark); margin-bottom: 8px;}
+        .inv-icon { font-size: 24px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--panel); border-radius: 8px;}
+        
+        /* MAP */
+        .node-path { display: flex; flex-direction: column; align-items: center; gap: 35px; padding: 40px 0; }
+        .node { width: 70px; height: 70px; border-radius: 50%; font-size: 26px; border: 4px solid var(--border-dark); background: var(--panel); display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 0 var(--border-dark); transition: 0.2s;}
+        .node.completed { background: var(--gold); border-color: var(--gold-shadow); box-shadow: 0 6px 0 var(--gold-shadow); color: black;}
+        .node.unlocked { background: var(--blue); border-color: var(--blue-shadow); box-shadow: 0 6px 0 var(--blue-shadow); color: white; animation: pulse 2s infinite;}
+        .node.boss { border-color: var(--red); border-width: 5px; }
+
+        /* COMBAT */
+        .combat-container { display: flex; flex-direction: column; height: 100%; transition: background 0.3s; }
+        .combat-header { padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border-dark); flex-shrink: 0;}
+        .combat-progress-bg { flex: 1; height: 10px; background: var(--border-dark); border-radius: 10px; overflow: hidden; }
+        .combat-progress-fill { height: 100%; background: var(--green); transition: width 0.3s ease; }
+        
+        .combat-body { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 20px; }
+        .combat-footer { padding: 15px 20px; background: var(--panel); border-top: 1px solid var(--border-dark); flex-shrink: 0; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+
+        .option { background: var(--panel-light); border: 2px solid var(--border-dark); border-radius: 12px; padding: 16px; margin-bottom: 10px; font-weight: 700; transition: 0.2s; cursor: pointer; }
+        .option.selected { border-color: var(--blue); background: rgba(59,130,246,0.1); }
+        .option.correct { border-color: var(--green); background: rgba(16,185,129,0.1); color: var(--green); }
+        .option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); opacity: 0.5; }
+
+        /* NAV CON PADDING BOTTOM PARA iPHONE */
+        .nav { position: absolute; bottom: 0; width: 100%; display: flex; background: rgba(13,20,36,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border-dark); z-index: 100; padding-bottom: env(safe-area-inset-bottom); overflow-x: auto;}
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 9px; transition: 0.2s; min-width: 60px; padding: 10px 0;}
+        .nav-item.active { color: var(--cyan); transform: translateY(-3px); }
+        .nav-item span { font-size: 20px; margin-bottom: 2px; }
+
+        /* MODALS & FX */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 200; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 16px; padding: 20px; width: 100%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; }
+        .forge-textarea { flex: 1; width: 100%; background: var(--panel-light); border: 1px solid var(--border-dark); border-radius: 8px; color: var(--text-main); font-family: monospace; padding: 10px; margin: 15px 0; resize: none; min-height: 200px; font-size: 12px; }
+
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); } 70% { box-shadow: 0 0 0 15px rgba(59,130,246,0); } 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); } }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 50% { transform: translateX(12px); } 75% { transform: translateX(-12px); } }
+        .floating-text { position: absolute; font-weight: 900; font-size: 26px; pointer-events: none; z-index: 1000; animation: floatUp 1s ease-out forwards; text-shadow: 2px 2px 0 #000; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-80px) scale(1.5); opacity: 0; } }
+        #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,0,0,0.5); z-index: 999; display: none; pointer-events: none; mix-blend-mode: multiply; }
+        
+        @keyframes chestAnim { 0% {transform: rotate(0deg) scale(1);} 25% {transform: rotate(-15deg) scale(1.1);} 50% {transform: rotate(15deg) scale(1.2);} 75% {transform: rotate(-15deg) scale(1.1);} 100% {transform: rotate(0deg) scale(1.3);} }
+        .chest-anim { animation: chestAnim 1s ease-in-out forwards; }
+        
+        /* MINERIA IDLE */
+        .mine-rock { font-size: 100px; text-align: center; cursor: pointer; transition: 0.1s; user-select: none; margin: 20px 0;}
+        .mine-rock:active { transform: scale(0.9); }
     </style>
 </head>
-<body class="px-4">
+<body>
 
-    <header class="glass-panel p-5 mb-6 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-[var(--sys-blue)] opacity-5 blur-[60px] rounded-full"></div>
-        
-        <div class="flex justify-between items-start mb-4 relative z-10">
-            <div>
-                <h1 class="font-sys font-bold text-xl text-[var(--sys-blue)] tracking-wider">SYS<span class="text-[var(--sys-red)] text-xs ml-1">v0.9.c</span></h1>
-                <div class="flex gap-3 mt-1">
-                    <p class="text-[10px] font-bold uppercase text-[var(--gold)]">💰 <span id="hud-gold">0</span></p>
-                    <p class="text-[10px] font-bold uppercase text-[var(--dia)]">💎 <span id="hud-dia">0</span></p>
-                </div>
-                <p id="hud-bonus-txt" class="text-[8px] font-bold mt-1 uppercase text-[var(--gold)] hidden animate-pulse">⚡ Bono Activo</p>
-            </div>
-            <div class="text-right">
-                <p class="font-sys font-bold text-3xl text-[var(--sys-purple)]">Tier <span id="hud-tier" class="text-white">I</span></p>
-                <p id="hud-next-tier" class="text-[9px] text-[var(--sys-blue)] font-bold uppercase tracking-widest mt-1">Siguiente: H</p>
-                <p id="hud-prestige" class="text-[10px] text-[var(--gold)] font-bold mt-1">Ascensión 0</p>
+<div id="damage-overlay"></div>
+
+<div id="modal-gacha" class="modal-overlay" style="z-index:9999;">
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div id="gacha-chest" style="font-size:100px;">📦</div>
+    </div>
+</div>
+
+<div id="modal-forge" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="margin:0; color:var(--gold); font-weight:900;">⚒️ Forjar Mazmorra</h2>
+        <p style="font-size:12px; color:var(--text-sub); margin-bottom:5px;">El terminal limpiará comillas curvas automáticamente.</p>
+        <textarea id="forge-input" class="forge-textarea" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="[ { 'id': 'n1'... } ]"></textarea>
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-dark" style="flex:1;" onclick="playSound('click'); document.getElementById('modal-forge').style.display='none'">CANCELAR</button>
+            <button class="btn btn-green" style="flex:1;" onclick="processForge()">FORJAR</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-worlds" class="modal-overlay">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <h2 style="margin:0; color:var(--cyan); font-weight:900;">🌌 Multiverso</h2>
+        <button class="btn btn-gold" style="margin: 15px 0;" onclick="createNewWorld()">➕ CREAR NUEVO MUNDO</button>
+        <div id="worlds-manager-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="playSound('click'); document.getElementById('modal-worlds').style.display='none'">CERRAR</button>
+    </div>
+</div>
+
+<div id="app-container">
+
+    <div id="hud-advanced">
+        <div class="hud-top-row">
+            <div style="font-weight:900; font-size:18px; color:var(--text-main);"> Nivel <span id="ui-lvl" style="color:var(--cyan);">1</span></div>
+            <div class="hud-currencies">
+                <div class="hud-curr-box">🟡 <span id="ui-gold">0</span></div>
+                <div class="hud-curr-box">💎 <span id="ui-gems">0</span></div>
+                <div class="hud-curr-box">SP <span id="ui-sp" style="color:var(--purple);">0</span></div>
             </div>
         </div>
-
-        <div class="space-y-3 relative z-10">
-            <div>
-                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-[var(--sys-red)]"><span>Reloj Solar</span> <span id="sys-countdown">--:--:--</span></div>
-                <div class="h-1.5 w-full bg-black/50 rounded-full border border-[var(--sys-red)]/30 overflow-hidden">
-                    <div id="hud-time-bar" class="progress-bar h-full bg-[var(--sys-red)] shadow-[0_0_8px_var(--sys-red)]" style="width: 0%"></div>
-                </div>
-            </div>
-            <div>
-                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-[var(--sys-purple)]"><span>EXP</span> <span id="hud-exp-txt">0/400</span></div>
-                <div class="h-1.5 w-full bg-black/50 rounded-full border border-[var(--sys-purple)]/30 overflow-hidden">
-                    <div id="hud-exp-bar" class="progress-bar h-full bg-[var(--sys-purple)] shadow-[0_0_8px_var(--sys-purple)]" style="width: 0%"></div>
-                </div>
-            </div>
-            <div>
-                <div class="flex justify-between text-[10px] font-bold mb-1 uppercase text-[var(--sys-blue)]"><span>MANÁ</span> <span id="hud-mana-txt">10/10</span></div>
-                <div class="h-1.5 w-full bg-black/50 rounded-full border border-[var(--sys-blue)]/30 overflow-hidden">
-                    <div id="hud-mana-bar" class="progress-bar h-full bg-[var(--sys-blue)] shadow-[0_0_8px_var(--sys-blue)]" style="width: 100%"></div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main id="main-content" class="min-h-[50vh] pb-10"></main>
-
-    <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 glass-panel !rounded-full px-6 py-3 text-xs font-bold uppercase tracking-widest text-white opacity-0 pointer-events-none transition-opacity duration-300 z-50">GUARDADO</div>
-
-    <nav class="fixed bottom-0 left-0 w-full glass-panel border-t-0 rounded-t-3xl rounded-b-none p-4 grid grid-cols-5 gap-1 z-40">
-        <button onclick="nav('home')" class="flex flex-col items-center nav-btn" id="nav-home"><span class="text-xl mb-1">⛺</span><span class="text-[8px] font-bold uppercase tracking-wider text-[var(--sys-blue)]">Refugio</span></button>
-        <button onclick="nav('lab')" class="flex flex-col items-center nav-btn opacity-40" id="nav-lab"><span class="text-xl mb-1">⚗️</span><span class="text-[8px] font-bold uppercase tracking-wider">Lab</span></button>
-        <button onclick="nav('dungeon')" class="flex flex-col items-center nav-btn opacity-40" id="nav-dungeon"><span class="text-xl mb-1">⛩️</span><span class="text-[8px] font-bold uppercase tracking-wider">Abismo</span></button>
-        <button onclick="nav('forge')" class="flex flex-col items-center nav-btn opacity-40" id="nav-forge"><span class="text-xl mb-1">⚒️</span><span class="text-[8px] font-bold uppercase tracking-wider">Forja</span></button>
-        <button onclick="nav('shop')" class="flex flex-col items-center nav-btn" id="nav-shop"><span class="text-xl mb-1">⚖️</span><span class="text-[8px] font-bold uppercase tracking-wider">Tienda</span></button>
-    </nav>
-
-    <div id="modal" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col justify-center items-center p-6 text-center">
-        <div class="glass-panel w-full p-8 relative overflow-hidden">
-            <div id="modal-glow" class="absolute inset-0 opacity-20 blur-2xl"></div>
-            <h3 id="modal-title" class="font-sys text-[16px] font-bold tracking-[0.2em] mb-4 relative z-10 text-[var(--sys-blue)]">...</h3>
-            <p id="modal-desc" class="text-sm text-gray-300 mb-8 font-sys leading-relaxed relative z-10">...</p>
-            <button onclick="closeModal()" class="btn-aaa w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest relative z-10 bg-black/50">
-                ACEPTAR (<span id="modal-timer">5</span>s)
-            </button>
+        <div class="hud-bars-row">
+            <div class="hud-bar-container">HP: <span id="ui-hp-txt">100/100</span><div class="bar-bg"><div id="ui-hp-bar" class="bar-fill" style="background:var(--red); width:100%;"></div></div></div>
+            <div class="hud-bar-container">EN: <span id="ui-en-txt">50/50</span><div class="bar-bg"><div id="ui-en-bar" class="bar-fill" style="background:var(--gold); width:100%;"></div></div></div>
         </div>
     </div>
 
-    <script>
-        const DB_KEY = 'sys_v0_9_c_safe'; 
-        const TIERS = {1:'I', 2:'H', 3:'G', 4:'F', 5:'E', 6:'D', 7:'C', 8:'B', 9:'A', 10:'S'};
-        const EXP_NEEDED = [0, 400, 1000, 3000, 7500, 15000, 30000, 50000, 75000, 100000];
+    <div id="hud-minimal">
+        <div class="min-curr" style="color:var(--cyan);">LVL <span id="ui-min-lvl">1</span></div>
+        <div style="display:flex; gap:10px;">
+            <div class="min-curr">🟡 <span id="ui-min-gold">0</span></div>
+            <div class="min-curr">💎 <span id="ui-min-gems">0</span></div>
+        </div>
+    </div>
 
-        // --- ARMAS Y ARMADURAS ---
-        let ALL_WEAPONS = [];
-        const W_P1 = ["Filo", "Espada", "Hacha", "Cuerno", "Garra", "Martillo", "Daga", "Lanza", "Cetro", "Guadaña"];
-        const W_P2 = ["del Demonio", "Vampiresco", "Roto", "de Luz", "Sombrío", "del Rey", "Abisal", "Sangriento", "Maldito", "Antiguo"];
-        for(let i=1; i<=100; i++) {
-            let n = i===1 ? "Daga Oxidada" : `${W_P1[i%10]} ${W_P2[Math.floor((i-1)/10)%10]}`;
-            ALL_WEAPONS.push({id:`w_sys_${i}`, type:'weapon', name: n, atk: i*20, reqTier: Math.ceil(i/10)});
+    <div id="screen-home" class="screen active">
+        <div class="content">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin-top:0; color:var(--cyan); font-weight:900;" id="profile-rank">Rango: F</h2>
+                <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="navTo('skills')">✨ SKILLS</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box" style="color:var(--red); border-color:var(--red);">⚔️ ATQ<br><span id="stat-atk" style="font-size:18px; color:white;">10</span></div>
+                <div class="stat-box" style="color:var(--blue); border-color:var(--blue);">🛡️ DEF<br><span id="stat-def" style="font-size:18px; color:white;">10</span></div>
+                <div class="stat-box" style="color:var(--gold); border-color:var(--gold);">🍀 SUE<br><span id="stat-luck" style="font-size:18px; color:white;">5</span></div>
+                <div class="stat-box" style="color:var(--purple); border-color:var(--purple);">🔥 CRIT<br><span id="stat-crit" style="font-size:18px; color:white;">0%</span></div>
+            </div>
+
+            <h3 style="font-weight: 900; margin-bottom: 10px;">Equipamiento</h3>
+            <div class="equip-grid">
+                <div class="equip-slot" id="slot-weapon"><div class="equip-icon">🗡️</div><div class="equip-name">Arma</div></div>
+                <div class="equip-slot" id="slot-armor"><div class="equip-icon">🛡️</div><div class="equip-name">Armadura</div></div>
+                <div class="equip-slot" id="slot-accessory"><div class="equip-icon">💍</div><div class="equip-name">Amuleto</div></div>
+                <div class="equip-slot" id="slot-pet"><div class="equip-icon">🥚</div><div class="equip-name">Mascota</div></div>
+            </div>
+
+            <h3 style="font-weight: 900; margin-bottom: 10px; margin-top: 20px;">Mochila & Inventario</h3>
+            <div id="inventory-list-detailed" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+    </div>
+
+    <div id="screen-skills" class="screen">
+        <div class="content">
+            <h2 style="margin-top:0; color:var(--purple); font-weight:900;">✨ Constelación AAA</h2>
+            <div style="font-size:18px; font-weight:bold; margin-bottom:20px; text-align:center;">SP Disp: <span id="skill-points-display" style="color:var(--purple);">0</span></div>
+            
+            <div class="list-item">
+                <div class="item-icon">❤️</div><div class="item-details"><div style="font-weight:900;">Vitalidad (+10 HP)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-hp">0</span></div></div>
+                <button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('hp')">1 SP</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">⚔️</div><div class="item-details"><div style="font-weight:900;">Fuerza (+5 ATQ)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-atk">0</span></div></div>
+                <button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('atk')">1 SP</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">🛡️</div><div class="item-details"><div style="font-weight:900;">Resistencia (+5 DEF)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-def">0</span></div></div>
+                <button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('def')">1 SP</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">🔥</div><div class="item-details"><div style="font-weight:900;">Precisión (+1% Crit)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-crit">0</span></div></div>
+                <button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('crit')">1 SP</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">💨</div><div class="item-details"><div style="font-weight:900;">Evasión (+1% Esquivar)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-evasion">0</span></div></div>
+                <button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('evasion')">1 SP</button>
+            </div>
+            <button class="btn btn-dark" style="margin-top:20px;" onclick="navTo('home')">VOLVER</button>
+        </div>
+    </div>
+
+    <div id="screen-worlds" class="screen">
+        <div class="content">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; font-weight:900; color:var(--cyan); cursor:pointer;" id="world-title" onclick="openWorldsManager()">Mazmorra ▾</h2>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openWorldsManager()">🌌 MUNDOS</button>
+                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ CARGAR JSON</button>
+                </div>
+            </div>
+            <div class="node-path" id="map-render"></div>
+        </div>
+    </div>
+
+    <div id="screen-combat" class="screen" style="background:var(--panel);">
+        <div class="combat-container" id="combat-container">
+            <div class="combat-header" id="combat-header">
+                <div style="font-size:20px; cursor:pointer; color:var(--text-sub);" onclick="fleeCombat()">✖</div>
+                <div class="combat-progress-bg"><div id="combat-prog-bar" class="combat-progress-fill" style="width:0%;"></div></div>
+                <div style="font-weight:900; color:var(--red);">❤️ <span id="combat-hp">100</span></div>
+            </div>
+            
+            <div class="combat-body">
+                <div id="boss-ui" style="display:none; text-align:center; margin-bottom:15px;">
+                    <div style="font-size:50px;" id="boss-emoji">👹</div>
+                    <div style="width:100%; height:15px; background:#330; border:2px solid var(--red); border-radius:10px; overflow:hidden; margin-top:5px;"><div id="boss-hp-fill" style="height:100%; background:var(--red); width:100%; transition:0.3s;"></div></div>
+                </div>
+                
+                <button id="btn-reading-exit" class="btn btn-dark" style="display:none; margin-bottom:20px;" onclick="fleeCombat()">✖ SALIR</button>
+
+                <h2 id="question-text" style="font-weight:900; font-size:18px; margin-bottom:20px;">Cargando...</h2>
+                <div id="options-container"></div>
+            </div>
+
+            <div class="combat-footer" id="combat-footer">
+                <div id="active-skills" style="display:flex; gap:5px; margin-bottom:10px;">
+                    <button id="btn-hint" class="btn btn-dark" style="flex:1; padding:8px; font-size:11px;" onclick="useOraculo()">👁️ ORÁCULO</button>
+                    <button class="btn btn-green" style="flex:0.5; padding:8px; font-size:11px;" onclick="usePotion()">💊 <span id="combat-pots">0</span></button>
+                </div>
+                <button id="btn-check" class="btn btn-dark" onclick="checkAnswer()">COMPROBAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-crafting" class="screen">
+        <div class="content">
+            <div style="display:flex; gap:5px; margin-bottom: 15px; overflow-x:auto; padding-bottom:5px;">
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-weapon" onclick="renderCrafting('weapon')">🗡️ Armas</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-armor" onclick="renderCrafting('armor')">🛡️ Armor</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-accessory" onclick="renderCrafting('accessory')">💍 Amu</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-fusion" onclick="renderCrafting('fusion')">🔥 Fusión</button>
+            </div>
+            <div id="craft-list"></div>
+        </div>
+    </div>
+
+    <div id="screen-shop" class="screen">
+        <div class="content">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin-top:0; color:var(--gold); font-weight:900;">⏳ Ofertas Rotativas</h2>
+                <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="refreshShop(true)">🔄 50 💎</button>
+            </div>
+            <p style="font-size:12px; color:var(--text-sub);">Se reinician a medianoche. Pueden contener equipo.</p>
+            <div id="daily-shop-list" style="margin-bottom: 30px;"></div>
+
+            <h2 style="margin-top:0; color:var(--purple); font-weight:900;">📦 Gacha del Abismo</h2>
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <button class="btn btn-dark" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(1)"><span style="font-size:30px;">🪵</span>100 🟡</button>
+                <button class="btn btn-blue" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(2)"><span style="font-size:30px;">🧰</span>500 🟡</button>
+                <button class="btn btn-mythic" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(3)"><span style="font-size:30px;">💎</span>50 💎</button>
+            </div>
+            
+            <h2 style="margin-top:30px; font-weight:900;">Elixires</h2>
+            <div class="list-item">
+                <div class="item-icon">💉</div>
+                <div class="item-details"><div style="font-weight:900;">Elixir ATQ</div><div style="font-size:11px; color:var(--text-sub);">+1 ATQ Permanente.</div></div>
+                <button class="btn btn-mythic" style="width:auto; padding:8px 12px;" onclick="buyElixir('atk')">💎 20</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">🎒</div>
+                <div class="item-details"><div style="font-weight:900;">Mochila Plus</div><div style="font-size:11px; color:var(--text-sub);">+1 Límite Pociones.</div></div>
+                <button class="btn btn-gold" style="width:auto; padding:8px 12px;" onclick="buyBag()">🟡 1000</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-mining" class="screen">
+        <div class="content">
+            <h2 style="margin-top:0; color:var(--gold); font-weight:900;">⛏️ Mina de los Enanos</h2>
+            <p style="font-size:12px; color:var(--text-sub);">Pica la piedra. Tus mineros automáticos trabajan offline.</p>
+            
+            <div class="mine-rock" onclick="mineRock()">🪨</div>
+            
+            <div style="text-align:center; font-weight:900; font-size:18px; margin-bottom:20px;">
+                Piedra: <span id="mine-stone-qty" style="color:var(--text-sub);">0</span>
+            </div>
+
+            <div class="list-item">
+                <div class="item-icon">⛏️</div>
+                <div class="item-details"><div style="font-weight:900;">Mejorar Pico</div><div style="font-size:11px; color:var(--text-sub);">+1 Poder de Click (Nvl: <span id="mine-pick-lvl">1</span>)</div></div>
+                <button class="btn btn-gold" style="width:auto; padding:8px;" id="btn-upg-pick" onclick="upgradePickaxe()">50 🪨</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">👷</div>
+                <div class="item-details"><div style="font-weight:900;">Contratar Minero</div><div style="font-size:11px; color:var(--text-sub);">Pica automáticamente offline (Total: <span id="mine-auto-lvl">0</span>)</div></div>
+                <button class="btn btn-blue" style="width:auto; padding:8px;" id="btn-upg-auto" onclick="buyAutoMiner()">100 🟡</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav">
+        <div class="nav-item active" id="tab-home" onclick="navTo('home')"><span>👤</span>PERFIL</div>
+        <div class="nav-item" id="tab-worlds" onclick="navTo('worlds')"><span>🗺️</span>MAPA</div>
+        <div class="nav-item" id="tab-mining" onclick="navTo('mining')"><span>⛏️</span>MINA</div>
+        <div class="nav-item" id="tab-crafting" onclick="navTo('crafting')"><span>⚒️</span>FORJA</div>
+        <div class="nav-item" id="tab-shop" onclick="navTo('shop')"><span>⚖️</span>TIENDA</div>
+    </div>
+
+</div>
+
+<script>
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    function playSound(type) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        if(type === 'click') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        } else if(type === 'gacha') {
+            osc.type = 'square'; osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.8);
+        }
+    }
+
+    // --- DATABASE ---
+    const matsDB = { 
+        m1: {icon:'⚪', t:1, n:'Hierro', desc:'Minado en la Mina o Gacha M.'}, 
+        m2: {icon:'🟤', t:1, n:'Cuero', desc:'Drops de monstruos.'}, 
+        m3: {icon:'🪵', t:1, n:'Madera', desc:'Drops básicos.'}, 
+        m4: {icon:'🟣', t:2, n:'Cristal Oscuro', desc:'Jefes o Fusión.'}, 
+        m5: {icon:'🧵', t:2, n:'Hilo Mágico', desc:'Tienda Diaria.'}, 
+        m6: {icon:'⚙️', t:2, n:'Acero', desc:'Forja de Hierro.'}, 
+        m7: {icon:'✨', t:3, n:'Polvo Estelar', desc:'Gacha Mítico o Jefes.'}, 
+        m8: {icon:'🦴', t:3, n:'Hueso', desc:'Drops Raros.'}, 
+        m9: {icon:'📀', t:3, n:'Oro Puro', desc:'Jefes de élite.'}, 
+        m10: {icon:'👹', t:4, n:'Alma', desc:'Jefes Finales.'}, 
+        m11: {icon:'🩸', t:4, n:'Sangre', desc:'Mercado Negro.'}, 
+        m12: {icon:'🐉', t:5, n:'Escama', desc:'Extremadamente Raro.'} 
+    };
+    
+    const gearDB = {
+        w1: { id:'w1', t:'weapon', name:'Daga Novato', icon:'🗡️', r:1, stats:{atk:5}, cost:{m1:3} },
+        w2: { id:'w2', t:'weapon', name:'Hoja Cazador', icon:'⚔️', r:2, stats:{atk:15}, cost:{m6:5, m2:5} },
+        w3: { id:'w3', t:'weapon', name:'Excalibur', icon:'⚔️', r:5, stats:{atk:100}, cost:{m9:10, m12:2} },
+        a1: { id:'a1', t:'armor', name:'Harapos', icon:'👕', r:1, stats:{def:5}, cost:{m2:4} },
+        a2: { id:'a2', t:'armor', name:'Malla Hierro', icon:'🛡️', r:2, stats:{def:15}, cost:{m1:10} },
+        ac1: { id:'ac1', t:'accessory', name:'Anillo Suerte', icon:'💍', r:1, stats:{luck:2}, cost:{m3:5} },
+        f1: { id:'f1', t:'fusion', name:'Fundir Acero', icon:'⚙️', r:2, isConsumable:true, gives:'m6', cost:{m1:10} },
+        f2: { id:'f2', t:'fusion', name:'Sintetizar Cristal', icon:'🟣', r:2, isConsumable:true, gives:'m4', cost:{m2:10, m3:5} }
+    };
+    const rColor = { 1:'tier-1', 2:'tier-2', 3:'tier-3', 4:'tier-4', 5:'tier-5' };
+
+    // --- STATE ---
+    let state = {
+        lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 100, gems: 0, potions: 3, maxPots: 5, sp: 0,
+        stats: { atk: 10, def: 10, luck: 5, crit: 0, dodge: 0 }, baseBonus: { atk: 0, def: 0 }, 
+        skills: { hp: 0, atk: 0, def: 0, crit: 0, evasion: 0 },
+        inventory: {}, equipment: { weapon: null, armor: null, accessory: null, pet: null }, ownedGear: [],
+        worlds: [{ id: 0, name: "Mundo de Estudio", campaign: [], completed: [], unlocked: ['n1'] }], activeW: 0,
+        mining: { power: 1, auto: 0, stone: 0, lastMineTime: Date.now() },
+        dailyShopDate: "", dailyShopItems: []
+    };
+
+    let currFilter = 'weapon'; 
+    let combat = { active: false, node: null, qIndex: 0, selIdx: null, isDone: false, corrects: 0 };
+
+    function init() {
+        try { const saved = localStorage.getItem('LifeQuest_V12'); if (saved) state = Object.assign(state, JSON.parse(saved)); } catch(e) {}
+        
+        if(state.worlds[0].campaign.length === 0) {
+            state.worlds[0].campaign = [
+                {id:'n1', type:'reading', title:'📖 Actualización AAA', content:'Ahora tienes recompensas por pregunta, un minijuego de minería, y animaciones Gacha. ¡Suerte!', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
+                {id:'n2', type:'test', title:'⚔️ Test Final', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿Cada correcta te da gemas ahora?', options:['Sí (10 Gemas)','No'], correct:0} ]}
+            ];
         }
 
-        let ALL_ARMORS = [];
-        const ARMOR_SETS = [
-            {n:"Hierro Oscuro", t:1}, {n:"Cuero Bestia", t:2}, {n:"Hueso Maldito", t:3},
-            {n:"Plata Lunar", t:4}, {n:"Caballero Caído", t:5}, {n:"Escamas Dragón", t:6},
-            {n:"Sombra Profunda", t:7}, {n:"Fuego Infernal", t:8}, {n:"Viento Ártico", t:9}, {n:"Monarca Rey", t:10}
-        ];
-        const SLOTS = [{id:'head', n:'Casco'}, {id:'chest', n:'Peto'}, {id:'legs', n:'Grebas'}, {id:'acc', n:'Amuleto'}];
-        ARMOR_SETS.forEach(set => {
-            SLOTS.forEach(sl => {
-                ALL_ARMORS.push({ id: `ar_${set.t}_${sl.id}`, type: 'armor', slot: sl.id, setName: set.n, name: `${sl.n} de ${set.n}`, manaDiscount: set.t * 2, reqTier: set.t });
-            });
+        checkIdleMining(); generateDailyShop(false); recalcStats(); navTo('home');
+        setInterval(checkIdleMining, 60000);
+    }
+    
+    function save() { localStorage.setItem('LifeQuest_V12', JSON.stringify(state)); updateUI(); }
+
+    // --- IDLE MINING ---
+    function mineRock() {
+        playSound('click');
+        state.mining.stone += state.mining.power;
+        if(Math.random() < 0.1) { state.inventory.m1 = (state.inventory.m1||0)+1; showFloatingText("+1 Hierro", "var(--tier-1)"); }
+        else showFloatingText("+"+state.mining.power, "gray");
+        updateMiningUI(); save();
+    }
+    function checkIdleMining() {
+        if(state.mining.auto > 0) {
+            let now = Date.now(); let mins = Math.floor((now - state.mining.lastMineTime) / 60000);
+            if(mins > 0) {
+                state.mining.stone += (mins * state.mining.auto * 5);
+                state.inventory.m1 = (state.inventory.m1||0) + (mins * state.mining.auto); // 1 hierro por min por worker
+                state.mining.lastMineTime = now; save();
+            }
+        } else { state.mining.lastMineTime = Date.now(); }
+    }
+    function updateMiningUI() {
+        const setT = (id,v) => {let e=document.getElementById(id); if(e) e.innerText=v;};
+        setT('mine-stone-qty', state.mining.stone); setT('mine-pick-lvl', state.mining.power); setT('mine-auto-lvl', state.mining.auto);
+        let upgC = state.mining.power * 50; let btnP = document.getElementById('btn-upg-pick'); if(btnP) btnP.innerText = `${upgC} 🪨`;
+        let autoC = (state.mining.auto + 1) * 100; let btnA = document.getElementById('btn-upg-auto'); if(btnA) btnA.innerText = `${autoC} 🟡`;
+    }
+    function upgradePickaxe() {
+        let cost = state.mining.power * 50; if(state.mining.stone < cost) return alert("Falta Piedra.");
+        state.mining.stone -= cost; state.mining.power++; playSound('click'); updateMiningUI(); save();
+    }
+    function buyAutoMiner() {
+        let cost = (state.mining.auto + 1) * 100; if(state.gold < cost) return alert("Falta Oro.");
+        state.gold -= cost; state.mining.auto++; playSound('click'); updateMiningUI(); save();
+    }
+
+    // --- DAILY SHOP ---
+    function generateDailyShop(force) {
+        const today = new Date().toDateString();
+        if(state.dailyShopDate !== today || force) {
+            state.dailyShopDate = today; state.dailyShopItems = [];
+            const keys = Object.keys(matsDB);
+            for(let i=0; i<4; i++) {
+                let k = keys[Math.floor(Math.random() * keys.length)];
+                state.dailyShopItems.push({ id: k, cost: matsDB[k].t * 50, b: false });
+            }
+            save();
+        }
+    }
+    function refreshShop(paid) {
+        if(paid) { if(state.gems < 50) return alert("Faltan Gemas."); state.gems -= 50; }
+        generateDailyShop(true); renderDailyShop(); playSound('click');
+    }
+    function renderDailyShop() {
+        const container = document.getElementById('daily-shop-list');
+        if(!container) return;
+        container.innerHTML = state.dailyShopItems.map((item, idx) => {
+            let m = matsDB[item.id];
+            return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[m.t]})">${m.icon}</div>
+                <div class="item-details"><div style="font-weight:900; color:var(--${rColor[m.t]})">${m.n}</div></div>
+                <button class="btn ${item.b?'btn-dark':'btn-gold'}" style="width:auto; padding:8px 12px; font-size:11px;" onclick="buyDaily(${idx})" ${item.b?'disabled':''}>${item.b?'AGOTADO':'🟡 '+item.cost}</button></div>`;
+        }).join('');
+    }
+    function buyDaily(idx) {
+        playSound('click');
+        const item = state.dailyShopItems[idx]; if(state.gold < item.cost) return alert("Falta Oro.");
+        state.gold -= item.cost; item.b = true; state.inventory[item.id] = (state.inventory[item.id]||0) + 1; save(); renderDailyShop();
+    }
+
+    // --- STATS & SKILLS ---
+    function recalcStats() {
+        let bA = 10 + state.baseBonus.atk, bD = 10 + state.baseBonus.def, bL = 5, bC = 0, bE = 0;
+        bA += (state.skills.atk * 5); bD += (state.skills.def * 5); bC += (state.skills.crit * 1); bE += (state.skills.evasion * 1);
+        
+        Object.values(state.equipment).forEach(gId => {
+            if(gId && gearDB[gId]) {
+                let g = gearDB[gId];
+                if(g.stats.atk) bA += g.stats.atk; if(g.stats.def) bD += g.stats.def; if(g.stats.luck) bL += g.stats.luck;
+            }
+        });
+        state.stats = { atk: bA, def: bD, luck: bL, crit: bC, dodge: bE };
+        state.maxHp = 100 + (state.lvl * 10) + (state.skills.hp * 10);
+    }
+    function upgradeSkill(type) { playSound('click'); if(state.sp <= 0) return alert("Sin SP."); state.sp--; state.skills[type]++; recalcStats(); save(); navTo('skills'); }
+    function buyElixir(type) { playSound('click'); if(state.gems < 20) return alert("Faltan 20 Gemas."); state.gems -= 20; if(type==='atk') state.baseBonus.atk++; recalcStats(); save(); alert("+1 ATQ"); }
+    function buyBag() { playSound('click'); if(state.gold < 1000) return alert("Falta Oro."); state.gold -= 1000; state.maxPots++; save(); }
+
+    // --- NAV & UI ---
+    function navTo(id) {
+        playSound('click');
+        if(combat.active && id !== 'combat') return alert("⚔️ ¡SAL del combate primero (Usa la X o SALIR)!");
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+        const tab = document.getElementById('tab-' + id); if(tab) tab.classList.add('active');
+        
+        const hA = document.getElementById('hud-advanced'), hM = document.getElementById('hud-minimal');
+        if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; renderMap(); }
+        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; }
+        else { hA.style.display = 'flex'; hM.style.display = 'none'; }
+        
+        if(id === 'home') updateProfile();
+        if(id === 'skills') { const setT=(id,v)=>{let e=document.getElementById(id);if(e)e.innerText=v;}; setT('skill-points-display',state.sp); setT('skill-hp',state.skills.hp); setT('skill-atk',state.skills.atk); setT('skill-def',state.skills.def||0); setT('skill-crit',state.skills.crit||0); setT('skill-evasion',state.skills.evasion||0); }
+        if(id === 'crafting') renderCrafting(currFilter);
+        if(id === 'shop') renderDailyShop();
+        if(id === 'mining') updateMiningUI();
+    }
+
+    function updateProfile() {
+        document.getElementById('stat-atk').innerText = state.stats.atk; document.getElementById('stat-def').innerText = state.stats.def;
+        document.getElementById('stat-luck').innerText = state.stats.luck; document.getElementById('stat-crit').innerText = state.stats.crit + "%";
+
+        ['weapon', 'armor', 'accessory', 'pet'].forEach(t => {
+            const slot = document.getElementById(`slot-${t}`); const eqId = state.equipment[t];
+            if(eqId && gearDB[eqId]) {
+                const g = gearDB[eqId]; let sStr = g.stats.atk ? `(+${g.stats.atk} ATQ)` : g.stats.def ? `(+${g.stats.def} DEF)` : `(+${g.stats.luck} SUE)`;
+                slot.className = `equip-slot filled`; slot.style.borderColor = `var(--${rColor[g.r]})`;
+                slot.innerHTML = `<div class="equip-icon">${g.icon}</div><div class="equip-name" style="color:var(--${rColor[g.r]})">${g.name} <br> <span style="color:var(--green)">${sStr}</span></div>`;
+            } else { slot.className = `equip-slot`; slot.style.borderColor = `var(--border-dark)`; slot.innerHTML = `<div class="equip-icon">🎒</div><div class="equip-name">Vacío</div>`; }
         });
 
-        const ALL_MATS = [
-            ["m1","⛏️","Acero"], ["m2","🐉","Escamas"], ["m3","🧱","Cobre"], ["m4","🔩","Hierro"], ["m5","🪙","Plata"], ["m6","🥇","Oro Puro"], ["m7","💎","Platino"], ["m8","💠","Mithril"], ["m9","🪨","P. Rúnica"],
-            ["m10","🪵","Madera"], ["m11","🌿","H. Curativa"], ["m12","☠️","R. Venenosa"], ["m13","🌸","F. Lunar"], ["m14","🌻","S. Solar"], ["m15","🍯","Savia"], ["m16","🦴","Hueso"], ["m17","🦷","Colmillo"], ["m18","🐾","Piel"],
-            ["m19","👁️","Ojo Araña"], ["m20","🦇","Ala Murc."], ["m21","😈","Cuerno"], ["m22","🩸","Sangre M."], ["m23","🔮","Núcleo"], ["m24","✨","Polvo Est."], ["m25","🧊","C. Roto"], ["m26","🔥","E. Fuego"], ["m27","❄️","E. Hielo"],
-            ["m28","🌪️","E. Viento"], ["m29","🌍","E. Tierra"], ["m30","👻","Alma"], ["m31","🌑","M. Oscura"], ["m32","⚱️","Ceniza"], ["m33","🧪","Ectoplasma"], ["m34","💧","Lágrima"], ["m35","🧚","P. Hada"], ["m36","🌋","Azufre"]
-        ];
+        const inv = document.getElementById('inventory-list-detailed'); inv.innerHTML = '';
+        Object.entries(state.inventory).forEach(([k, v]) => { 
+            if(v > 0 && matsDB[k]) {
+                inv.innerHTML += `<div class="inv-list-item"><div class="inv-icon" style="color:var(--${rColor[matsDB[k].t]})">${matsDB[k].icon}</div><div><div style="font-weight:900; color:var(--${rColor[matsDB[k].t]})">${matsDB[k].n} x${v}</div><div style="font-size:10px; color:var(--text-sub)">${matsDB[k].desc}</div></div></div>`;
+            } 
+        });
+        if(state.potions > 0) inv.innerHTML += `<div class="inv-list-item"><div class="inv-icon">💊</div><div><div style="font-weight:900; color:var(--green)">Pociones x${state.potions}/${state.maxPots}</div><div style="font-size:10px; color:var(--text-sub)">Cura 50 HP en combate.</div></div></div>`;
+    }
 
-        const STORY_TITLES = ["El Exilio", "Impuestos de Sangre", "Alianza Subterránea", "Cazadores Reales", "El Pacto Abisal", "Sangre y Barro", "Ecos Antiguos", "El Asedio", "La Guardia Caída", "Sangre de mi Sangre"];
-        const STORY_TEXT = [
-            "Tu hermano, el Rey Aric, consumió la magia del reino para volverse inmortal. Por oponerte, te arrebató tus títulos y te exilió a los páramos oscuros.",
-            "En los páramos, descubres la verdad. Aric drena la fuerza vital de los campesinos. Las aldeas están muriendo.",
-            "Has encontrado un refugio en las antiguas catacumbas. Aquí, los olvidados te han nombrado su campeón.",
-            "Aric ha enviado a sus Perros de Sangre a las mazmorras para cazarte. Cada asesino que derrotas te hace más fuerte.",
-            "Descubres el origen del poder de Aric. Hizo un trato con los Señores del Abismo Profundo. Es un mero títere de la oscuridad.",
-            "Aric en persona apareció. Casi te mata, dejándote una cicatriz arcana que quema cuando usas maná. Ahora es personal.",
-            "Te has adentrado en la Forja Primigenia. Estás forjando tu voluntad. Tu poder empieza a rivalizar con el de tu hermano.",
-            "Es la hora. Los estandartes de los olvidados se alzan en la noche. Marchamos hacia la Ciudadela de Obsidiana.",
-            "Avanzas por los pasillos que una vez llamaste hogar, ahora apestando a magia negra y muerte. Solo queda la Sala del Trono.",
-            "Aric ha caído a tus pies. La corona, manchada de negro, murmura tu nombre ofreciéndote el mismo poder absoluto."
-        ];
+    function updateUI() {
+        const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
+        const setW = (id, w) => { const el = document.getElementById(id); if(el) el.style.width = w; };
+        setTxt('ui-lvl', state.lvl); setTxt('ui-min-lvl', state.lvl); setTxt('ui-gold', state.gold); setTxt('ui-min-gold', state.gold);
+        setTxt('ui-gems', state.gems); setTxt('ui-min-gems', state.gems); setTxt('ui-sp', state.sp);
+        setTxt('ui-hp-txt', `${state.hp}/${state.maxHp}`); setW('ui-hp-bar', `${(state.hp/state.maxHp)*100}%`);
+        setTxt('ui-en-txt', `${state.en}/${state.maxEn}`); setW('ui-en-bar', `${(state.en/state.maxEn)*100}%`);
+    }
 
-        const SHOP_POOL = [
-            { id:'s1', mat:'m1', qty:10, cost:5000, reqLvl: 1 }, { id:'s2', mat:'m10', qty:15, cost:8000, reqLvl: 1 },
-            { id:'s3', mat:'m11', qty:5, cost:3000, reqLvl: 1 }, { id:'s4', mat:'m4', qty:5, cost:15000, reqLvl: 2 },
-            { id:'s5', mat:'m5', qty:3, cost:20000, reqLvl: 2 }, { id:'s6', mat:'m24', qty:2, cost:30000, reqLvl: 3 },
-            { id:'s7', mat:'m31', qty:1, cost:80000, reqLvl: 5 }, { id:'s8', mat:'m8', qty:1, cost:60000, reqLvl: 4 }
-        ];
+    // --- MUNDOS & FORJA ---
+    function renderMap() {
+        const w = state.worlds[state.activeW]; document.getElementById('world-title').innerText = w.name + " ▾";
+        const c = document.getElementById('map-render'); c.innerHTML = w.campaign.length ? '' : '<div style="color:var(--text-sub);">Vacío.</div>';
+        w.campaign.forEach((n, i) => {
+            const isDone = w.completed.includes(n.id); const isUnl = w.unlocked.includes(n.id);
+            let cls = isDone ? 'completed' : (isUnl ? 'unlocked' : ''); if(n.type === 'boss') cls += ' boss';
+            let icon = isDone ? '⭐' : (n.type === 'reading' ? '📖' : (n.type === 'boss' ? '👹' : '⚔️'));
+            c.innerHTML += `<div style="transform: translateX(${(i%2!==0)?'20px':'-20px'}); text-align:center;"><button class="node ${cls}" onclick="startNode('${n.id}')">${icon}</button><div style="font-weight:900; font-size:12px; margin-top:8px;">${n.title}</div></div>`;
+        });
+    }
 
-        // --- SISTEMA ANTI-VOID (Garantiza que nunca haya un undefined al arrancar) ---
-        let s = JSON.parse(localStorage.getItem(DB_KEY)) || {};
+    function openWorldsManager() { playSound('click'); document.getElementById('modal-worlds').style.display = 'flex'; renderWorldsManager(); }
+    function renderWorldsManager() {
+        const list = document.getElementById('worlds-manager-list');
+        list.innerHTML = state.worlds.map((w, idx) => `<div class="list-item" style="flex-direction:column; align-items:flex-start;"><div style="display:flex; width:100%; gap:10px; align-items:center;">
+                    <div style="font-weight:900; flex:1;">${w.name}</div>
+                    ${state.activeW === idx ? `<span style="color:var(--green); font-weight:900; font-size:12px;">ACTIVO</span>` : `<button class="btn btn-blue" style="width:auto; padding:5px 10px; font-size:10px;" onclick="selectWorld(${idx})">ENTRAR</button>`}
+                </div></div>`).join('');
+    }
+    function createNewWorld() { playSound('click'); let nm = prompt("Nombre:"); if(nm) { state.worlds.push({ id: Date.now(), name: nm, campaign: [], completed: [], unlocked: [] }); save(); renderWorldsManager(); } }
+    function selectWorld(idx) { playSound('click'); state.activeW = idx; save(); document.getElementById('modal-worlds').style.display = 'none'; renderMap(); }
+    
+    function openForgeModal() { playSound('click'); document.getElementById('modal-forge').style.display = 'flex'; document.getElementById('forge-input').value = JSON.stringify(state.worlds[state.activeW].campaign, null, 2); }
+    function processForge() {
+        playSound('click'); let rawCode = document.getElementById('forge-input').value;
+        try { rawCode = rawCode.replace(/```json/gi, '').replace(/```/g, '').trim().replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+            const p = JSON.parse(rawCode); if(!Array.isArray(p)) throw new Error("Debe ser Array");
+            state.worlds[state.activeW].campaign = p; state.worlds[state.activeW].completed = []; state.worlds[state.activeW].unlocked = p.length > 0 ? [p[0].id] : []; 
+            save(); renderMap(); document.getElementById('modal-forge').style.display = 'none'; alert("✅ Carga Exitosa."); 
+        } catch(e) { alert("❌ ERROR JSON: " + e.message); } 
+    }
+
+    // --- COMBATE ---
+    function startNode(id) {
+        playSound('click'); const w = state.worlds[state.activeW];
+        if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Bloqueado.");
+        const node = w.campaign.find(n => n.id === id);
+        if (!node.questions && (node.type === 'test' || node.type === 'boss')) node.questions = [{ q: node.content||"P:", options: node.options||["A","B"], correct: node.correctAnswer||0 }];
+
+        const isDone = w.completed.includes(id);
+        if(!isDone) { state.en = Math.max(0, state.en - node.energyCost); recalcStats(); save(); }
+
+        combat = { active: true, node: node, qIndex: 0, selIdx: null, isDone: isDone, corrects: 0 };
+        document.getElementById('boss-ui').style.display = node.type === 'boss' ? 'block' : 'none';
+
+        const hdr = document.getElementById('combat-header'); const ftr = document.getElementById('combat-footer'); const btnR = document.getElementById('btn-reading-exit');
+        if(node.type === 'reading') {
+            hdr.style.display = 'none'; ftr.style.display = 'none'; btnR.style.display = 'block';
+            document.getElementById('question-text').innerHTML = node.content; document.getElementById('options-container').innerHTML = '';
+            // If completed, just read. If not, clicking Exit finishes it. We handle it in fleeCombat.
+        } else {
+            hdr.style.display = 'flex'; ftr.style.display = 'block'; btnR.style.display = 'none';
+            renderQuestion();
+        }
+        navTo('combat');
+    }
+
+    function renderQuestion() {
+        const q = combat.node.questions[combat.qIndex]; document.getElementById('question-text').innerText = q.q;
+        const prog = (combat.qIndex / combat.node.questions.length) * 100; document.getElementById('combat-prog-bar').style.width = `${prog}%`;
+        if(combat.node.type === 'boss') document.getElementById('boss-hp-fill').style.width = `${100-prog}%`;
+
+        document.getElementById('combat-hp').innerText = state.hp; document.getElementById('combat-pots').innerText = state.potions;
+        const opts = document.getElementById('options-container'); opts.innerHTML = '';
+        q.options.forEach((o, i) => { opts.innerHTML += `<div class="option" id="opt-${i}" onclick="selectOpt(${i})">${o}</div>`; });
+        const btn = document.getElementById('btn-check'); btn.innerText = "ATACAR"; btn.className = "btn btn-dark"; btn.disabled = true; btn.onclick = checkAnswer; combat.selIdx = null;
+    }
+
+    function selectOpt(idx) {
+        playSound('click'); if(combat.selIdx !== null && document.getElementById(`opt-${combat.selIdx}`).classList.contains('wrong')) return;
+        combat.selIdx = idx; document.querySelectorAll('.option').forEach(c => c.classList.remove('selected')); document.getElementById(`opt-${idx}`).classList.add('selected');
+        const btn = document.getElementById('btn-check'); btn.disabled = false; btn.className = "btn btn-blue";
+    }
+
+    function usePotion() { playSound('click'); if(state.potions <= 0) return alert("Sin pociones."); state.potions--; state.hp = Math.min(state.maxHp, state.hp + 50); document.getElementById('combat-hp').innerText = state.hp; document.getElementById('combat-pots').innerText = state.potions; save(); }
+    function useOraculo() { playSound('click'); document.getElementById('btn-hint').disabled = true; }
+
+    function checkAnswer() {
+        playSound('click'); const q = combat.node.questions[combat.qIndex]; const el = document.getElementById(`opt-${combat.selIdx}`); const btn = document.getElementById('btn-check');
+        if(btn.innerText === "CONTINUAR") {
+            combat.qIndex++;
+            if(combat.qIndex >= combat.node.questions.length) { if(!combat.isDone) finishNode(combat.node); else fleeCombat(); } 
+            else renderQuestion(); return;
+        }
+
+        if(combat.selIdx === q.correct) {
+            combat.corrects++;
+            let isCrit = Math.random() < (state.stats.crit * 0.01);
+            if(isCrit) showFloatingText("¡CRÍTICO!", "var(--gold)");
+            el.classList.replace('selected', 'correct'); btn.innerText = "CONTINUAR"; btn.className = "btn btn-green";
+        } else {
+            let isDodge = Math.random() < (state.stats.dodge * 0.01);
+            if(isDodge) {
+                showFloatingText("ESQUIVASTE", "var(--blue)");
+                el.classList.replace('selected', 'wrong'); btn.disabled = true; btn.className = "btn btn-dark"; btn.innerText = "ESQUIVADO"; return;
+            }
+
+            let realDmg = Math.max(1, (combat.node.damagePenalization||20) - Math.floor(state.stats.def/2)); 
+            state.hp -= realDmg; document.getElementById('app-container').classList.add('shake'); setTimeout(()=> document.getElementById('app-container').classList.remove('shake'), 400);
+
+            el.classList.replace('selected', 'wrong'); btn.disabled = true; btn.className = "btn btn-dark"; btn.innerText = "FALLO";
+            document.getElementById('combat-hp').innerText = Math.max(0, state.hp);
+
+            if(state.hp <= 0) { setTimeout(() => { alert("💀 HAS MUERTO."); state.hp = state.maxHp; save(); fleeCombat(); }, 500); } else save();
+        }
+    }
+
+    function finishNode(node) {
+        const w = state.worlds[state.activeW];
+        if(!w.completed.includes(node.id)) {
+            w.completed.push(node.id);
+            if(node.unlocks) node.unlocks.forEach(uid => { if(!w.unlocked.includes(uid)) w.unlocked.push(uid); });
+
+            let multi = 1 + (state.stats.atk * 0.05);
+            let goldGain = Math.floor(node.rewardGold * multi); let xpGain = Math.floor(node.rewardXp * multi);
+            
+            let gemsEarned = (combat.corrects || 0) * 10;
+            state.gold += goldGain; gainXP(xpGain); state.gems += gemsEarned;
+            
+            if(Math.random() < 0.5) state.inventory.m1 = (state.inventory.m1||0)+1; 
+            
+            save(); alert(`🏆 ¡COMPLETADO!\n+${goldGain} Oro | +${xpGain} XP\n💎 +${gemsEarned} Gemas (por aciertos)`); 
+        }
+        combat.active = false; navTo('worlds');
+    }
+
+    function fleeCombat() { 
+        playSound('click');
+        if(combat.active && combat.node && combat.node.type === 'reading' && !combat.isDone) {
+            finishNode(combat.node); return;
+        }
+        combat.active = false; navTo('worlds'); 
+    }
+
+    function gainXP(amt) { state.xp += amt; if(state.xp >= state.maxXp) { state.lvl++; state.sp++; state.xp -= state.maxXp; state.maxXp = Math.floor(state.maxXp * 1.5); recalcStats(); state.hp = state.maxHp; state.en = state.maxEn; } }
+
+    // --- FORJA ITEMS ---
+    function renderCrafting(f) {
+        currFilter = f; document.querySelectorAll('#screen-crafting .btn-dark, #screen-crafting .btn-blue').forEach(b => b.className='btn btn-dark'); document.getElementById('filter-'+f).className='btn btn-blue';
+        const c = document.getElementById('craft-list');
+        c.innerHTML = Object.values(gearDB).filter(g => g.t === f).map(g => {
+            let canCraft = Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v); let isEq = state.equipment[g.t] === g.id;
+            let costHTML = Object.entries(g.cost).map(([k,v]) => { let m=matsDB[k]; let h=state.inventory[k]||0; return `<div style="font-size:10px;"><span style="color:var(--${rColor[m.t]})">${m.icon} ${m.n}</span>: <span style="color:${h>=v?'var(--green)':'var(--red)'}">(${h}/${v})</span></div>`; }).join('');
+            if(g.isConsumable) return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div>${costHTML}</div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">SINTETIZAR</button></div>`;
+            if(state.ownedGear.includes(g.id)) return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div></div><button class="btn ${isEq?'btn-dark':'btn-blue'}" style="width:auto; padding:8px;" onclick="equip('${g.id}')">${isEq?'EQ':'EQUIPAR'}</button></div>`;
+            return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div>${costHTML}</div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">FORJAR</button></div>`;
+        }).join('');
+    }
+    function craft(id) { playSound('click'); const g = gearDB[id]; if(!Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v)) return; Object.entries(g.cost).forEach(([k,v]) => state.inventory[k] -= v); if(!g.isConsumable) state.ownedGear.push(id); else state.inventory[g.gives] = (state.inventory[g.gives]||0)+1; save(); renderCrafting(currFilter); }
+    function equip(id) { playSound('click'); const g = gearDB[id]; state.equipment[g.t] = id; recalcStats(); save(); renderCrafting(currFilter); }
+
+    // --- GACHA CON ANIMACIÓN Y EQUIPOS ---
+    function pullGacha(tier) {
+        playSound('click'); let cost = tier===1?100:tier===2?500:50;
+        if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas 💎."); state.gems -= cost; } else { if(state.gold < cost) return alert("Falta Oro 🟡."); state.gold -= cost; }
         
-        s.lvl = s.lvl || 1;
-        s.exp = s.exp || 0;
-        s.gold = s.gold || 0;
-        s.diamonds = s.diamonds || 0;
-        s.prestige = s.prestige || 0;
-        s.mana = s.mana || 10;
-        s.atk = s.atk || 10;
-        s.timeOffset = s.timeOffset || 0;
-        s.objective = s.objective || "Objetivo: Menor tiempo posible";
-        s.races = s.races || [];
-        s.diaClaimedToday = s.diaClaimedToday || false;
-        s.dailies = (s.dailies && s.dailies.length > 0) ? s.dailies : [{name: "Entrenamiento Físico", done: false}];
-        s.dailiesCompletedToday = s.dailiesCompletedToday || 0; 
-        s.dailySacrificed = s.dailySacrificed || false;
-        s.storyClaimed = s.storyClaimed || Array(10).fill(false);
-        s.potions = s.potions || { expB: 1.0 };
-        s.potionInv = s.potionInv || {};
-        s.mats = s.mats || {};
-        ALL_MATS.forEach(m => { if(s.mats[m[0]] === undefined) s.mats[m[0]] = 0; });
-        s.weapons = (s.weapons && s.weapons.length > 0) ? s.weapons : [ALL_WEAPONS[0]];
-        s.armors = s.armors || [];
-        s.activeWeps = s.activeWeps || ['w_sys_1', null];
-        s.activeArmors = s.activeArmors || {head:null, chest:null, legs:null, acc:null};
-        s.bosses = s.bosses || { 
-            b1: { name: "Duende Ladrón", hp: 500, maxHp: 500, lvl: 1 }, 
-            b2: { name: "Caballero Caído", hp: 5000, maxHp: 5000, lvl: 11 }, 
-            b3: { name: "Dragón de Hueso", hp: 20000, maxHp: 20000, lvl: 21 } 
-        };
-        s.currentTab = s.currentTab || 'home';
-        s.subTabs = s.subTabs || {};
-        s.dailyShopIds = s.dailyShopIds || [];
-
-        const MAX_MANA = () => 10 + (s.lvl * 2);
-        let virtualTime = new Date(); let modalTimer = null; let modalCountdown = 0;
-
-        function rollShop() {
-            let available = SHOP_POOL.filter(x => x.reqLvl <= s.lvl);
-            if(available.length < 4) available = SHOP_POOL.slice(0,4);
-            let shuffled = available.sort(() => 0.5 - Math.random());
-            s.dailyShopIds = shuffled.slice(0, 4).map(x => x.id);
-        }
+        let m = document.getElementById('modal-gacha'); m.style.display = 'flex';
+        let c = document.getElementById('gacha-chest'); c.className = 'chest-anim'; playSound('gacha');
         
-        // Anti-Crash Tienda en el arranque
-        if(s.dailyShopIds.length === 0) rollShop();
-
-        function checkTime() {
-            virtualTime = new Date(Date.now() + s.timeOffset);
-            let msSinceMidnight = virtualTime.getHours()*3600000 + virtualTime.getMinutes()*60000 + virtualTime.getSeconds()*1000;
-            let timeBar = document.getElementById('hud-time-bar');
-            if(timeBar) timeBar.style.width = `${(msSinceMidnight / 86400000) * 100}%`;
-
-            let rem = 86400000 - msSinceMidnight;
-            let h = Math.floor(rem/3600000).toString().padStart(2, '0');
-            let m = Math.floor((rem%3600000)/60000).toString().padStart(2, '0');
-            let sec = Math.floor((rem%60000)/1000).toString().padStart(2, '0');
-            let tStr = `${h}:${m}:${sec}`;
+        setTimeout(() => {
+            m.style.display = 'none'; c.className = '';
+            let r = Math.random(); let msg = "";
             
-            let sc = document.getElementById('sys-countdown');
-            if(sc) sc.innerText = tStr;
-            let shopC = document.getElementById('shop-countdown');
-            if(shopC) shopC.innerText = tStr;
-
-            const strDate = virtualTime.toLocaleDateString();
-            if(s.lastDate !== strDate) { 
-                s.dailySacrificed = false; 
-                s.diaClaimedToday = false;
-                s.dailiesCompletedToday = 0;
-                s.dailies.forEach(d => d.done = false); 
-                s.labCraftsToday = 0;
-                rollShop(); 
-                s.lastDate = strDate; 
-                save(); 
-            }
-        }
-        setInterval(checkTime, 1000);
-
-        function save() { localStorage.setItem(DB_KEY, JSON.stringify(s)); updateHUD(); render(); }
-        
-        function toast(msg, color="var(--sys-blue)") { 
-            const t = document.getElementById('toast'); 
-            if(!t) return;
-            t.innerText = msg; t.style.color = color; t.style.borderColor = color;
-            t.style.opacity = 1; 
-            setTimeout(() => { t.style.opacity = 0; }, 2000); 
-        }
-
-        function getEquipStats() {
-            let w1 = s.weapons.find(x => x.id === s.activeWeps[0]);
-            let w2 = s.weapons.find(x => x.id === s.activeWeps[1]);
-            let atk = (w1?w1.atk:0) + (w2?w2.atk:0);
-
-            let counts = {}; let md = 0;
-            SLOTS.forEach(sl => {
-                let a = s.armors.find(x => x.id === s.activeArmors[sl.id]);
-                if(a) { md += a.manaDiscount; counts[a.setName] = (counts[a.setName]||0) + 1; }
-            });
-
-            // Set Bonus: x2 de maná si tiene las 4
-            for(let setName in counts) {
-                if(counts[setName] === 4) {
-                    let sample = s.armors.find(x => x.setName === setName);
-                    if(sample) md += (sample.manaDiscount * 4); 
+            // 5% a 15% de sacar Equipo Directo!
+            let gearChance = tier === 1 ? 0.05 : tier === 2 ? 0.10 : 0.15;
+            if(Math.random() < gearChance) {
+                let possibleGears = Object.values(gearDB).filter(g => g.r <= tier + 2 && !g.isConsumable && !state.ownedGear.includes(g.id));
+                if(possibleGears.length > 0) {
+                    let won = possibleGears[Math.floor(Math.random() * possibleGears.length)];
+                    state.ownedGear.push(won.id); msg = `¡ÉPICO! Has obtenido Equipo: ${won.icon} ${won.name}`;
+                    save(); alert(`🎁 ¡BOOOM!\n${msg}`); return;
                 }
             }
-            return { atk, manaDiscount: md, setCounts: counts };
-        }
 
-        function gain(type, amount) {
-            let mult = (s.prestige + 1);
-            if(type === 'exp') {
-                s.exp += amount * mult * s.potions.expB;
-                s.potions.expB = 1.0; 
-                let reqExp = EXP_NEEDED[s.lvl];
-                while(s.exp >= reqExp && s.lvl < 10) { 
-                    s.exp -= reqExp; s.lvl++; s.atk += 10; s.mana = MAX_MANA(); 
-                    showModal("✨ TIER AUMENTADO", `TIER ${TIERS[s.lvl]} ALCANZADO`, "var(--sys-blue)"); 
-                    reqExp = EXP_NEEDED[s.lvl]; 
-                }
-                if(s.lvl >= 10) { s.lvl = 10; s.exp = EXP_NEEDED[9]; }
-                toast(`+${Math.floor(amount)} EXP`, "var(--sys-purple)");
-            }
-            if(type === 'gold') { s.gold += amount * mult; toast(`+${Math.floor(amount)} G`, "var(--gold)"); }
-            if(type === 'dia') { s.diamonds += amount; toast(`+${amount} Diamantes`, "var(--dia)"); }
-            save();
-        }
+            if(tier === 1) { if(r<0.6) { state.inventory.m1=(state.inventory.m1||0)+3; msg="3x Hierro"; } else { state.inventory.m4=(state.inventory.m4||0)+1; msg="1x Cristal Oscuro"; } }
+            else if (tier === 2) { if(r<0.5) { state.inventory.m4=(state.inventory.m4||0)+3; msg="3x Cristal"; } else { state.inventory.m10=(state.inventory.m10||0)+1; msg="1x Alma Demonio"; } }
+            else { if(r<0.5) { state.inventory.m10=(state.inventory.m10||0)+3; msg="3x Alma Demonio"; } else { state.inventory.m12=(state.inventory.m12||0)+1; msg="1x Escama Mítica 🐉"; } }
+            save(); alert(`📦 Botín: ${msg}`);
+        }, 1200);
+    }
 
-        function updateHUD() {
-            document.getElementById('hud-tier').innerText = TIERS[s.lvl] || s.lvl;
-            document.getElementById('hud-next-tier').innerText = s.lvl >= 10 ? "PRESTIGIO DISPONIBLE" : `Siguiente: ${TIERS[s.lvl+1]}`;
-            document.getElementById('hud-gold').innerText = Math.floor(s.gold);
-            document.getElementById('hud-dia').innerText = s.diamonds;
-            document.getElementById('hud-prestige').innerText = `Ascensión ${s.prestige}`;
-            
-            let reqExp = EXP_NEEDED[s.lvl] || 100000;
-            document.getElementById('hud-exp-bar').style.width = `${(s.exp/reqExp)*100}%`;
-            document.getElementById('hud-exp-txt').innerText = `${Math.floor(s.exp)}/${reqExp}`;
-            document.getElementById('hud-mana-bar').style.width = `${(s.mana/MAX_MANA())*100}%`;
-            document.getElementById('hud-mana-txt').innerText = `${Math.floor(s.mana)}/${MAX_MANA()}`;
+    function showFloatingText(txt, col) { const el = document.createElement('div'); el.className = 'floating-text'; el.innerText = txt; el.style.color = col; el.style.left = (window.innerWidth / 2 - 40) + 'px'; el.style.top = (window.innerHeight / 2 - 50) + 'px'; document.body.appendChild(el); setTimeout(() => el.remove(), 1000); }
 
-            const bt = document.getElementById('hud-bonus-txt');
-            if(s.potions.expB > 1.0) { bt.classList.remove('hidden'); bt.innerText = `✨ EXP x${s.potions.expB}`; } 
-            else { bt.classList.add('hidden'); }
-
-            ['lab', 'dungeon', 'forge', 'shop'].forEach((id, idx) => {
-                const btn = document.getElementById(`nav-${id}`);
-                if(btn) {
-                    if(s.lvl >= [2,3,4,1][idx]) btn.classList.remove('opacity-40');
-                    else btn.classList.add('opacity-40');
-                }
-            });
-        }
-
-        function showModal(title, desc, color="var(--sys-blue)") {
-            clearInterval(modalTimer);
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-title').style.color = color;
-            document.getElementById('modal-desc').innerHTML = desc;
-            document.getElementById('modal-glow').style.backgroundColor = color;
-            
-            const m = document.getElementById('modal');
-            m.classList.remove('hidden'); m.style.display = 'flex';
-            
-            modalCountdown = 5;
-            document.getElementById('modal-timer').innerText = modalCountdown;
-            modalTimer = setInterval(() => {
-                modalCountdown--;
-                document.getElementById('modal-timer').innerText = modalCountdown;
-                if(modalCountdown <= 0) closeModal();
-            }, 1000);
-        }
-
-        function closeModal() { clearInterval(modalTimer); document.getElementById('modal').classList.add('hidden'); }
-
-        function runRace() {
-            let m = parseInt(document.getElementById('in-min').value) || 0;
-            let sc = parseInt(document.getElementById('in-sec').value) || 0;
-            let tot = (m * 60) + sc;
-            if(tot > 0) {
-                s.races.push({val: tot, date: Date.now()});
-                gain('exp', 1500); 
-                gain('gold', 3000); 
-                if(!s.diaClaimedToday){ gain('dia', 300); s.diaClaimedToday = true; } 
-                toast('CARRERA REGISTRADA', 'var(--sys-blue)'); 
-                save(); // Refresca automáticamente la gráfica
-            } else {
-                toast('Introduce tiempo', 'var(--sys-red)');
-            }
-        }
-
-        function generateLineChart() {
-            if(!s.races || s.races.length < 2) return `<div class="text-[10px] text-center opacity-50 py-10 uppercase tracking-widest text-[var(--sys-blue)] border border-dashed border-[var(--sys-blue)]/30 rounded-xl mt-4">Aparece a partir de 2 carreras</div>`;
-            
-            let max = Math.max(...s.races.map(r => r.val));
-            let min = Math.min(...s.races.map(r => r.val));
-            let range = (max - min) || 1;
-            
-            let w = 100; let h = 60; 
-            let points = s.races.map((r, i) => {
-                let x = (i / (s.races.length - 1)) * w;
-                let y = h - ((r.val - min) / range * (h-10) + 5);
-                return `${x},${y}`;
-            }).join(' ');
-
-            let sDate = new Date(s.races[0].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
-            let eDate = new Date(s.races[s.races.length-1].date).toLocaleDateString(undefined, {month:'numeric', day:'numeric'});
-
-            return `
-            <div class="relative w-full h-[120px] flex items-end mt-6 mb-6 border-l border-b border-[var(--sys-blue)]/50 pb-4 pl-8">
-                <div class="absolute left-0 top-0 bottom-4 flex flex-col justify-between text-[8px] text-[var(--sys-blue)] font-sys">
-                    <span>${Math.ceil(max/60)}m</span>
-                    <span>${Math.floor(min/60)}m</span>
-                </div>
-                <svg viewBox="0 0 ${w} ${h}" class="chart-svg" preserveAspectRatio="none"><polyline points="${points}"/></svg>
-                <div class="absolute bottom-[-16px] left-8 right-0 flex justify-between text-[8px] text-[var(--sys-blue)] font-sys">
-                    <span>${sDate}</span><span>${eDate}</span>
-                </div>
-            </div>`;
-        }
-
-        function exploreAbyss(tierLvl) {
-            let allDone = s.dailies.length > 0 && s.dailies.every(d => d.done);
-            if(!allDone) return toast("Requiere Diarias Completadas", "var(--sys-red)");
-            if(s.dailySacrificed) return toast("Ya sacrificado hoy", "var(--sys-red)");
-            
-            s.dailySacrificed = true;
-            let min = (tierLvl-1)*12; let max = min + 11;
-            let lootText = "";
-            for(let i=0; i<3; i++) {
-                let mId = ALL_MATS[Math.floor(Math.random()*(max-min+1))+min];
-                s.mats[mId[0]] += 2; lootText += `${mId[1]} 2x ${mId[2]}<br>`;
-            }
-            showModal("🎒 EXPLORACIÓN", `Has sacrificado tus Diarias.<br><br>Botín obtenido:<br>${lootText}`, "var(--sys-purple)");
-            save();
-        }
-
-        function attackBoss(bId, cost, namesArray) {
-            let b = s.bosses[bId];
-            let eq = getEquipStats();
-            let finalCost = Math.max(1, cost * (1 - (eq.manaDiscount/100)));
-            if(s.mana < finalCost) return toast("Maná Insuficiente", "var(--sys-red)");
-            
-            s.mana -= finalCost;
-            b.hp -= (s.atk + eq.atk + (s.lvl*5));
-            if(b.hp <= 0) {
-                let e = cost * 1000; let g = cost * 5000;
-                b.lvl++; b.maxHp = Math.floor(b.maxHp * 1.5); b.hp = b.maxHp;
-                b.name = namesArray[Math.min(b.lvl-1, namesArray.length-1)] || namesArray[namesArray.length-1];
-                showModal("☠️ JEFE DERROTADO", `+${e} EXP / +${g}G`, "var(--sys-red)");
-                gain('exp', e); gain('gold', g);
-            }
-            save();
-        }
-
-        function pullGacha(type) {
-            if(s.diamonds < 160) return toast("Faltan 160 Diamantes", "var(--sys-red)");
-            s.diamonds -= 160;
-            
-            let r = Math.random() * 100;
-            let targetTiers = []; let color = ""; let rank = "";
-            if(r < 60) { targetTiers = [1,2,3,4,5]; color = "var(--sys-blue)"; rank = "Tier I-E (Común)"; }
-            else if(r < 98) { targetTiers = [6,7,8,9]; color = "var(--sys-purple)"; rank = "Tier D-A (Épico)"; }
-            else { targetTiers = [10]; color = "var(--gold)"; rank = "Tier S (Legendario)"; }
-
-            let pool = type === 'W' ? ALL_WEAPONS : ALL_ARMORS;
-            let valid = pool.filter(x => targetTiers.includes(x.reqTier));
-            if(valid.length === 0) valid = pool; 
-            
-            let item = Object.assign({}, valid[Math.floor(Math.random()*valid.length)]);
-            item.id = `g_${Date.now()}`;
-            if(type === 'W') s.weapons.push(item); else s.armors.push(item);
-            
-            showModal(`🔮 GACHA: ${rank}`, `Obtenido:<br><br><span style="color:${color}; font-size:16px; font-weight:bold; letter-spacing:2px;">${item.name}</span><br><br>Tier ${TIERS[item.reqTier]}`, color);
-            save();
-        }
-
-        function nav(tab) { s.currentTab = tab; save(); }
-        function setSubTab(st) { s.subTabs[s.currentTab] = st; save(); }
-
-        function render() {
-            const mc = document.getElementById('main-content'); let h = ""; 
-            const t = s.currentTab;
-
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                let sp = b.querySelector('span:last-child');
-                if(sp) sp.classList.remove('text-[var(--sys-blue)]');
-            });
-            let activeNav = document.getElementById(`nav-${t}`);
-            if(activeNav) {
-                let sp = activeNav.querySelector('span:last-child');
-                if(sp) sp.classList.add('text-[var(--sys-blue)]');
-            }
-
-            if(t === 'home') {
-                const st = s.subTabs[t] || 'main';
-                h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl">
-                    <button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Campamento</button>
-                    <button onclick="setSubTab('story')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='story'?'bg-[var(--gold)]/20 text-[var(--gold)]':'opacity-50'}">Historia</button>
-                </div>`;
-
-                if(st === 'main') {
-                    h += `<div class="glass-panel p-5 mb-4 border-[var(--sys-blue)]/30">
-                            <div class="flex items-center mb-4 bg-[var(--sys-blue)]/5 rounded border-b border-[var(--sys-blue)]/30">
-                                <span class="ml-2 text-[var(--sys-blue)]">🎯</span>
-                                <input type="text" value="${s.objective}" onchange="s.objective=this.value; save();" class="w-full bg-transparent text-[10px] text-[var(--sys-blue)] uppercase tracking-widest font-bold outline-none editable-objective text-center" placeholder="Escribe tu objetivo aquí...">
-                                <span class="mr-2 text-[var(--sys-blue)] opacity-50 text-[10px]">✏️ EDITAR</span>
-                            </div>
-                            <div class="flex gap-2 items-center mb-2">
-                                <input id="in-min" type="number" placeholder="Min" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--sys-blue)] outline-none text-white">
-                                <input id="in-sec" type="number" placeholder="Seg" class="w-1/2 bg-black/50 border border-[var(--border-glass)] rounded-xl px-4 py-3 text-sm focus:border-[var(--sys-blue)] outline-none text-white">
-                                <button onclick="runRace()" class="btn-aaa px-6 py-3 rounded-xl font-bold">GO</button>
-                            </div>
-                            ${generateLineChart()}
-                            <div class="mt-4 max-h-[120px] overflow-y-auto pr-2 space-y-1 border-t border-[var(--border-glass)] pt-2">`;
-                            
-                            if(!s.races || s.races.length === 0) { h += `<p class="text-[9px] opacity-50">Sin registros</p>`; }
-                            else {
-                                s.races.slice().reverse().forEach(r => {
-                                    h += `<div class="flex justify-between items-center text-[10px] py-2 border-b border-[var(--border-glass)] text-gray-300">
-                                        <span>${new Date(r.date).toLocaleDateString()}</span>
-                                        <span>${Math.floor(r.val/60)}m ${r.val%60}s</span>
-                                    </div>`;
-                                });
-                            }
-                    h += `</div></div>`;
-
-                    let allDone = s.dailies.length > 0 && s.dailies.every(d => d.done);
-                    h += `<div class="glass-panel p-5 mb-4">
-                        <h2 class="text-[10px] font-sys text-[var(--sys-purple)] mb-3 uppercase tracking-widest flex justify-between">
-                            <span>Misiones Diarias</span> <span class="text-[var(--sys-red)]">${s.dailies.filter(d=>d.done).length}/${s.dailies.length}</span>
-                        </h2>`;
-                    
-                    if(s.dailySacrificed) {
-                        h += `<div class="w-full py-4 rounded-xl border border-[var(--sys-red)]/50 bg-[var(--sys-red)]/20 text-[var(--sys-red)] text-center text-xs font-bold uppercase tracking-widest">SACRIFICADO AL ABISMO</div>`;
-                    } else {
-                        s.dailies.forEach((d, i) => {
-                            let color = d.done ? 'text-[var(--sys-blue)] border-[var(--sys-blue)]/50' : 'text-gray-300 border-[var(--border-glass)]';
-                            h += `<div class="flex gap-2 items-center mb-2 bg-black/30 p-2 rounded-lg border ${color}">
-                                <input type="text" value="${d.name}" onchange="s.dailies[${i}].name=this.value; save();" class="w-full bg-transparent outline-none text-xs ${d.done?'opacity-50 line-through text-[var(--sys-blue)]':'text-gray-300'}" ${d.done?'disabled':''}>
-                                ${!d.done ? `<button onclick="if(s.dailiesCompletedToday < 3){ s.dailiesCompletedToday++; gain('exp', 1000); gain('gold',5000); gain('dia',50); toast('Misión Completada'); } else { toast('Límite: 3/Día', 'var(--sys-red)'); } s.dailies[${i}].done=true; save();" class="text-[var(--sys-blue)] text-xs px-2 py-1 bg-[var(--sys-blue)]/10 rounded border border-[var(--sys-blue)]/50">✔️</button>` : ''}
-                                <button onclick="if(s.dailies[${i}].done) { toast('Solo al reinicio', 'var(--sys-red)'); } else { s.dailies.splice(${i},1); save(); }" class="text-[var(--sys-red)] text-xs px-2 py-1 bg-[var(--sys-red)]/10 rounded border border-[var(--sys-red)]/50">❌</button>
-                            </div>`;
-                        });
-                        
-                        let btns = `<div class="flex gap-2 mt-3">`;
-                        if(s.dailies.length < 3) btns += `<button onclick="s.dailies.push({name:'Nueva Misión', done:false}); save();" class="flex-1 py-2 border border-[var(--border-glass)] rounded bg-black/30 text-xs font-bold text-gray-400 hover:bg-white/5">+</button>`;
-                        if(allDone) btns += `<div class="flex-1 py-2 border border-[var(--sys-blue)] bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] text-center text-[10px] font-bold uppercase tracking-widest rounded flex items-center justify-center">COMPLETADAS</div>`;
-                        btns += `</div>`;
-                        h += btns;
-                    }
-                    h += `</div>`;
-                    
-                    h += `<div class="glass-panel p-4 mb-4">
-                        <h2 class="text-[10px] font-sys text-[var(--sys-blue)] mb-3 uppercase tracking-widest border-b border-[var(--border-glass)] pb-2">Materiales (36)</h2>
-                        <div class="grid grid-cols-4 gap-2 text-[9px] text-center">`;
-                    ALL_MATS.forEach(m => {
-                        let qty = s.mats[m[0]] || 0;
-                        let op = qty > 0 ? 'opacity-100' : 'opacity-30 grayscale';
-                        h += `<div onclick="showModal('${m[1]} ${m[2]}', '${m[3]}<br><br>Cantidad poseída: ${qty}', 'white', 'CERRAR')" class="bg-black/60 p-2 rounded border border-gray-800 ${op} active:scale-95 transition-transform flex flex-col items-center justify-center min-h-[60px]">
-                            <span class="text-lg mb-1">${m[1]}</span><span class="font-bold text-white">${qty}</span>
-                        </div>`;
-                    });
-                    h += `</div></div>`;
-                } else if(st === 'story') {
-                    STORY_TEXT.forEach((txt, i) => {
-                        const reqLvl = i + 1;
-                        if(s.lvl >= reqLvl) {
-                            let isClaimed = s.storyClaimed[i];
-                            let extra = !isClaimed ? 'story-claimable' : 'border-[var(--border-glass)]';
-                            h += `<div onclick="if(!${isClaimed}){ s.storyClaimed[${i}]=true; gain('gold', 10000); save(); }" class="glass-panel p-4 mb-3 transition-all ${extra}">
-                                <div class="flex justify-between items-center mb-2"><h3 class="text-[10px] font-sys text-[var(--gold)] uppercase tracking-wider">Capítulo ${reqLvl}: ${STORY_TITLES[i]}</h3>${isClaimed?'<span class="text-[8px] text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-2 py-1 rounded">LEÍDO</span>':'<span class="text-[8px] text-[var(--gold)] animate-pulse font-bold">RECLAMAR 10k G</span>'}</div>
-                                <p class="text-[11px] text-gray-300 italic leading-relaxed">"${txt}"</p>
-                            </div>`;
-                        } else {
-                            h += `<div class="glass-panel p-4 mb-3 opacity-30 text-center border-dashed border-gray-800"><p class="text-[10px] uppercase tracking-widest text-[var(--sys-red)]">Requiere Tier ${TIERS[reqLvl]} <span class="text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`;
-                        }
-                    });
-                }
-            }
-            else if(t === 'lab') {
-                if(s.lvl < 2) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier H<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
-                    const st = s.subTabs[t] || 'main';
-                    h += `<div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl"><button onclick="setSubTab('main')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='main'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Alquimia Base</button><button onclick="${s.lvl>=4?`setSubTab('sec')`:`toast('Requiere Tier F', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='sec'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Alquimia Oscura</button><button onclick="setSubTab('inv')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='inv'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Pociones</button></div>`;
-                    
-                    if(st === 'main') {
-                        h += `<div class="glass-panel p-5 text-center">
-                            <h3 class="font-sys text-[var(--sys-blue)] text-sm mb-2 uppercase tracking-widest flex justify-between items-center"><span>Destilación Básica</span> <span class="text-[10px] bg-black px-2 py-1 rounded text-[var(--sys-blue)] border border-[var(--sys-blue)]/30">${s.labCraftsToday}/3 Hoy</span></h3>
-                            <p class="text-[10px] opacity-70 mb-4 text-left text-gray-300">Las pociones creadas se guardarán en tu inventario para usarlas cuando quieras.</p>`;
-                            
-                        let potions = [
-                            { n: "Poción Menor (x1.2)", m: 1.2, cost: {m11:2}, req: 2 },
-                            { n: "Poción Verde (x1.5)", m: 1.5, cost: {m11:3, m13:1}, req: 3 },
-                            { n: "Poción Fuerte (x2.0)", m: 2.0, cost: {m13:2, m15:1}, req: 4 },
-                            { n: "Poción Mística (x2.5)", m: 2.5, cost: {m24:2, m9:1}, req: 5 },
-                            { n: "Poción Maestra (x3.0)", m: 3.0, cost: {m24:5, m23:1}, req: 7 }
-                        ];
-
-                        potions.forEach(p => {
-                            if(s.lvl >= p.req) {
-                                h += `<div class="bg-black/50 p-3 rounded-xl border border-[var(--border-glass)] mb-2 flex justify-between items-center">
-                                    <p class="text-[10px] font-bold text-gray-200">${p.n}</p>
-                                    <button onclick="if(s.labCraftsToday<3){ let ok=true; for(let m in ${JSON.stringify(p.cost).replace(/"/g, "'")}){if(s.mats[m]<${JSON.stringify(p.cost).replace(/"/g, "'")}[m]) ok=false;} if(!ok) return toast('Faltan Materiales','var(--sys-red)'); for(let m in ${JSON.stringify(p.cost).replace(/"/g, "'")}){s.mats[m]-=${JSON.stringify(p.cost).replace(/"/g, "'")}[m];} s.labCraftsToday++; s.potionInv['${p.n}']=(s.potionInv['${p.n}']||0)+1; toast('Guardada en Inventario', 'var(--sys-blue)'); save(); } else toast('Límite 3/Día', 'var(--sys-red)');" class="bg-[var(--sys-blue)]/10 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-3 py-2 rounded text-[9px] font-bold uppercase">Crear</button>
-                                </div>`;
-                            } else {
-                                h += `<div class="bg-black/20 p-3 rounded-xl border border-gray-800 mb-2 text-left opacity-40"><p class="text-[10px] font-bold text-gray-500">🔒 Requiere Tier ${TIERS[p.req]} <span class="text-[8px]">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`;
-                            }
-                        });
-                        h += `</div>`;
-                    } else if(st === 'sec') {
-                        h += `<div class="glass-panel p-5 border-[var(--sys-purple)]/30 text-center">
-                            <h3 class="font-sys text-[var(--sys-purple)] text-sm mb-4 uppercase tracking-widest">Magia Prohibida</h3>
-                            <div class="bg-black/50 p-4 rounded-xl border border-gray-800 mb-4">
-                                <p class="text-[11px] font-bold text-[var(--sys-purple)] mb-3">Poción Oscura (x5.0 EXP)</p>
-                                <button onclick="if(s.mats.m22>=5 && s.mats.m32>=5){ s.mats.m22-=5; s.mats.m32-=5; s.potionInv['Poción Oscura (x5.0)']= (s.potionInv['Poción Oscura (x5.0)']||0)+1; toast('Destilada en Inventario', 'var(--sys-purple)'); save(); } else toast('Faltan Materiales', 'var(--sys-red)');" class="w-full py-3 bg-[var(--sys-purple)]/10 border border-[var(--sys-purple)]/50 rounded text-[10px] font-bold text-[var(--sys-purple)] uppercase tracking-widest">Crear (Tier A)</button>
-                            </div>
-                            <div class="bg-black/50 p-4 rounded-xl border border-[var(--sys-purple)]/30 mb-4">
-                                <p class="text-[11px] font-bold text-white mb-3">Lágrima Abismo (x10.0 EXP)</p>
-                                <button onclick="if(s.mats.m34>=1 && s.mats.m23>=10 && s.mats.m31>=10){ s.mats.m34-=1; s.mats.m23-=10; s.mats.m31-=10; s.potionInv['Lágrima Abismo (x10.0)']= (s.potionInv['Lágrima Abismo (x10.0)']||0)+1; toast('Lágrima en Inventario', 'var(--sys-purple)'); save(); } else toast('Faltan Materiales', 'var(--sys-red)');" class="w-full py-3 bg-white/10 border border-white/50 rounded text-[10px] font-bold text-white uppercase tracking-widest">Crear (Tier S)</button>
-                            </div>
-                        </div>`;
-                    } else if(st === 'inv') {
-                        h += `<div class="glass-panel p-4 h-[60vh] overflow-y-auto"><h3 class="font-sys text-[var(--sys-blue)] text-sm mb-4 uppercase tracking-widest border-b border-[var(--border-glass)] pb-2">Inventario de Pociones</h3>`;
-                        let has = false;
-                        for(let p in s.potionInv) {
-                            if(s.potionInv[p] > 0) {
-                                has = true; let mult = parseFloat(p.match(/x(\d+\.\d+)/)[1]) || 1.2;
-                                h += `<div class="flex justify-between items-center bg-black/40 p-3 rounded mb-2 border border-[var(--border-glass)]">
-                                    <div><p class="text-xs font-bold text-[var(--sys-blue)]">${p}</p><p class="text-[9px] text-gray-400 mt-1">Cantidad: <span class="text-[var(--sys-blue)] font-bold">${s.potionInv[p]}</span></p></div>
-                                    <button onclick="if(s.potions.expB>1.0){ if(!confirm('Ya tienes un efecto de poción activo y lo vas a reemplazar. ¿Continuar?')) return; } s.potionInv['${p}']--; s.potions.expB=${mult}; toast('Poción Activada', 'var(--sys-blue)'); save();" class="bg-[var(--sys-blue)]/20 text-[var(--sys-blue)] border border-[var(--sys-blue)]/50 px-4 py-2 rounded text-xs font-bold uppercase">Tomar</button>
-                                </div>`;
-                            }
-                        }
-                        if(!has) h += `<p class="text-[10px] text-gray-500 text-center uppercase tracking-widest py-10 border border-dashed border-gray-800 rounded-xl">Inventario vacío</p>`;
-                        h += `</div>`;
-                    }
-                }
-            }
-            else if(t === 'dungeon') {
-                if(s.lvl < 3) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier G<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
-                    const st = s.subTabs[t] || 'd1';
-                    h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
-                        <button onclick="setSubTab('d1')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d1'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Mazmorra</button>
-                        <button onclick="${s.lvl>=5?`setSubTab('d2')`:`toast('Requiere Tier E', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d2'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Maldita</button>
-                        <button onclick="${s.lvl>=7?`setSubTab('d3')`:`toast('Requiere Tier C', 'var(--sys-red)')`}" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='d3'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Abismo</button>
-                    </div>`;
-
-                    let cfg = { id:'b1', arr: BOSSES_T1, mCost: 2, tLvl: 1, col: 'var(--sys-blue)' };
-                    if(st==='d2') cfg = { id:'b2', arr: BOSSES_T2, mCost: 4, tLvl: 2, col: 'var(--sys-red)' };
-                    if(st==='d3') cfg = { id:'b3', arr: BOSSES_T3, mCost: 6, tLvl: 3, col: 'var(--sys-purple)' };
-
-                    let b = s.bosses[cfg.id]; let p = (b.hp / b.maxHp) * 100;
-                    let eq = getEquipStats(); let finalCost = Math.max(1, cfg.mCost * (1 - (eq.manaDiscount/100)));
-
-                    h += `<div class="glass-panel p-6 text-center border-[${cfg.col}]/30">
-                        <div class="mb-8">
-                            <h3 class="font-sys text-[${cfg.col}] text-xl font-bold uppercase mb-1 drop-shadow-[0_0_8px_${cfg.col}]">${b.name}</h3>
-                            <p class="text-[9px] opacity-60 mb-4 uppercase tracking-widest text-[var(--sys-blue)]">Ataque Total: ${s.atk + eq.atk + (s.lvl*5)}</p>
-                            <div class="h-8 w-full bg-black rounded-full border border-[${cfg.col}]/50 relative overflow-hidden mb-4 shadow-inner">
-                                <div class="progress-bar h-full bg-[${cfg.col}]/80" style="width: ${p}%"></div>
-                                <div class="absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase text-white drop-shadow-md">HP: ${b.hp} / ${b.maxHp}</div>
-                            </div>
-                            <button onclick="attackBoss('${cfg.id}', ${cfg.mCost}, [${cfg.arr.map(x=>`'${x}'`).join(',')}])" class="w-full py-4 rounded-xl border border-[${cfg.col}]/50 bg-[${cfg.col}]/10 text-[${cfg.col}] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(0,0,0,0.5)]">⚔️ ATACAR (${finalCost.toFixed(1)} Maná)</button>
-                        </div>
-                        <hr class="border-gray-800 mb-6">
-                        <div>
-                            <h4 class="text-xs font-bold text-[var(--sys-blue)] mb-2 uppercase tracking-widest">Exploración Autónoma</h4>
-                            <p class="text-[9px] text-[var(--sys-blue)] opacity-60 mb-4 leading-relaxed">No gasta Maná. Sacrifica TODAS tus Diarias creadas a cambio de 3 materiales aleatorios de este Tier.</p>
-                            <button onclick="exploreAbyss(${cfg.tLvl})" class="w-full py-3 rounded-xl border border-gray-600 bg-gray-900 text-gray-300 text-[10px] font-bold uppercase tracking-widest ${(s.dailies.length>0 && s.dailies.every(d=>d.done)) && !s.dailySacrificed?'':'opacity-30'}">⛺ EXPLORAR (Req. Diarias Completadas)</button>
-                        </div>
-                    </div>`;
-                }
-            }
-            else if(t === 'forge') {
-                if(s.lvl < 4) { h = `<div class="glass-panel p-10 text-center"><span class="text-4xl opacity-50">🔒</span><p class="text-[var(--sys-red)] mt-2 text-xs uppercase tracking-widest">Requiere Tier F<br><span class="text-[8px] text-gray-500">(Eres Tier ${TIERS[s.lvl]})</span></p></div>`; } else {
-                    const st = s.subTabs[t] || 'wep';
-                    h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
-                        <button onclick="setSubTab('wep')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='wep'?'bg-white/10 text-[var(--sys-blue)]':'opacity-50'}">Armas</button>
-                        <button onclick="setSubTab('arm')" class="flex-1 py-2 rounded-lg text-[10px] uppercase font-bold ${st==='arm'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Armaduras</button>
-                    </div>`;
-                    
-                    if(st === 'wep') {
-                        let w1 = s.weapons.find(x=>x.id===s.activeWeps[0]); let w2 = s.weapons.find(x=>x.id===s.activeWeps[1]);
-                        h += `<div class="glass-panel p-4 mb-4 border-[var(--sys-blue)]/30"><p class="text-[10px] text-[var(--sys-blue)] font-bold uppercase tracking-widest border-b border-[var(--sys-blue)]/30 pb-2 mb-2">Equipado (Máx 2)</p>
-                        <div class="flex justify-between text-xs text-gray-300"><span class="truncate w-1/2">${w1?w1.name:'Vacio'}</span><span class="truncate w-1/2 text-right">${w2?w2.name:'Vacio'}</span></div></div>`;
-
-                        h += `<div class="glass-panel p-4 max-h-[50vh] overflow-y-auto pr-2"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-3 border-b border-gray-800 pb-2">Inventario de Armas</p>`;
-                        s.weapons.forEach((w) => {
-                            let isW1 = s.activeWeps[0] === w.id; let isW2 = s.activeWeps[1] === w.id; let active = isW1 || isW2;
-                            h += `<div class="bg-black/60 border ${active?'border-[var(--sys-blue)] shadow-[0_0_8px_var(--sys-blue)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-3">
-                                <div class="flex justify-between items-center mb-2">
-                                    <p class="text-xs font-bold ${active?'text-[var(--sys-blue)]':'text-gray-300'}">${w.name}</p>
-                                    <div class="flex gap-1">
-                                        <button onclick="s.activeWeps[0]='${w.id}'; if(s.activeWeps[1]==='${w.id}') s.activeWeps[1]=null; save();" class="text-[8px] font-bold border px-2 py-1 rounded ${isW1?'bg-[var(--sys-blue)] text-black border-[var(--sys-blue)]':'border-gray-600 text-gray-400'}">SLOT 1</button>
-                                        <button onclick="s.activeWeps[1]='${w.id}'; if(s.activeWeps[0]==='${w.id}') s.activeWeps[0]=null; save();" class="text-[8px] font-bold border px-2 py-1 rounded ${isW2?'bg-[var(--sys-blue)] text-black border-[var(--sys-blue)]':'border-gray-600 text-gray-400'}">SLOT 2</button>
-                                    </div>
-                                </div>
-                                <p class="text-[9px] text-gray-400 uppercase tracking-widest">ATK: <span class="text-white">${w.atk}</span> | Tier ${TIERS[w.reqTier]}</p>
-                            </div>`;
-                        });
-                        h += `</div>`;
-                    } else {
-                        let slots = [ {id:'head', n:'Casco', v:s.activeArmors.head}, {id:'chest', n:'Peto', v:s.activeArmors.chest}, {id:'legs', n:'Grebas', v:s.activeArmors.legs}, {id:'acc', n:'Amuleto', v:s.activeArmors.acc} ];
-                        let eq = getEquipStats();
-                        
-                        h += `<div class="glass-panel p-4 mb-4 border-[var(--gold)]/30"><div class="flex justify-between text-[10px] text-[var(--gold)] font-bold uppercase tracking-widest border-b border-[var(--gold)]/30 pb-2 mb-2"><span>Equipado</span><span>Desc. Maná: <span class="text-white">${eq.manaDiscount}%</span></span></div>
-                        <div class="grid grid-cols-2 gap-2 text-[9px] text-gray-300 text-center">`;
-                        slots.forEach(sl => { let item = s.armors.find(x=>x.id===sl.v); h+=`<div class="bg-black/50 p-2 border border-gray-800 rounded"> <span class="block text-gray-500 mb-1">${sl.n}</span> <span class="truncate font-bold">${item?item.name:'Vacío'}</span></div>`; });
-                        h += `</div>`;
-                        
-                        let setsActivos = Object.entries(eq.setCounts).filter(([_,c])=>c>0).map(([n,c])=>`<span class="${c===4?'text-[var(--gold)] font-bold':'text-gray-400'}">${n} ${c}/4 ${c===4?'(x2)':''}</span>`).join(' | ');
-                        if(setsActivos) h += `<div class="mt-3 text-[9px] uppercase tracking-widest text-center bg-black/30 py-2 border border-[var(--gold)]/20 rounded">${setsActivos}</div>`;
-                        h += `</div>`;
-
-                        h += `<div class="glass-panel p-4 max-h-[40vh] overflow-y-auto pr-2"><p class="text-[10px] text-gray-500 uppercase tracking-widest mb-3 border-b border-gray-800 pb-2">Inventario de Armaduras</p>`;
-                        s.armors.forEach((a) => {
-                            let act = s.activeArmors[a.slot] === a.id;
-                            h += `<div class="bg-black/60 border ${act?'border-[var(--gold)] shadow-[0_0_8px_var(--gold)]':'border-[var(--border-glass)]'} p-3 rounded-xl mb-3">
-                                <div class="flex justify-between items-center mb-2">
-                                    <p class="text-xs font-bold ${act?'text-[var(--gold)]':'text-gray-300'}">${a.name}</p>
-                                    <button onclick="s.activeArmors['${a.slot}']='${a.id}'; save();" class="text-[9px] font-bold border px-3 py-1 rounded ${act?'bg-[var(--gold)] text-black border-[var(--gold)]':'border-gray-600 text-gray-400'} uppercase tracking-widest">${act?'Equipado':'Equipar'}</button>
-                                </div>
-                                <p class="text-[9px] text-gray-400 uppercase tracking-widest">Desc. Maná: <span class="text-[var(--sys-blue)]">${a.manaDiscount}%</span> | Tier ${TIERS[a.reqTier]}</p>
-                            </div>`;
-                        });
-                        if(s.armors.length===0) h += `<p class="text-[10px] opacity-50 text-center py-6 border border-dashed border-gray-700 rounded-xl mt-2">Invoca armaduras en la tienda.</p>`;
-                        h += `</div>`;
-                    }
-                }
-            }
-            else if(t === 'shop') {
-                const st = s.subTabs[t] || 'base';
-                h += `<div class="flex gap-1 mb-4 bg-black/40 p-1 rounded-xl">
-                    <button onclick="setSubTab('base')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='base'?'bg-white/10 text-[var(--gold)]':'opacity-50'}">Tienda</button>
-                    <button onclick="setSubTab('gacW')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='gacW'?'bg-[var(--sys-blue)]/20 text-[var(--sys-blue)]':'opacity-50'}">Gacha Arma</button>
-                    <button onclick="setSubTab('gacA')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='gacA'?'bg-[var(--sys-purple)]/20 text-[var(--sys-purple)]':'opacity-50'}">Gacha Armor</button>
-                    <button onclick="setSubTab('admin')" class="flex-1 py-2 rounded-lg text-[9px] uppercase font-bold ${st==='admin'?'bg-[var(--sys-red)]/20 text-[var(--sys-red)]':'opacity-50'}">Hacker</button>
-                </div>`;
-
-                if(st === 'base') {
-                    h += `<div class="glass-panel p-4 mb-4 border-[var(--gold)]/30"><div class="flex justify-between items-center border-b border-[var(--gold)]/30 pb-2 mb-3"><h2 class="text-[10px] uppercase font-sys text-[var(--gold)]">Ofertas</h2><span class="text-[8px] text-[var(--sys-red)] font-bold tracking-widest" id="shop-countdown">--:--:--</span></div><div class="space-y-2 max-h-[300px] overflow-y-auto pr-1">`;
-                    s.dailyShopIds.forEach(id => {
-                        let item = SHOP_POOL.find(x => x.id === id);
-                        if(item) {
-                            let mInfo = ALL_MATS.find(m => m[0] === item.mat);
-                            h += `<div class="flex justify-between items-center text-[10px] bg-black/40 p-3 rounded border border-gray-800">
-                                <span class="text-gray-200 font-bold">${mInfo[1]} ${item.qty}x ${mInfo[2]}</span>
-                                <button onclick="if(s.gold>=${item.cost}){ s.gold-=${item.cost}; s.mats['${item.mat}']+=${item.qty}; save(); toast('Comprado', 'var(--gold)'); } else toast('Oro Insuficiente', 'var(--sys-red)')" class="text-[var(--gold)] font-bold border border-[var(--gold)]/50 px-3 py-1 rounded bg-[var(--gold)]/10 font-sys">${item.cost}G</button>
-                            </div>`;
-                        }
-                    });
-                    h += `</div></div>`;
-                } else if(st === 'gacW' || st === 'gacA') {
-                    let isW = st === 'gacW';
-                    let col = isW ? 'var(--sys-blue)' : 'var(--sys-purple)';
-                    h += `<div class="glass-panel p-6 text-center border-[${col}]/30">
-                        <span class="text-4xl block mb-4">🔮</span>
-                        <h3 class="font-sys text-[${col}] text-lg font-bold uppercase tracking-widest mb-2">Invocación</h3>
-                        <p class="text-[9px] text-[var(--sys-blue)] opacity-70 mb-6 border-b border-[${col}]/30 pb-4">Probabilidades: < Tier D (60%) | Tier D-A (38%) | Tier S (2%)</p>
-                        <button onclick="pullGacha('${isW?'W':'A'}')" class="w-full py-5 rounded-xl border border-[${col}]/50 bg-[${col}]/10 text-[${col}] font-bold uppercase tracking-widest text-xs shadow-[0_0_15px_${col}]">TIRADA (160 💎)</button>
-                    </div>`;
-                } else {
-                    h += `<div class="border border-red-900/50 bg-black/80 rounded-xl p-4 shadow-inner mb-4"><p class="text-[9px] font-sys text-[var(--sys-red)] mb-3 text-center tracking-widest">HACKER MENU</p>
-                    <div class="flex flex-col gap-2">
-                        <button onclick="s.exp=EXP_NEEDED[9]; s.lvl=10; save(); toast('Max Level', 'var(--sys-blue)');" class="bg-blue-900/40 py-3 rounded-lg text-[10px] border border-blue-500/30 text-[var(--sys-blue)] font-bold uppercase">Nivel 10 (Max)</button>
-                        <button onclick="gain('exp', 50000);" class="bg-purple-900/40 py-3 rounded-lg text-[10px] border border-purple-500/30 text-[var(--sys-purple)] font-bold uppercase">+50,000 EXP</button>
-                        <button onclick="gain('gold', 500000);" class="bg-yellow-900/40 py-3 rounded-lg text-[10px] border border-yellow-500/30 text-[var(--gold)] font-bold uppercase">+500,000 Oro</button>
-                        <button onclick="gain('dia', 5000);" class="bg-[var(--dia)]/20 py-3 rounded-lg text-[10px] border border-[var(--dia)]/50 text-[var(--dia)] font-bold uppercase">+5000 Diamantes</button>
-                        <button onclick="ALL_MATS.forEach(m => s.mats[m[0]]=999); save(); toast('Materiales Max', 'var(--sys-blue)');" class="bg-green-900/40 py-3 rounded-lg text-[10px] border border-green-500/30 text-green-300 font-bold uppercase">Materiales Máximos</button>
-                        <div class="grid grid-cols-2 gap-2 mt-1">
-                            <button onclick="s.timeOffset+=3600000; checkTime(); toast('Reloj: +1 Hora', 'var(--sys-red)')" class="bg-gray-800 py-3 rounded text-[9px] border border-gray-600 text-gray-300 font-bold uppercase">+1H Reloj</button>
-                            <button onclick="if(confirm('¿BORRAR TODO EL PROGRESO?')){ localStorage.removeItem(DB_KEY); location.reload(); }" class="bg-red-900/50 py-3 rounded text-[9px] border border-[var(--sys-red)] text-[var(--sys-red)] font-bold uppercase">Hard Reset</button>
-                        </div>
-                    </div></div>`;
-                }
-
-                h += `<button onclick="if(s.lvl<10) { toast('Requiere Tier S (Eres Tier '+TIERS[s.lvl]+')', 'var(--sys-red)'); return; } if(confirm('¿Ascender?')){ s.prestige++; s.lvl=1; s.exp=0; s.gold=0; s.diamonds=0; s.weapons=[ALL_WEAPONS[0]]; s.armors=[]; s.activeWeps=['w_sys_1',null]; s.activeArmors={head:null,chest:null,legs:null,acc:null}; s.storyClaimed.fill(false); save(); showModal('ASCENSIÓN', 'Has renacido', 'var(--sys-blue)'); }" class="w-full py-5 glass-panel text-xs tracking-widest font-bold uppercase transition-all mt-4 ${s.lvl>=10?'border-[var(--sys-blue)] text-[var(--sys-blue)] shadow-[0_0_15px_var(--sys-blue)]':'opacity-30 border-gray-800 text-gray-500'}">ASCENSIÓN PRESTIGIO</button>`;
-            }
-            mc.innerHTML = h;
-        }
-
-        render();
-        if(s.dailyShopIds.length === 0) rollShop();
-        checkTime();
-    </script>
+    init();
+</script>
 </body>
 </html>
