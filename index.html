@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>LifeQuest AAA: V13 Mina</title>
+    <title>LifeQuest AAA: V14 Estable</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -61,6 +61,7 @@
         .equip-slot.filled { border-style: solid; background: var(--panel); }
         .equip-icon { font-size: 30px; margin-bottom: 5px; }
         .equip-name { font-size: 9px; font-weight: 900; text-transform: uppercase; }
+        .lvl-badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: black; font-size: 10px; padding: 2px 5px; border-radius: 10px; font-weight: 900;}
 
         .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-dark); flex-wrap: wrap;}
         .item-icon { font-size: 30px; background: var(--panel-light); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); }
@@ -199,14 +200,13 @@
                 <div class="equip-slot" id="slot-pet"><div class="equip-icon">🥚</div><div class="equip-name">Mascota</div></div>
             </div>
 
-            <div class="card" style="margin-top:20px; border-color:var(--green); text-align:center;">
-                <h3 style="margin-top:0; color:var(--green); font-weight:900;">🏕️ El Campamento</h3>
-                <p style="font-size:12px; color:var(--text-sub);">Deja la pantalla encendida. Recuperarás 2 HP y 1 EN cada 2 segundos sin hacer nada.</p>
-                <div style="font-size:30px; transition:0.2s;" id="camp-fire">🔥</div>
-            </div>
-
             <h3 style="font-weight: 900; margin-bottom: 10px; margin-top: 20px;">Mochila & Inventario</h3>
             <div id="inventory-list-detailed" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            
+            <div style="margin-top: 40px; text-align: center; border-top: 1px solid var(--border-dark); padding-top: 20px;">
+                <p style="font-size:11px; color:var(--text-sub);">Opciones del Sistema</p>
+                <button class="btn btn-dark" style="border-color:var(--red); color:var(--red);" onclick="hardReset()">⚠️ REINICIAR TODO (BORRAR DATOS) ⚠️</button>
+            </div>
         </div>
     </div>
 
@@ -231,6 +231,10 @@
                 <div class="item-icon">🔥</div><div class="item-details"><div style="font-weight:900;">Precisión (+1% Crit)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-crit">0</span></div></div>
                 <button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('crit')">1 SP</button>
             </div>
+            <div class="list-item">
+                <div class="item-icon">💨</div><div class="item-details"><div style="font-weight:900;">Evasión (+1% Esquivar)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-evasion">0</span></div></div>
+                <button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('evasion')">1 SP</button>
+            </div>
             <button class="btn btn-dark" style="margin-top:20px;" onclick="navTo('home')">VOLVER</button>
         </div>
     </div>
@@ -241,7 +245,7 @@
                 <h2 style="margin:0; font-weight:900; color:var(--cyan); cursor:pointer;" id="world-title" onclick="openWorldsManager()">Mazmorra ▾</h2>
                 <div style="display:flex; gap:5px;">
                     <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openWorldsManager()">🌌 MUNDOS</button>
-                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ JSON</button>
+                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ CARGAR JSON</button>
                 </div>
             </div>
             <div class="node-path" id="map-render"></div>
@@ -294,7 +298,7 @@
                 <h2 style="margin-top:0; color:var(--gold); font-weight:900;">⏳ Ofertas Rotativas</h2>
                 <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="refreshShop(true)">🔄 50 💎</button>
             </div>
-            <p style="font-size:12px; color:var(--text-sub);">Se reinician a medianoche.</p>
+            <p style="font-size:12px; color:var(--text-sub);">Se reinician a medianoche. Pueden contener equipo.</p>
             <div id="daily-shop-list" style="margin-bottom: 30px;"></div>
 
             <h2 style="margin-top:0; color:var(--purple); font-weight:900;">📦 Gacha del Abismo</h2>
@@ -302,6 +306,18 @@
                 <button class="btn btn-dark" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(1)"><span style="font-size:30px;">🪵</span>100 🟡</button>
                 <button class="btn btn-blue" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(2)"><span style="font-size:30px;">🧰</span>500 🟡</button>
                 <button class="btn btn-mythic" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(3)"><span style="font-size:30px;">💎</span>50 💎</button>
+            </div>
+            
+            <h2 style="margin-top:30px; font-weight:900;">Elixires</h2>
+            <div class="list-item">
+                <div class="item-icon">💉</div>
+                <div class="item-details"><div style="font-weight:900;">Elixir ATQ</div><div style="font-size:11px; color:var(--text-sub);">+1 ATQ Permanente.</div></div>
+                <button class="btn btn-mythic" style="width:auto; padding:8px 12px;" onclick="buyElixir('atk')">💎 20</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">🎒</div>
+                <div class="item-details"><div style="font-weight:900;">Mochila Plus</div><div style="font-size:11px; color:var(--text-sub);">+1 Límite Pociones.</div></div>
+                <button class="btn btn-gold" style="width:auto; padding:8px 12px;" onclick="buyBag()">🟡 1000</button>
             </div>
         </div>
     </div>
@@ -405,18 +421,18 @@
 
     // --- DATABASE ---
     const matsDB = { 
-        m1: {icon:'⚪', t:1, n:'Hierro', desc:'Minado en la Mina o Gacha.'}, 
+        m1: {icon:'⚪', t:1, n:'Hierro', desc:'Minado en la Mina o Gacha M.'}, 
         m2: {icon:'🟤', t:1, n:'Cuero', desc:'Drops de monstruos.'}, 
         m3: {icon:'🪵', t:1, n:'Madera', desc:'Drops básicos.'}, 
         m4: {icon:'🟣', t:2, n:'Cristal Oscuro', desc:'Jefes o Fusión.'}, 
         m5: {icon:'🧵', t:2, n:'Hilo Mágico', desc:'Tienda Diaria.'}, 
         m6: {icon:'⚙️', t:2, n:'Acero', desc:'Forja de Hierro.'}, 
-        m7: {icon:'✨', t:3, n:'Polvo Estelar', desc:'Sintetizador o Jefes.'}, 
+        m7: {icon:'✨', t:3, n:'Polvo Estelar', desc:'Gacha Mítico o Jefes.'}, 
         m8: {icon:'🦴', t:3, n:'Hueso', desc:'Drops Raros.'}, 
         m9: {icon:'📀', t:3, n:'Oro Puro', desc:'Jefes de élite.'}, 
         m10: {icon:'👹', t:4, n:'Alma', desc:'Jefes Finales.'}, 
         m11: {icon:'🩸', t:4, n:'Sangre', desc:'Mercado Negro.'}, 
-        m12: {icon:'🐉', t:5, n:'Escama', desc:'Capa 2 del Abismo.'} 
+        m12: {icon:'🐉', t:5, n:'Escama', desc:'Extremadamente Raro.'} 
     };
     
     const gearDB = {
@@ -431,7 +447,7 @@
     };
     const rColor = { 1:'tier-1', 2:'tier-2', 3:'tier-3', 4:'tier-4', 5:'tier-5' };
 
-    // --- STATE ---
+    // --- STATE CORE & SANITIZATION ---
     let state = {
         lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 100, gems: 0, potions: 3, maxPots: 5, sp: 0,
         stats: { atk: 10, def: 10, luck: 5, crit: 0, dodge: 0 }, baseBonus: { atk: 0, def: 0 }, 
@@ -442,20 +458,38 @@
         dailyShopDate: "", dailyShopItems: []
     };
 
-    let currFilter = 'weapon'; let campInterval = null; let heat = 0; let frenzyTime = 0;
+    let currFilter = 'weapon'; let heat = 0; let frenzyTime = 0;
     let combat = { active: false, node: null, qIndex: 0, selIdx: null, isDone: false, corrects: 0 };
 
     function init() {
-        try { const saved = localStorage.getItem('LifeQuest_V12'); if (saved) state = Object.assign(state, JSON.parse(saved)); } catch(e) {}
+        try { 
+            const saved = localStorage.getItem('LifeQuest_V14'); 
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state = { ...state, ...parsed };
+                // DEEP MERGE CRÍTICO PARA EVITAR NaN
+                state.mining = { power: 1, auto: 0, carts: 0, stone: 0, geodes: 0, totalClicks: 0, depth: 0, lastMineTime: Date.now(), ...(parsed.mining || {}) };
+                state.skills = { hp: 0, atk: 0, def: 0, crit: 0, evasion: 0, ...(parsed.skills || {}) };
+                state.inventory = { ...(parsed.inventory || {}) };
+                state.equipment = { weapon: null, armor: null, accessory: null, pet: null, ...(parsed.equipment || {}) };
+                
+                // Sanear basuras NaN si las hubiera
+                if(isNaN(state.gold)) state.gold = 0;
+                if(isNaN(state.mining.stone)) state.mining.stone = 0;
+                if(isNaN(state.mining.power)) state.mining.power = 1;
+                if(isNaN(state.gems)) state.gems = 0;
+            } 
+        } catch(e) { console.error("Save load error", e); }
         
         if(state.worlds[0].campaign.length === 0) {
             state.worlds[0].campaign = [
-                {id:'n1', type:'reading', title:'📖 Introducción', content:'¡Bienvenido a la V12! Hemos añadido minería AAA, animaciones de Gacha, recompensas por pregunta y botones para salir de la lectura.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
-                {id:'n2', type:'test', title:'⚔️ Test Final', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿Cada correcta te da gemas ahora?', options:['Sí (10 Gemas)','No'], correct:0} ]}
+                {id:'n1', type:'reading', title:'📖 Introducción a la V14', content:'El virus de los números infinitos ha sido purgado. Los botones de lectura han vuelto a su sitio. Disfruta de la nueva minería.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
+                {id:'n2', type:'test', title:'⚔️ Test Final', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿El botón de lectura ha vuelto?', options:['Sí','No'], correct:0} ]}
             ];
         }
 
         checkIdleMining(); generateDailyShop(false); recalcStats(); navTo('home');
+        
         setInterval(checkIdleMining, 60000); // Check idle every min
         setInterval(() => { 
             if(frenzyTime > 0) frenzyTime--; 
@@ -464,7 +498,13 @@
         }, 500); // Heat decay
     }
     
-    function save() { localStorage.setItem('LifeQuest_V12', JSON.stringify(state)); updateUI(); }
+    function save() { localStorage.setItem('LifeQuest_V14', JSON.stringify(state)); updateUI(); }
+
+    function hardReset() {
+        if(confirm("🚨 ¿ESTÁS TOTALMENTE SEGURO?\nEsto borrará absolutamente todo tu progreso para siempre.")) {
+            localStorage.removeItem('LifeQuest_V14'); location.reload();
+        }
+    }
 
     // --- IDLE MINING (AAA) ---
     function mineRock() {
@@ -490,9 +530,7 @@
         else if(state.mining.depth >= 100 && r < 0.001) { state.inventory.m12 = (state.inventory.m12||0)+1; showFloatingText("+1 Escama 🐉", "var(--tier-5)"); }
         else showFloatingText("+" + (state.mining.power * multiplier), "gray");
 
-        // Random Events
         if(Math.random() < 0.005) spawnMineEvent();
-
         updateMiningUI(); save();
     }
     
@@ -549,7 +587,7 @@
     function useDrill() {
         if(state.en < 50) return alert("Cuesta 50 EN.");
         state.en -= 50; updateUI(); playSound('gacha');
-        let ticks = 30; // 5 times a sec for 6s
+        let ticks = 30;
         let drillInt = setInterval(() => {
             mineRock(); ticks--;
             if(ticks <= 0) clearInterval(drillInt);
@@ -559,8 +597,7 @@
     let currentEvent = null;
     function spawnMineEvent() {
         let ev = document.getElementById('mine-event'); if(!ev) return;
-        ev.style.display = 'block';
-        currentEvent = Math.random() < 0.5 ? 'gold' : 'boss';
+        ev.style.display = 'block'; currentEvent = Math.random() < 0.5 ? 'gold' : 'boss';
         ev.innerText = currentEvent === 'gold' ? '💎' : '👹';
         setTimeout(() => { ev.style.display = 'none'; currentEvent = null; }, 3000);
     }
@@ -604,20 +641,6 @@
         state.gold -= item.cost; item.b = true; state.inventory[item.id] = (state.inventory[item.id]||0) + 1; save(); renderDailyShop();
     }
 
-    // --- CAMPAMENTO ---
-    function startCamp() {
-        if(campInterval) clearInterval(campInterval);
-        campInterval = setInterval(() => {
-            if(state.hp < state.maxHp || state.en < state.maxEn) {
-                state.hp = Math.min(state.maxHp, state.hp + 2);
-                state.en = Math.min(state.maxEn, state.en + 1);
-                updateUI();
-                let f = document.getElementById('camp-fire'); if(f) f.style.transform = `scale(${1 + Math.random()*0.2})`;
-            }
-        }, 2000);
-    }
-    function stopCamp() { if(campInterval) clearInterval(campInterval); }
-
     // --- STATS & SKILLS ---
     function recalcStats() {
         let bA = 10 + state.baseBonus.atk, bD = 10 + state.baseBonus.def, bL = 5, bC = 0, bE = 0;
@@ -650,7 +673,7 @@
         else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; }
         else { hA.style.display = 'flex'; hM.style.display = 'none'; }
         
-        if(id === 'home') { updateProfile(); startCamp(); } else stopCamp();
+        if(id === 'home') updateProfile();
         if(id === 'skills') { const setT=(id,v)=>{let e=document.getElementById(id);if(e)e.innerText=v;}; setT('skill-points-display',state.sp); setT('skill-hp',state.skills.hp); setT('skill-atk',state.skills.atk); setT('skill-def',state.skills.def||0); setT('skill-crit',state.skills.crit||0); setT('skill-evasion',state.skills.evasion||0); }
         if(id === 'crafting') renderCrafting(currFilter);
         if(id === 'shop') renderDailyShop();
@@ -688,7 +711,7 @@
         setTxt('ui-en-txt', `${state.en}/${state.maxEn}`); setW('ui-en-bar', `${(state.en/state.maxEn)*100}%`);
     }
 
-    // --- MUNDOS & FORJA ---
+    // --- MAPA ---
     function renderMap() {
         const w = state.worlds[state.activeW]; document.getElementById('world-title').innerText = w.name + " ▾";
         const c = document.getElementById('map-render'); c.innerHTML = w.campaign.length ? '' : '<div style="color:var(--text-sub);">Vacío.</div>';
@@ -721,7 +744,7 @@
         } catch(e) { alert("❌ ERROR JSON: " + e.message); } 
     }
 
-    // --- COMBATE Y LECTURA ---
+    // --- COMBATE / LECTURA (ARREGLO DE BOTÓN) ---
     function startNode(id) {
         playSound('click'); const w = state.worlds[state.activeW];
         if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Bloqueado.");
@@ -734,16 +757,25 @@
         combat = { active: true, node: node, qIndex: 0, selIdx: null, isDone: isDone, corrects: 0 };
         document.getElementById('boss-ui').style.display = node.type === 'boss' ? 'block' : 'none';
 
-        const hdr = document.getElementById('combat-header'); const ftr = document.getElementById('combat-footer'); const btnR = document.getElementById('btn-reading-exit');
+        const hdr = document.getElementById('combat-header'); 
+        const optsContainer = document.getElementById('options-container'); 
+        const skillsRow = document.getElementById('active-skills');
+        const btnCheck = document.getElementById('btn-check');
+
         if(node.type === 'reading') {
-            hdr.style.display = 'none'; document.getElementById('active-skills').style.display = 'none';
-            document.getElementById('question-text').innerHTML = node.content; document.getElementById('options-container').innerHTML = '';
+            hdr.style.display = 'none'; 
+            skillsRow.style.display = 'none';
+            document.getElementById('question-text').innerHTML = node.content; 
+            optsContainer.innerHTML = '';
             
-            const btn = document.getElementById('btn-check');
-            btn.innerText = "¡ENTENDIDO Y SALIR!"; btn.className = "btn btn-green"; btn.disabled = false;
-            btn.onclick = () => finishNode(node);
+            // Reutilizamos el botón central grande y le damos estilo de Aceptar
+            btnCheck.innerText = "¡LECCIÓN COMPLETADA!"; 
+            btnCheck.className = "btn btn-green"; 
+            btnCheck.disabled = false;
+            btnCheck.onclick = () => finishNode(node);
         } else {
-            hdr.style.display = 'flex'; document.getElementById('active-skills').style.display = 'flex';
+            hdr.style.display = 'flex'; 
+            skillsRow.style.display = 'flex';
             renderQuestion();
         }
         navTo('combat');
@@ -757,7 +789,9 @@
         document.getElementById('combat-hp').innerText = state.hp; document.getElementById('combat-pots').innerText = state.potions;
         const opts = document.getElementById('options-container'); opts.innerHTML = '';
         q.options.forEach((o, i) => { opts.innerHTML += `<div class="option" id="opt-${i}" onclick="selectOpt(${i})">${o}</div>`; });
-        const btn = document.getElementById('btn-check'); btn.innerText = "ATACAR"; btn.className = "btn btn-dark"; btn.disabled = true; btn.onclick = checkAnswer; combat.selIdx = null;
+        
+        const btn = document.getElementById('btn-check'); 
+        btn.innerText = "ATACAR"; btn.className = "btn btn-dark"; btn.disabled = true; btn.onclick = checkAnswer; combat.selIdx = null;
     }
 
     function selectOpt(idx) {
@@ -809,23 +843,25 @@
             let multi = 1 + (state.stats.atk * 0.05);
             let goldGain = Math.floor(node.rewardGold * multi); let xpGain = Math.floor(node.rewardXp * multi);
             
-            state.gold += goldGain; gainXP(xpGain);
+            let gemsEarned = (combat.corrects || 0) * 10;
+            state.gold += goldGain; gainXP(xpGain); state.gems += gemsEarned;
+            
             if(Math.random() < 0.5) state.inventory.m1 = (state.inventory.m1||0)+1; 
             
-            save(); alert(`🏆 ¡COMPLETADO!\n+${goldGain} Oro | +${xpGain} XP\nHas ganado Gemas extra en combate.`); 
+            save(); alert(`🏆 ¡COMPLETADO!\n+${goldGain} Oro | +${xpGain} XP\n💎 +${gemsEarned} Gemas`); 
         }
         combat.active = false; navTo('worlds');
     }
 
     function fleeCombat() { 
         playSound('click');
-        if(combat.active && combat.node && combat.node.type === 'reading' && !combat.isDone) { finishNode(combat.node); return; }
+        if(combat.active && combat.node && combat.node.type === 'reading' && !combat.isDone) {
+            finishNode(combat.node); return;
+        }
         combat.active = false; navTo('worlds'); 
     }
 
-    function gainXP(amt) { state.xp += amt; if(state.xp >= state.maxXp) { state.lvl++; state.sp++; state.xp -= state.maxXp; state.maxXp = Math.floor(state.maxXp * 1.5); recalcStats(); state.hp = state.maxHp; state.en = state.maxEn; } }
-
-    // --- FORJA ITEMS ---
+    // --- RESTO DE FUNCIONES (FORJA Y GACHA) ---
     function renderCrafting(f) {
         currFilter = f; document.querySelectorAll('#screen-crafting .btn-dark, #screen-crafting .btn-blue').forEach(b => b.className='btn btn-dark'); document.getElementById('filter-'+f).className='btn btn-blue';
         const c = document.getElementById('craft-list');
@@ -840,28 +876,26 @@
     function craft(id) { playSound('click'); const g = gearDB[id]; if(!Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v)) return; Object.entries(g.cost).forEach(([k,v]) => state.inventory[k] -= v); if(!g.isConsumable) state.ownedGear.push(id); else state.inventory[g.gives] = (state.inventory[g.gives]||0)+1; save(); renderCrafting(currFilter); }
     function equip(id) { playSound('click'); const g = gearDB[id]; state.equipment[g.t] = id; recalcStats(); save(); renderCrafting(currFilter); }
 
-    // --- GACHA CON ANIMACIÓN Y EQUIPOS ---
     function pullGacha(tier, isFree = false) {
         playSound('click'); let cost = tier===1?100:tier===2?500:50;
-        if(!isFree) { if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas 💎."); state.gems -= cost; } else { if(state.gold < cost) return alert("Falta Oro 🟡."); state.gold -= cost; } }
-        
+        if(!isFree) {
+            if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas 💎."); state.gems -= cost; } else { if(state.gold < cost) return alert("Falta Oro 🟡."); state.gold -= cost; }
+        }
         let m = document.getElementById('modal-gacha'); m.style.display = 'flex';
         let c = document.getElementById('gacha-chest'); c.className = 'chest-anim'; playSound('gacha');
         
         setTimeout(() => {
             m.style.display = 'none'; c.className = '';
             let r = Math.random(); let msg = "";
-            
             let gearChance = tier === 1 ? 0.05 : tier === 2 ? 0.10 : 0.15;
             if(Math.random() < gearChance) {
                 let pGears = Object.values(gearDB).filter(g => g.r <= tier + 2 && !g.isConsumable && !state.ownedGear.includes(g.id));
                 if(pGears.length > 0) { let won = pGears[Math.floor(Math.random() * pGears.length)]; state.ownedGear.push(won.id); msg = `¡ÉPICO! Equipo: ${won.icon} ${won.name}`; save(); alert(`🎁 ¡BOOOM!\n${msg}`); return; }
             }
-
             if(tier === 1) { if(r<0.6) { state.inventory.m1=(state.inventory.m1||0)+3; msg="3x Hierro"; } else { state.inventory.m4=(state.inventory.m4||0)+1; msg="1x Cristal Oscuro"; } }
             else if (tier === 2) { if(r<0.5) { state.inventory.m4=(state.inventory.m4||0)+3; msg="3x Cristal"; } else { state.inventory.m10=(state.inventory.m10||0)+1; msg="1x Alma Demonio"; } }
             else { if(r<0.5) { state.inventory.m10=(state.inventory.m10||0)+3; msg="3x Alma Demonio"; } else { state.inventory.m12=(state.inventory.m12||0)+1; msg="1x Escama Mítica 🐉"; } }
-            save(); alert(`📦 Botín: ${msg}`);
+            save(); if(!isFree) alert(`📦 Botín: ${msg}`);
         }, 1200);
     }
 
