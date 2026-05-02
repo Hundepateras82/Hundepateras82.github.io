@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>LifeQuest AAA: V15.1</title>
+    <title>LifeQuest AAA: V15.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -409,20 +409,51 @@
 
     function playSound(type) {
         if(audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
+        const t = audioCtx.currentTime;
+        
         if(type === 'click') {
-            osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            // Sonido de "Pop" suave
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, t);
+            osc.frequency.exponentialRampToValueAtTime(300, t + 0.05);
+            gain.gain.setValueAtTime(0.3, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(t); osc.stop(t + 0.1);
         } else if(type === 'gacha') {
-            osc.type = 'square'; osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.8);
+            // Campanillas / Arpegio mágico suave
+            [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, t + i * 0.1);
+                gain.gain.setValueAtTime(0, t + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0.15, t + i * 0.1 + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + i * 0.1 + 0.4);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(t + i * 0.1); osc.stop(t + i * 0.1 + 0.5);
+            });
         } else if(type === 'mine') {
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(200 + Math.random()*50, audioCtx.currentTime); 
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            // Sonido de impacto sordo (piedra)
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+            
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(150, t);
+            osc.frequency.exponentialRampToValueAtTime(40, t + 0.1);
+            
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(800, t);
+            filter.frequency.exponentialRampToValueAtTime(100, t + 0.1);
+            
+            gain.gain.setValueAtTime(0.4, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+            
+            osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(t); osc.stop(t + 0.15);
         }
     }
 
@@ -684,10 +715,10 @@
         const tab = document.getElementById('tab-' + id); if(tab) tab.classList.add('active');
         
         const hA = document.getElementById('hud-advanced'), hM = document.getElementById('hud-minimal');
-        const nBar = document.querySelector('.nav'); // CAPTURAMOS LA BARRA DE NAVEGACION
+        const nBar = document.querySelector('.nav');
         
         if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; nBar.style.display = 'flex'; renderMap(); }
-        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; nBar.style.display = 'none'; } // MODO CONCENTRACION
+        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; nBar.style.display = 'none'; } 
         else { hA.style.display = 'flex'; hM.style.display = 'none'; nBar.style.display = 'flex'; }
         
         if(id === 'home') { updateProfile(); startCamp(); } else stopCamp();
@@ -741,16 +772,43 @@
     }
 
     function openWorldsManager() { playSound('click'); document.getElementById('modal-worlds').style.display = 'flex'; renderWorldsManager(); }
+    
     function renderWorldsManager() {
         const list = document.getElementById('worlds-manager-list');
         list.innerHTML = state.worlds.map((w, idx) => `<div class="list-item" style="flex-direction:column; align-items:flex-start;"><div style="display:flex; width:100%; gap:10px; align-items:center;">
                     <div style="font-weight:900; flex:1;">${w.name}</div>
                     ${state.activeW === idx ? `<span style="color:var(--green); font-weight:900; font-size:12px;">ACTIVO</span>` : `<button class="btn btn-blue" style="width:auto; padding:5px 10px; font-size:10px;" onclick="selectWorld(${idx})">ENTRAR</button>`}
+                    <button class="btn btn-gold" style="width:auto; padding:5px 10px; font-size:10px;" onclick="editWorldName(${idx})">✏️</button>
+                    <button class="btn btn-red" style="width:auto; padding:5px 10px; font-size:10px;" onclick="deleteWorld(${idx})">🗑️</button>
                 </div></div>`).join('');
     }
+
     function createNewWorld() { playSound('click'); let nm = prompt("Nombre:"); if(nm) { state.worlds.push({ id: Date.now(), name: nm, campaign: [], completed: [], unlocked: [] }); save(); renderWorldsManager(); } }
     function selectWorld(idx) { playSound('click'); state.activeW = idx; save(); document.getElementById('modal-worlds').style.display = 'none'; renderMap(); }
     
+    function editWorldName(idx) {
+        playSound('click');
+        let newName = prompt("Nuevo nombre para el mundo:", state.worlds[idx].name);
+        if(newName && newName.trim() !== "") {
+            state.worlds[idx].name = newName.trim();
+            save();
+            renderWorldsManager();
+            if(state.activeW === idx) renderMap(); 
+        }
+    }
+
+    function deleteWorld(idx) {
+        playSound('click');
+        if(state.worlds.length <= 1) return alert("❌ No puedes borrar tu único mundo.");
+        
+        if(confirm(`⚠️ ¿Seguro que quieres borrar "${state.worlds[idx].name}"?\nSe perderá todo el progreso de esa mazmorra.`)) {
+            state.worlds.splice(idx, 1);
+            if(state.activeW === idx) state.activeW = 0; 
+            else if (state.activeW > idx) state.activeW--; 
+            save(); renderWorldsManager(); renderMap();
+        }
+    }
+
     function openForgeModal() { playSound('click'); document.getElementById('modal-forge').style.display = 'flex'; document.getElementById('forge-input').value = JSON.stringify(state.worlds[state.activeW].campaign, null, 2); }
     function processForge() {
         playSound('click'); let rawCode = document.getElementById('forge-input').value;
@@ -761,7 +819,7 @@
         } catch(e) { alert("❌ ERROR JSON: " + e.message); } 
     }
 
-    // --- COMBATE / LECTURA (TOTALMENTE ARREGLADO) ---
+    // --- COMBATE / LECTURA ---
     function startNode(id) {
         playSound('click'); const w = state.worlds[state.activeW];
         if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Bloqueado.");
@@ -782,13 +840,11 @@
             document.getElementById('question-text').innerHTML = node.content; 
             document.getElementById('options-container').innerHTML = '';
             
-            // Apagamos los botones de combate y activamos el de lectura
             btnCheck.style.display = 'none';
             btnRead.style.display = 'flex'; 
         } else {
             document.getElementById('active-skills').style.display = 'flex';
             
-            // Apagamos el botón de lectura y encendemos los de combate
             btnRead.style.display = 'none';
             btnCheck.style.display = 'flex';
             
