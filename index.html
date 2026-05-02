@@ -2,297 +2,285 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LifeQuest Epic: Dark Mode</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>LifeQuest: Adrenaline</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* === PALETA MODO OSCURO DUOLINGO === */
+        /* === PALETA MODO OSCURO === */
         :root {
-            --bg-page: #131f24; 
-            --panel: #202f36; 
-            --text-main: #ffffff; 
-            --text-sub: #afafaf;
-            --border-dark: #37464f;
-            
+            --bg-page: #0f171e; --panel: #1b262c; --text-main: #ffffff; --text-sub: #8b9eb0;
+            --border-dark: #2c3e50;
             --duo-green: #58cc02; --duo-green-shadow: #46a302;
             --duo-blue: #1cb0f6; --duo-blue-shadow: #1899d6;
             --duo-orange: #ff9600; --duo-orange-shadow: #cc7800;
             --duo-red: #ff4b4b; --duo-red-shadow: #ea2b2b;
-            --duo-purple: #ce82ff; --duo-purple-shadow: #a568cc;
+            --duo-purple: #9b59b6; --duo-purple-shadow: #8e44ad;
             --duo-yellow: #ffc800; --duo-yellow-shadow: #cc9a00;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
             margin: 0; font-family: 'Nunito', sans-serif; background: var(--bg-page); 
-            display: flex; justify-content: center; height: 100vh; overflow: hidden; color: var(--text-main);
+            display: flex; justify-content: center; height: 100dvh; width: 100vw; overflow: hidden; color: var(--text-main);
         }
 
-        #phone-container {
-            width: 100%; max-width: 480px; height: 100%; background: var(--panel);
-            position: relative; display: flex; flex-direction: column;
-            border-left: 1px solid var(--border-dark); border-right: 1px solid var(--border-dark);
-        }
+        #phone-container { width: 100%; max-width: 600px; height: 100%; background: var(--panel); position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
-        .screen { 
-            display: none; width: 100%; height: 100%; flex-direction: column; 
-            position: absolute; top: 0; left: 0; z-index: 1; background: var(--panel);
-        }
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; position: absolute; top: 0; left: 0; z-index: 1; background: var(--panel); }
         .screen.active { display: flex; animation: screenIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10; }
         @keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* HUD Global Oscuro */
-        .rpg-hud {
-            padding: 15px 20px; border-bottom: 2px solid var(--border-dark); background: var(--bg-page);
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-weight: 900; font-size: 14px;
-        }
-        .bar-wrap { width: 100%; height: 12px; background: var(--border-dark); border-radius: 10px; margin-top: 4px; overflow: hidden; }
-        .bar-fill { height: 100%; width: 0%; transition: width 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        /* HUD Global */
+        .rpg-hud { padding: 12px 15px; border-bottom: 2px solid var(--border-dark); background: var(--bg-page); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-weight: 900; font-size: 13px; z-index: 50; }
+        .bar-wrap { width: 100%; height: 10px; background: var(--border-dark); border-radius: 10px; margin-top: 4px; overflow: hidden; position: relative;}
+        .bar-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
+        
+        .combo-badge { background: var(--duo-orange); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 5px; animation: pulse 1s infinite; display: none; }
 
         /* Botones 3D Neon */
-        .btn-3d {
-            padding: 15px 20px; border-radius: 16px; border: none; font-family: inherit;
-            font-weight: 900; font-size: 16px; text-transform: uppercase; cursor: pointer;
-            position: relative; transition: all 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px;
-            margin-bottom: 12px; width: 100%;
-        }
+        .btn-3d { padding: 15px 20px; border-radius: 16px; border: none; font-family: inherit; font-weight: 900; font-size: 15px; text-transform: uppercase; cursor: pointer; position: relative; transition: all 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; width: 100%; }
         .btn-3d:active { transform: translateY(4px); box-shadow: none !important; margin-bottom: 8px; margin-top: 4px; }
-        
         .btn-blue { background: var(--duo-blue); color: white; box-shadow: 0 5px 0 var(--duo-blue-shadow); }
         .btn-green { background: var(--duo-green); color: white; box-shadow: 0 5px 0 var(--duo-green-shadow); }
-        .btn-orange { background: var(--duo-orange); color: white; box-shadow: 0 5px 0 var(--duo-orange-shadow); }
         .btn-red { background: var(--duo-red); color: white; box-shadow: 0 5px 0 var(--duo-red-shadow); }
         .btn-purple { background: var(--duo-purple); color: white; box-shadow: 0 5px 0 var(--duo-purple-shadow); }
+        .btn-yellow { background: var(--duo-yellow); color: black; box-shadow: 0 5px 0 var(--duo-yellow-shadow); }
         .btn-dark { background: transparent; color: var(--text-sub); border: 2px solid var(--border-dark); box-shadow: 0 4px 0 var(--border-dark); }
-        .btn-dark:hover { background: var(--border-dark); color: white; }
+        .btn-blood { background: #500; color: #fcc; border: 2px solid #a00; box-shadow: 0 4px 0 #700; }
 
-        /* Navbar Inferior Oscuro */
-        .main-nav {
-            position: absolute; bottom: 0; width: 100%; height: 75px;
-            background: var(--bg-page); border-top: 2px solid var(--border-dark);
-            display: flex; justify-content: space-around; align-items: center; z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .nav-tab { 
-            display: flex; flex-direction: column; align-items: center; 
-            color: var(--text-sub); font-weight: 900; font-size: 11px; cursor: pointer; transition: 0.2s;
-        }
+        /* Navbar Inferior */
+        .main-nav { position: absolute; bottom: 0; width: 100%; height: 75px; background: var(--bg-page); border-top: 2px solid var(--border-dark); display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-tab { display: flex; flex-direction: column; align-items: center; color: var(--text-sub); font-weight: 900; font-size: 10px; cursor: pointer; transition: 0.2s; }
         .nav-tab.active { color: var(--duo-blue); transform: scale(1.1); }
-        .nav-tab span { font-size: 24px; margin-bottom: 2px; }
+        .nav-tab span { font-size: 22px; margin-bottom: 2px; }
 
         .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
 
-        /* Tarjetas Oscuras */
-        .card { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
-        .shop-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-dark); padding-bottom: 15px; margin-bottom: 15px; }
-        .shop-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+        /* Elementos UI */
+        .card { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
+        .shop-item, .craft-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-dark); padding-bottom: 15px; margin-bottom: 15px; }
+        .shop-item:last-child, .craft-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+        .loot-pill { display: inline-block; background: var(--border-dark); padding: 4px 10px; border-radius: 20px; font-size: 12px; margin: 2px; font-weight: bold;}
         
-        /* Mundos y Nodos */
-        .world-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .world-box { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 20px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .world-box:hover { border-color: var(--duo-blue); background: rgba(28, 176, 246, 0.1); }
-        .world-icon { font-size: 40px; display: block; margin-bottom: 10px; }
-        
+        /* Nodos y Mapas */
         .node-path { display: flex; flex-direction: column; align-items: center; gap: 30px; padding-top: 20px; }
-        .node { width: 75px; height: 75px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; border: none; position: relative; box-shadow: 0 6px 0 var(--border-dark); background: var(--border-dark); }
-        
+        .node { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; cursor: pointer; border: none; position: relative; box-shadow: 0 6px 0 var(--border-dark); background: var(--border-dark); transition: 0.2s;}
         .node.completed { background: var(--duo-yellow); box-shadow: 0 6px 0 var(--duo-yellow-shadow); color: white; }
-        .node.unlocked { background: var(--duo-green); box-shadow: 0 6px 0 var(--duo-green-shadow); color: white; }
+        .node.unlocked { background: var(--duo-green); box-shadow: 0 6px 0 var(--duo-green-shadow); color: white; animation: pulse 2s infinite; }
+        .node.boss { border: 2px solid var(--duo-purple); }
         .node.unlocked.boss { background: var(--duo-purple); box-shadow: 0 6px 0 var(--duo-purple-shadow); }
-        
-        .node.unlocked::after { content: 'JUGAR'; position: absolute; top: -35px; background: var(--bg-page); color: var(--duo-green); padding: 4px 10px; border-radius: 10px; font-size: 10px; font-weight: 900; border: 2px solid var(--border-dark); }
-        .node.unlocked.boss::after { content: '¡JEFE!'; color: var(--duo-purple); }
 
-        /* Examen / Flashcards */
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* Examen */
         .option-card { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 15px; padding: 15px; margin-bottom: 12px; cursor: pointer; font-weight: 700; transition: 0.2s; color: var(--text-main); }
-        .option-card.selected { background: rgba(28, 176, 246, 0.1); border-color: var(--duo-blue); color: var(--duo-blue); }
-        .option-card.correct { background: rgba(88, 204, 2, 0.1); border-color: var(--duo-green); color: var(--duo-green); }
-        .option-card.wrong { background: rgba(255, 75, 75, 0.1); border-color: var(--duo-red); color: var(--duo-red); }
+        .option-card.selected { border-color: var(--duo-blue); box-shadow: 0 0 10px rgba(28,176,246,0.3); }
+        .option-card.correct { border-color: var(--duo-green); background: rgba(88,204,2,0.1); }
+        .option-card.wrong { border-color: var(--duo-red); background: rgba(255,75,75,0.1); opacity: 0.5; }
+        .option-card.hidden { display: none; }
 
-        .flashcard-box { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 20px; padding: 40px 20px; text-align: center; font-size: 20px; font-weight: 700; min-height: 200px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; flex-direction: column;}
-        .flashcard-back { display: none; margin-top: 20px; padding-top: 20px; border-top: 2px dashed var(--border-dark); color: var(--duo-blue); }
-
-        /* Logros */
-        .badges-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .badge { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 15px; padding: 10px; text-align: center; opacity: 0.3; filter: grayscale(1); transition: 0.3s; }
-        .badge.earned { opacity: 1; filter: grayscale(0); border-color: var(--duo-yellow); background: rgba(255, 200, 0, 0.1); }
-
-        /* Animaciones */
-        @keyframes damageShake { 0% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 75% { transform: translateX(-10px); } 100% { transform: translateX(0); } }
+        /* Daño y FX */
+        @keyframes damageShake { 0% { transform: translateX(0); filter: drop-shadow(0 0 10px red); } 25% { transform: translateX(-15px); } 50% { transform: translateX(15px); } 75% { transform: translateX(-15px); } 100% { transform: translateX(0); } }
         .damage-effect { animation: damageShake 0.4s; }
+        #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,0,0,0.4); z-index: 999; display: none; pointer-events: none; }
         
-        #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,0,0,0.3); z-index: 999; display: none; pointer-events: none; }
-        #confetti { position: fixed; top: 0; left: 0; pointer-events: none; width: 100%; height: 100%; z-index: 1000; }
+        .gacha-box { background: linear-gradient(45deg, #1b262c, #2c3e50); border: 2px dashed var(--duo-purple); text-align: center; padding: 20px; border-radius: 16px; margin-top: 15px;}
     </style>
 </head>
 <body>
 
-<canvas id="confetti"></canvas>
 <div id="damage-overlay"></div>
 
 <div id="phone-container">
 
     <div id="global-hud" class="rpg-hud" style="display:none;">
-        <div>NVL <span id="ui-lvl">1</span> • 🟡 <span id="ui-gold">0</span><div class="bar-wrap"><div id="bar-xp" class="bar-fill" style="background:var(--duo-blue)"></div></div></div>
-        <div>EXP <span id="ui-xp">0</span>/<span id="ui-max-xp">100</span></div>
-        <div>❤️ HP <span id="ui-hp">100</span><div class="bar-wrap"><div id="bar-hp" class="bar-fill" style="background:var(--duo-red); width:100%"></div></div></div>
-        <div>⚡ EN <span id="ui-en">50</span><div class="bar-wrap"><div id="bar-en" class="bar-fill" style="background:var(--duo-yellow); width:100%"></div></div></div>
+        <div>👑 NVL <span id="ui-lvl">1</span> • 🟡 <span id="ui-gold">0</span> <span id="combo-badge" class="combo-badge">🔥 x1.5</span>
+            <div class="bar-wrap"><div id="bar-xp" class="bar-fill" style="background:var(--duo-blue)"></div></div>
+        </div>
+        <div style="text-align:right">XP <span id="ui-xp">0</span>/<span id="ui-max-xp">100</span></div>
+        <div>❤️ HP <span id="ui-hp">100</span>/<span id="ui-maxhp">100</span><div class="bar-wrap"><div id="bar-hp" class="bar-fill" style="background:var(--duo-red)"></div></div></div>
+        <div style="text-align:right">⚡ EN <span id="ui-en">50</span>/<span id="ui-maxen">50</span><div class="bar-wrap"><div id="bar-en" class="bar-fill" style="background:var(--duo-yellow)"></div></div></div>
     </div>
 
     <div id="screen-home" class="screen active">
         <div class="content">
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <span style="font-weight: 900; font-size: 24px; color: var(--duo-blue);">LifeQuest Epic</span>
-                <span style="color:var(--duo-orange); font-weight: 900; font-size: 18px;">🔥 <span id="hub-streak">0</span> Días</span>
+            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <span style="font-weight: 900; font-size: 24px; color: var(--duo-blue);">Shadows & Steel</span>
+                <span style="color:var(--duo-orange); font-weight: 900; font-size: 16px;">🔥 <span id="hub-streak">0</span> Días</span>
             </div>
 
             <div class="card" style="text-align: center; border-color: var(--duo-blue);">
-                <div style="font-size: 80px; margin-bottom: 10px;">🦉</div>
-                <h1 style="font-weight: 900; font-size: 22px; margin-bottom: 10px; color: var(--text-main);">Tu destino aguarda</h1>
-                <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">La oscuridad no detendrá tu aprendizaje.</p>
-                <button class="btn-3d btn-blue" onclick="navTo('worlds')">▶ ENTRAR AL MAPA</button>
+                <div style="font-size: 60px; margin-bottom: 10px;">🛡️</div>
+                <h1 style="font-weight: 900; font-size: 20px; margin-bottom: 10px;">Forja tu Mente</h1>
+                <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 20px;">Mantén tu racha de combo alta para multiplicar ganancias.</p>
+                <button class="btn-3d btn-blue" onclick="navTo('worlds')">⚔️ MAPA DE CAMPAÑA</button>
             </div>
 
-            <h2 style="font-weight: 900; font-size: 18px; margin: 30px 0 15px; color: var(--text-sub);">Estadísticas Vitales</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="card" style="text-align:center; padding: 15px;">
-                    <div style="font-size:24px;">🧠</div>
-                    <div style="font-weight:900; color:var(--text-main); font-size:20px;" id="stat-nodes">0</div>
-                    <div style="font-size:12px; color:var(--text-sub);">Niveles Superados</div>
-                </div>
-                <div class="card" style="text-align:center; padding: 15px;">
-                    <div style="font-size:24px;">🎯</div>
-                    <div style="font-weight:900; color:var(--text-main); font-size:20px;" id="stat-correct">0</div>
-                    <div style="font-size:12px; color:var(--text-sub);">Aciertos Totales</div>
+            <h2 style="font-weight: 900; font-size: 16px; margin: 20px 0 10px; color: var(--text-sub);">Equipamiento Actual</h2>
+            <div class="card" style="display:flex; align-items:center; gap:15px; border-color:var(--duo-yellow);">
+                <div style="font-size: 40px;" id="eq-icon">🗡️</div>
+                <div>
+                    <div style="font-weight:900;" id="eq-name">Sin Arma</div>
+                    <div style="font-size:12px; color:var(--text-sub);" id="eq-desc">Ningún bonus activo.</div>
                 </div>
             </div>
+
+            <h2 style="font-weight: 900; font-size: 16px; margin: 20px 0 10px; color: var(--text-sub);">Bolsa de Materiales</h2>
+            <div class="card" id="inventory-ui"></div>
         </div>
     </div>
 
     <div id="screen-worlds" class="screen">
         <div class="content">
-            <h2 style="font-weight: 900; margin-bottom: 20px; color:var(--text-main);">Reinos de Conocimiento</h2>
-            <div class="world-grid" id="worlds-list"></div>
+            <h2 style="font-weight: 900; margin-bottom: 20px;">Reinos de Conocimiento</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" id="worlds-list"></div>
         </div>
     </div>
 
     <div id="screen-study" class="screen">
         <div class="content" id="study-map-view" style="padding-top: 0;">
             <div style="display:flex; justify-content: space-between; align-items:center; margin: 15px 0;">
-                <h2 id="current-world-title" style="font-weight: 900; margin:0; font-size: 18px;">Mundo</h2>
-                <button class="btn-3d btn-dark" style="width:auto; padding: 8px 15px; margin:0; font-size: 12px;" onclick="openForge()">⚒️ FORJA</button>
+                <h2 id="current-world-title" style="font-weight: 900; margin:0; font-size: 16px;">Mundo</h2>
+                <button class="btn-3d btn-dark" style="width:auto; padding: 6px 12px; margin:0; font-size: 11px;" onclick="openForge()">⚒️ FORJA TEST</button>
             </div>
             <div class="node-path" id="node-path-render"></div>
         </div>
 
         <div class="content" id="study-node-view" style="display:none; padding-top: 0;">
-            <button class="btn-3d btn-dark" style="margin: 10px 0 20px;" onclick="closeNode()">← RETIRADA</button>
-            <h2 id="node-title" style="font-weight:900; color:var(--duo-blue);">Cargando...</h2>
-            <div id="node-text" style="line-height:1.6; margin-bottom:20px; font-size:16px; color:var(--text-main);"></div>
+            <button class="btn-3d btn-dark" style="margin: 10px 0 20px;" onclick="closeNode()">← HUIR DEL COMBATE</button>
             
-            <div id="game-container"></div>
-
-            <div style="margin-top:40px;">
-                <button id="btn-action-1" class="btn-3d btn-blue" style="display:none;"></button>
-                <button id="btn-action-2" class="btn-3d btn-red" style="display:none;"></button>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="node-title" style="font-weight:900; margin:0;">Cargando...</h2>
+                <button id="btn-hint" class="btn-3d btn-dark" style="width:auto; margin:0; padding:5px 10px; font-size:10px;" onclick="useOraculo()">👁️ ORÁCULO (-15🟡)</button>
             </div>
+            
+            <div id="node-text" style="line-height:1.5; margin:20px 0; font-size:15px;"></div>
+            <div id="game-container"></div>
+            <div style="margin-top:30px;"><button id="btn-action-1" class="btn-3d btn-blue" style="display:none;"></button></div>
         </div>
     </div>
 
     <div id="screen-shop" class="screen">
         <div class="content">
-            <h2 style="font-weight: 900; margin-bottom: 20px;">Mercado Negro</h2>
+            <h2 style="font-weight: 900; margin-bottom: 15px;">Mercado Común</h2>
             <div class="card">
                 <div class="shop-item">
-                    <div>
-                        <div style="font-weight:900; font-size:16px;">❤️ Poción de Sangre</div>
-                        <div style="font-size:12px; color:var(--text-sub);">Restaura 50 HP.</div>
-                    </div>
-                    <button class="btn-3d btn-orange" style="width:auto; margin:0; padding:10px 15px;" onclick="buyItem('hp', 30, 50)">🟡 30</button>
+                    <div><div style="font-weight:900;">❤️ Poción Menor</div><div style="font-size:11px; color:var(--text-sub);">Recupera 50 HP.</div></div>
+                    <button class="btn-3d btn-green" style="width:auto; margin:0; padding:8px 12px;" onclick="buyItem('hp', 25, 50)">🟡 25</button>
                 </div>
                 <div class="shop-item">
-                    <div>
-                        <div style="font-weight:900; font-size:16px;">⚡ Frasco de Relámpagos</div>
-                        <div style="font-size:12px; color:var(--text-sub);">Recupera 25 Energía.</div>
-                    </div>
-                    <button class="btn-3d btn-orange" style="width:auto; margin:0; padding:10px 15px;" onclick="buyItem('en', 25, 25)">🟡 25</button>
+                    <div><div style="font-weight:900;">⚡ Brebaje Vigorizante</div><div style="font-size:11px; color:var(--text-sub);">Recupera 25 Energía.</div></div>
+                    <button class="btn-3d btn-yellow" style="width:auto; margin:0; padding:8px 12px;" onclick="buyItem('en', 20, 25)">🟡 20</button>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div id="screen-profile" class="screen">
-        <div class="content">
-            <h2 style="font-weight: 900; margin-bottom: 20px;">Códex del Héroe</h2>
-            
-            <div class="card" style="text-align: center; border-color: var(--duo-purple);">
-                <div style="font-size: 60px; margin-bottom:10px;">🧙‍♂️</div>
-                <h3 style="margin:0; color: var(--duo-purple);">Nivel de Mago: <span id="profile-lvl">1</span></h3>
+            <div class="gacha-box">
+                <div style="font-size:40px; margin-bottom:10px;">📦</div>
+                <div style="font-weight:900; color:var(--duo-purple);">Cofre de la Penumbra</div>
+                <div style="font-size:12px; color:var(--text-sub); margin-bottom:15px;">Materiales y botines aleatorios. ¿Te sobra el oro?</div>
+                <button class="btn-3d btn-purple" onclick="openGacha()">ABRIR (🟡 50)</button>
             </div>
 
-            <h3 style="font-weight: 900; font-size: 16px; margin: 30px 0 10px;">Medallas de Honor</h3>
-            <div class="badges-grid" id="badges-container">
-                </div>
+            <h2 style="font-weight: 900; margin-bottom: 15px; margin-top: 30px;">⚒️ La Herrería</h2>
+            <div class="card" id="craft-ui"></div>
 
-            <h3 style="font-weight: 900; font-size: 16px; margin: 40px 0 15px; color:var(--duo-red);">Zona de Peligro</h3>
-            <button class="btn-3d btn-red" onclick="hardReset()">⚠️ DESTRUIR PARTIDA</button>
+            <h2 style="font-weight: 900; margin-bottom: 15px; margin-top: 30px; color: var(--duo-red);">🩸 Altar de Sangre</h2>
+            <div class="card" style="border-color: #500; background: #200;">
+                <p style="font-size:12px; margin-top:0; color:#f99;">Sacrifica tu propia Vida (HP) a cambio de poder.</p>
+                <div class="shop-item" style="border-color:#500;">
+                    <div><div style="font-weight:900; color:white;">Pacto de Oro</div><div style="font-size:11px; color:#f99;">-30 HP por +100 Oro.</div></div>
+                    <button class="btn-3d btn-blood" style="width:auto; margin:0; padding:8px 12px;" onclick="darkPact('gold')">🩸 SACRIFICAR</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="main-nav">
         <div class="nav-tab active" id="tab-home" onclick="navTo('home')"><span>🏠</span>INICIO</div>
-        <div class="nav-tab" id="tab-worlds" onclick="navTo('worlds')"><span>🌍</span>MUNDOS</div>
-        <div class="nav-tab" id="tab-shop" onclick="navTo('shop')"><span>🛒</span>MERCADO</div>
-        <div class="nav-tab" id="tab-profile" onclick="navTo('profile')"><span>👤</span>PERFIL</div>
+        <div class="nav-tab" id="tab-worlds" onclick="navTo('worlds')"><span>🌍</span>MAPA</div>
+        <div class="nav-tab" id="tab-shop" onclick="navTo('shop')"><span>⚖️</span>COMERCIO</div>
     </div>
 
 </div>
 
 <script>
-    // --- ESTADO Y LÓGICA CORE ---
+    // --- MOTOR HÁPTICO Y AUDIO ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    function uiClick() {
+        vibratePhone(10);
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function playSound(type) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+
+        if(type === 'hit') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === 'success') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === 'levelup' || type === 'gacha') {
+            osc.type = 'square'; osc.frequency.setValueAtTime(type==='gacha'?600:400, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(type==='gacha'?900:600, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(1200, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        } else if (type === 'buy') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(1000, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+        }
+    }
+
+    function vibratePhone(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
+
+    // --- ESTADO CORE ---
     let state = {
-        streak: 0, lastDate: null,
+        streak: 0, lastDate: null, combo: 0,
         lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 0,
-        stats: { nodesDone: 0, correctAnswers: 0, bossesDefeated: 0 },
-        achievements: { first_blood: false, scholar: false, boss_slayer: false, rich: false },
-        worlds: Array.from({length: 9}, (_, i) => ({
-            id: i, name: `Reino ${i+1}`, campaign: [], completed: [], unlocked: ['n1']
-        }))
+        inventory: { iron: 0, dark_shard: 0, star_dust: 0 },
+        equipment: {
+            weapon1: { id: 'w1', name: 'Espada de Erudito', icon:'🗡️', desc: '+20% XP obtenida', cost: {iron:5}, owned: false },
+            weapon2: { id: 'w2', name: 'Escudo de Verdad', icon:'🛡️', desc: '-30% Daño recibido', cost: {iron:3, dark_shard:2}, owned: false },
+            weapon3: { id: 'w3', name: 'Anillo Astral', icon:'💍', desc: '-50% Coste de Energía', cost: {star_dust:3}, owned: false }
+        },
+        equipped: null,
+        worlds: Array.from({length: 5}, (_, i) => ({ id: i, name: `Reino ${i+1}`, campaign: [], completed: [], unlocked: ['n1'] }))
     };
 
-    let activeW = null;
-    let currNode = null;
-    let selIdx = null;
+    let activeW = null; let currNode = null; let selIdx = null; let hintsUsed = false;
 
     function init() {
-        const saved = localStorage.getItem('lifequest_epic_v1');
-        if (saved) {
-            let parsed = JSON.parse(saved);
-            state = { ...state, ...parsed };
-            if(!state.achievements) state.achievements = { first_blood: false, scholar: false, boss_slayer: false, rich: false };
-            if(!state.stats.bossesDefeated) state.stats.bossesDefeated = 0;
-        }
+        const saved = localStorage.getItem('lq_adrenaline_v1');
+        if (saved) state = { ...state, ...JSON.parse(saved) };
+        if(!state.combo) state.combo = 0;
         
-        // Campaña extendida de demostración
         if(state.worlds[0].campaign.length === 0) {
             state.worlds[0].campaign = [
-                {id:'n1', type:'reading', title:'El Despertar', content:'En las sombras, el conocimiento es poder. <br><br>Bienvenido a LifeQuest Epic. Usa la FORJA para crear tus propios reinos usando IA.', energyCost:0, rewardXp:20, rewardGold:10, unlocks:['n2']},
-                {id:'n2', type:'test', title:'Prueba de Sangre', content:'¿De qué color es la Vida (HP) en este HUD?', options:['Azul','Roja','Verde'], correctAnswer:1, energyCost:5, damagePenalization:20, rewardXp:30, rewardGold:20, unlocks:['n3']},
-                {id:'n3', type:'flashcard', title:'Memoria Arcana', content:'Dale la vuelta a esta carta mental.', frontText:'¿Cuál es la capital de Francia?', backText:'París', energyCost:5, damagePenalization:15, rewardXp:40, rewardGold:20, unlocks:['n4']},
-                {id:'n4', type:'boss', title:'JEFE: El Guardián Oscuro', content:'¡Has despertado al jefe! Si fallas, perderás casi toda tu vida.', options:['Rendirme','Luchar y Vencer'], correctAnswer:1, energyCost:10, damagePenalization:80, rewardXp:100, rewardGold:100, unlocks:[]}
+                {id:'n1', type:'reading', title:'La Teoría', content:'Aquí va la teoría. Léela bien. Al entenderla no gastas energía.', energyCost:0, rewardXp:10, rewardGold:5, unlocks:['n2']},
+                {id:'n2', type:'test', title:'Prueba Rápida', content:'Si aciertas varias seguidas, subirá tu medidor de combo.', options:['Fallo','Acierto','Fallo'], correctAnswer:1, energyCost:5, damagePenalization:20, rewardXp:30, rewardGold:20, unlocks:['n3']},
+                {id:'n3', type:'boss', title:'JEFE: Examen Final', content:'Todo lo aprendido. Si fallas pierdes el combo.', options:['La Correcta','No','Tampoco'], correctAnswer:0, energyCost:10, damagePenalization:50, rewardXp:100, rewardGold:50, unlocks:[]}
             ];
-            state.worlds[0].name = "Reino: Tierras del Tutorial";
+            state.worlds[0].name = "Introducción al Combo";
         }
-
-        checkStreak();
-        updateUI();
+        checkStreak(); updateUI();
     }
 
-    function save() { 
-        checkAchievements();
-        localStorage.setItem('lifequest_epic_v1', JSON.stringify(state)); 
-        updateUI(); 
-    }
+    function save() { localStorage.setItem('lq_adrenaline_v1', JSON.stringify(state)); updateUI(); }
 
     function checkStreak() {
         const today = new Date().toDateString();
@@ -301,197 +289,149 @@
                 const diff = Math.ceil(Math.abs(new Date(today) - new Date(state.lastDate)) / (1000*60*60*24));
                 state.streak = (diff === 1) ? state.streak + 1 : 1;
             } else state.streak = 1;
-            state.lastDate = today;
-            save();
+            state.lastDate = today; save();
         }
-        document.getElementById('hub-streak').innerText = state.streak;
     }
 
-    // --- NAVEGACIÓN ---
     function navTo(screenId) {
+        uiClick();
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-' + screenId).classList.add('active');
-        
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         const tab = document.getElementById('tab-' + (screenId === 'study' ? 'worlds' : screenId));
         if(tab) tab.classList.add('active');
-
         document.getElementById('global-hud').style.display = (screenId === 'home') ? 'none' : 'grid';
-
         if(screenId === 'worlds') renderWorlds();
-        if(screenId === 'profile') renderBadges();
+        if(screenId === 'shop') renderCrafting();
     }
 
     // --- MUNDOS Y MAPA ---
     function renderWorlds() {
-        const list = document.getElementById('worlds-list');
-        list.innerHTML = state.worlds.map((w, i) => `
-            <div class="world-box" onclick="enterWorld(${i})">
-                <span class="world-icon">${w.campaign.length ? (w.completed.length === w.campaign.length ? '👑' : '🔮') : '📁'}</span>
-                <div style="font-weight:900; font-size:14px;">${w.name}</div>
-                <div style="font-size:11px; color:var(--text-sub); margin-top:5px;">Progreso: ${w.campaign.length ? Math.floor((w.completed.length/w.campaign.length)*100) : 0}%</div>
+        document.getElementById('worlds-list').innerHTML = state.worlds.map((w, i) => `
+            <div class="card" style="text-align:center; padding:15px; cursor:pointer;" onclick="enterWorld(${i})">
+                <div style="font-size:30px; margin-bottom:5px;">${w.campaign.length ? '🗺️' : '🔒'}</div>
+                <div style="font-weight:900; font-size:13px;">${w.name}</div>
+                <div style="font-size:10px; color:var(--text-sub);">Progreso: ${w.campaign.length ? Math.floor((w.completed.length/w.campaign.length)*100) : 0}%</div>
             </div>
         `).join('');
     }
 
     function enterWorld(idx) {
-        activeW = idx;
+        uiClick(); activeW = idx; navTo('study');
         document.getElementById('study-map-view').style.display = 'block';
         document.getElementById('study-node-view').style.display = 'none';
         document.getElementById('current-world-title').innerText = state.worlds[activeW].name;
-        navTo('study');
         renderMap();
     }
 
     function renderMap() {
         const w = state.worlds[activeW];
         const container = document.getElementById('node-path-render');
-        container.innerHTML = w.campaign.length ? '' : '<div style="text-align:center; color:var(--text-sub); margin-top:50px;">Reino Vacío.<br>Usa la Forja para invocar niveles.</div>';
+        container.innerHTML = w.campaign.length ? '' : '<div style="text-align:center; color:var(--text-sub);">Mundo vacío. Usa la Forja.</div>';
         
         w.campaign.forEach((n, i) => {
-            const isDone = w.completed.includes(n.id);
-            const isUnlocked = w.unlocked.includes(n.id);
-            const isBoss = n.type === 'boss';
-            
-            let statusClass = isDone ? 'completed' : (isUnlocked ? 'unlocked' : '');
-            if(isBoss && isUnlocked && !isDone) statusClass += ' boss';
-            
-            let icon = '⚔️';
-            if(isDone) icon = '⭐';
-            else if(n.type === 'reading') icon = '📖';
-            else if(n.type === 'flashcard') icon = '🎴';
-            else if(isBoss) icon = '👹';
-
-            const offset = (i % 2 !== 0) ? 'translateX(30px)' : 'translateX(-30px)';
+            const isDone = w.completed.includes(n.id); const isUnlocked = w.unlocked.includes(n.id);
+            let status = isDone ? 'completed' : (isUnlocked ? 'unlocked' : '');
+            if(n.type === 'boss') status += ' boss';
+            let icon = isDone ? '⭐' : (n.type === 'reading' ? '📖' : (n.type === 'boss' ? '👹' : '⚔️'));
+            const offset = (i % 2 !== 0) ? 'translateX(20px)' : 'translateX(-20px)';
 
             container.innerHTML += `
                 <div style="transform: ${offset}; text-align:center;">
-                    <button class="node ${statusClass}" onclick="openNode('${n.id}')">${icon}</button>
-                    <div style="font-weight:900; font-size:12px; margin-top:12px; color:${isBoss && !isDone ? 'var(--duo-purple)' : 'var(--text-main)'};">${n.title}</div>
+                    <button class="node ${status}" onclick="openNode('${n.id}')">${icon}</button>
+                    <div style="font-weight:900; font-size:11px; margin-top:8px; color:${n.type === 'boss' && !isDone?'var(--duo-purple)':'var(--text-main)'}">${n.title}</div>
                 </div>
             `;
         });
     }
 
-    // --- GAMEPLAY (NODOS) ---
+    // --- NODOS ---
     function openNode(id) {
+        uiClick();
         const w = state.worlds[activeW];
-        if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Este camino está sellado por ahora.");
+        if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Camino cerrado.");
         
         currNode = w.campaign.find(n => n.id === id);
         const isDone = w.completed.includes(id);
 
-        if(!isDone && state.en < currNode.energyCost) return alert("⚡ Te falta Energía. Usa el Mercado Negro o sube de nivel.");
-        if(!isDone) { state.en -= currNode.energyCost; save(); }
+        let cost = currNode.energyCost;
+        if(state.equipped === 'w3') cost = Math.floor(cost * 0.5);
+        if(!isDone && state.en < cost) return alert("⚡ Energía insuficiente.");
+        if(!isDone) { state.en -= cost; save(); }
+
+        hintsUsed = false;
+        document.getElementById('btn-hint').style.display = (currNode.type === 'test' || currNode.type === 'boss') && !isDone ? 'block' : 'none';
 
         document.getElementById('study-map-view').style.display = 'none';
         document.getElementById('study-node-view').style.display = 'block';
-        
-        const titleEl = document.getElementById('node-title');
-        titleEl.innerText = currNode.title;
-        titleEl.style.color = currNode.type === 'boss' ? 'var(--duo-purple)' : 'var(--duo-blue)';
-        
+        document.getElementById('node-title').innerText = currNode.title;
         document.getElementById('node-text').innerHTML = currNode.content;
         
         const gameDiv = document.getElementById('game-container');
         const b1 = document.getElementById('btn-action-1');
-        const b2 = document.getElementById('btn-action-2');
-        
-        gameDiv.innerHTML = ''; 
-        b1.style.display = 'none'; b2.style.display = 'none'; b1.className = 'btn-3d btn-blue'; b2.className = 'btn-3d btn-red';
-        selIdx = null;
+        gameDiv.innerHTML = ''; b1.style.display = 'none'; b1.className = 'btn-3d btn-blue'; selIdx = null;
 
         if(isDone) {
             b1.style.display = 'block'; b1.innerText = "YA COMPLETADO"; b1.onclick = closeNode; b1.className = 'btn-3d btn-dark';
         } else {
-            // RENDERIZAR SEGÚN TIPO
             if(currNode.type === 'reading') {
                 b1.style.display = 'block'; b1.innerText = "ENTENDIDO"; b1.onclick = finishNode; b1.className = 'btn-3d btn-green';
-            } 
-            else if(currNode.type === 'test' || currNode.type === 'boss') {
-                currNode.options.forEach((o, i) => {
-                    gameDiv.innerHTML += `<div class="option-card" onclick="selectOpt(${i}, this)">${o}</div>`;
-                });
-                b1.style.display = 'block'; b1.innerText = "ATACAR / COMPROBAR"; b1.onclick = () => checkTestAnswer();
+            } else {
+                currNode.options.forEach((o, i) => { gameDiv.innerHTML += `<div class="option-card" id="opt-${i}" onclick="selectOpt(${i})">${o}</div>`; });
+                b1.style.display = 'block'; b1.innerText = "ATACAR"; b1.onclick = checkAnswer;
                 if(currNode.type === 'boss') b1.className = 'btn-3d btn-purple';
             }
-            else if(currNode.type === 'flashcard') {
-                gameDiv.innerHTML = `
-                    <div class="flashcard-box" id="fc-box">
-                        <div id="fc-front">${currNode.frontText}</div>
-                        <div class="flashcard-back" id="fc-back">${currNode.backText}</div>
-                    </div>
-                `;
-                b1.style.display = 'block'; b1.innerText = "MOSTRAR RESPUESTA"; b1.onclick = showFlashcardBack; b1.className = 'btn-3d btn-blue';
-            }
         }
     }
 
-    // Lógica Test & Boss
-    function selectOpt(idx, el) {
-        selIdx = idx;
+    function selectOpt(idx) {
+        uiClick(); selIdx = idx;
         document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-        el.classList.add('selected');
+        document.getElementById(`opt-${idx}`).classList.add('selected');
     }
 
-    function checkTestAnswer() {
+    function useOraculo() {
+        uiClick();
+        if(state.gold < 15) return alert("Falta Oro.");
+        if(hintsUsed) return;
+        const wrong = []; currNode.options.forEach((_, i) => { if(i !== currNode.correctAnswer) wrong.push(i); });
+        if(wrong.length > 0) {
+            state.gold -= 15; hintsUsed = true; save(); playSound('buy');
+            document.getElementById(`opt-${wrong[Math.floor(Math.random() * wrong.length)]}`).classList.add('hidden');
+            document.getElementById('btn-hint').style.display = 'none';
+        }
+    }
+
+    function checkAnswer() {
         if(selIdx === null) return;
-        const cards = document.querySelectorAll('.option-card');
+        const el = document.getElementById(`opt-${selIdx}`);
         const isCorrect = selIdx === currNode.correctAnswer;
-        processResult(isCorrect, cards[selIdx]);
-    }
-
-    // Lógica Flashcard
-    function showFlashcardBack() {
-        document.getElementById('fc-back').style.display = 'block';
-        const b1 = document.getElementById('btn-action-1');
-        const b2 = document.getElementById('btn-action-2');
-        b1.innerText = "LO SABÍA ✅"; b1.className = 'btn-3d btn-green'; b1.onclick = () => processResult(true, document.getElementById('fc-box'));
-        b2.style.display = 'block'; b2.innerText = "FALLÉ ❌"; b2.onclick = () => processResult(false, document.getElementById('fc-box'));
-    }
-
-    // Procesar Acierto/Fallo
-    function processResult(isCorrect, visualElement) {
-        const b1 = document.getElementById('btn-action-1');
-        const b2 = document.getElementById('btn-action-2');
-        b1.style.display = 'none'; b2.style.display = 'none';
+        document.getElementById('btn-action-1').style.display = 'none';
 
         if(isCorrect) {
-            visualElement.classList.add('correct');
-            state.stats.correctAnswers++;
-            if(currNode.type === 'boss') state.stats.bossesDefeated++;
-            triggerConfetti();
-            setTimeout(() => { finishNode(); }, 1000);
+            playSound('success'); vibratePhone([50, 50, 50]);
+            el.classList.add('correct');
+            state.combo++; // Sube combo
+            setTimeout(() => finishNode(), 800);
         } else {
-            visualElement.classList.add('wrong');
-            takeDamage(currNode.damagePenalization);
-        }
-    }
-
-    function takeDamage(dmg) {
-        state.hp -= dmg;
-        
-        // Efecto visual de daño
-        document.getElementById('phone-container').classList.add('damage-effect');
-        document.getElementById('damage-overlay').style.display = 'block';
-        setTimeout(() => { 
-            document.getElementById('phone-container').classList.remove('damage-effect'); 
-            document.getElementById('damage-overlay').style.display = 'none';
-        }, 400);
-
-        if(state.hp <= 0) { 
-            setTimeout(() => {
-                alert("💀 HAS CAÍDO EN BATALLA.\nPierdes la consciencia y despiertas en el inicio. Tu energía y vida se han reiniciado."); 
-                state.hp = state.maxHp; state.en = state.maxEn;
-                save();
-                navTo('home');
-            }, 500);
-        } else {
-            setTimeout(() => {
-                alert(`❌ Respuesta incorrecta. Pierdes ${dmg} HP.`);
-                save();
-                closeNode(); // Te saca del nodo para que lo pienses
-            }, 500);
+            playSound('hit'); vibratePhone(300);
+            el.classList.add('wrong');
+            state.combo = 0; // Rompe combo
+            
+            let dmg = currNode.damagePenalization;
+            if(state.equipped === 'w2') dmg = Math.floor(dmg * 0.7);
+            
+            state.hp -= dmg;
+            document.getElementById('phone-container').classList.add('damage-effect');
+            document.getElementById('damage-overlay').style.display = 'block';
+            
+            setTimeout(() => { 
+                document.getElementById('phone-container').classList.remove('damage-effect'); 
+                document.getElementById('damage-overlay').style.display = 'none';
+                if(state.hp <= 0) {
+                    alert("💀 HAS MUERTO."); state.hp = state.maxHp; state.en = state.maxEn; save(); navTo('home');
+                } else { alert(`❌ Fallaste. Recibes ${dmg} de daño.\nCombo Reiniciado.`); save(); closeNode(); }
+            }, 400);
         }
     }
 
@@ -499,120 +439,118 @@
         const w = state.worlds[activeW];
         if(!w.completed.includes(currNode.id)) {
             w.completed.push(currNode.id);
-            state.gold += currNode.rewardGold;
-            state.stats.nodesDone++;
-            gainXP(currNode.rewardXp);
+            
+            // Multilpicador por Combo (ej: 0 combo = x1, 5 combo = x1.5)
+            const multiplier = 1 + (state.combo * 0.1);
+            const finalGold = Math.floor(currNode.rewardGold * multiplier);
+            let xpGain = Math.floor(currNode.rewardXp * multiplier);
+            
+            if(state.equipped === 'w1') xpGain = Math.floor(xpGain * 1.2);
+            
+            state.gold += finalGold;
+            gainXP(xpGain);
+            dropLoot(currNode.type === 'boss');
+
             if(currNode.unlocks) currNode.unlocks.forEach(uid => { if(!w.unlocked.includes(uid)) w.unlocked.push(uid); });
             save();
         }
         closeNode();
     }
 
-    function closeNode() {
-        document.getElementById('study-node-view').style.display = 'none';
-        document.getElementById('study-map-view').style.display = 'block';
-        renderMap();
+    function dropLoot(isBoss) {
+        let msg = "";
+        if(Math.random() > 0.5 || isBoss) { state.inventory.iron++; msg += "1x Hierro "; }
+        if(Math.random() > 0.75 || (isBoss && Math.random() > 0.3)) { state.inventory.dark_shard++; msg += "1x Fragmento Oscuro "; }
+        if(Math.random() > 0.95 || isBoss) { state.inventory.star_dust++; msg += "1x Polvo Estelar "; }
+        if(msg !== "") { vibratePhone([30,30,30]); playSound('buy'); alert("🎁 ¡Botín!\n" + msg); }
     }
+
+    function closeNode() { uiClick(); document.getElementById('study-node-view').style.display = 'none'; document.getElementById('study-map-view').style.display = 'block'; renderMap(); }
 
     function gainXP(amt) {
         state.xp += amt;
         if(state.xp >= state.maxXp) {
+            playSound('levelup'); vibratePhone([100, 50, 100, 50, 200]);
             state.lvl++; state.xp -= state.maxXp; state.maxXp = Math.floor(state.maxXp * 1.5);
-            state.hp = state.maxHp; state.en = state.maxEn;
-            alert(`⚡ ¡NIVEL DE MAGO AUMENTADO: ${state.lvl}!\nVida y Energía restauradas.`);
+            state.maxHp += 10; state.hp = state.maxHp; state.en = state.maxEn;
+            alert(`⚡ ¡NIVEL ${state.lvl}!\nVida Máxima aumentada.`);
         }
     }
 
-    // --- TIENDA, FORJA Y LOGROS ---
+    // --- MERCADO Y GACHA ---
     function buyItem(type, cost, amount) {
-        if(state.gold < cost) return alert("No tienes suficiente oro.");
-        if(type === 'hp' && state.hp >= state.maxHp) return alert("Tu HP ya está al máximo.");
-        if(type === 'en' && state.en >= state.maxEn) return alert("Tu Energía ya está al máximo.");
-        
+        uiClick();
+        if(state.gold < cost) return alert("Falta Oro.");
         state.gold -= cost;
         if(type === 'hp') state.hp = Math.min(state.maxHp, state.hp + amount);
         if(type === 'en') state.en = Math.min(state.maxEn, state.en + amount);
+        playSound('buy'); save();
+    }
+
+    function openGacha() {
+        uiClick();
+        if(state.gold < 50) return alert("Falta Oro para abrir el cofre.");
+        state.gold -= 50;
+        playSound('gacha'); vibratePhone([50, 100, 50, 100, 300]);
+        
+        const roll = Math.random();
+        let reward = "";
+        if(roll < 0.50) { state.inventory.iron += 2; reward = "2x Hierro ⚪"; }
+        else if(roll < 0.80) { state.inventory.dark_shard += 1; reward = "1x Fragmento Oscuro 🟣"; }
+        else if(roll < 0.95) { state.inventory.star_dust += 1; reward = "1x Polvo Estelar ✨"; }
+        else { state.maxHp += 5; state.hp += 5; reward = "¡BENDICIÓN! +5 Vida Máxima ❤️"; }
         
         save();
-        alert("¡Poción consumida!");
+        alert(`📦 Has abierto el cofre...\n¡Obtienes: ${reward}!`);
     }
 
-    function openForge() {
-        const code = JSON.stringify(state.worlds[activeW].campaign, null, 2);
-        const newCode = prompt("⚒️ FORJA DE CREADOR (JSON):\nCuidado, sobreescribirás este Reino.", code);
-        if(newCode) {
-            try {
-                const parsed = JSON.parse(newCode);
-                state.worlds[activeW].campaign = parsed;
-                state.worlds[activeW].completed = [];
-                state.worlds[activeW].unlocked = parsed.length > 0 ? [parsed[0].id] : [];
-                if(parsed.length > 0 && parsed[0].title) state.worlds[activeW].name = "Reino: " + parsed[0].title;
-                save();
-                renderMap();
-                document.getElementById('current-world-title').innerText = state.worlds[activeW].name;
-            } catch(e) { alert("El hechizo ha fallado. El JSON no es válido."); }
-        }
+    // Herrería y Forja (iguales, con uiClick())
+    function renderCrafting() {
+        document.getElementById('craft-ui').innerHTML = Object.values(state.equipment).map(w => {
+            let costStr = Object.entries(w.cost).map(([k,v]) => `${v} ${k==='iron'?'Hierro':k==='dark_shard'?'Frag.':'Polvo'}`).join(', ');
+            let canBuy = Object.entries(w.cost).every(([k,v]) => state.inventory[k] >= v);
+            if(w.owned) return `<div class="craft-item"><div><div style="font-weight:900;">${w.icon} ${w.name}</div><div style="font-size:11px; color:var(--text-sub);">${w.desc}</div></div><button class="btn-3d ${state.equipped===w.id?'btn-dark':'btn-blue'}" style="width:auto; margin:0; padding:8px 12px;" onclick="equip('${w.id}')">${state.equipped===w.id?'EQUIPADO':'EQUIPAR'}</button></div>`;
+            return `<div class="craft-item"><div><div style="font-weight:900;">${w.icon} ${w.name}</div><div style="font-size:11px; color:var(--duo-orange);">${costStr}</div><div style="font-size:10px; color:var(--text-sub);">${w.desc}</div></div><button class="btn-3d ${canBuy?'btn-purple':'btn-dark'}" style="width:auto; margin:0; padding:8px 12px;" onclick="craft('${w.id}')">FORJAR</button></div>`;
+        }).join('');
     }
+    function craft(id) { uiClick(); const w = state.equipment[id]; if(!Object.entries(w.cost).every(([k,v]) => state.inventory[k] >= v)) return; Object.entries(w.cost).forEach(([k,v]) => state.inventory[k] -= v); w.owned = true; playSound('levelup'); vibratePhone([200, 100, 200]); save(); renderCrafting(); alert(`Forjado: ${w.name}!`); }
+    function equip(id) { uiClick(); state.equipped = id; playSound('success'); save(); renderCrafting(); }
+    function darkPact(type) { uiClick(); if(type==='gold' && state.hp>30){ state.hp-=30; state.gold+=100; playSound('hit'); vibratePhone(400); document.getElementById('phone-container').classList.add('damage-effect'); setTimeout(()=>document.getElementById('phone-container').classList.remove('damage-effect'),400); save(); } }
+    function openForge() { uiClick(); const code = JSON.stringify(state.worlds[activeW].campaign, null, 2); const newCode = prompt("⚒️ FORJA DE CREADOR (JSON):", code); if(newCode) { try { const p = JSON.parse(newCode); state.worlds[activeW].campaign = p; state.worlds[activeW].completed = []; state.worlds[activeW].unlocked = p.length?[p[0].id]:[]; save(); renderMap(); } catch(e) {} } }
 
-    function checkAchievements() {
-        if(state.stats.nodesDone >= 1) state.achievements.first_blood = true;
-        if(state.stats.nodesDone >= 10) state.achievements.scholar = true;
-        if(state.stats.bossesDefeated >= 1) state.achievements.boss_slayer = true;
-        if(state.gold >= 500) state.achievements.rich = true;
-    }
-
-    function renderBadges() {
-        const c = document.getElementById('badges-container');
-        c.innerHTML = `
-            <div class="badge ${state.achievements.first_blood ? 'earned' : ''}"><div>🩸</div><small>1ª Sangre</small></div>
-            <div class="badge ${state.achievements.scholar ? 'earned' : ''}"><div>📚</div><small>Erudito (10)</small></div>
-            <div class="badge ${state.achievements.boss_slayer ? 'earned' : ''}"><div>👹</div><small>Caza-Jefes</small></div>
-            <div class="badge ${state.achievements.rich ? 'earned' : ''}"><div>💰</div><small>Rico (500g)</small></div>
-        `;
-    }
-
-    function hardReset() { 
-        if(confirm("🚨 Vas a borrar tu existencia en este Multiverso. ¿Seguro?")) { 
-            localStorage.clear(); location.reload(); 
-        } 
-    }
-
-    // --- UI UPDATES ---
     function updateUI() {
-        document.getElementById('ui-lvl').innerText = state.lvl;
-        document.getElementById('ui-gold').innerText = state.gold;
-        document.getElementById('ui-xp').innerText = Math.floor(state.xp);
-        document.getElementById('ui-max-xp').innerText = Math.floor(state.maxXp);
+        document.getElementById('ui-lvl').innerText = state.lvl; document.getElementById('ui-gold').innerText = state.gold;
+        document.getElementById('ui-xp').innerText = state.xp; document.getElementById('ui-max-xp').innerText = state.maxXp;
         document.getElementById('bar-xp').style.width = (state.xp / state.maxXp * 100) + '%';
-        
-        document.getElementById('ui-hp').innerText = state.hp;
+        document.getElementById('ui-hp').innerText = state.hp; document.getElementById('ui-maxhp').innerText = state.maxHp;
         document.getElementById('bar-hp').style.width = (state.hp / state.maxHp * 100) + '%';
-        
-        document.getElementById('ui-en').innerText = state.en;
+        document.getElementById('ui-en').innerText = state.en; document.getElementById('ui-maxen').innerText = state.maxEn;
         document.getElementById('bar-en').style.width = (state.en / state.maxEn * 100) + '%';
 
-        document.getElementById('stat-nodes').innerText = state.stats.nodesDone;
-        document.getElementById('stat-correct').innerText = state.stats.correctAnswers;
-        document.getElementById('profile-lvl').innerText = state.lvl;
-    }
+        // Combo Badge
+        const comboBadge = document.getElementById('combo-badge');
+        if(state.combo > 0) {
+            comboBadge.style.display = 'inline-block';
+            comboBadge.innerText = `🔥 x${(1 + (state.combo * 0.1)).toFixed(1)}`;
+        } else { comboBadge.style.display = 'none'; }
 
-    function triggerConfetti() {
-        const canvas = document.getElementById('confetti');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        let particles = Array.from({length: 80}, () => ({
-            x: Math.random() * canvas.width, y: canvas.height, 
-            c: `hsl(${Math.random()*360}, 100%, 60%)`,
-            v: Math.random() * 6 + 4, d: Math.random() * 4 - 2
-        }));
-        function draw() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            particles.forEach(p => { p.y -= p.v; p.x += p.d; ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, 6, 6); });
-            if(particles[0].y > -20) requestAnimationFrame(draw); else ctx.clearRect(0,0,canvas.width, canvas.height);
+        const inv = document.getElementById('inventory-ui');
+        if(inv) inv.innerHTML = `<span class="loot-pill">⚪ Hierro: ${state.inventory.iron}</span> <span class="loot-pill">🟣 Frag: ${state.inventory.dark_shard}</span> <span class="loot-pill">✨ Polvo: ${state.inventory.star_dust}</span>`;
+        
+        const eqEl = document.getElementById('eq-icon');
+        if(eqEl) {
+            if(state.equipped && state.equipment[state.equipped]) {
+                const eq = state.equipment[state.equipped];
+                eqEl.innerText = eq.icon; document.getElementById('eq-name').innerText = eq.name; document.getElementById('eq-desc').innerText = eq.desc;
+            } else {
+                eqEl.innerText = '🎒'; document.getElementById('eq-name').innerText = 'Sin Arma'; document.getElementById('eq-desc').innerText = 'Sin bonus.';
+            }
         }
-        draw();
+        document.getElementById('hub-streak').innerText = state.streak;
     }
 
+    document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    document.querySelector('.content').addEventListener('touchmove', function(e) { e.stopPropagation(); }, { passive: false });
     init();
 </script>
 </body>
