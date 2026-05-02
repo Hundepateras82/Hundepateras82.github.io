@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>LifeQuest AAA: V15 Llama Eterna</title>
+    <title>LifeQuest AAA: V15.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -66,7 +66,6 @@
         .item-icon { font-size: 30px; background: var(--panel-light); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); }
         .item-details { flex: 1; min-width: 120px; }
 
-        /* INVENTARIO DETALLADO */
         .inv-list-item { display: flex; align-items: center; gap: 15px; padding: 10px; background: var(--panel-light); border-radius: 10px; border: 1px solid var(--border-dark); margin-bottom: 8px;}
         .inv-icon { font-size: 24px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--panel); border-radius: 8px;}
         
@@ -77,14 +76,16 @@
         .node.unlocked { background: var(--blue); border-color: var(--blue-shadow); box-shadow: 0 6px 0 var(--blue-shadow); color: white; animation: pulse 2s infinite;}
         .node.boss { border-color: var(--red); border-width: 5px; }
 
-        /* COMBAT IPHONE FIX */
+        /* COMBAT FIX TOTAL IPHONE */
         .combat-container { display: flex; flex-direction: column; height: 100%; transition: background 0.3s; }
         .combat-header { padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border-dark); flex-shrink: 0;}
         .combat-progress-bg { flex: 1; height: 10px; background: var(--border-dark); border-radius: 10px; overflow: hidden; }
         .combat-progress-fill { height: 100%; background: var(--green); transition: width 0.3s ease; }
         
         .combat-body { flex: 1; overflow-y: auto; padding: 20px; }
-        .combat-footer { flex-shrink: 0; padding: 15px 20px; background: var(--panel); border-top: 1px solid var(--border-dark); padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+        
+        /* El padding extra aquí empuja los botones hacia arriba lejos del borde de la pantalla */
+        .combat-footer { flex-shrink: 0; padding: 15px 20px; background: var(--panel); border-top: 1px solid var(--border-dark); padding-bottom: calc(40px + env(safe-area-inset-bottom)); z-index: 200; }
 
         .option { background: var(--panel-light); border: 2px solid var(--border-dark); border-radius: 12px; padding: 16px; margin-bottom: 10px; font-weight: 700; transition: 0.2s; cursor: pointer; }
         .option.selected { border-color: var(--blue); background: rgba(59,130,246,0.1); }
@@ -180,7 +181,7 @@
     <div id="screen-home" class="screen active">
         <div class="content">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 style="margin:0; color:var(--cyan); font-weight:900;" id="profile-rank">Rango: F</h2>
+                <h2 style="margin-top:0; color:var(--cyan); font-weight:900;" id="profile-rank">Rango: F</h2>
                 <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="navTo('skills')">✨ SKILLS</button>
             </div>
 
@@ -250,7 +251,7 @@
                 <h2 style="margin:0; font-weight:900; color:var(--cyan); cursor:pointer;" id="world-title" onclick="openWorldsManager()">Mazmorra ▾</h2>
                 <div style="display:flex; gap:5px;">
                     <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openWorldsManager()">🌌 MUNDOS</button>
-                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ JSON</button>
+                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ CARGAR JSON</button>
                 </div>
             </div>
             <div class="node-path" id="map-render"></div>
@@ -302,7 +303,7 @@
     <div id="screen-shop" class="screen">
         <div class="content">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 style="margin:0; color:var(--gold); font-weight:900;">⏳ Ofertas Rotativas</h2>
+                <h2 style="margin-top:0; color:var(--gold); font-weight:900;">⏳ Ofertas Rotativas</h2>
                 <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="refreshShop(true)">🔄 50 💎</button>
             </div>
             <p style="font-size:12px; color:var(--text-sub);">Se reinician a medianoche. Pueden contener equipo.</p>
@@ -470,46 +471,46 @@
 
     function init() {
         try { 
-            const saved = localStorage.getItem('LifeQuest_V15'); 
+            const saved = localStorage.getItem('LifeQuest_V15_1'); 
             if (saved) {
                 const parsed = JSON.parse(saved);
                 state = { ...state, ...parsed };
+                // DEEP MERGE CRÍTICO PARA EVITAR NaN
                 state.mining = { power: 1, auto: 0, carts: 0, stone: 0, geodes: 0, totalClicks: 0, depth: 0, lastMineTime: Date.now(), ...(parsed.mining || {}) };
                 state.skills = { hp: 0, atk: 0, def: 0, crit: 0, evasion: 0, ...(parsed.skills || {}) };
                 state.inventory = { ...(parsed.inventory || {}) };
                 state.equipment = { weapon: null, armor: null, accessory: null, pet: null, ...(parsed.equipment || {}) };
+                
+                // Sanear basuras NaN si las hubiera
+                if(isNaN(state.gold)) state.gold = 0;
+                if(isNaN(state.mining.stone)) state.mining.stone = 0;
+                if(isNaN(state.mining.power)) state.mining.power = 1;
+                if(isNaN(state.gems)) state.gems = 0;
             } 
-        } catch(e) { console.error("Save error", e); }
-        
-        // VIRUS NaN SANITIZATION
-        state.gold = Number(state.gold) || 0;
-        state.gems = Number(state.gems) || 0;
-        state.lvl = Number(state.lvl) || 1;
-        state.hp = Number(state.hp) || 100;
-        state.mining.stone = Number(state.mining.stone) || 0;
-        state.mining.power = Number(state.mining.power) || 1;
-        state.mining.auto = Number(state.mining.auto) || 0;
-        state.mining.carts = Number(state.mining.carts) || 0;
-        state.mining.geodes = Number(state.mining.geodes) || 0;
+        } catch(e) { console.error("Save load error", e); }
         
         if(state.worlds[0].campaign.length === 0) {
             state.worlds[0].campaign = [
-                {id:'n1', type:'reading', title:'📖 La Llama Eterna', content:'V15 Cargada. Tu partida ha sido curada del virus NaN. El botón de lectura está arreglado y anclado abajo.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
+                {id:'n1', type:'reading', title:'📖 Pantalla Completa', content:'Hemos ocultado la barra de navegación inferior durante los combates y las lecturas. El botón de ¡LECCIÓN COMPLETADA! ahora se ve perfectamente y no se sale de tu pantalla.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
                 {id:'n2', type:'test', title:'⚔️ Test Estable', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿El botón de lectura funciona ahora?', options:['Sí','No'], correct:0} ]}
             ];
         }
 
         checkIdleMining(); generateDailyShop(false); recalcStats(); navTo('home');
         
-        setInterval(checkIdleMining, 60000);
-        setInterval(() => { if(frenzyTime > 0) frenzyTime--; else if(heat > 0) heat = Math.max(0, heat - 5); updateMineHeat(); }, 500);
+        setInterval(checkIdleMining, 60000); 
+        setInterval(() => { 
+            if(frenzyTime > 0) frenzyTime--; 
+            else if(heat > 0) heat = Math.max(0, heat - 5); 
+            updateMineHeat(); 
+        }, 500);
     }
     
-    function save() { localStorage.setItem('LifeQuest_V15', JSON.stringify(state)); updateUI(); }
+    function save() { localStorage.setItem('LifeQuest_V15_1', JSON.stringify(state)); updateUI(); }
 
     function hardReset() {
         if(confirm("🚨 ¿ESTÁS TOTALMENTE SEGURO?\nEsto borrará absolutamente todo tu progreso para siempre.")) {
-            localStorage.removeItem('LifeQuest_V15'); location.reload();
+            localStorage.removeItem('LifeQuest_V15_1'); location.reload();
         }
     }
 
@@ -677,19 +678,21 @@
     // --- NAV & UI ---
     function navTo(id) {
         playSound('click');
-        if(combat.active && id !== 'combat') return alert("⚔️ ¡SAL del combate primero (Usa la X o SALIR)!");
+        if(combat.active && id !== 'combat') return alert("⚔️ ¡SAL del combate primero (Usa la X o el Botón Verde)!");
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-' + id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
         const tab = document.getElementById('tab-' + id); if(tab) tab.classList.add('active');
         
         const hA = document.getElementById('hud-advanced'), hM = document.getElementById('hud-minimal');
-        if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; renderMap(); }
-        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; }
-        else { hA.style.display = 'flex'; hM.style.display = 'none'; }
+        const nBar = document.querySelector('.nav'); // CAPTURAMOS LA BARRA DE NAVEGACION
+        
+        if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; nBar.style.display = 'flex'; renderMap(); }
+        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; nBar.style.display = 'none'; } // MODO CONCENTRACION
+        else { hA.style.display = 'flex'; hM.style.display = 'none'; nBar.style.display = 'flex'; }
         
         if(id === 'home') { updateProfile(); startCamp(); } else stopCamp();
-        if(id === 'skills') { const setT=(id,v)=>{let e=document.getElementById(id);if(e)e.innerText=v;}; setT('skill-points-display',state.sp); setT('skill-hp',state.skills.hp); setT('skill-atk',state.skills.atk); setT('skill-def',state.skills.def||0); setT('skill-crit',state.skills.crit||0); setT('skill-evasion',state.skills.evasion||0); }
+        if(id === 'skills') { const setT=(i,v)=>{let e=document.getElementById(i);if(e)e.innerText=v;}; setT('skill-points-display',state.sp); setT('skill-hp',state.skills.hp); setT('skill-atk',state.skills.atk); setT('skill-def',state.skills.def||0); setT('skill-crit',state.skills.crit||0); setT('skill-evasion',state.skills.evasion||0); }
         if(id === 'crafting') renderCrafting(currFilter);
         if(id === 'shop') renderDailyShop();
         if(id === 'mining') updateMiningUI();
@@ -759,7 +762,7 @@
         } catch(e) { alert("❌ ERROR JSON: " + e.message); } 
     }
 
-    // --- COMBATE / LECTURA (BLINDADO) ---
+    // --- COMBATE / LECTURA (TOTALMENTE ARREGLADO) ---
     function startNode(id) {
         playSound('click'); const w = state.worlds[state.activeW];
         if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Bloqueado.");
@@ -772,25 +775,23 @@
         combat = { active: true, node: node, qIndex: 0, selIdx: null, isDone: isDone, corrects: 0 };
         document.getElementById('boss-ui').style.display = node.type === 'boss' ? 'block' : 'none';
 
-        const skillsRow = document.getElementById('active-skills');
         const btnCheck = document.getElementById('btn-check');
         const btnRead = document.getElementById('btn-reading-done');
 
         if(node.type === 'reading') {
-            document.getElementById('ui-combat-prog').style.display = 'none';
-            document.getElementById('ui-combat-hp').style.display = 'none';
-            skillsRow.style.display = 'none';
-            btnCheck.style.display = 'none';
-            btnRead.style.display = 'flex';
-            
+            document.getElementById('active-skills').style.display = 'none';
             document.getElementById('question-text').innerHTML = node.content; 
             document.getElementById('options-container').innerHTML = '';
+            
+            // Apagamos los botones de combate y activamos el de lectura
+            btnCheck.style.display = 'none';
+            btnRead.style.display = 'flex'; 
         } else {
-            document.getElementById('ui-combat-prog').style.display = 'block';
-            document.getElementById('ui-combat-hp').style.display = 'block';
-            skillsRow.style.display = 'flex';
-            btnCheck.style.display = 'flex';
+            document.getElementById('active-skills').style.display = 'flex';
+            
+            // Apagamos el botón de lectura y encendemos los de combate
             btnRead.style.display = 'none';
+            btnCheck.style.display = 'flex';
             
             renderQuestion();
         }
@@ -802,7 +803,7 @@
         const prog = (combat.qIndex / combat.node.questions.length) * 100; document.getElementById('combat-prog-bar').style.width = `${prog}%`;
         if(combat.node.type === 'boss') document.getElementById('boss-hp-fill').style.width = `${100-prog}%`;
 
-        document.getElementById('combat-hp').innerText = state.hp; document.getElementById('combat-pots').innerText = state.potions;
+        document.getElementById('combat-hp').innerText = state.hp;
         const opts = document.getElementById('options-container'); opts.innerHTML = '';
         q.options.forEach((o, i) => { opts.innerHTML += `<div class="option" id="opt-${i}" onclick="selectOpt(${i})">${o}</div>`; });
         const btn = document.getElementById('btn-check'); btn.innerText = "ATACAR"; btn.className = "btn btn-dark"; btn.disabled = true; combat.selIdx = null;
@@ -877,10 +878,7 @@
 
     function fleeCombat() { 
         playSound('click');
-        combat.active = false; 
-        document.getElementById('ui-combat-prog').style.display = 'block';
-        document.getElementById('ui-combat-hp').style.display = 'block';
-        navTo('worlds'); 
+        combat.active = false; navTo('worlds'); 
     }
 
     function gainXP(amt) { state.xp += amt; if(state.xp >= state.maxXp) { state.lvl++; state.sp++; state.xp -= state.maxXp; state.maxXp = Math.floor(state.maxXp * 1.5); recalcStats(); state.hp = state.maxHp; state.en = state.maxEn; } }
