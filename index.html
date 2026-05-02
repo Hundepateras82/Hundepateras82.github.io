@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>LifeQuest AAA: V14 Estable</title>
+    <title>LifeQuest AAA: V15 Llama Eterna</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -61,8 +61,7 @@
         .equip-slot.filled { border-style: solid; background: var(--panel); }
         .equip-icon { font-size: 30px; margin-bottom: 5px; }
         .equip-name { font-size: 9px; font-weight: 900; text-transform: uppercase; }
-        .lvl-badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: black; font-size: 10px; padding: 2px 5px; border-radius: 10px; font-weight: 900;}
-
+        
         .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-dark); flex-wrap: wrap;}
         .item-icon { font-size: 30px; background: var(--panel-light); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); }
         .item-details { flex: 1; min-width: 120px; }
@@ -78,7 +77,7 @@
         .node.unlocked { background: var(--blue); border-color: var(--blue-shadow); box-shadow: 0 6px 0 var(--blue-shadow); color: white; animation: pulse 2s infinite;}
         .node.boss { border-color: var(--red); border-width: 5px; }
 
-        /* COMBAT FIJADO IPHONE 15 */
+        /* COMBAT IPHONE FIX */
         .combat-container { display: flex; flex-direction: column; height: 100%; transition: background 0.3s; }
         .combat-header { padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border-dark); flex-shrink: 0;}
         .combat-progress-bg { flex: 1; height: 10px; background: var(--border-dark); border-radius: 10px; overflow: hidden; }
@@ -92,7 +91,7 @@
         .option.correct { border-color: var(--green); background: rgba(16,185,129,0.1); color: var(--green); }
         .option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); opacity: 0.5; }
 
-        /* NAV CON PADDING BOTTOM PARA iPHONE */
+        /* NAV */
         .nav { position: absolute; bottom: 0; width: 100%; display: flex; background: rgba(13,20,36,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border-dark); z-index: 100; padding-bottom: env(safe-area-inset-bottom); overflow-x: auto;}
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 9px; transition: 0.2s; min-width: 60px; padding: 10px 0;}
         .nav-item.active { color: var(--cyan); transform: translateY(-3px); }
@@ -181,7 +180,7 @@
     <div id="screen-home" class="screen active">
         <div class="content">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 style="margin-top:0; color:var(--cyan); font-weight:900;" id="profile-rank">Rango: F</h2>
+                <h2 style="margin:0; color:var(--cyan); font-weight:900;" id="profile-rank">Rango: F</h2>
                 <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="navTo('skills')">✨ SKILLS</button>
             </div>
 
@@ -190,6 +189,12 @@
                 <div class="stat-box" style="color:var(--blue); border-color:var(--blue);">🛡️ DEF<br><span id="stat-def" style="font-size:18px; color:white;">10</span></div>
                 <div class="stat-box" style="color:var(--gold); border-color:var(--gold);">🍀 SUE<br><span id="stat-luck" style="font-size:18px; color:white;">5</span></div>
                 <div class="stat-box" style="color:var(--purple); border-color:var(--purple);">🔥 CRIT<br><span id="stat-crit" style="font-size:18px; color:white;">0%</span></div>
+            </div>
+            
+            <div class="card" style="margin-top:15px; border-color:var(--green); text-align:center; background: rgba(16, 185, 129, 0.1);">
+                <h3 style="margin-top:0; color:var(--green); font-weight:900;">🏕️ El Campamento</h3>
+                <p style="font-size:12px; color:var(--text-main);">Quédate en esta pantalla. Recuperas 2 HP y 1 EN cada 2 segundos sin hacer nada.</p>
+                <div style="font-size:30px; transition:0.2s;" id="camp-fire">🔥</div>
             </div>
 
             <h3 style="font-weight: 900; margin-bottom: 10px;">Equipamiento</h3>
@@ -245,7 +250,7 @@
                 <h2 style="margin:0; font-weight:900; color:var(--cyan); cursor:pointer;" id="world-title" onclick="openWorldsManager()">Mazmorra ▾</h2>
                 <div style="display:flex; gap:5px;">
                     <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openWorldsManager()">🌌 MUNDOS</button>
-                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ CARGAR JSON</button>
+                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ JSON</button>
                 </div>
             </div>
             <div class="node-path" id="map-render"></div>
@@ -254,10 +259,11 @@
 
     <div id="screen-combat" class="screen" style="background:var(--panel);">
         <div class="combat-container" id="combat-container">
+            
             <div class="combat-header" id="combat-header">
-                <div style="font-size:20px; cursor:pointer; color:var(--text-sub);" onclick="fleeCombat()">✖</div>
-                <div class="combat-progress-bg"><div id="combat-prog-bar" class="combat-progress-fill" style="width:0%;"></div></div>
-                <div style="font-weight:900; color:var(--red);">❤️ <span id="combat-hp">100</span></div>
+                <div style="font-size:20px; cursor:pointer; color:var(--text-sub); padding-right:15px;" onclick="fleeCombat()">✖</div>
+                <div class="combat-progress-bg" id="ui-combat-prog"><div id="combat-prog-bar" class="combat-progress-fill" style="width:0%;"></div></div>
+                <div style="font-weight:900; color:var(--red);" id="ui-combat-hp">❤️ <span id="combat-hp">100</span></div>
             </div>
             
             <div class="combat-body">
@@ -276,6 +282,7 @@
                     <button class="btn btn-green" style="flex:0.5; padding:8px; font-size:11px;" onclick="usePotion()">💊 <span id="combat-pots">0</span></button>
                 </div>
                 <button id="btn-check" class="btn btn-dark" onclick="checkAnswer()">COMPROBAR</button>
+                <button id="btn-reading-done" class="btn btn-green" onclick="finishReading()" style="display:none;">¡LECCIÓN COMPLETADA!</button>
             </div>
         </div>
     </div>
@@ -295,7 +302,7 @@
     <div id="screen-shop" class="screen">
         <div class="content">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 style="margin-top:0; color:var(--gold); font-weight:900;">⏳ Ofertas Rotativas</h2>
+                <h2 style="margin:0; color:var(--gold); font-weight:900;">⏳ Ofertas Rotativas</h2>
                 <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="refreshShop(true)">🔄 50 💎</button>
             </div>
             <p style="font-size:12px; color:var(--text-sub);">Se reinician a medianoche. Pueden contener equipo.</p>
@@ -332,8 +339,8 @@
                     <div>Clics: <span id="mine-clicks" style="color:var(--gold);">0</span></div>
                 </div>
                 <div style="font-size:11px; color:var(--text-sub); text-align:left;">
-                    Producción Idle: <span id="idle-stone-rate">0</span> 🪨/min | <span id="idle-iron-rate">0</span> ⚪/min<br>
-                    Límite Offline: <span id="idle-cap-hrs">2</span> horas
+                    Producción Idle: <span id="idle-stone-rate" style="color:white; font-weight:bold;">0</span> 🪨/min | <span id="idle-iron-rate" style="color:white; font-weight:bold;">0</span> ⚪/min<br>
+                    Límite Offline: <span id="idle-cap-hrs" style="color:white; font-weight:bold;">2</span> horas
                 </div>
             </div>
             
@@ -427,12 +434,12 @@
         m4: {icon:'🟣', t:2, n:'Cristal Oscuro', desc:'Jefes o Fusión.'}, 
         m5: {icon:'🧵', t:2, n:'Hilo Mágico', desc:'Tienda Diaria.'}, 
         m6: {icon:'⚙️', t:2, n:'Acero', desc:'Forja de Hierro.'}, 
-        m7: {icon:'✨', t:3, n:'Polvo Estelar', desc:'Gacha Mítico o Jefes.'}, 
+        m7: {icon:'✨', t:3, n:'Polvo Estelar', desc:'Sintetizador o Jefes.'}, 
         m8: {icon:'🦴', t:3, n:'Hueso', desc:'Drops Raros.'}, 
         m9: {icon:'📀', t:3, n:'Oro Puro', desc:'Jefes de élite.'}, 
         m10: {icon:'👹', t:4, n:'Alma', desc:'Jefes Finales.'}, 
         m11: {icon:'🩸', t:4, n:'Sangre', desc:'Mercado Negro.'}, 
-        m12: {icon:'🐉', t:5, n:'Escama', desc:'Extremadamente Raro.'} 
+        m12: {icon:'🐉', t:5, n:'Escama', desc:'Capa 2 del Abismo.'} 
     };
     
     const gearDB = {
@@ -447,7 +454,7 @@
     };
     const rColor = { 1:'tier-1', 2:'tier-2', 3:'tier-3', 4:'tier-4', 5:'tier-5' };
 
-    // --- STATE CORE & SANITIZATION ---
+    // --- STATE CORE & SANITIZATION (ANTI-NaN) ---
     let state = {
         lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 100, gems: 0, potions: 3, maxPots: 5, sp: 0,
         stats: { atk: 10, def: 10, luck: 5, crit: 0, dodge: 0 }, baseBonus: { atk: 0, def: 0 }, 
@@ -458,51 +465,51 @@
         dailyShopDate: "", dailyShopItems: []
     };
 
-    let currFilter = 'weapon'; let heat = 0; let frenzyTime = 0;
+    let currFilter = 'weapon'; let campInterval = null; let heat = 0; let frenzyTime = 0;
     let combat = { active: false, node: null, qIndex: 0, selIdx: null, isDone: false, corrects: 0 };
 
     function init() {
         try { 
-            const saved = localStorage.getItem('LifeQuest_V14'); 
+            const saved = localStorage.getItem('LifeQuest_V15'); 
             if (saved) {
                 const parsed = JSON.parse(saved);
                 state = { ...state, ...parsed };
-                // DEEP MERGE CRÍTICO PARA EVITAR NaN
                 state.mining = { power: 1, auto: 0, carts: 0, stone: 0, geodes: 0, totalClicks: 0, depth: 0, lastMineTime: Date.now(), ...(parsed.mining || {}) };
                 state.skills = { hp: 0, atk: 0, def: 0, crit: 0, evasion: 0, ...(parsed.skills || {}) };
                 state.inventory = { ...(parsed.inventory || {}) };
                 state.equipment = { weapon: null, armor: null, accessory: null, pet: null, ...(parsed.equipment || {}) };
-                
-                // Sanear basuras NaN si las hubiera
-                if(isNaN(state.gold)) state.gold = 0;
-                if(isNaN(state.mining.stone)) state.mining.stone = 0;
-                if(isNaN(state.mining.power)) state.mining.power = 1;
-                if(isNaN(state.gems)) state.gems = 0;
             } 
-        } catch(e) { console.error("Save load error", e); }
+        } catch(e) { console.error("Save error", e); }
+        
+        // VIRUS NaN SANITIZATION
+        state.gold = Number(state.gold) || 0;
+        state.gems = Number(state.gems) || 0;
+        state.lvl = Number(state.lvl) || 1;
+        state.hp = Number(state.hp) || 100;
+        state.mining.stone = Number(state.mining.stone) || 0;
+        state.mining.power = Number(state.mining.power) || 1;
+        state.mining.auto = Number(state.mining.auto) || 0;
+        state.mining.carts = Number(state.mining.carts) || 0;
+        state.mining.geodes = Number(state.mining.geodes) || 0;
         
         if(state.worlds[0].campaign.length === 0) {
             state.worlds[0].campaign = [
-                {id:'n1', type:'reading', title:'📖 Introducción a la V14', content:'El virus de los números infinitos ha sido purgado. Los botones de lectura han vuelto a su sitio. Disfruta de la nueva minería.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
-                {id:'n2', type:'test', title:'⚔️ Test Final', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿El botón de lectura ha vuelto?', options:['Sí','No'], correct:0} ]}
+                {id:'n1', type:'reading', title:'📖 La Llama Eterna', content:'V15 Cargada. Tu partida ha sido curada del virus NaN. El botón de lectura está arreglado y anclado abajo.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
+                {id:'n2', type:'test', title:'⚔️ Test Estable', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿El botón de lectura funciona ahora?', options:['Sí','No'], correct:0} ]}
             ];
         }
 
         checkIdleMining(); generateDailyShop(false); recalcStats(); navTo('home');
         
-        setInterval(checkIdleMining, 60000); // Check idle every min
-        setInterval(() => { 
-            if(frenzyTime > 0) frenzyTime--; 
-            else if(heat > 0) heat = Math.max(0, heat - 5); 
-            updateMineHeat(); 
-        }, 500); // Heat decay
+        setInterval(checkIdleMining, 60000);
+        setInterval(() => { if(frenzyTime > 0) frenzyTime--; else if(heat > 0) heat = Math.max(0, heat - 5); updateMineHeat(); }, 500);
     }
     
-    function save() { localStorage.setItem('LifeQuest_V14', JSON.stringify(state)); updateUI(); }
+    function save() { localStorage.setItem('LifeQuest_V15', JSON.stringify(state)); updateUI(); }
 
     function hardReset() {
         if(confirm("🚨 ¿ESTÁS TOTALMENTE SEGURO?\nEsto borrará absolutamente todo tu progreso para siempre.")) {
-            localStorage.removeItem('LifeQuest_V14'); location.reload();
+            localStorage.removeItem('LifeQuest_V15'); location.reload();
         }
     }
 
@@ -513,16 +520,13 @@
         state.mining.stone += (state.mining.power * multiplier);
         state.mining.totalClicks++;
         
-        // Depth
         if(state.mining.totalClicks % 100 === 0) state.mining.depth++;
 
-        // Heat & Frenzy
         if(frenzyTime === 0) {
             heat += 10;
             if(heat >= 100) { heat = 100; frenzyTime = 10; showFloatingText("¡FRENESÍ x2!", "var(--gold)"); }
         }
 
-        // Drops based on depth
         let r = Math.random();
         if(r < 0.1) { state.inventory.m1 = (state.inventory.m1||0)+1; showFloatingText("+1 Hierro", "var(--tier-1)"); }
         else if(r < 0.01) { state.mining.geodes++; showFloatingText("+1 Geoda 🔮", "var(--purple)"); }
@@ -588,10 +592,7 @@
         if(state.en < 50) return alert("Cuesta 50 EN.");
         state.en -= 50; updateUI(); playSound('gacha');
         let ticks = 30;
-        let drillInt = setInterval(() => {
-            mineRock(); ticks--;
-            if(ticks <= 0) clearInterval(drillInt);
-        }, 200);
+        let drillInt = setInterval(() => { mineRock(); ticks--; if(ticks <= 0) clearInterval(drillInt); }, 200);
     }
 
     let currentEvent = null;
@@ -641,6 +642,20 @@
         state.gold -= item.cost; item.b = true; state.inventory[item.id] = (state.inventory[item.id]||0) + 1; save(); renderDailyShop();
     }
 
+    // --- CAMPAMENTO (IDLE HEAL) ---
+    function startCamp() {
+        if(campInterval) clearInterval(campInterval);
+        campInterval = setInterval(() => {
+            if(state.hp < state.maxHp || state.en < state.maxEn) {
+                state.hp = Math.min(state.maxHp, state.hp + 2);
+                state.en = Math.min(state.maxEn, state.en + 1);
+                updateUI();
+                let f = document.getElementById('camp-fire'); if(f) f.style.transform = `scale(${1 + Math.random()*0.2})`;
+            }
+        }, 2000);
+    }
+    function stopCamp() { if(campInterval) clearInterval(campInterval); }
+
     // --- STATS & SKILLS ---
     function recalcStats() {
         let bA = 10 + state.baseBonus.atk, bD = 10 + state.baseBonus.def, bL = 5, bC = 0, bE = 0;
@@ -673,7 +688,7 @@
         else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; }
         else { hA.style.display = 'flex'; hM.style.display = 'none'; }
         
-        if(id === 'home') updateProfile();
+        if(id === 'home') { updateProfile(); startCamp(); } else stopCamp();
         if(id === 'skills') { const setT=(id,v)=>{let e=document.getElementById(id);if(e)e.innerText=v;}; setT('skill-points-display',state.sp); setT('skill-hp',state.skills.hp); setT('skill-atk',state.skills.atk); setT('skill-def',state.skills.def||0); setT('skill-crit',state.skills.crit||0); setT('skill-evasion',state.skills.evasion||0); }
         if(id === 'crafting') renderCrafting(currFilter);
         if(id === 'shop') renderDailyShop();
@@ -711,7 +726,7 @@
         setTxt('ui-en-txt', `${state.en}/${state.maxEn}`); setW('ui-en-bar', `${(state.en/state.maxEn)*100}%`);
     }
 
-    // --- MAPA ---
+    // --- MUNDOS & FORJA ---
     function renderMap() {
         const w = state.worlds[state.activeW]; document.getElementById('world-title').innerText = w.name + " ▾";
         const c = document.getElementById('map-render'); c.innerHTML = w.campaign.length ? '' : '<div style="color:var(--text-sub);">Vacío.</div>';
@@ -744,7 +759,7 @@
         } catch(e) { alert("❌ ERROR JSON: " + e.message); } 
     }
 
-    // --- COMBATE / LECTURA (ARREGLO DE BOTÓN) ---
+    // --- COMBATE / LECTURA (BLINDADO) ---
     function startNode(id) {
         playSound('click'); const w = state.worlds[state.activeW];
         if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Bloqueado.");
@@ -752,30 +767,31 @@
         if (!node.questions && (node.type === 'test' || node.type === 'boss')) node.questions = [{ q: node.content||"P:", options: node.options||["A","B"], correct: node.correctAnswer||0 }];
 
         const isDone = w.completed.includes(id);
-        if(!isDone) { state.en = Math.max(0, state.en - node.energyCost); recalcStats(); save(); }
+        if(!isDone) { state.en = Math.max(0, state.en - (node.energyCost||0)); recalcStats(); save(); }
 
         combat = { active: true, node: node, qIndex: 0, selIdx: null, isDone: isDone, corrects: 0 };
         document.getElementById('boss-ui').style.display = node.type === 'boss' ? 'block' : 'none';
 
-        const hdr = document.getElementById('combat-header'); 
-        const optsContainer = document.getElementById('options-container'); 
         const skillsRow = document.getElementById('active-skills');
         const btnCheck = document.getElementById('btn-check');
+        const btnRead = document.getElementById('btn-reading-done');
 
         if(node.type === 'reading') {
-            hdr.style.display = 'none'; 
+            document.getElementById('ui-combat-prog').style.display = 'none';
+            document.getElementById('ui-combat-hp').style.display = 'none';
             skillsRow.style.display = 'none';
-            document.getElementById('question-text').innerHTML = node.content; 
-            optsContainer.innerHTML = '';
+            btnCheck.style.display = 'none';
+            btnRead.style.display = 'flex';
             
-            // Reutilizamos el botón central grande y le damos estilo de Aceptar
-            btnCheck.innerText = "¡LECCIÓN COMPLETADA!"; 
-            btnCheck.className = "btn btn-green"; 
-            btnCheck.disabled = false;
-            btnCheck.onclick = () => finishNode(node);
+            document.getElementById('question-text').innerHTML = node.content; 
+            document.getElementById('options-container').innerHTML = '';
         } else {
-            hdr.style.display = 'flex'; 
+            document.getElementById('ui-combat-prog').style.display = 'block';
+            document.getElementById('ui-combat-hp').style.display = 'block';
             skillsRow.style.display = 'flex';
+            btnCheck.style.display = 'flex';
+            btnRead.style.display = 'none';
+            
             renderQuestion();
         }
         navTo('combat');
@@ -789,9 +805,7 @@
         document.getElementById('combat-hp').innerText = state.hp; document.getElementById('combat-pots').innerText = state.potions;
         const opts = document.getElementById('options-container'); opts.innerHTML = '';
         q.options.forEach((o, i) => { opts.innerHTML += `<div class="option" id="opt-${i}" onclick="selectOpt(${i})">${o}</div>`; });
-        
-        const btn = document.getElementById('btn-check'); 
-        btn.innerText = "ATACAR"; btn.className = "btn btn-dark"; btn.disabled = true; btn.onclick = checkAnswer; combat.selIdx = null;
+        const btn = document.getElementById('btn-check'); btn.innerText = "ATACAR"; btn.className = "btn btn-dark"; btn.disabled = true; combat.selIdx = null;
     }
 
     function selectOpt(idx) {
@@ -811,12 +825,13 @@
             else renderQuestion(); return;
         }
 
-        if(combat.selIdx === q.correct) {
+        let correctAns = q.correct !== undefined ? q.correct : 0;
+        if(combat.selIdx == correctAns) {
             combat.corrects++;
             let isCrit = Math.random() < (state.stats.crit * 0.01);
             if(isCrit) showFloatingText("¡CRÍTICO!", "var(--gold)");
             el.classList.replace('selected', 'correct'); btn.innerText = "CONTINUAR"; btn.className = "btn btn-green";
-            state.gems += 10; showFloatingText("+10 💎", "var(--cyan)"); // 10 Gemas por correcta
+            state.gems += 10; showFloatingText("+10 💎", "var(--cyan)");
         } else {
             let isDodge = Math.random() < (state.stats.dodge * 0.01);
             if(isDodge) {
@@ -834,6 +849,12 @@
         }
     }
 
+    function finishReading() {
+        playSound('click');
+        if(!combat.isDone) finishNode(combat.node);
+        else fleeCombat();
+    }
+
     function finishNode(node) {
         const w = state.worlds[state.activeW];
         if(!w.completed.includes(node.id)) {
@@ -841,7 +862,8 @@
             if(node.unlocks) node.unlocks.forEach(uid => { if(!w.unlocked.includes(uid)) w.unlocked.push(uid); });
 
             let multi = 1 + (state.stats.atk * 0.05);
-            let goldGain = Math.floor(node.rewardGold * multi); let xpGain = Math.floor(node.rewardXp * multi);
+            let goldGain = Math.floor((node.rewardGold || 0) * multi); 
+            let xpGain = Math.floor((node.rewardXp || 0) * multi);
             
             let gemsEarned = (combat.corrects || 0) * 10;
             state.gold += goldGain; gainXP(xpGain); state.gems += gemsEarned;
@@ -855,13 +877,15 @@
 
     function fleeCombat() { 
         playSound('click');
-        if(combat.active && combat.node && combat.node.type === 'reading' && !combat.isDone) {
-            finishNode(combat.node); return;
-        }
-        combat.active = false; navTo('worlds'); 
+        combat.active = false; 
+        document.getElementById('ui-combat-prog').style.display = 'block';
+        document.getElementById('ui-combat-hp').style.display = 'block';
+        navTo('worlds'); 
     }
 
-    // --- RESTO DE FUNCIONES (FORJA Y GACHA) ---
+    function gainXP(amt) { state.xp += amt; if(state.xp >= state.maxXp) { state.lvl++; state.sp++; state.xp -= state.maxXp; state.maxXp = Math.floor(state.maxXp * 1.5); recalcStats(); state.hp = state.maxHp; state.en = state.maxEn; } }
+
+    // --- FORJA ITEMS ---
     function renderCrafting(f) {
         currFilter = f; document.querySelectorAll('#screen-crafting .btn-dark, #screen-crafting .btn-blue').forEach(b => b.className='btn btn-dark'); document.getElementById('filter-'+f).className='btn btn-blue';
         const c = document.getElementById('craft-list');
@@ -878,20 +902,14 @@
 
     function pullGacha(tier, isFree = false) {
         playSound('click'); let cost = tier===1?100:tier===2?500:50;
-        if(!isFree) {
-            if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas 💎."); state.gems -= cost; } else { if(state.gold < cost) return alert("Falta Oro 🟡."); state.gold -= cost; }
-        }
+        if(!isFree) { if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas 💎."); state.gems -= cost; } else { if(state.gold < cost) return alert("Falta Oro 🟡."); state.gold -= cost; } }
         let m = document.getElementById('modal-gacha'); m.style.display = 'flex';
         let c = document.getElementById('gacha-chest'); c.className = 'chest-anim'; playSound('gacha');
-        
         setTimeout(() => {
             m.style.display = 'none'; c.className = '';
             let r = Math.random(); let msg = "";
             let gearChance = tier === 1 ? 0.05 : tier === 2 ? 0.10 : 0.15;
-            if(Math.random() < gearChance) {
-                let pGears = Object.values(gearDB).filter(g => g.r <= tier + 2 && !g.isConsumable && !state.ownedGear.includes(g.id));
-                if(pGears.length > 0) { let won = pGears[Math.floor(Math.random() * pGears.length)]; state.ownedGear.push(won.id); msg = `¡ÉPICO! Equipo: ${won.icon} ${won.name}`; save(); alert(`🎁 ¡BOOOM!\n${msg}`); return; }
-            }
+            if(Math.random() < gearChance) { let pGears = Object.values(gearDB).filter(g => g.r <= tier + 2 && !g.isConsumable && !state.ownedGear.includes(g.id)); if(pGears.length > 0) { let won = pGears[Math.floor(Math.random() * pGears.length)]; state.ownedGear.push(won.id); msg = `¡ÉPICO! Equipo: ${won.icon} ${won.name}`; save(); alert(`🎁 ¡BOOOM!\n${msg}`); return; } }
             if(tier === 1) { if(r<0.6) { state.inventory.m1=(state.inventory.m1||0)+3; msg="3x Hierro"; } else { state.inventory.m4=(state.inventory.m4||0)+1; msg="1x Cristal Oscuro"; } }
             else if (tier === 2) { if(r<0.5) { state.inventory.m4=(state.inventory.m4||0)+3; msg="3x Cristal"; } else { state.inventory.m10=(state.inventory.m10||0)+1; msg="1x Alma Demonio"; } }
             else { if(r<0.5) { state.inventory.m10=(state.inventory.m10||0)+3; msg="3x Alma Demonio"; } else { state.inventory.m12=(state.inventory.m12||0)+1; msg="1x Escama Mítica 🐉"; } }
