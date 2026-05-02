@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>LifeQuest AAA: V10.1 Renacer</title>
+    <title>LifeQuest AAA: V11 Multiverso</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -36,7 +36,7 @@
         .bar-bg { width: 100%; height: 8px; background: var(--border-dark); border-radius: 4px; overflow: hidden; margin-top: 3px; position: relative;}
         .bar-fill { height: 100%; transition: width 0.3s ease; position: absolute; top:0; left:0;}
 
-        /* HUD MAPA RESTAURADO (Solución del Error) */
+        /* HUD MAPA MINIMALISTA */
         #hud-minimal { background: transparent; padding: 15px; display: none; justify-content: space-between; align-items: center; position: absolute; top: env(safe-area-inset-top); width: 100%; z-index: 10; pointer-events: none; }
         .min-curr { pointer-events: auto; background: rgba(13,20,36,0.8); backdrop-filter: blur(5px); padding: 5px 10px; border-radius: 12px; font-weight: 900; font-size: 12px; border: 1px solid var(--border-dark); }
 
@@ -85,7 +85,6 @@
         
         .combat-body { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 20px; }
         .combat-footer { padding: 15px 20px; background: var(--panel); border-top: 1px solid var(--border-dark); flex-shrink: 0; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
-
         .combat-log { background: rgba(0,0,0,0.5); border: 1px solid var(--border-dark); border-radius: 8px; padding: 10px; font-size: 11px; color: var(--text-sub); height: 60px; overflow-y: auto; margin-bottom: 15px; font-family: monospace; display: flex; flex-direction: column-reverse; }
 
         .option { background: var(--panel-light); border: 2px solid var(--border-dark); border-radius: 12px; padding: 16px; margin-bottom: 10px; font-weight: 700; transition: 0.2s; cursor: pointer; }
@@ -102,7 +101,7 @@
         /* MODALS & FX */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 200; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
         .modal-content { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 16px; padding: 20px; width: 100%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; }
-        .forge-textarea { flex: 1; width: 100%; background: var(--panel-light); border: 1px solid var(--border-dark); border-radius: 8px; color: var(--text-main); font-family: monospace; padding: 10px; margin: 15px 0; resize: none; min-height: 250px; font-size: 12px; }
+        .forge-textarea { flex: 1; width: 100%; background: var(--panel-light); border: 1px solid var(--border-dark); border-radius: 8px; color: var(--text-main); font-family: monospace; padding: 10px; margin: 15px 0; resize: none; min-height: 200px; font-size: 12px; }
 
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 50% { transform: translateX(12px); } 75% { transform: translateX(-12px); } }
@@ -110,8 +109,9 @@
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-80px) scale(1.5); opacity: 0; } }
         #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,0,0,0.5); z-index: 999; display: none; pointer-events: none; mix-blend-mode: multiply; }
         
-        /* Aura Rango */
         .aura-prestige { box-shadow: 0 0 20px var(--gold); border-color: var(--gold) !important; }
+        
+        .world-input { background: var(--panel); color: var(--text-main); border: 1px solid var(--border-dark); padding: 8px; border-radius: 8px; font-weight: bold; width: 100%; }
     </style>
 </head>
 <body>
@@ -120,13 +120,23 @@
 
 <div id="modal-forge" class="modal-overlay">
     <div class="modal-content">
-        <h2 style="margin:0; color:var(--gold); font-weight:900;">⚒️ Terminal de la Forja</h2>
-        <p style="font-size:12px; color:var(--text-sub); margin-bottom:5px;">Pega aquí el código JSON puro. El terminal limpiará comillas curvas e impurezas automáticamente.</p>
+        <h2 style="margin:0; color:var(--gold); font-weight:900;">⚒️ Forjar Mazmorra</h2>
+        <p style="font-size:12px; color:var(--text-sub); margin-bottom:5px;">Pega el código JSON de la IA. Destruirá los nodos actuales del mundo seleccionado.</p>
         <textarea id="forge-input" class="forge-textarea" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="[ { 'id': 'n1'... } ]"></textarea>
         <div style="display:flex; gap:10px;">
             <button class="btn btn-dark" style="flex:1;" onclick="document.getElementById('modal-forge').style.display='none'">CANCELAR</button>
-            <button class="btn btn-green" style="flex:1;" onclick="processForge()">FORJAR MUNDO</button>
+            <button class="btn btn-green" style="flex:1;" onclick="processForge()">FORJAR</button>
         </div>
+    </div>
+</div>
+
+<div id="modal-worlds" class="modal-overlay">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <h2 style="margin:0; color:var(--cyan); font-weight:900;">🌌 Multiverso</h2>
+        <p style="font-size:12px; color:var(--text-sub); margin-bottom: 20px;">Organiza tus estudios creando un mundo por asignatura.</p>
+        <button class="btn btn-gold" style="margin-bottom:15px;" onclick="createNewWorld()">➕ CREAR NUEVO MUNDO</button>
+        <div id="worlds-manager-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="document.getElementById('modal-worlds').style.display='none'">CERRAR PANEL</button>
     </div>
 </div>
 
@@ -182,7 +192,7 @@
 
             <div class="card" style="margin-top:20px; border-color:var(--green); text-align:center;">
                 <h3 style="margin-top:0; color:var(--green); font-weight:900;">🏕️ El Campamento</h3>
-                <p style="font-size:12px; color:var(--text-sub);">Quédate aquí y deja la pantalla encendida. Recuperarás 5 HP y 2 EN cada segundo.</p>
+                <p style="font-size:12px; color:var(--text-sub);">Deja la pantalla encendida. Recuperarás 2 HP y 1 EN cada 2 segundos sin hacer nada.</p>
                 <div style="font-size:30px;" id="camp-fire">🔥</div>
             </div>
 
@@ -213,8 +223,11 @@
     <div id="screen-worlds" class="screen">
         <div class="content">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 style="margin:0; font-weight:900;" id="world-title">Mazmorra</h2>
-                <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ CARGAR JSON</button>
+                <h2 style="margin:0; font-weight:900; color:var(--cyan); cursor:pointer;" id="world-title" onclick="openWorldsManager()">Mazmorra ▾</h2>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openWorldsManager()">🌌 MUNDOS</button>
+                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ CARGAR JSON</button>
+                </div>
             </div>
             <div class="node-path" id="map-render"></div>
         </div>
@@ -318,10 +331,11 @@
         lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 100, gems: 0, potions: 3, maxPots: 5, sp: 0, prestige: 0,
         stats: { atk: 10, def: 10, luck: 5 }, baseBonus: { atk: 0, def: 0 }, skills: { hp: 0, atk: 0 }, kills: 0, pClass: 'warrior',
         inventory: {}, equipment: { weapon: null, armor: null, accessory: null, pet: null }, upgrades: {}, ownedGear: [],
-        worlds: [{ id: 0, name: "Tutorial V10", campaign: [], completed: [], unlocked: ['n1'] }]
+        worlds: [{ id: 0, name: "Tutorial V11", campaign: [], completed: [], unlocked: ['n1'] }],
+        activeW: 0
     };
 
-    let activeW = 0; let currFilter = 'weapon'; let campInterval = null;
+    let currFilter = 'weapon'; let campInterval = null;
     let combat = { active: false, node: null, qIndex: 0, selIdx: null, isDone: false, isFlawless: true };
 
     function logCombat(msg, color) {
@@ -332,31 +346,80 @@
     // --- INIT ---
     function init() {
         try {
-            const saved = localStorage.getItem('LifeQuest_V10_1');
+            const saved = localStorage.getItem('LifeQuest_V11');
             if (saved) { 
                 state = Object.assign(state, JSON.parse(saved));
+                state.activeW = state.activeW || 0;
             }
         } catch(e) {}
         
         if(!state.worlds[0] || state.worlds[0].campaign.length === 0) {
-            state.worlds[0] = { id: 0, name: "Tutorial V10.1", completed: [], unlocked: ['n1'], campaign: [
-                {id:'n1', type:'reading', title:'📖 Renacimiento', content:'Parche V10.1 Activo. El HUD de iOS ha sido reparado. Ya no colapsa.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
-                {id:'n2', type:'test', title:'⚔️ Test V10.1', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:['n3'], questions: [ {q:'¿Si respondes todo bien en un nivel?', options:['Nada','Flawless Run (Cofre extra)'], correct:1} ]},
-                {id:'n3', type:'boss', title:'👹 Rey', energyCost:10, rewardXp:200, rewardGold:100, damagePenalization:40, unlocks:[], questions: [ {q:'¿A qué nivel se puede Renacer?', options:['50','100'], correct:0} ]}
+            state.worlds[0] = { id: Date.now(), name: "Tutorial V11", completed: [], unlocked: ['n1'], campaign: [
+                {id:'n1', type:'reading', title:'📖 Multiverso', content:'Parche V11 Activo. Toca el nombre de la mazmorra arriba a la izquierda para crear y cambiar entre distintos mundos.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
+                {id:'n2', type:'test', title:'⚔️ Test V11', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:['n3'], questions: [ {q:'¿Puedes crear mundos infinitos ahora?', options:['Sí','No'], correct:0} ]},
+                {id:'n3', type:'boss', title:'👹 Rey', energyCost:10, rewardXp:200, rewardGold:100, damagePenalization:40, unlocks:[], questions: [ {q:'¿Se guarda en qué mundo estás?', options:['Sí','No'], correct:0} ]}
             ]};
         }
 
         recalcStats(); navTo('home');
     }
     
-    function save() { localStorage.setItem('LifeQuest_V10_1', JSON.stringify(state)); updateUI(); }
+    function save() { localStorage.setItem('LifeQuest_V11', JSON.stringify(state)); updateUI(); }
 
-    function hardReset() { if(confirm("🚨 ¿BORRAR PARTIDA?")) { localStorage.removeItem('LifeQuest_V10_1'); location.reload(); } }
+    function hardReset() { if(confirm("🚨 ¿BORRAR PARTIDA?")) { localStorage.removeItem('LifeQuest_V11'); location.reload(); } }
 
-    // --- FORJA MODAL (iOS FIX) ---
+    // --- MULTIVERSO (WORLD MANAGER) ---
+    function openWorldsManager() {
+        document.getElementById('modal-worlds').style.display = 'flex';
+        renderWorldsManager();
+    }
+
+    function renderWorldsManager() {
+        const list = document.getElementById('worlds-manager-list');
+        list.innerHTML = state.worlds.map((w, idx) => `
+            <div class="list-item" style="flex-direction:column; align-items:flex-start;">
+                <div style="display:flex; width:100%; gap:10px; align-items:center;">
+                    <input type="text" class="world-input" value="${w.name}" onchange="renameWorld(${idx}, this.value)">
+                    ${state.activeW === idx 
+                        ? `<span style="color:var(--green); font-weight:900; font-size:12px;">ACTIVO</span>` 
+                        : `<button class="btn btn-blue" style="width:auto; padding:5px 10px; font-size:10px;" onclick="selectWorld(${idx})">ENTRAR</button>`
+                    }
+                    ${state.worlds.length > 1 
+                        ? `<button class="btn btn-red" style="width:auto; padding:5px 10px; font-size:10px;" onclick="deleteWorld(${idx})">🗑️</button>` 
+                        : ''
+                    }
+                </div>
+                <div style="font-size:10px; color:var(--text-sub); margin-top:5px;">Progreso: ${w.campaign.length ? Math.floor((w.completed.length / w.campaign.length) * 100) : 0}% | Nodos: ${w.campaign.length}</div>
+            </div>
+        `).join('');
+    }
+
+    function createNewWorld() {
+        state.worlds.push({ id: Date.now(), name: "Nuevo Mundo " + (state.worlds.length + 1), campaign: [], completed: [], unlocked: [] });
+        save(); renderWorldsManager();
+    }
+
+    function renameWorld(idx, newName) { state.worlds[idx].name = newName; save(); if(idx === state.activeW) renderMap(); }
+
+    function selectWorld(idx) {
+        state.activeW = idx; save();
+        document.getElementById('modal-worlds').style.display = 'none';
+        renderMap();
+    }
+
+    function deleteWorld(idx) {
+        if(state.worlds.length <= 1) return alert("No puedes borrar tu único mundo.");
+        if(confirm("¿Seguro que quieres borrar este mundo y su progreso?")) {
+            state.worlds.splice(idx, 1);
+            if(state.activeW >= state.worlds.length) state.activeW = state.worlds.length - 1;
+            save(); renderWorldsManager(); renderMap();
+        }
+    }
+
+    // --- FORJA MODAL ---
     function openForgeModal() {
         document.getElementById('modal-forge').style.display = 'flex';
-        let defaultCode = JSON.stringify(state.worlds[activeW].campaign, null, 2);
+        let defaultCode = JSON.stringify(state.worlds[state.activeW].campaign, null, 2);
         document.getElementById('forge-input').value = defaultCode;
     }
 
@@ -367,7 +430,7 @@
             rawCode = rawCode.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
             const p = JSON.parse(rawCode); 
             if(!Array.isArray(p)) throw new Error("Debe ser Array");
-            state.worlds[activeW].campaign = p; state.worlds[activeW].completed = []; state.worlds[activeW].unlocked = p.length > 0 ? [p[0].id] : []; 
+            state.worlds[state.activeW].campaign = p; state.worlds[state.activeW].completed = []; state.worlds[state.activeW].unlocked = p.length > 0 ? [p[0].id] : []; 
             save(); renderMap(); document.getElementById('modal-forge').style.display = 'none'; alert("✅ Mazmorra cargada."); 
         } catch(e) { alert("❌ ERROR JSON: " + e.message); } 
     }
@@ -381,15 +444,17 @@
         }
     }
 
-    // --- CAMPAMENTO (IDLE HEAL) ---
+    // --- CAMPAMENTO (IDLE HEAL NERFEADO) ---
     function startCamp() {
         if(campInterval) clearInterval(campInterval);
         campInterval = setInterval(() => {
             if(state.hp < state.maxHp || state.en < state.maxEn) {
-                state.hp = Math.min(state.maxHp, state.hp + 5); state.en = Math.min(state.maxEn, state.en + 2); updateUI();
+                state.hp = Math.min(state.maxHp, state.hp + 2); // Bajado a 2
+                state.en = Math.min(state.maxEn, state.en + 1); // Bajado a 1
+                updateUI();
                 let f = document.getElementById('camp-fire'); if(f) f.style.transform = `scale(${1 + Math.random()*0.2})`;
             }
-        }, 1000);
+        }, 2000); // Cada 2 segundos
     }
     function stopCamp() { if(campInterval) clearInterval(campInterval); }
 
@@ -459,7 +524,6 @@
     }
 
     function updateUI() {
-        // SEGURIDAD EN UI
         const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
         const setW = (id, w) => { const el = document.getElementById(id); if(el) el.style.width = w; };
 
@@ -473,7 +537,7 @@
     }
 
     function renderMap() {
-        const w = state.worlds[activeW]; document.getElementById('world-title').innerText = w.name;
+        const w = state.worlds[state.activeW]; document.getElementById('world-title').innerText = w.name + " ▾";
         const c = document.getElementById('map-render'); c.innerHTML = w.campaign.length ? '' : '<div style="color:var(--text-sub);">Vacío.</div>';
         w.campaign.forEach((n, i) => {
             const isDone = w.completed.includes(n.id); const isUnl = w.unlocked.includes(n.id);
@@ -485,7 +549,7 @@
 
     // --- COMBATE ---
     function startNode(id) {
-        const w = state.worlds[activeW];
+        const w = state.worlds[state.activeW];
         if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Bloqueado.");
         const node = w.campaign.find(n => n.id === id);
         if (!node.questions && (node.type === 'test' || node.type === 'boss')) node.questions = [{ q: node.content||"P:", options: node.options||["A","B"], correct: node.correctAnswer||0 }];
@@ -559,7 +623,7 @@
     }
 
     function finishNode(node) {
-        const w = state.worlds[activeW];
+        const w = state.worlds[state.activeW];
         if(!w.completed.includes(node.id)) {
             w.completed.push(node.id);
             if(node.unlocks) node.unlocks.forEach(uid => { if(!w.unlocked.includes(uid)) w.unlocked.push(uid); });
@@ -597,25 +661,35 @@
         }
     }
 
-    // --- FORJA ---
+    // --- FORJA VISUAL TRANSPARENTE ---
     function renderCrafting(f) {
         currFilter = f;
         document.querySelectorAll('#screen-crafting .btn-dark, #screen-crafting .btn-blue').forEach(b => b.className='btn btn-dark');
         document.getElementById('filter-'+f).className='btn btn-blue';
         const c = document.getElementById('craft-list');
         c.innerHTML = Object.values(gearDB).filter(g => g.t === f).map(g => {
+            
+            // LA MAGIA: MOSTRAR RECURSOS EXACTOS
+            let costHTML = `<div style="display:flex; flex-direction:column; gap:2px; margin:5px 0;">` + 
+                Object.entries(g.cost).map(([k,v]) => {
+                    let mat = matsDB[k];
+                    let have = state.inventory[k] || 0;
+                    let color = have >= v ? 'var(--green)' : 'var(--red)';
+                    return `<div style="font-size:10px; font-weight:bold; color:var(--text-sub);"><span style="color:var(--${rColor[mat.t]})">${mat.icon} ${mat.n}</span>: <span style="color:${color}">(${have}/${v})</span></div>`;
+                }).join('') + `</div>`;
+
             let canCraft = Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v);
             let isOwned = state.ownedGear.includes(g.id); let isEq = state.equipment[g.t] === g.id;
             let upg = state.upgrades[g.id] || 0;
             
             if(g.isConsumable) {
-                return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div></div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">SINTETIZAR</button></div>`;
+                return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div>${costHTML}</div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">SINTETIZAR</button></div>`;
             }
             if(isOwned) {
                 let upgCost = (g.r * 5) + upg; let canUpg = (state.inventory.m1||0) >= upgCost;
                 return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name} <span style="color:var(--gold)">+${upg}</span></div></div><div style="display:flex; gap:5px;"><button class="btn ${isEq?'btn-dark':'btn-blue'}" style="padding:8px;" onclick="equip('${g.id}')">${isEq?'EQ':'EQ'}</button><button class="btn ${canUpg?'btn-purple':'btn-dark'}" style="padding:8px;" onclick="upgrade('${g.id}')">UPG</button></div></div>`;
             } else {
-                return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div></div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">FORJAR</button></div>`;
+                return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div>${costHTML}</div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">FORJAR</button></div>`;
             }
         }).join('');
     }
