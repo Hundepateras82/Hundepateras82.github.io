@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Sistema Operativo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: #050914; color: white; font-family: 'Nunito', sans-serif; 
+            height: 100dvh; margin: 0; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; padding: 20px; 
+            box-sizing: border-box; overflow: hidden;
+        }
+        h1 { 
+            color: #06b6d4; font-weight: 900; letter-spacing: 2px; 
+            text-transform: uppercase; margin-bottom: 5px; 
+            text-shadow: 0 0 15px rgba(6,182,212,0.5); font-size: 32px; text-align: center;
+        }
+        .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 40px; text-align: center; }
+        
+        .card-container { display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 400px; }
+        
+        .app-card { 
+            background: #162032; border-radius: 24px; padding: 30px 20px; 
+            text-align: center; cursor: pointer; transition: 0.2s; 
+            position: relative; border: 2px solid #1e293b; 
+        }
+        .app-card:active { transform: translateY(8px); box-shadow: none !important; margin-bottom: -8px;}
+        
+        .card-estudio { border-color: #3b82f6; box-shadow: 0 12px 0 #1d4ed8; }
+        .card-deporte { border-color: #10b981; box-shadow: 0 12px 0 #047857; }
+        
+        .icon { font-size: 60px; margin-bottom: 10px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+        .app-title { font-size: 26px; font-weight: 900; margin: 0; color: #e2e8f0; }
+        .app-desc { font-size: 13px; color: #94a3b8; margin-top: 8px; font-weight: bold;}
+    </style>
+</head>
+<body>
+    <h1>🌌 EL NEXO</h1>
+    <p class="subtitle">Selecciona tu protocolo de entrenamiento</p>
+
+    <div class="card-container">
+        <div class="app-card card-estudio" onclick="window.location.href='estudio.html'">
+            <div class="icon">📚</div>
+            <h2 class="app-title">LifeQuest</h2>
+            <p class="app-desc">Mazmorras y Teoría AAA</p>
+        </div>
+
+        <div class="app-card card-deporte" onclick="window.location.href='deporte.html'">
+            <div class="icon">🏋️‍♂️</div>
+            <h2 class="app-title">Fitness</h2>
+            <p class="app-desc">Acondicionamiento Físico</p>
+        </div>
+    </div>
+</body>
+</html>
