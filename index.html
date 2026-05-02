@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>LifeQuest AAA: V10 Renacer</title>
+    <title>LifeQuest AAA: V10.1 Renacer</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -36,6 +36,10 @@
         .bar-bg { width: 100%; height: 8px; background: var(--border-dark); border-radius: 4px; overflow: hidden; margin-top: 3px; position: relative;}
         .bar-fill { height: 100%; transition: width 0.3s ease; position: absolute; top:0; left:0;}
 
+        /* HUD MAPA RESTAURADO (Solución del Error) */
+        #hud-minimal { background: transparent; padding: 15px; display: none; justify-content: space-between; align-items: center; position: absolute; top: env(safe-area-inset-top); width: 100%; z-index: 10; pointer-events: none; }
+        .min-curr { pointer-events: auto; background: rgba(13,20,36,0.8); backdrop-filter: blur(5px); padding: 5px 10px; border-radius: 12px; font-weight: 900; font-size: 12px; border: 1px solid var(--border-dark); }
+
         /* BTNS */
         .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; font-size: 13px; text-transform: uppercase; cursor: pointer; transition: 0.1s; text-align: center; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .btn:active { transform: translateY(4px); margin-bottom: -4px; }
@@ -57,6 +61,7 @@
         .equip-slot.filled { border-style: solid; background: var(--panel); }
         .equip-icon { font-size: 30px; margin-bottom: 5px; }
         .equip-name { font-size: 9px; font-weight: 900; text-transform: uppercase; }
+        .lvl-badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: black; font-size: 10px; padding: 2px 5px; border-radius: 10px; font-weight: 900;}
 
         .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-dark); flex-wrap: wrap;}
         .item-icon { font-size: 30px; background: var(--panel-light); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); }
@@ -131,7 +136,7 @@
         <div class="hud-top-row">
             <div style="font-weight:900; font-size:18px; color:var(--text-main);"> Nivel <span id="ui-lvl" style="color:var(--cyan);">1</span></div>
             <div class="hud-currencies">
-                <div class="hud-curr-box">🟡 <span id="ui-gold">0</span></div>
+                <div class="hud-curr-box" onclick="investBank()">🟡 <span id="ui-gold">0</span></div>
                 <div class="hud-curr-box">💎 <span id="ui-gems">0</span></div>
                 <div class="hud-curr-box">SP <span id="ui-sp" style="color:var(--purple);">0</span></div>
             </div>
@@ -139,6 +144,14 @@
         <div class="hud-bars-row">
             <div class="hud-bar-container">HP: <span id="ui-hp-txt">100/100</span><div class="bar-bg"><div id="ui-hp-bar" class="bar-fill" style="background:var(--red); width:100%;"></div></div></div>
             <div class="hud-bar-container">EN: <span id="ui-en-txt">50/50</span><div class="bar-bg"><div id="ui-en-bar" class="bar-fill" style="background:var(--gold); width:100%;"></div></div></div>
+        </div>
+    </div>
+
+    <div id="hud-minimal">
+        <div class="min-curr" style="color:var(--cyan);">LVL <span id="ui-min-lvl">1</span></div>
+        <div style="display:flex; gap:10px;">
+            <div class="min-curr">🟡 <span id="ui-min-gold">0</span></div>
+            <div class="min-curr">💎 <span id="ui-min-gems">0</span></div>
         </div>
     </div>
 
@@ -249,7 +262,6 @@
 
     <div id="screen-shop" class="screen">
         <div class="content">
-            
             <h2 style="margin-top:0; color:var(--purple); font-weight:900;">📦 Gacha del Abismo</h2>
             <div style="display:flex; gap:10px; margin-bottom: 20px;">
                 <button class="btn btn-dark" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(1)"><span style="font-size:30px;">🪵</span>100 🟡</button>
@@ -320,31 +332,26 @@
     // --- INIT ---
     function init() {
         try {
-            const saved = localStorage.getItem('LifeQuest_V10');
+            const saved = localStorage.getItem('LifeQuest_V10_1');
             if (saved) { 
-                const parsed = JSON.parse(saved);
-                state = Object.assign(state, parsed);
-                state.inventory = state.inventory || {};
-                state.baseBonus = state.baseBonus || {atk:0, def:0};
-                state.maxPots = state.maxPots || 5;
-                state.prestige = state.prestige || 0;
+                state = Object.assign(state, JSON.parse(saved));
             }
         } catch(e) {}
         
         if(!state.worlds[0] || state.worlds[0].campaign.length === 0) {
-            state.worlds[0] = { id: 0, name: "Tutorial V10", completed: [], unlocked: ['n1'], campaign: [
-                {id:'n1', type:'reading', title:'📖 Renacimiento', content:'Parche V10 activo. La forja es segura y el Autocorrector de iOS no te romperá el JSON. Ve a pelear.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
-                {id:'n2', type:'test', title:'⚔️ Test V10', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:['n3'], questions: [ {q:'¿Si respondes todo bien en un nivel?', options:['Nada','Flawless Run (Cofre extra)'], correct:1} ]},
-                {id:'n3', type:'boss', title:'👹 Rey', energyCost:10, rewardXp:200, rewardGold:100, damagePenalization:40, unlocks:[], questions: [ {q:'¿A qué nivel se puede Renacer (Prestigio)?', options:['50','100'], correct:0} ]}
+            state.worlds[0] = { id: 0, name: "Tutorial V10.1", completed: [], unlocked: ['n1'], campaign: [
+                {id:'n1', type:'reading', title:'📖 Renacimiento', content:'Parche V10.1 Activo. El HUD de iOS ha sido reparado. Ya no colapsa.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
+                {id:'n2', type:'test', title:'⚔️ Test V10.1', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:['n3'], questions: [ {q:'¿Si respondes todo bien en un nivel?', options:['Nada','Flawless Run (Cofre extra)'], correct:1} ]},
+                {id:'n3', type:'boss', title:'👹 Rey', energyCost:10, rewardXp:200, rewardGold:100, damagePenalization:40, unlocks:[], questions: [ {q:'¿A qué nivel se puede Renacer?', options:['50','100'], correct:0} ]}
             ]};
         }
 
         recalcStats(); navTo('home');
     }
     
-    function save() { localStorage.setItem('LifeQuest_V10', JSON.stringify(state)); updateUI(); }
+    function save() { localStorage.setItem('LifeQuest_V10_1', JSON.stringify(state)); updateUI(); }
 
-    function hardReset() { if(confirm("🚨 ¿BORRAR PARTIDA?")) { localStorage.removeItem('LifeQuest_V10'); location.reload(); } }
+    function hardReset() { if(confirm("🚨 ¿BORRAR PARTIDA?")) { localStorage.removeItem('LifeQuest_V10_1'); location.reload(); } }
 
     // --- FORJA MODAL (iOS FIX) ---
     function openForgeModal() {
@@ -356,33 +363,21 @@
     function processForge() {
         let rawCode = document.getElementById('forge-input').value;
         try {
-            // 1. Limpiar bloques markdown (por si la IA lo envolvió)
             rawCode = rawCode.replace(/```json/gi, '').replace(/```/g, '').trim();
-            // 2. Limpiar comillas de iOS "inteligentes" y cambiarlas por comillas rectas.
             rawCode = rawCode.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
-            
             const p = JSON.parse(rawCode); 
-            if(!Array.isArray(p)) throw new Error("El código debe ser un Array (empezar por [ y terminar por ]).");
-            
-            state.worlds[activeW].campaign = p; 
-            state.worlds[activeW].completed = []; 
-            state.worlds[activeW].unlocked = p.length > 0 ? [p[0].id] : []; 
-            
-            save(); renderMap(); 
-            document.getElementById('modal-forge').style.display = 'none';
-            alert("✅ Mazmorra cargada correctamente."); 
-        } catch(e) {
-            alert("❌ ERROR JSON: " + e.message + "\n\nAsegúrate de copiar SOLO desde el corchete [ inicial hasta el corchete ] final.");
-        } 
+            if(!Array.isArray(p)) throw new Error("Debe ser Array");
+            state.worlds[activeW].campaign = p; state.worlds[activeW].completed = []; state.worlds[activeW].unlocked = p.length > 0 ? [p[0].id] : []; 
+            save(); renderMap(); document.getElementById('modal-forge').style.display = 'none'; alert("✅ Mazmorra cargada."); 
+        } catch(e) { alert("❌ ERROR JSON: " + e.message); } 
     }
 
     // --- PRESTIGE (RENACER) ---
     function prestige() {
-        if(state.lvl < 50) return alert("Debes ser Nivel 50 para Renacer.");
-        if(confirm("🌌 ¿RENACER?\nVolverás al nivel 1, perderás tu oro, pero ganarás un +50% permanente de XP y Oro en tus próximas vidas.")) {
-            state.prestige++; state.lvl = 1; state.xp = 0; state.maxXp = 100; state.gold = 0; state.sp = 0;
-            state.skills = {hp:0, atk:0}; recalcStats(); state.hp = state.maxHp; state.en = state.maxEn;
-            save(); alert("✨ Has Renacido. Tu aura ahora es más fuerte.");
+        if(state.lvl < 50) return alert("Debes ser Nivel 50.");
+        if(confirm("🌌 ¿RENACER?\nVolverás al nivel 1, pero ganarás un +50% permanente de XP y Oro.")) {
+            state.prestige++; state.lvl = 1; state.xp = 0; state.maxXp = 100; state.gold = 0; state.sp = 0; state.skills = {hp:0, atk:0}; 
+            recalcStats(); state.hp = state.maxHp; state.en = state.maxEn; save(); alert("✨ Has Renacido.");
         }
     }
 
@@ -391,11 +386,8 @@
         if(campInterval) clearInterval(campInterval);
         campInterval = setInterval(() => {
             if(state.hp < state.maxHp || state.en < state.maxEn) {
-                state.hp = Math.min(state.maxHp, state.hp + 5);
-                state.en = Math.min(state.maxEn, state.en + 2);
-                updateUI();
-                let f = document.getElementById('camp-fire');
-                if(f) { f.style.transform = `scale(${1 + Math.random()*0.2})`; }
+                state.hp = Math.min(state.maxHp, state.hp + 5); state.en = Math.min(state.maxEn, state.en + 2); updateUI();
+                let f = document.getElementById('camp-fire'); if(f) f.style.transform = `scale(${1 + Math.random()*0.2})`;
             }
         }, 1000);
     }
@@ -406,7 +398,6 @@
         let bA = 10 + state.baseBonus.atk, bD = 10 + state.baseBonus.def, bL = 5;
         if(state.pClass === 'warrior') bA += 5; if(state.pClass === 'defender') bD += 5; if(state.pClass === 'rogue') bL += 5;
         bA += (state.skills.atk * 5);
-        
         Object.values(state.equipment).forEach(gId => {
             if(gId && gearDB[gId]) {
                 let g = gearDB[gId]; let upg = state.upgrades[gId] || 0; let mult = 1 + (upg * 0.1);
@@ -427,21 +418,9 @@
         document.getElementById('btn-prestige').style.display = state.lvl >= 50 ? 'block' : 'none';
     }
 
-    function upgradeSkill(type) {
-        if(state.sp <= 0) return alert("No tienes SP.");
-        state.sp--; state.skills[type]++; recalcStats(); save(); navTo('skills');
-    }
-
-    function buyElixir(type) {
-        if(state.gems < 20) return alert("Faltan 20 Gemas.");
-        state.gems -= 20; if(type==='atk') state.baseBonus.atk++; if(type==='def') state.baseBonus.def++;
-        recalcStats(); save(); alert(`Elixir consumido. +1 ${type.toUpperCase()} permanente.`);
-    }
-
-    function buyBag() {
-        if(state.gold < 1000) return alert("Falta Oro.");
-        state.gold -= 1000; state.maxPots++; save(); alert("Mochila mejorada. Límite de pociones: " + state.maxPots);
-    }
+    function upgradeSkill(type) { if(state.sp <= 0) return alert("Sin SP."); state.sp--; state.skills[type]++; recalcStats(); save(); navTo('skills'); }
+    function buyElixir(type) { if(state.gems < 20) return alert("Faltan 20 Gemas."); state.gems -= 20; if(type==='atk') state.baseBonus.atk++; if(type==='def') state.baseBonus.def++; recalcStats(); save(); alert("+1 " + type.toUpperCase()); }
+    function buyBag() { if(state.gold < 1000) return alert("Falta Oro."); state.gold -= 1000; state.maxPots++; save(); alert("Límite de pociones: " + state.maxPots); }
 
     // --- NAV ---
     function navTo(id) {
@@ -480,13 +459,17 @@
     }
 
     function updateUI() {
-        document.getElementById('ui-lvl').innerText = state.lvl; document.getElementById('ui-min-lvl').innerText = state.lvl;
-        document.getElementById('ui-gold').innerText = state.gold; document.getElementById('ui-min-gold').innerText = state.gold;
-        document.getElementById('ui-gems').innerText = state.gems; document.getElementById('ui-min-gems').innerText = state.gems;
-        document.getElementById('ui-sp').innerText = state.sp;
+        // SEGURIDAD EN UI
+        const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
+        const setW = (id, w) => { const el = document.getElementById(id); if(el) el.style.width = w; };
+
+        setTxt('ui-lvl', state.lvl); setTxt('ui-min-lvl', state.lvl);
+        setTxt('ui-gold', state.gold); setTxt('ui-min-gold', state.gold);
+        setTxt('ui-gems', state.gems); setTxt('ui-min-gems', state.gems);
+        setTxt('ui-sp', state.sp);
         
-        document.getElementById('ui-hp-txt').innerText = `${state.hp}/${state.maxHp}`; document.getElementById('ui-hp-bar').style.width = `${(state.hp/state.maxHp)*100}%`;
-        document.getElementById('ui-en-txt').innerText = `${state.en}/${state.maxEn}`; document.getElementById('ui-en-bar').style.width = `${(state.en/state.maxEn)*100}%`;
+        setTxt('ui-hp-txt', `${state.hp}/${state.maxHp}`); setW('ui-hp-bar', `${(state.hp/state.maxHp)*100}%`);
+        setTxt('ui-en-txt', `${state.en}/${state.maxEn}`); setW('ui-en-bar', `${(state.en/state.maxEn)*100}%`);
     }
 
     function renderMap() {
@@ -591,7 +574,7 @@
             
             if(combat.isFlawless && node.type !== 'reading') {
                 alert("✨ FLAWLESS RUN ✨\nHas completado el nivel sin fallar. ¡Ganas un cofre dorado!");
-                pullGacha(2, true); // Pull gacha for free
+                pullGacha(2, true);
             } else { alert(`🏆 ¡VICTORIA!\n+${goldGain} Oro | +${xpGain} XP`); }
             save(); 
         }
