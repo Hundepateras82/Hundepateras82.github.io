@@ -11,13 +11,13 @@
             --bg-base: #050505; --bg-surface: #121212; --bg-card: #1e1e1e; --border: #333;
             --text-pri: #f5f5f5; --text-sec: #a0a0a0;
             --c-kcal: #fbbf24; --c-prot: #ef4444; --c-carb: #3b82f6; --c-fat: #22c55e;
-            --c-nexo: #8b5cf6; --c-danger: #f43f5e; --c-shop: #4ade80;
-            --c-gold: #fbbf24; --c-xp: #06b6d4; 
+            --c-nexo: #8b5cf6; --c-danger: #f43f5e; --c-shop: #22c55e;
+            --c-gold: #fbbf24; --c-xp: #06b6d4; --c-dark: #7f1d1d;
             
-            /* Themas sutiles (solo bordes y acentos) */
-            --border-forge: #ef4444;
-            --border-shop: #22c55e;
-            --border-temple: #a855f7;
+            /* Temas específicos */
+            --bg-forge: #1a0505; --border-forge: #7f1d1d;
+            --bg-shop: #051f0e; --border-shop: #14532d;
+            --bg-temple: #1b0a2e; --border-temple: #581c87;
 
             --safe-top: env(safe-area-inset-top, 40px);
             --safe-bot: env(safe-area-inset-bottom, 20px);
@@ -35,10 +35,10 @@
         .view { display: none; animation: fadeIn 0.2s ease; } .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card { background: var(--bg-surface); border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
-        .card-forge { border-color: var(--border-forge); }
-        .card-shop { border-color: var(--border-shop); }
-        .card-temple { border-color: var(--border-temple); }
+        .card { background: var(--bg-card); border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+        .card-forge { background: var(--bg-forge); border-color: var(--border-forge); }
+        .card-shop { background: var(--bg-shop); border-color: var(--border-shop); }
+        .card-temple { background: var(--bg-temple); border-color: var(--border-temple); }
 
         .card-title { font-size: 13px; font-weight: 800; color: var(--text-sec); text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;}
         
@@ -49,7 +49,7 @@
         .btn { width: 100%; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-align: center; margin-bottom: 10px; transition: 0.1s;}
         .btn:active { transform: scale(0.98); }
         .btn-pri { background: var(--text-pri); color: var(--bg-base); }
-        .btn-sec { background: var(--bg-card); color: var(--text-pri); border: 1px solid var(--border); }
+        .btn-sec { background: var(--bg-surface); color: var(--text-pri); border: 1px solid var(--border); }
         .btn-nexo-bg { background: var(--c-nexo); color: white; }
         .btn-shop { background: var(--c-shop); color: black; margin-top: 10px;}
         .btn-danger { background: var(--c-danger); color: white; }
@@ -61,22 +61,25 @@
         .m-bar-bg { height: 6px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden; }
         .m-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
 
-        .micro-text { font-size: 10px; color: var(--text-sec); line-height: 1.4; margin-top: 8px; background: rgba(255,255,255,0.02); padding: 8px; border-radius: 6px; border: 1px dashed var(--border); }
+        .micro-list { display: flex; flex-direction: column; gap: 8px; }
+        .micro-item { display: flex; align-items: center; justify-content: space-between; font-size: 11px; background: var(--bg-surface); padding: 6px 10px; border-radius: 6px; }
+        .micro-bar-bg { width: 50%; height: 4px; background: rgba(0,0,0,0.5); border-radius: 2px; display:flex; align-items:center;}
+        .micro-bar-fill { height: 100%; border-radius: 2px; background: var(--c-nexo); transition: width 0.3s; }
 
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-base); border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-surface); border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); }
         .list-item.bought { opacity: 0.5; text-decoration: line-through; border-color: var(--c-shop); }
         .item-info { flex: 1; }
         .item-name { font-size: 14px; font-weight: 800; }
         .item-sub { font-size: 11px; color: var(--text-sec); margin-top: 4px; display:flex; gap: 8px; align-items: center; }
         .item-actions { display: flex; gap: 5px; }
 
-        .chart-container { position: relative; height: 180px; width: 100%; margin-bottom: 15px;}
+        .chart-container { position: relative; height: 200px; width: 100%; margin-top: 10px;}
 
         /* CALENDARIO */
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 800; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
         .cal-day-header { font-size: 10px; color: var(--text-sec); text-align: center; margin-bottom: 5px; }
-        .cal-day { aspect-ratio: 1; border-radius: 6px; background: var(--bg-base); display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 800; border: 1px solid var(--border); cursor: pointer; }
+        .cal-day { aspect-ratio: 1; border-radius: 6px; background: var(--bg-surface); display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 800; border: 1px solid var(--border); cursor: pointer; }
         .cal-day.empty { background: transparent; border: none; }
         .cal-c-0 { background: #ef4444; color: black; border-color: #ef4444; } 
         .cal-c-1 { background: #eab308; color: black; border-color: #eab308; } 
@@ -89,15 +92,12 @@
         .nav-icon { font-size: 18px; }
 
         .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab { flex: 1; text-align: center; padding: 10px; background: var(--bg-base); border-radius: 8px; font-size: 12px; font-weight: 800; color: var(--text-sec); border: 1px solid var(--border); cursor: pointer; }
+        .tab { flex: 1; text-align: center; padding: 10px; background: var(--bg-surface); border-radius: 8px; font-size: 12px; font-weight: 800; color: var(--text-sec); border: 1px solid var(--border); cursor: pointer; }
         .tab.active { background: var(--text-pri); color: black; border-color: var(--text-pri); }
         
-        .qty-ctrl { display: flex; align-items: center; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+        .qty-ctrl { display: flex; align-items: center; background: var(--bg-base); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
         .qty-ctrl button { background: none; border: none; color: white; padding: 4px 8px; cursor: pointer; font-weight: bold; }
         .qty-ctrl input { width: 30px; background: none; border: none; color: white; padding: 0; text-align: center; margin: 0; font-size: 12px; -moz-appearance: textfield;}
-
-        /* MODAL EDICION */
-        #edit-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:1000; padding: env(safe-area-inset-top, 40px) 20px 20px; overflow-y:auto; }
     </style>
 </head>
 <body>
@@ -125,7 +125,22 @@
                     <div class="m-box"><div class="m-head"><span style="color:var(--c-fat)">GRASA</span> <span id="t-fat">0g</span></div><div class="m-bar-bg"><div id="b-fat" class="m-bar-fill" style="background:var(--c-fat)"></div></div></div>
                 </div>
                 <div style="font-size: 11px; color: var(--text-sec); text-align: center; margin-top: 10px;">Ingesta: <span id="st-in">0</span> | Ejercicio: <span id="st-out" style="color:var(--c-danger)">0</span> | Límite: <span id="st-max">2000</span></div>
-                <div id="dash-micros" class="micro-text"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Micronutrientes</div>
+                <div class="micro-list">
+                    <div class="micro-item"><span>🌾 Fibra</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-fib" class="micro-bar-fill"></div></div><span id="t-fib" style="width:35px; text-align:right;">0g</span></div></div>
+                    <div class="micro-item"><span>🍬 Azúcar</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-sug" class="micro-bar-fill" style="background:var(--c-danger)"></div></div><span id="t-sug" style="width:35px; text-align:right;">0g</span></div></div>
+                    <div class="micro-item"><span>👁️ Vit A</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-va" class="micro-bar-fill"></div></div><span id="t-va" style="width:35px; text-align:right;">0µg</span></div></div>
+                    <div class="micro-item"><span>🍊 Vit C</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-vc" class="micro-bar-fill"></div></div><span id="t-vc" style="width:35px; text-align:right;">0mg</span></div></div>
+                    <div class="micro-item"><span>☀️ Vit D</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-vd" class="micro-bar-fill"></div></div><span id="t-vd" style="width:35px; text-align:right;">0µg</span></div></div>
+                    <div class="micro-item"><span>🦴 Calcio</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-ca" class="micro-bar-fill"></div></div><span id="t-ca" style="width:35px; text-align:right;">0mg</span></div></div>
+                    <div class="micro-item"><span>🩸 Hierro</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-fe" class="micro-bar-fill"></div></div><span id="t-fe" style="width:35px; text-align:right;">0mg</span></div></div>
+                    <div class="micro-item"><span>🍌 Potasio</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-po" class="micro-bar-fill"></div></div><span id="t-po" style="width:35px; text-align:right;">0mg</span></div></div>
+                    <div class="micro-item"><span>⚡ Magnesio</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-mg" class="micro-bar-fill"></div></div><span id="t-mg" style="width:35px; text-align:right;">0mg</span></div></div>
+                    <div class="micro-item"><span>🧂 Sodio</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-na" class="micro-bar-fill" style="background:var(--c-danger)"></div></div><span id="t-na" style="width:35px; text-align:right;">0mg</span></div></div>
+                </div>
             </div>
 
             <div class="card">
@@ -152,18 +167,17 @@
 
         <div id="view-db" class="view">
             <div class="card card-forge">
-                <div class="card-title" style="color: var(--border-forge);">Biblioteca (Todos los Alimentos)</div>
+                <div class="card-title" style="color: #fca5a5;">Biblioteca (Todos los Alimentos)</div>
                 <input type="text" id="search-db" placeholder="Buscar en la biblioteca..." onkeyup="renderDB()">
                 <div id="db-render-list" style="max-height: 350px; overflow-y: auto; margin-top: 10px;"></div>
             </div>
             
             <div class="card card-forge">
-                <div class="card-title" style="color: var(--border-forge);">Forja de la despensa</div>
+                <div class="card-title" style="color: #fca5a5;">Forja de la despensa</div>
                 <input type="text" id="c-name" placeholder="Nombre">
                 <input type="number" id="c-qty" placeholder="¿Gramos base del envase?" value="100">
                 <div class="row"><input type="number" id="c-k" placeholder="Kcal"><input type="number" id="c-p" placeholder="Prot"></div>
                 <div class="row"><input type="number" id="c-c" placeholder="Carb"><input type="number" id="c-f" placeholder="Grasa"></div>
-                <div style="font-size:11px; color:var(--text-sec); margin-bottom:5px;">Micronutrientes (Opcional):</div>
                 <div class="row"><input type="number" id="c-fib" placeholder="Fibra"><input type="number" id="c-sug" placeholder="Azúcar"></div>
                 <div class="row"><input type="number" id="c-va" placeholder="Vit A"><input type="number" id="c-vc" placeholder="Vit C"><input type="number" id="c-vd" placeholder="Vit D"></div>
                 <div class="row"><input type="number" id="c-ca" placeholder="Calcio"><input type="number" id="c-fe" placeholder="Hierro"></div>
@@ -175,52 +189,50 @@
         <div id="view-inv" class="view">
             <div class="card">
                 <div class="card-title">Inventario Actual (Total)</div>
-                <div class="macro-grid" style="margin-bottom: 5px;">
+                <div class="macro-grid" style="margin-bottom: 10px;">
                     <div class="m-box" style="padding:5px;"><div class="m-head"><span style="color:var(--c-kcal)">KCAL</span> <span id="inv-k">0</span></div></div>
                     <div class="m-box" style="padding:5px;"><div class="m-head"><span style="color:var(--c-prot)">PROT</span> <span id="inv-p">0g</span></div></div>
                     <div class="m-box" style="padding:5px;"><div class="m-head"><span style="color:var(--c-carb)">CARB</span> <span id="inv-c">0g</span></div></div>
                     <div class="m-box" style="padding:5px;"><div class="m-head"><span style="color:var(--c-fat)">GRASA</span> <span id="inv-f">0g</span></div></div>
                 </div>
-                <div id="inv-micros" class="micro-text" style="margin-bottom: 15px;"></div>
                 <div id="inv-list"></div>
             </div>
         </div>
 
         <div id="view-shop" class="view">
             <div class="tabs">
-                <div class="tab active" id="tab-shop-active" onclick="switchShopTab('active')" style="color:var(--c-shop); border-color:var(--c-shop);">Lista Actual</div>
+                <div class="tab active" id="tab-shop-active" onclick="switchShopTab('active')" style="background:var(--c-shop); color:black; border-color:var(--c-shop);">Lista Actual</div>
                 <div class="tab" id="tab-shop-history" onclick="switchShopTab('history')">Historial</div>
             </div>
 
             <div id="shop-view-active">
                 <div class="card card-shop">
-                    <div class="card-title" style="color:var(--c-shop);">Añadir a la Cesta</div>
-                    <select id="shop-db-select"></select>
+                    <div class="card-title" style="color:#86efac;">Añadir a la Cesta</div>
+                    <select id="shop-db-select" style="margin-bottom: 10px; border-color:var(--border-shop);"></select>
                     <div class="row">
-                        <input type="number" id="shop-add-qty" placeholder="Gramos" value="100">
-                        <input type="number" id="shop-add-price" placeholder="Precio (€)">
+                        <input type="number" id="shop-add-qty" placeholder="Gramos" value="100" style="border-color:var(--border-shop);">
+                        <input type="number" id="shop-add-price" placeholder="Precio (€)" style="border-color:var(--border-shop);">
                     </div>
                     <button class="btn btn-shop" onclick="addToShop()">Añadir a la Cesta</button>
                 </div>
                 
                 <div class="card card-shop">
-                    <div class="card-title" style="color:var(--c-shop);">Cesta Actual (<span id="shop-total-cost">0.00 €</span>)</div>
-                    <div class="macro-grid" style="margin-bottom: 5px;">
-                        <div class="m-box" style="border-color:rgba(34, 197, 94, 0.3);"><div class="m-head"><span style="color:var(--c-kcal)">KCAL</span> <span id="sh-k">0</span></div></div>
-                        <div class="m-box" style="border-color:rgba(34, 197, 94, 0.3);"><div class="m-head"><span style="color:var(--c-prot)">PROT</span> <span id="sh-p">0g</span></div></div>
-                        <div class="m-box" style="border-color:rgba(34, 197, 94, 0.3);"><div class="m-head"><span style="color:var(--c-carb)">CARB</span> <span id="sh-c">0g</span></div></div>
-                        <div class="m-box" style="border-color:rgba(34, 197, 94, 0.3);"><div class="m-head"><span style="color:var(--c-fat)">GRASA</span> <span id="sh-f">0g</span></div></div>
+                    <div class="card-title" style="color:#86efac;">Cesta Actual (<span id="shop-total-cost">0.00 €</span>)</div>
+                    <div class="macro-grid" style="margin-bottom: 15px;">
+                        <div class="m-box" style="border-color:var(--border-shop);"><div class="m-head"><span style="color:var(--c-kcal)">KCAL</span> <span id="sh-k">0</span></div></div>
+                        <div class="m-box" style="border-color:var(--border-shop);"><div class="m-head"><span style="color:var(--c-prot)">PROT</span> <span id="sh-p">0g</span></div></div>
+                        <div class="m-box" style="border-color:var(--border-shop);"><div class="m-head"><span style="color:var(--c-carb)">CARB</span> <span id="sh-c">0g</span></div></div>
+                        <div class="m-box" style="border-color:var(--border-shop);"><div class="m-head"><span style="color:var(--c-fat)">GRASA</span> <span id="sh-f">0g</span></div></div>
                     </div>
-                    <div id="shop-micros" class="micro-text" style="margin-bottom: 15px; border-color:rgba(34, 197, 94, 0.3);"></div>
                     <div id="shop-list-items"></div>
-                    <button class="btn" style="background:var(--c-shop); color:black; margin-top:15px;" onclick="finishShopping()">Guardar Compra en Historial</button>
+                    <button class="btn" style="background:#bbf7d0; color:black; margin-top:15px;" onclick="finishShopping()">Guardar Compra en Historial</button>
                 </div>
             </div>
 
             <div id="shop-view-history" style="display:none;">
                 <div class="card card-shop">
-                    <div class="card-title" style="color:var(--c-shop);">Gráfica de Gastos</div>
-                    <div class="chart-container" style="height:150px;"><canvas id="shopChart"></canvas></div>
+                    <div class="card-title" style="color:#86efac;">Gráfica de Gastos</div>
+                    <div class="chart-container"><canvas id="shopChart"></canvas></div>
                 </div>
                 <div id="shop-history-list"></div>
             </div>
@@ -228,21 +240,13 @@
 
         <div id="view-templo" class="view">
             <div class="card card-temple">
-                <div class="card-title" style="color:var(--border-temple);">Camino del Titán <span><span id="t-h">00</span>:<span id="t-m">00</span>:<span id="t-s">00</span></span></div>
+                <div class="card-title" style="color:#d8b4fe;">Camino del Titán <span><span id="t-h">00</span>:<span id="t-m">00</span>:<span id="t-s">00</span></span></div>
                 <div style="font-size: 12px; margin-bottom: 5px; display:flex; justify-content:space-between; color:#e9d5ff;"><span>Experiencia Nvl <span id="rpg-lvl">1</span></span> <span><span id="rpg-xp">0</span> / <span id="rpg-next">500</span> XP</span></div>
                 <div class="m-bar-bg" style="height: 10px; margin-bottom: 15px; border: 1px solid var(--border-temple);"><div id="b-xp" class="m-bar-fill" style="background:var(--c-xp); width: 0%;"></div></div>
                 <div style="font-size: 13px; font-weight:800; margin-bottom:10px; color:#f3e8ff;">Recompensas Diarias</div>
-                <div class="list-item" style="padding:8px; border-color:rgba(255,255,255,0.1);"><span>🎯 Cuadrar Kcal Límite</span> <span style="color:var(--c-gold)">+50 G</span></div>
-                <div class="list-item" style="padding:8px; border-color:rgba(255,255,255,0.1);"><span>🥩 Macro cumplido</span> <span style="color:var(--c-gold)">+150 G / c.u</span></div>
-                <div class="list-item" style="padding:8px; border-color:rgba(255,255,255,0.1);"><span>💊 Micro cumplido</span> <span style="color:var(--c-gold)">+75 G / c.u</span></div>
-            </div>
-
-            <div class="card" style="border-color: #7f1d1d; background: #1a0505;">
-                <div class="card-title" style="color: #fca5a5;">Confesionario de Pecados</div>
-                <p style="font-size:11px; color:var(--text-sec); margin-bottom:10px;">Si caíste en la tentación, regístralo aquí. El Nexo exige un tributo de <b>-2000 G</b> por falta de disciplina.</p>
-                <select id="sin-select"></select>
-                <input type="number" id="sin-qty" placeholder="Gramos / Unidades consumidas" value="100">
-                <button class="btn btn-danger" onclick="commitSin()">Pecar (-2000 G)</button>
+                <div class="micro-item" style="margin-bottom:5px; background:rgba(255,255,255,0.05);"><span>🎯 Cuadrar Calorías Límite</span> <span style="color:var(--c-gold)">+50 G</span></div>
+                <div class="micro-item" style="margin-bottom:5px; background:rgba(255,255,255,0.05);"><span>🥩 Macro cumplido (P/C/G)</span> <span style="color:var(--c-gold)">+150 G / c.u</span></div>
+                <div class="micro-item" style="background:rgba(255,255,255,0.05);"><span>💊 Micro cumplido</span> <span style="color:var(--c-gold)">+75 G / c.u</span></div>
             </div>
         </div>
 
@@ -264,53 +268,41 @@
             </div>
 
             <div class="card">
-                <div class="card-title">Tendencias</div>
+                <div class="card-title">Tendencia de Macros</div>
                 <div class="tabs" style="margin-bottom: 10px;">
-                    <div class="tab active" id="tab-t-7" onclick="renderChart(7)">7 Días</div>
-                    <div class="tab" id="tab-t-30" onclick="renderChart(30)">30 Días</div>
-                    <div class="tab" id="tab-t-365" onclick="renderChart(365)">365 Días</div>
+                    <div class="tab active" id="tab-t-7" onclick="renderChart(7)">Semana</div>
+                    <div class="tab" id="tab-t-30" onclick="renderChart(30)">Mes</div>
+                    <div class="tab" id="tab-t-365" onclick="renderChart(365)">Año</div>
+                </div>
+                <div class="chart-container"><canvas id="macroChart"></canvas></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Energía Global (Periodo Seleccionado)</div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                    <span>Consumido: <span id="stat-k-in" style="color:var(--c-kcal); font-weight:bold;">0</span> kc</span>
+                    <span>Quemado: <span id="stat-k-out" style="color:var(--c-danger); font-weight:bold;">0</span> kc</span>
+                </div>
+                <div class="m-bar-bg" style="height: 10px; background:var(--c-danger); margin-bottom:15px; position:relative;">
+                    <div id="stat-k-bar" class="m-bar-fill" style="background:var(--c-kcal); position:absolute; left:0; top:0;"></div>
                 </div>
                 
-                <div style="font-size:11px; font-weight:bold; color:var(--text-sec); margin-bottom:5px;">Energía (Kcal In vs Out)</div>
-                <div class="chart-container"><canvas id="chartEnergy"></canvas></div>
-                
-                <div style="font-size:11px; font-weight:bold; color:var(--text-sec); margin-bottom:5px;">Macros Principales</div>
-                <div class="chart-container"><canvas id="chartMacros"></canvas></div>
-                
-                <div style="font-size:11px; font-weight:bold; color:var(--text-sec); margin-bottom:5px;">Micronutrientes (% del Objetivo)</div>
-                <div class="chart-container"><canvas id="chartMicros"></canvas></div>
-                <div id="micro-warning" style="font-size:12px; font-weight:800; text-align:center; margin-top:10px; padding:10px; border-radius:8px;"></div>
+                <button class="btn btn-sec" onclick="toggleAllStats()">Mostrar Todas las Stats</button>
+                <div id="all-stats-panel" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid var(--border);">
+                    </div>
             </div>
 
             <div class="card">
                 <div class="card-title">Gestión de Días</div>
-                <div id="manage-days-list" style="max-height: 250px; overflow-y:auto;"></div>
+                <div id="manage-days-list" style="max-height: 200px; overflow-y:auto;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Backup</div>
+                <button class="btn btn-sec" onclick="exportData()">Exportar JSON</button>
             </div>
         </div>
-    </div>
 
-    <div id="edit-modal">
-        <div class="card">
-            <div class="card-title">Editando: <span id="edit-modal-date" style="color:var(--c-nexo);"></span></div>
-            
-            <div style="font-size:12px; color:var(--text-sec); margin-bottom:5px;">Añadir Alimento a este día:</div>
-            <div class="row" style="margin-bottom: 10px;">
-                <select id="edit-food-select" style="flex: 2; margin-bottom:0;"></select>
-                <input type="number" id="edit-food-qty" placeholder="Gramos" value="100" style="margin-bottom:0;">
-            </div>
-            <button class="btn btn-nexo-bg" onclick="addFoodToEditDay()">Añadir a Historial</button>
-
-            <div style="font-size:12px; color:var(--text-sec); margin-top:15px; margin-bottom:5px;">Kcal Extra Quemadas:</div>
-            <div class="row">
-                <input type="number" id="edit-burn-input" placeholder="Kcal quemadas" style="margin-bottom:0;">
-                <button class="btn btn-sec" style="margin-bottom:0;" onclick="saveEditBurn()">Actualizar Quemadas</button>
-            </div>
-
-            <div style="font-size:12px; color:var(--text-sec); margin-top:15px; margin-bottom:5px;">Alimentos Registrados:</div>
-            <div id="edit-log-list"></div>
-            
-            <button class="btn btn-sec" style="margin-top:20px;" onclick="closeEditModal()">Cerrar y Guardar</button>
-        </div>
     </div>
 
     <nav>
@@ -349,24 +341,28 @@
         if(!state.activeShop) state.activeShop = [];
         if(!state.shopHistory) state.shopHistory = [];
 
+        state.inventory.forEach(i => { if(i.invQty === undefined) i.invQty = 1; });
+
         let fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name));
-        let chartEnergyInst, chartMacrosInst, chartMicrosInst, shopChartInst;
+        let chartInst = null; let shopChartInst = null;
         let calViewDate = new Date();
         let currentChartRange = 7;
-        let editingDate = null; // Para el modal
 
         function save() { localStorage.setItem('nexo_dieta_rpg', JSON.stringify(state)); updateDash(); updateRPG(); }
 
         function switchTab(id, btn) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`view-${id}`).classList.add('active');
-            btn.classList.add('active');
-            if(id === 'db') renderDB();
-            if(id === 'inv') renderInv();
-            if(id === 'shop') renderShop();
-            if(id === 'stats') { renderChart(currentChartRange); renderCalendar(); renderManageDays(); }
-            if(id === 'templo') { updateRPG(); populateSinSelect(); }
+            try {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById(`view-${id}`).classList.add('active');
+                if(btn) btn.classList.add('active');
+                
+                if(id === 'db') renderDB();
+                if(id === 'inv') renderInv();
+                if(id === 'shop') renderShop();
+                if(id === 'stats') { renderChart(currentChartRange); renderCalendar(); renderManageDays(); }
+                if(id === 'templo') updateRPG();
+            } catch(e) { console.error("Error cambiando pestaña:", e); }
         }
 
         function getSums(date = today) {
@@ -377,39 +373,54 @@
             t.netK = Math.max(0, t.k - burn); return { t, burn };
         }
 
-        function formatMicros(t) {
-            return `Fibra: ${Math.round(t.fib)}g | Azúcar: ${Math.round(t.sug)}g | VitA: ${Math.round(t.va)}µg | VitC: ${Math.round(t.vc)}mg | VitD: ${Math.round(t.vd)}µg | Calcio: ${Math.round(t.ca)}mg | Hierro: ${Math.round(t.fe)}mg | Potasio: ${Math.round(t.po)}mg | Magnesio: ${Math.round(t.mg)}mg | Sodio: ${Math.round(t.na)}mg`;
-        }
-
         function updateDash() {
-            document.getElementById('ui-date').innerText = new Date().toLocaleDateString('es-ES', {day:'numeric', month:'short'}).toUpperCase();
-            document.getElementById('food-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
-            
-            let { t, burn } = getSums(); let T = state.targets;
-            const uM = (id, val, max, unit="") => { document.getElementById(`t-${id}`).innerText = `${Math.round(val)}${unit}`; document.getElementById(`b-${id}`).style.width = `${Math.min(100, (val/max)*100)}%`; };
-            uM('kcal', t.netK, T.kcal); uM('prot', t.p, T.prot, 'g'); uM('carb', t.c, T.carb, 'g'); uM('fat', t.f, T.fat, 'g');
-            document.getElementById('st-in').innerText = Math.round(t.k); document.getElementById('st-out').innerText = Math.round(burn); document.getElementById('st-max').innerText = Math.round(T.kcal);
-            document.getElementById('dash-micros').innerText = formatMicros(t);
+            try {
+                document.getElementById('ui-date').innerText = new Date().toLocaleDateString('es-ES', {day:'numeric', month:'short'}).toUpperCase();
+                document.getElementById('food-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+                
+                let { t, burn } = getSums(); let T = state.targets;
+                
+                const uM = (id, val, max, unit="", inv=false) => { 
+                    let elT = document.getElementById(`t-${id}`); let elB = document.getElementById(`b-${id}`);
+                    if(elT) elT.innerText = `${Math.round(val)}${unit}`; 
+                    if(elB) {
+                        let pct = (val/max)*100;
+                        if(inv) elB.style.width = `${Math.min(100, pct)}%`; // Invertido: Azúcar y Sodio
+                        else elB.style.width = `${Math.min(100, pct)}%`; 
+                    }
+                };
+                
+                // Macros
+                uM('kcal', t.netK, T.kcal); uM('prot', t.p, T.prot, 'g'); uM('carb', t.c, T.carb, 'g'); uM('fat', t.f, T.fat, 'g');
+                
+                // Micros RESTAURADOS
+                uM('fib', t.fib, T.fib, 'g'); uM('sug', t.sug, T.sug, 'g', true);
+                uM('va', t.va, T.va, 'µg'); uM('vc', t.vc, T.vc, 'mg'); uM('vd', t.vd, T.vd, 'µg');
+                uM('ca', t.ca, T.ca, 'mg'); uM('fe', t.fe, T.fe, 'mg'); uM('po', t.po, T.po, 'mg');
+                uM('mg', t.mg, T.mg, 'mg'); uM('na', t.na, T.na, 'mg', true);
 
-            document.getElementById('today-log').innerHTML = state.history[today].log.map((i, idx) => `
-                <div class="list-item">
-                    <div class="item-info" style="flex: 1.5;">
-                        <div class="item-name" style="font-size: 13px;">${i.name}</div>
-                        <div class="item-sub">🔥 ${Math.round(i.k*(i.qty/100))}kc | 🥩 ${Math.round(i.p*(i.qty/100))}g</div>
-                    </div>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <input type="number" value="${i.qty}" onchange="updateQty(${idx}, this.value, '${today}')" style="width: 65px; padding: 8px 5px; margin-bottom: 0; text-align: center; font-size: 13px;">
-                        <span style="font-size:11px; color:var(--text-sec);">g/u</span><button class="btn-icon" style="color:var(--c-danger);" onclick="delLog(${idx}, '${today}')">✖</button>
-                    </div>
-                </div>`).join('') || '<div style="font-size:12px; color:var(--text-sec);">Nada registrado aún.</div>';
+                document.getElementById('st-in').innerText = Math.round(t.k); document.getElementById('st-out').innerText = Math.round(burn); document.getElementById('st-max').innerText = Math.round(T.kcal);
+
+                document.getElementById('today-log').innerHTML = state.history[today].log.map((i, idx) => `
+                    <div class="list-item">
+                        <div class="item-info" style="flex: 1.5;">
+                            <div class="item-name" style="font-size: 13px;">${i.name}</div>
+                            <div class="item-sub">🔥 ${Math.round(i.k*(i.qty/100))}kc | 🥩 ${Math.round(i.p*(i.qty/100))}g</div>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input type="number" value="${i.qty}" onchange="updateQty(${idx}, this.value)" style="width: 65px; padding: 8px 5px; margin-bottom: 0; text-align: center; font-size: 13px;">
+                            <span style="font-size:11px; color:var(--text-sec);">g/u</span><button class="btn-icon" style="color:var(--c-danger);" onclick="delLog(${idx})">✖</button>
+                        </div>
+                    </div>`).join('') || '<div style="font-size:12px; color:var(--text-sec);">Nada registrado aún.</div>';
+            } catch(e) { console.error("Error actualizando Dashboard:", e); }
         }
 
         function logFood() { let id = document.getElementById('food-select').value; let qty = parseFloat(document.getElementById('food-qty').value); if(!id || isNaN(qty) || qty<=0) return; let item = fullDB.find(x => x.id == id); state.history[today].log.push({ ...item, qty }); save(); document.getElementById('food-qty').value = "100"; }
-        function delLog(i, date) { state.history[date].log.splice(i, 1); save(); if(date !== today) renderEditModalLogs(); }
-        function updateQty(idx, val, date) { let n = parseFloat(val); if(isNaN(n) || n <= 0) { delLog(idx, date); return; } state.history[date].log[idx].qty = n; save(); if(date !== today) renderEditModalLogs(); if(document.getElementById('view-stats').classList.contains('active')) renderChart(currentChartRange); }
+        function delLog(i) { state.history[today].log.splice(i, 1); save(); }
+        function updateQty(idx, val) { let n = parseFloat(val); if(isNaN(n) || n <= 0) { delLog(idx); return; } state.history[today].log[idx].qty = n; save(); if(document.getElementById('view-stats').classList.contains('active')) renderChart(currentChartRange); }
         function logBurn() { let v = parseFloat(document.getElementById('burn-input').value); if(v>0) { state.history[today].burn += v; document.getElementById('burn-input').value=""; save(); } }
 
-        // === FORJA ===
+        // === BIBLIOTECA / FORJA ===
         function createFood() {
             let n = document.getElementById('c-name').value; let q = parseFloat(document.getElementById('c-qty').value);
             if(!n || isNaN(q) || q <= 0) return alert("Introduce nombre y gramos base válidos.");
@@ -417,32 +428,38 @@
             let f = { id: Date.now(), name: n, k: gv('c-k'), p: gv('c-p'), c: gv('c-c'), f: gv('c-f'), fib: gv('c-fib'), sug: gv('c-sug'), va: gv('c-va'), vc: gv('c-vc'), vd: gv('c-vd'), ca: gv('c-ca'), fe: gv('c-fe'), po: gv('c-po'), mg: gv('c-mg'), na: gv('c-na') };
             state.customDB.push(f); fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name));
             save(); renderDB(); alert(`¡${n} forjado para 100g!`);
-            ['c-name','c-qty','c-k','c-p','c-c','c-f','c-fib','c-sug','c-va','c-vc','c-vd','c-ca','c-fe','c-po','c-mg','c-na'].forEach(id => document.getElementById(id).value = ''); document.getElementById('c-qty').value = "100";
+            ['c-name','c-qty','c-k','c-p','c-c','c-f','c-fib','c-sug','c-va','c-vc','c-vd','c-ca','c-fe','c-po','c-mg','c-na'].forEach(id => { let el = document.getElementById(id); if(el) el.value = ''; }); document.getElementById('c-qty').value = "100";
         }
 
         function renderDB() { 
             let q = document.getElementById('search-db').value.toLowerCase(); 
             document.getElementById('db-render-list').innerHTML = fullDB.filter(x => x.name.toLowerCase().includes(q)).map(f => `
-                <div class="list-item" style="border-color:var(--border); background:var(--bg-surface);">
+                <div class="list-item" style="border-color:var(--border-forge)">
                     <div class="item-info"><div class="item-name">${f.name}</div><div class="item-sub">${Math.round(f.k)} kc | ${Math.round(f.p)}g P</div></div>
                     <div class="item-actions">
-                        <button class="btn-icon" style="background:var(--c-shop); font-size:10px; color:black;" onclick="promptShopList(${f.id})" title="Añadir a la compra">🛒</button>
+                        <button class="btn-icon" style="background:#059669; font-size:10px;" onclick="promptShopList(${f.id})" title="Añadir a la compra">🛒</button>
                         <button class="btn-icon" style="background:var(--c-kcal); color:black;" onclick="addInv(${f.id})" title="Añadir inventario">📦</button>
-                        ${f.id > 1000 ? `<button class="btn-icon" style="color:var(--c-danger);" onclick="delDB(${f.id})" title="Borrar">✖</button>` : ''}
+                        ${f.id > 1000 ? `<button class="btn-icon" style="color:var(--c-danger);" onclick="delDB(${f.id})" title="Borrar de base de datos">✖</button>` : ''}
                     </div>
                 </div>`).join(''); 
         }
 
         function delDB(id) { if(confirm("¿Seguro que quieres borrar este alimento forjado?")) { state.customDB = state.customDB.filter(x => x.id !== id); fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name)); save(); renderDB(); } }
-        function promptShopList(id) { let item = fullDB.find(x => x.id == id); state.activeShop.push({ ...item, qty: 100, price: 0, done: false }); save(); alert(`Añadido a la cesta: ${item.name}`); }
+        function promptShopList(id) {
+            let item = fullDB.find(x => x.id == id);
+            let targetList = prompt(`¿A qué lista quieres añadir '${item.name}'? \nEscribe algo o dale a Aceptar para la cesta actual.`, "Cesta Principal");
+            if(targetList !== null) {
+                state.activeShop.push({ ...item, qty: 100, price: 0, done: false });
+                save(); alert(`Añadido a la cesta: ${item.name}`);
+            }
+        }
 
         // === INVENTARIO ===
         function renderInv() { 
-            let tk=0, tp=0, tc=0, tf=0; let tm = {fib:0, sug:0, va:0, vc:0, vd:0, ca:0, fe:0, po:0, mg:0, na:0};
+            let tk=0, tp=0, tc=0, tf=0;
             document.getElementById('inv-list').innerHTML = state.inventory.map((i, idx) => {
                 let m = i.name.includes('Unidad') ? i.invQty : (i.invQty * 100) / 100;
                 tk += i.k * m; tp += i.p * m; tc += i.c * m; tf += i.f * m;
-                for(let k in tm) tm[k] += (i[k]||0)*m;
                 return `
                 <div class="list-item">
                     <div class="item-info">
@@ -453,7 +470,7 @@
                                 <input type="number" value="${i.invQty}" onchange="setInvQty(${idx}, this.value)">
                                 <button onclick="changeInvQty(${idx}, 1)">+</button>
                             </div>
-                            <span>x uds/porciones</span>
+                            <span>x unidades/porciones</span>
                         </div>
                     </div>
                     <div class="item-actions">
@@ -465,7 +482,6 @@
 
             document.getElementById('inv-k').innerText = Math.round(tk); document.getElementById('inv-p').innerText = Math.round(tp)+'g';
             document.getElementById('inv-c').innerText = Math.round(tc)+'g'; document.getElementById('inv-f').innerText = Math.round(tf)+'g';
-            document.getElementById('inv-micros').innerText = formatMicros(tm);
         }
         function addInv(id) { let item = fullDB.find(x => x.id == id); let ex = state.inventory.find(x => x.id == id); if(ex) { ex.invQty++; } else { state.inventory.push({...item, invQty: 1}); } save(); renderDB(); alert("Añadido a la despensa"); }
         function delInv(idx) { state.inventory.splice(idx, 1); save(); renderInv(); }
@@ -473,13 +489,13 @@
         function setInvQty(idx, val) { let v = parseInt(val); if(isNaN(v)||v<1)v=1; state.inventory[idx].invQty = v; save(); renderInv(); }
         function logFromInv(id, qtyMultiplier) { document.getElementById('food-select').value = id; document.getElementById('food-qty').value = qtyMultiplier * 100; switchTab('dash', document.querySelector('.nav-btn')); }
 
-        // === COMPRA ===
+        // === TIENDA ===
         function switchShopTab(tab) {
-            document.getElementById('tab-shop-active').classList.remove('active'); document.getElementById('tab-shop-active').style.color = 'var(--text-sec)'; document.getElementById('tab-shop-active').style.borderColor = 'var(--border)';
-            document.getElementById('tab-shop-history').classList.remove('active'); document.getElementById('tab-shop-history').style.color = 'var(--text-sec)'; document.getElementById('tab-shop-history').style.borderColor = 'var(--border)';
+            document.getElementById('tab-shop-active').classList.remove('active'); document.getElementById('tab-shop-active').style.background = 'var(--bg-surface)'; document.getElementById('tab-shop-active').style.color = 'var(--text-sec)'; document.getElementById('tab-shop-active').style.borderColor = 'var(--border)';
+            document.getElementById('tab-shop-history').classList.remove('active'); document.getElementById('tab-shop-history').style.background = 'var(--bg-surface)'; document.getElementById('tab-shop-history').style.color = 'var(--text-sec)'; document.getElementById('tab-shop-history').style.borderColor = 'var(--border)';
             
             let actBtn = document.getElementById(`tab-shop-${tab}`);
-            actBtn.classList.add('active'); actBtn.style.color = 'var(--c-shop)'; actBtn.style.borderColor = 'var(--c-shop)';
+            actBtn.classList.add('active'); actBtn.style.background = 'var(--c-shop)'; actBtn.style.color = 'black'; actBtn.style.borderColor = 'var(--c-shop)';
             
             document.getElementById('shop-view-active').style.display = tab === 'active' ? 'block' : 'none';
             document.getElementById('shop-view-history').style.display = tab === 'history' ? 'block' : 'none';
@@ -488,12 +504,11 @@
 
         function renderShop() {
             document.getElementById('shop-db-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
-            let totCost = 0, tk=0, tp=0, tc=0, tf=0; let tm = {fib:0, sug:0, va:0, vc:0, vd:0, ca:0, fe:0, po:0, mg:0, na:0};
+            let totCost = 0, tk=0, tp=0, tc=0, tf=0;
             document.getElementById('shop-list-items').innerHTML = state.activeShop.map((i, idx) => {
                 totCost += i.price; let m = i.qty / 100; tk += i.k*m; tp += i.p*m; tc += i.c*m; tf += i.f*m;
-                for(let k in tm) tm[k] += (i[k]||0)*m;
                 return `
-                <div class="list-item ${i.done ? 'bought' : ''}" style="border-color:rgba(34, 197, 94, 0.2);" onclick="toggleShopItem(${idx})">
+                <div class="list-item ${i.done ? 'bought' : ''}" style="border-color:var(--border-shop);" onclick="toggleShopItem(${idx})">
                     <div class="item-info">
                         <div class="item-name" style="${i.done ? 'color:var(--text-sec)' : 'color:#bbf7d0'}">${i.name}</div>
                         <div class="item-sub">${i.qty}g | ${i.price.toFixed(2)}€</div>
@@ -505,38 +520,49 @@
             document.getElementById('shop-total-cost').innerText = `${totCost.toFixed(2)} €`;
             document.getElementById('sh-k').innerText = Math.round(tk); document.getElementById('sh-p').innerText = Math.round(tp)+'g';
             document.getElementById('sh-c').innerText = Math.round(tc)+'g'; document.getElementById('sh-f').innerText = Math.round(tf)+'g';
-            document.getElementById('shop-micros').innerText = formatMicros(tm);
 
             document.getElementById('shop-history-list').innerHTML = state.shopHistory.map((h, idx) => `
-                <div class="list-item" style="border-color:rgba(34, 197, 94, 0.3);">
-                    <div class="item-info">
-                        <div class="item-name">${h.date}</div>
-                        <div class="item-sub">${h.items} Artículos</div>
+                <div class="card card-shop" style="padding:12px;">
+                    <div style="font-size:12px; font-weight:800; display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span>${h.date}</span> <span style="color:var(--c-shop)">${h.cost.toFixed(2)} €</span>
                     </div>
-                    <div style="font-weight:bold; color:var(--c-shop); margin-right:10px;">${h.cost.toFixed(2)} €</div>
-                    <button class="btn-icon" style="color:var(--c-danger);" onclick="delShopHist(${idx})">✖</button>
+                    <div style="font-size:10px; color:var(--text-sec); display:flex; justify-content:space-between;">
+                        <span>${h.items} Artículos</span>
+                        <button class="btn-icon" style="color:var(--c-danger); width:20px; height:20px; font-size:10px;" onclick="delShopHist(${idx})">✖</button>
+                    </div>
                 </div>`).reverse().join('');
         }
 
-        function addToShop() { let id = document.getElementById('shop-db-select').value; let qty = parseFloat(document.getElementById('shop-add-qty').value); let price = parseFloat(document.getElementById('shop-add-price').value) || 0; if(!id || isNaN(qty) || qty <= 0) return alert("Introduce gramos válidos."); let item = fullDB.find(x => x.id == id); state.activeShop.push({ ...item, qty, price, done: false }); save(); renderShop(); document.getElementById('shop-add-price').value = ""; }
+        function addToShop() {
+            let id = document.getElementById('shop-db-select').value; let qty = parseFloat(document.getElementById('shop-add-qty').value); let price = parseFloat(document.getElementById('shop-add-price').value) || 0;
+            if(!id || isNaN(qty) || qty <= 0) return alert("Introduce gramos válidos.");
+            let item = fullDB.find(x => x.id == id); state.activeShop.push({ ...item, qty, price, done: false });
+            save(); renderShop(); document.getElementById('shop-add-price').value = "";
+        }
+
         function toggleShopItem(idx) { state.activeShop[idx].done = !state.activeShop[idx].done; save(); renderShop(); }
         function delShopItem(idx) { state.activeShop.splice(idx, 1); save(); renderShop(); }
         function delShopHist(idx) { if(confirm("¿Borrar compra del historial?")) { state.shopHistory.splice(idx, 1); save(); renderShop(); renderShopChart(); } }
-        function finishShopping() { if(state.activeShop.length === 0) return; let cost = state.activeShop.reduce((a, c) => a + c.price, 0); state.shopHistory.push({ date: today, items: state.activeShop.length, cost: cost }); state.activeShop = []; save(); switchShopTab('history'); renderShop(); }
-        function renderShopChart() { if(shopChartInst) shopChartInst.destroy(); let hist = state.shopHistory.slice(-10); let ctx = document.getElementById('shopChart').getContext('2d'); shopChartInst = new Chart(ctx, { type: 'bar', data: { labels: hist.map(h => h.date.substring(5)), datasets: [{ label: 'Gasto (€)', data: hist.map(h => h.cost), backgroundColor: '#4ade80', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: '#333' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } }); }
+
+        function finishShopping() {
+            if(state.activeShop.length === 0) return;
+            let cost = state.activeShop.reduce((acc, curr) => acc + curr.price, 0);
+            state.shopHistory.push({ date: today, items: state.activeShop.length, cost: cost });
+            state.activeShop = []; save(); switchShopTab('history'); renderShop();
+        }
+
+        function renderShopChart() {
+            try {
+                if(typeof Chart === 'undefined') return;
+                if(shopChartInst) shopChartInst.destroy();
+                let hist = state.shopHistory.slice(-10); 
+                let ctx = document.getElementById('shopChart').getContext('2d');
+                shopChartInst = new Chart(ctx, { type: 'bar', data: { labels: hist.map(h => h.date.substring(5)), datasets: [{ label: 'Gasto (€)', data: hist.map(h => h.cost), backgroundColor: '#22c55e', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: '#333' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
+            } catch(e) { console.log("Error renderizando gráfica de tienda:", e); }
+        }
 
         // === RPG TEMPLO ===
         function updateRPG() { document.getElementById('ui-gold').innerText = state.gold; document.getElementById('ui-lvl').innerText = state.lvl; document.getElementById('rpg-lvl').innerText = state.lvl; document.getElementById('rpg-xp').innerText = state.xp; let nextXP = state.lvl * 500; document.getElementById('rpg-next').innerText = nextXP; document.getElementById('b-xp').style.width = `${Math.min(100, (state.xp/nextXP)*100)}%`; }
-        function populateSinSelect() { document.getElementById('sin-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join(''); }
-        function commitSin() {
-            let id = document.getElementById('sin-select').value; let qty = parseFloat(document.getElementById('sin-qty').value);
-            if(!id || isNaN(qty) || qty <= 0) return;
-            if(state.gold < 2000) { if(!confirm("No tienes 2000G para pagar la penitencia. Quedarás en deuda. ¿Proceder?")) return; }
-            state.gold -= 2000;
-            let item = fullDB.find(x => x.id == id);
-            state.history[today].log.push({ ...item, qty });
-            save(); alert(`Has pecado. -2000 G.\nAlimento registrado en tu diario.`);
-        }
 
         function endDay() {
             if(state.history[today].done) return alert("El día ya ha sido juzgado por el Nexo.");
@@ -557,7 +583,7 @@
 
         setInterval(() => { let n = new Date(), tom = new Date(n.getFullYear(), n.getMonth(), n.getDate()+1); let d = tom - n; let h = Math.floor((d % 86400000) / 3600000), m = Math.floor((d % 3600000) / 60000), s = Math.floor((d % 60000) / 1000); document.getElementById('t-h').innerText=String(h).padStart(2,'0'); document.getElementById('t-m').innerText=String(m).padStart(2,'0'); document.getElementById('t-s').innerText=String(s).padStart(2,'0'); }, 1000);
 
-        // === DIARIO Y GRÁFICAS ===
+        // === DIARIO ===
         function changeMonth(dir) { calViewDate.setMonth(calViewDate.getMonth() + dir); renderCalendar(); }
         function renderCalendar() {
             const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -574,5 +600,84 @@
 
         function renderChart(days) {
             currentChartRange = days;
-            ['7','30','365'].forEach(id => { let btn = document.getElementById(`tab-t-${id}`); if(btn) { btn.classList.remove('active'); btn.style.color = 'var(--text-sec)'; btn.style.borderColor = 'var(--border)'; } });
-            let actBtn = document.getElementById(`tab-t-${days}`); if(actBtn) { actBtn.classList.add('active'); actBtn.style.color = 'black'; actBtn.style.borderColor = 'var(--text-pri)'; }
+            ['7','30','365'].forEach(id => {
+                let btn = document.getElementById(`tab-t-${id}`);
+                if(btn) { btn.classList.remove('active'); btn.style.background = 'var(--bg-surface)'; btn.style.color = 'var(--text-sec)'; btn.style.borderColor = 'var(--border)'; }
+            });
+            let actBtn = document.getElementById(`tab-t-${days}`);
+            if(actBtn) { actBtn.classList.add('active'); actBtn.style.background = 'var(--text-pri)'; actBtn.style.color = 'black'; actBtn.style.borderColor = 'var(--text-pri)'; }
+
+            try {
+                if(typeof Chart === 'undefined') return;
+                if(chartInst) chartInst.destroy();
+                let d = new Date(); let labels = [], kData = [], pData = [];
+                let totKin = 0, totKout = 0;
+                let step = days > 30 ? Math.floor(days/30) : 1;
+
+                for(let i=days-1; i>=0; i-=step) {
+                    let dt = new Date(d); dt.setDate(d.getDate() - i);
+                    let ds = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+                    if(days <= 30) labels.push(dt.getDate()); else labels.push(`${dt.getDate()}/${dt.getMonth()+1}`);
+                    
+                    let s = getSums(ds);
+                    kData.push(s.t.k); pData.push(s.t.p);
+                    totKin += s.t.k; totKout += s.burn;
+                }
+                let ctx = document.getElementById('macroChart').getContext('2d');
+                chartInst = new Chart(ctx, { type: 'line', data: { labels, datasets: [{label:'Kcal', data:kData, borderColor:'#fbbf24', tension:0.3, pointRadius: days>30?0:3}, {label:'Prot', data:pData, borderColor:'#ef4444', tension:0.3, yAxisID:'y1', pointRadius: days>30?0:3}] }, options: { responsive:true, maintainAspectRatio:false, scales: { y: { beginAtZero:true, grid:{color:'#333'} }, y1: { position:'right', grid:{display:false} } }, plugins:{legend:{labels:{color:'#fff', font:{size:10}}}} } });
+
+                document.getElementById('stat-k-in').innerText = Math.round(totKin); document.getElementById('stat-k-out').innerText = Math.round(totKout);
+                let totalMax = Math.max(1, totKin + totKout);
+                document.getElementById('stat-k-bar').style.width = `${(totKin / totalMax) * 100}%`;
+            } catch(e) { console.log("Error renderizando gráfica:", e); }
+        }
+
+        function toggleAllStats() {
+            let p = document.getElementById('all-stats-panel');
+            if(p.style.display === 'none') {
+                p.style.display = 'block';
+                let totalS = {k:0, p:0, c:0, f:0};
+                for(let i=currentChartRange-1; i>=0; i--) {
+                    let dt = new Date(); dt.setDate(dt.getDate() - i);
+                    let ds = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+                    let s = getSums(ds); totalS.k += s.t.k; totalS.p += s.t.p; totalS.c += s.t.c; totalS.f += s.t.f;
+                }
+                p.innerHTML = `
+                    <div style="font-size:11px; color:var(--text-sec); margin-bottom:5px;">Suma total en ${currentChartRange} días:</div>
+                    <div class="macro-grid">
+                        <div class="m-box"><div class="m-head"><span style="color:var(--c-kcal)">KCAL</span> <span>${Math.round(totalS.k)}</span></div></div>
+                        <div class="m-box"><div class="m-head"><span style="color:var(--c-prot)">PROT</span> <span>${Math.round(totalS.p)}g</span></div></div>
+                        <div class="m-box"><div class="m-head"><span style="color:var(--c-carb)">CARB</span> <span>${Math.round(totalS.c)}g</span></div></div>
+                        <div class="m-box"><div class="m-head"><span style="color:var(--c-fat)">GRASA</span> <span>${Math.round(totalS.f)}g</span></div></div>
+                    </div>`;
+            } else { p.style.display = 'none'; }
+        }
+
+        function renderManageDays() {
+            let list = Object.keys(state.history).sort((a,b)=>new Date(b)-new Date(a));
+            document.getElementById('manage-days-list').innerHTML = list.map(date => {
+                let s = getSums(date);
+                return `
+                <div class="list-item" style="padding: 8px 12px;">
+                    <div class="item-info">
+                        <div class="item-name" style="font-size:12px;">${date} ${date===today ? '(Hoy)' : ''}</div>
+                        <div class="item-sub" style="font-size:10px;">${Math.round(s.t.k)}kc in | ${s.burn}kc out</div>
+                    </div>
+                    ${date !== today ? `<button class="btn-icon" style="color:var(--c-danger); width:24px; height:24px; font-size:12px;" onclick="deleteDay('${date}')">✖</button>` : '<span style="font-size:10px; color:var(--text-sec);">Activo</span>'}
+                </div>`;
+            }).join('');
+        }
+
+        function deleteDay(date) {
+            if(confirm(`¿Estás SEGURO de que quieres borrar TODOS los registros del día ${date}? Esta acción no se puede deshacer.`)) {
+                delete state.history[date]; save(); renderManageDays(); renderChart(currentChartRange); renderCalendar();
+            }
+        }
+
+        function exportData() { let a=document.createElement('a'); a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(state)); a.download=`NexoRPG_${today}.json`; a.click(); }
+
+        // Inicialización segura
+        try { updateDash(); updateRPG(); } catch(e) { console.error("Error de inicialización:", e); }
+    </script>
+</body>
+</html>
