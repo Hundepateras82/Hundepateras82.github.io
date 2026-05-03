@@ -26,48 +26,71 @@
             text-transform: uppercase; margin-bottom: 5px; 
             text-shadow: 0 0 15px rgba(6,182,212,0.5); font-size: 32px; text-align: center;
         }
-        .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 40px; text-align: center; }
+        .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 30px; text-align: center; }
         
-        .card-container { display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 400px; }
+        /* Cambiado a Grid 2x2 */
+        .card-container { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 20px; 
+            width: 100%; 
+            max-width: 360px; 
+        }
         
         .app-card { 
-            background: #162032; border-radius: 24px; padding: 30px 20px; 
-            text-align: center; cursor: pointer; transition: 0.2s; 
+            background: #162032; border-radius: 20px; padding: 15px 10px; 
+            text-align: center; cursor: pointer; transition: 0.1s; 
             position: relative; border: 2px solid #1e293b; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            aspect-ratio: 1 / 1.1; /* Cuadrados ligeramente altos para que quepa el texto */
+            box-sizing: border-box;
         }
-        .app-card:active { transform: translateY(8px); box-shadow: none !important; margin-bottom: -8px;}
+        .app-card:active { transform: translateY(8px); box-shadow: none !important; }
         
-        .card-estudio { border-color: #3b82f6; box-shadow: 0 12px 0 #1d4ed8; }
-        .card-deporte { border-color: #10b981; box-shadow: 0 12px 0 #047857; }
-        /* Nueva tarjeta añadida */
-        .card-dieta { border-color: #f59e0b; box-shadow: 0 12px 0 #b45309; }
+        /* Colores y sombras ajustadas para la cuadrícula */
+        .card-estudio { border-color: #3b82f6; box-shadow: 0 8px 0 #1d4ed8; }
+        .card-deporte { border-color: #10b981; box-shadow: 0 8px 0 #047857; }
+        .card-dieta { border-color: #f59e0b; box-shadow: 0 8px 0 #b45309; }
+        .card-misterio { border-color: #8b5cf6; box-shadow: 0 8px 0 #6d28d9; opacity: 0.8;}
         
-        .icon { font-size: 60px; margin-bottom: 10px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
-        .app-title { font-size: 26px; font-weight: 900; margin: 0; color: #e2e8f0; }
-        .app-desc { font-size: 13px; color: #94a3b8; margin-top: 8px; font-weight: bold;}
+        .icon { font-size: 42px; margin-bottom: 8px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
+        .app-title { font-size: 18px; font-weight: 900; margin: 0; color: #e2e8f0; }
+        
+        /* Limitamos las líneas de la descripción para que no rompa el cuadrado */
+        .app-desc { 
+            font-size: 11px; color: #94a3b8; margin-top: 6px; font-weight: bold; 
+            line-height: 1.3; 
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
     </style>
 </head>
 <body>
     <h1>EL NEXO</h1>
-    <p class="subtitle">Selecciona lo que necesitas gamificar</p>
+    <p class="subtitle">Selecciona tu misión actual</p>
 
     <div class="card-container">
         <div class="app-card card-estudio" onclick="window.location.href='estudio.html'">
             <div class="icon">📚</div>
             <h2 class="app-title">Estudiar</h2>
-            <p class="app-desc">Se crea una paradoja muy graciosa cuando me cuestiono que si en vez de hacer esto hubiese estudiado no tendría que hacer esto</p>
+            <p class="app-desc">La paradoja de programar esto para no tener que estudiar.</p>
         </div>
 
         <div class="app-card card-deporte" onclick="window.location.href='deporte.html'">
             <div class="icon">🏋️‍♂️</div>
             <h2 class="app-title">Deporte</h2>
-            <p class="app-desc">Lo siguiente que gamificaré será comer??💀</p>
+            <p class="app-desc">Subiendo los stats físicos en la vida real.</p>
         </div>
 
         <div class="app-card card-dieta" onclick="window.location.href='dieta.html'">
             <div class="icon">🥩</div>
             <h2 class="app-title">Dieta</h2>
-            <p class="app-desc">No era broma al parecer.</p>
+            <p class="app-desc">No se si es triste o gracioso.</p>
+        </div>
+
+        <div class="app-card card-misterio" onclick="alert('Nivel insuficiente para desbloquear este módulo.')">
+            <div class="icon">❓</div>
+            <h2 class="app-title">???</h2>
+            <p class="app-desc">Lo mismo esta acaba siendo dormir porque no se que más me queda.</p>
         </div>
     </div>
 </body>
