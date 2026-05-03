@@ -1,0 +1,874 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>LifeQuest: Profundidades de Moria (AAA)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Biome Colors - Dynamic via JS */
+            --biome-top: #2d1b15;
+            --biome-bot: #0a0503;
+            
+            --panel: rgba(13, 20, 36, 0.85);
+            --panel-light: rgba(30, 41, 59, 0.9);
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-dark: #334155;
+            
+            --green: #10b981; --blue: #3b82f6; --red: #ef4444; 
+            --purple: #a855f7; --gold: #f59e0b; --cyan: #06b6d4;
+            --mythic: #f43f5e;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { 
+            margin: 0; font-family: 'Nunito', sans-serif; color: var(--text-main);
+            background: linear-gradient(180deg, var(--biome-top) 0%, var(--biome-bot) 100%);
+            display: flex; justify-content: center; height: 100dvh; width: 100vw; overflow: hidden;
+            transition: background 1s ease;
+        }
+
+        /* SCROLLBAR HIDING */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        #game-container { 
+            width: 100%; max-width: 600px; height: 100dvh; display: flex; flex-direction: column; 
+            position: relative; padding-top: env(safe-area-inset-top);
+            backdrop-filter: blur(5px);
+        }
+
+        /* HEADER STATS */
+        .header {
+            padding: 10px 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            z-index: 50; flex-shrink: 0;
+        }
+        .stat-badge {
+            background: var(--panel); border: 1px solid var(--border-dark); border-radius: 8px;
+            padding: 5px 10px; display: flex; align-items: center; justify-content: space-between;
+            font-weight: 900; font-size: 13px;
+        }
+        .depth-display {
+            grid-column: span 2; text-align: center; font-size: 24px; font-weight: 900;
+            color: var(--cyan); text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .biome-name { font-size: 10px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 2px; }
+
+        /* SCREENS */
+        .screen { display: none; flex: 1; flex-direction: column; overflow-y: auto; padding: 15px; padding-bottom: 100px; }
+        .screen.active { display: flex; animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        /* --- THE MINE (MAIN SCREEN) --- */
+        .mine-area {
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; margin-bottom: 20px;
+        }
+        
+        .rock-container { position: relative; width: 250px; height: 250px; display: flex; justify-content: center; align-items: center; }
+        .the-rock {
+            font-size: 150px; cursor: pointer; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
+            transition: transform 0.05s ease; position: relative; z-index: 10;
+        }
+        .the-rock:active { transform: scale(0.9) translateY(10px); }
+        .rock-shake { animation: shake 0.2s ease-in-out; }
+        .rock-break { animation: shatter 0.5s ease-out forwards; }
+        
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px) rotate(-5deg); } 75% { transform: translateX(5px) rotate(5deg); } }
+        @keyframes shatter { 0% { transform: scale(1); filter: brightness(1); opacity: 1; } 50% { transform: scale(1.2); filter: brightness(2); opacity: 1; } 100% { transform: scale(0); opacity: 0; filter: brightness(0); } }
+
+        /* HP BAR */
+        .rock-hp-wrap { width: 100%; max-width: 300px; height: 12px; background: rgba(0,0,0,0.5); border: 2px solid var(--border-dark); border-radius: 10px; margin-top: 20px; overflow: hidden; position: relative;}
+        .rock-hp-fill { height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); width: 100%; transition: width 0.1s ease-out; }
+        .rock-hp-text { position: absolute; width: 100%; text-align: center; top: -2px; font-size: 10px; font-weight: 900; color: white; text-shadow: 1px 1px 0 #000; }
+
+        /* COMBO BAR */
+        .combo-container { width: 100%; display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .combo-multiplier { font-weight: 900; font-size: 18px; color: var(--gold); width: 50px; text-align: right; }
+        .combo-bar-wrap { flex: 1; height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden; }
+        .combo-bar-fill { height: 100%; background: var(--cyan); width: 0%; transition: width 0.1s linear; }
+
+        /* ACTIVE SKILLS */
+        .skills-tray { display: flex; gap: 15px; margin-top: 30px; justify-content: center; }
+        .skill-btn {
+            width: 60px; height: 60px; border-radius: 15px; background: var(--panel-light);
+            border: 2px solid var(--border-dark); font-size: 24px; display: flex; justify-content: center; align-items: center;
+            position: relative; cursor: pointer; box-shadow: 0 4px 0 var(--border-dark);
+        }
+        .skill-btn:active { transform: translateY(4px); box-shadow: none; }
+        .skill-cooldown { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); border-radius: 13px; display:none; justify-content:center; align-items:center; font-weight:900; font-size:16px; color:white; }
+
+        /* --- UI ELEMENTS --- */
+        .panel { background: var(--panel); border: 1px solid var(--border-dark); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
+        .panel-title { font-size: 14px; font-weight: 900; color: var(--gold); margin: 0 0 15px 0; border-bottom: 1px solid var(--border-dark); padding-bottom: 5px; text-transform: uppercase; }
+        
+        .list-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--panel-light); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-dark); }
+        .item-icon { font-size: 28px; width: 45px; height: 45px; background: var(--panel); border-radius: 10px; display: flex; justify-content: center; align-items: center; border: 1px solid var(--border-dark); }
+        .item-info { flex: 1; }
+        .item-name { font-weight: 900; font-size: 13px; color: var(--text-main); }
+        .item-desc { font-size: 10px; color: var(--text-sub); margin-top: 2px; line-height: 1.2; }
+        
+        .btn { padding: 10px 15px; border-radius: 10px; font-weight: 900; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer; color: white; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .btn-upgrade { background: var(--green); box-shadow: 0 4px 0 #047857; }
+        .btn-blue { background: var(--blue); box-shadow: 0 4px 0 #1d4ed8; }
+        .btn-purple { background: var(--purple); box-shadow: 0 4px 0 #7e22ce; }
+        .btn-red { background: var(--red); box-shadow: 0 4px 0 #b91c1c; }
+        .btn:active { transform: translateY(4px); box-shadow: none; margin-bottom: -4px; }
+        .btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; margin-bottom: 0;}
+
+        /* INVENTORY GRID */
+        .inv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .inv-slot { background: var(--panel-light); border: 1px solid var(--border-dark); border-radius: 10px; padding: 10px 5px; text-align: center; position: relative;}
+        .inv-qty { font-weight: 900; font-size: 11px; margin-top: 5px; color: var(--text-main); }
+        
+        /* TABS NAV */
+        .nav { position: absolute; bottom: 0; width: 100%; display: flex; background: rgba(10, 15, 25, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border-dark); z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 9px; padding: 12px 0; transition: 0.2s; cursor: pointer; }
+        .nav-item.active { color: var(--cyan); }
+        .nav-item span { font-size: 22px; margin-bottom: 4px; transition: transform 0.2s;}
+        .nav-item.active span { transform: translateY(-3px) scale(1.1); }
+
+        /* PARTICLES & FX */
+        .particle { position: absolute; pointer-events: none; font-weight: 900; z-index: 1000; animation: floatUp 1s cubic-bezier(0.2, 1, 0.3, 1) forwards; text-shadow: 0px 2px 5px rgba(0,0,0,0.8); }
+        @keyframes floatUp { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.5); } }
+        
+        #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, transparent 50%, rgba(239, 68, 68, 0.3) 100%); z-index: 999; display: none; pointer-events: none; }
+        
+        /* BOSS WARNING */
+        .boss-warning { position: absolute; top: 20%; width: 100%; text-align: center; color: var(--red); font-size: 30px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 20px red; animation: pulseRed 1s infinite; z-index: 100; display: none; pointer-events: none; }
+        @keyframes pulseRed { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
+
+        /* GEODE MODAL */
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 200; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { text-align: center; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .geode-img { font-size: 120px; animation: float 3s infinite ease-in-out; cursor: pointer; filter: drop-shadow(0 0 20px var(--purple)); }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+        /* REFINERY BARS */
+        .refine-bar-bg { width: 100%; height: 6px; background: var(--border-dark); border-radius: 3px; margin-top: 5px; overflow: hidden; }
+        .refine-bar-fill { height: 100%; background: var(--gold); width: 0%; transition: width 1s linear; }
+
+    </style>
+</head>
+<body>
+
+<div id="damage-overlay"></div>
+<div class="boss-warning" id="boss-warning">¡ANOMALÍA DETECTADA!</div>
+
+<div class="modal" id="geode-modal">
+    <div class="modal-content">
+        <h2 style="color:var(--purple); font-weight:900; font-size:24px; margin:0; text-shadow:0 0 10px var(--purple);">Geoda Abisal</h2>
+        <p style="color:var(--text-sub); font-size:12px; margin-bottom:30px;">Toca para romperla con toda tu fuerza.</p>
+        <div class="geode-img" id="geode-icon" onclick="crackGeode()">🔮</div>
+        <p id="geode-clicks-left" style="font-weight:900; font-size:18px; color:white; margin-top:20px;">10 Clics Restantes</p>
+    </div>
+</div>
+
+<div id="game-container">
+    <!-- TOP HEADER -->
+    <div class="header">
+        <div class="depth-display">
+            <span id="ui-depth">0m</span>
+            <span class="biome-name" id="ui-biome">Estrato Terrestre</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:5px; justify-content:center;">
+            <div class="stat-badge"><span style="font-size:16px;">🪙</span> <span id="ui-coins">0</span></div>
+            <div class="stat-badge"><span style="font-size:16px;">💎</span> <span id="ui-gems">0</span></div>
+        </div>
+    </div>
+
+    <!-- SCREEN 1: LA MINA -->
+    <div id="screen-mine" class="screen active">
+        <div class="mine-area">
+            <div class="rock-container">
+                <div class="the-rock" id="the-rock" onmousedown="hitRock(event)" ontouchstart="hitRock(event)">🪨</div>
+            </div>
+            
+            <div class="rock-hp-wrap">
+                <div class="rock-hp-fill" id="rock-hp-bar"></div>
+                <div class="rock-hp-text" id="rock-hp-txt">10/10</div>
+            </div>
+
+            <div class="combo-container">
+                <div class="combo-bar-wrap"><div class="combo-bar-fill" id="combo-bar"></div></div>
+                <div class="combo-multiplier">x<span id="combo-txt">1.0</span></div>
+            </div>
+
+            <div class="skills-tray">
+                <div class="skill-btn" onclick="useSkill('dynamite')">🧨<div class="skill-cooldown" id="cd-dynamite"></div></div>
+                <div class="skill-btn" onclick="useSkill('laser')">🔫<div class="skill-cooldown" id="cd-laser"></div></div>
+                <div class="skill-btn" onclick="useSkill('frenzy')" style="border-color:var(--red);">🔥<div class="skill-cooldown" id="cd-frenzy"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: EL GREMIO (Mejoras) -->
+    <div id="screen-guild" class="screen">
+        <div class="panel">
+            <h2 class="panel-title">🛠️ Herramientas</h2>
+            
+            <div class="list-item">
+                <div class="item-icon" id="pickaxe-icon">⛏️</div>
+                <div class="item-info">
+                    <div class="item-name">Pico <span style="color:var(--gold)">Lv.<span id="upg-pick-lvl">1</span></span></div>
+                    <div class="item-desc">Daño base por clic: <span id="upg-pick-dmg" style="color:var(--green)">1</span></div>
+                </div>
+                <button class="btn btn-upgrade" id="btn-upg-pick" onclick="buyUpgrade('pickaxe')"><span>MEJORAR</span><span id="cost-pick" style="color:rgba(255,255,255,0.8)">10 🪙</span></button>
+            </div>
+
+            <div class="list-item">
+                <div class="item-icon">👷</div>
+                <div class="item-info">
+                    <div class="item-name">Mineros Automáticos <span style="color:var(--gold)">Lv.<span id="upg-auto-lvl">0</span></span></div>
+                    <div class="item-desc">Daño por segundo (DPS): <span id="upg-auto-dps" style="color:var(--green)">0</span></div>
+                </div>
+                <button class="btn btn-upgrade" id="btn-upg-auto" onclick="buyUpgrade('autominer')"><span>CONTRATAR</span><span id="cost-auto" style="color:rgba(255,255,255,0.8)">50 🪙</span></button>
+            </div>
+
+            <div class="list-item">
+                <div class="item-icon">🛒</div>
+                <div class="item-info">
+                    <div class="item-name">Vagonetas <span style="color:var(--gold)">Lv.<span id="upg-cart-lvl">0</span></span></div>
+                    <div class="item-desc">Tiempo de farmeo offline: <span id="upg-cart-cap" style="color:var(--cyan)">2h</span></div>
+                </div>
+                <button class="btn btn-upgrade" id="btn-upg-cart" onclick="buyUpgrade('carts')"><span>EXPANDIR</span><span id="cost-cart" style="color:rgba(255,255,255,0.8)">200 🪙</span></button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-title">📚 Investigación Abisal</h2>
+            
+            <div class="list-item">
+                <div class="item-icon">🦅</div>
+                <div class="item-info">
+                    <div class="item-name">Canario Mecánico <span style="color:var(--gold)">Lv.<span id="upg-luck-lvl">0</span></span></div>
+                    <div class="item-desc">Probabilidad de Crítico y Geodas: +<span id="upg-luck-pct" style="color:var(--purple)">0</span>%</div>
+                </div>
+                <button class="btn btn-purple" id="btn-upg-luck" onclick="buyUpgrade('luck')"><span>INVESTIGAR</span><span id="cost-luck" style="color:rgba(255,255,255,0.8)">5 💎</span></button>
+            </div>
+            
+            <div class="list-item">
+                <div class="item-icon">⚡</div>
+                <div class="item-info">
+                    <div class="item-name">Sobrecarga de Combo <span style="color:var(--gold)">Lv.<span id="upg-combo-lvl">0</span></span></div>
+                    <div class="item-desc">Multiplicador máximo: x<span id="upg-combo-max" style="color:var(--red)">2.0</span></div>
+                </div>
+                <button class="btn btn-purple" id="btn-upg-combo" onclick="buyUpgrade('combo')"><span>INVESTIGAR</span><span id="cost-combo" style="color:rgba(255,255,255,0.8)">10 💎</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: REFINERÍA Y MERCADO -->
+    <div id="screen-market" class="screen">
+        <div class="panel">
+            <h2 class="panel-title">🔥 Refinería</h2>
+            <p style="font-size:11px; color:var(--text-sub); margin-top:0;">La fundición procesa minerales crudos en lingotes automáticamente cada 5 segundos.</p>
+            
+            <div class="list-item" style="flex-direction:column; align-items:flex-start;">
+                <div style="display:flex; width:100%; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="item-icon" style="border-color:var(--tier-1); font-size:20px;">🪨➔⚪</div>
+                        <div class="item-info">
+                            <div class="item-name">Horno de Hierro</div>
+                            <div class="item-desc" style="color:var(--gold)">Convierte 10 Piedra en 1 Hierro</div>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:10px; color:var(--text-sub);">Obreros asignados</div>
+                        <div style="display:flex; align-items:center; gap:5px; margin-top:5px;">
+                            <button class="btn btn-dark" style="padding:5px; width:25px; height:25px;" onclick="assignWorker('iron', -1)">-</button>
+                            <span style="font-weight:900;" id="workers-iron">0</span>
+                            <button class="btn btn-dark" style="padding:5px; width:25px; height:25px;" onclick="assignWorker('iron', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="refine-bar-bg"><div class="refine-bar-fill" id="refine-bar-iron"></div></div>
+            </div>
+
+            <div class="list-item" style="flex-direction:column; align-items:flex-start;">
+                <div style="display:flex; width:100%; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="item-icon" style="border-color:var(--tier-3); font-size:20px;">⚪➔📀</div>
+                        <div class="item-info">
+                            <div class="item-name">Crisol de Oro</div>
+                            <div class="item-desc" style="color:var(--gold)">Convierte 50 Hierro en 1 Oro</div>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:10px; color:var(--text-sub);">Obreros asignados</div>
+                        <div style="display:flex; align-items:center; gap:5px; margin-top:5px;">
+                            <button class="btn btn-dark" style="padding:5px; width:25px; height:25px;" onclick="assignWorker('gold', -1)">-</button>
+                            <span style="font-weight:900;" id="workers-gold">0</span>
+                            <button class="btn btn-dark" style="padding:5px; width:25px; height:25px;" onclick="assignWorker('gold', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="refine-bar-bg"><div class="refine-bar-fill" id="refine-bar-gold"></div></div>
+            </div>
+            
+            <div style="text-align:right; font-size:11px; font-weight:900; color:var(--cyan);">Obreros Libres: <span id="free-workers">1</span></div>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-title">⚖️ Exportación de Materiales</h2>
+            
+            <div class="list-item">
+                <div class="item-icon">🪨</div>
+                <div class="item-info">
+                    <div class="item-name">Vender Piedra Bruta</div>
+                    <div class="item-desc">Vende 1000 🪨 por 10 🪙</div>
+                </div>
+                <button class="btn btn-gold" style="width:auto; padding:8px 12px;" onclick="sellMat('stone')">VENDER</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">⚪</div>
+                <div class="item-info">
+                    <div class="item-name">Vender Hierro</div>
+                    <div class="item-desc">Vende 100 ⚪ por 50 🪙</div>
+                </div>
+                <button class="btn btn-gold" style="width:auto; padding:8px 12px;" onclick="sellMat('iron')">VENDER</button>
+            </div>
+            <div class="list-item">
+                <div class="item-icon">📀</div>
+                <div class="item-info">
+                    <div class="item-name">Vender Oro Puro</div>
+                    <div class="item-desc">Vende 10 📀 por 1 💎</div>
+                </div>
+                <button class="btn btn-cyan" style="width:auto; padding:8px 12px; background:var(--cyan);" onclick="sellMat('gold_ingot')">CAMBIAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: INVENTARIO -->
+    <div id="screen-inventory" class="screen">
+        <div class="panel">
+            <h2 class="panel-title">🎒 Minerales Acumulados</h2>
+            <div class="inv-grid" id="inv-render">
+                <!-- Rellenado por JS -->
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2 class="panel-title">🔮 Artefactos Activos</h2>
+            <p style="font-size:11px; color:var(--text-sub); margin-top:0;">Derrota a Jefes de Piedra para conseguir artefactos con bufos permanentes.</p>
+            <div id="artifacts-render">
+                <!-- Rellenado por JS -->
+            </div>
+        </div>
+        
+        <div style="margin-top:20px; text-align:center;">
+            <button class="btn btn-dark" style="border-color:var(--red); color:var(--red);" onclick="hardReset()">⚠️ BORRAR PARTIDA</button>
+        </div>
+    </div>
+
+    <!-- NAVEGACIÓN INFERIOR -->
+    <div class="nav">
+        <div class="nav-item active" id="tab-mine" onclick="navTo('mine')">
+            <span>⛏️</span> MINA
+        </div>
+        <div class="nav-item" id="tab-guild" onclick="navTo('guild')">
+            <span>🛠️</span> MEJORAS
+        </div>
+        <div class="nav-item" id="tab-market" onclick="navTo('market')">
+            <span>⚖️</span> MERCADO
+        </div>
+        <div class="nav-item" id="tab-inventory" onclick="navTo('inventory')">
+            <span>🎒</span> INVENTARIO
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- AUDIO ENGINE ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+    function playSound(type) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const t = audioCtx.currentTime;
+        if(type === 'hit') {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(100 + Math.random()*20, t);
+            osc.frequency.exponentialRampToValueAtTime(20, t + 0.1);
+            gain.gain.setValueAtTime(0.5, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.1);
+        } else if(type === 'break') {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'square'; osc.frequency.setValueAtTime(50, t); osc.frequency.exponentialRampToValueAtTime(10, t + 0.3);
+            gain.gain.setValueAtTime(0.8, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.3);
+        } else if(type === 'coin') {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(1000, t); osc.frequency.setValueAtTime(1500, t + 0.05);
+            gain.gain.setValueAtTime(0.1, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.2);
+        } else if(type === 'rare') {
+            [600, 800, 1200].forEach((freq, i) => {
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t + i * 0.1);
+                gain.gain.setValueAtTime(0.2, t + i * 0.1); gain.gain.exponentialRampToValueAtTime(0.01, t + i * 0.1 + 0.3);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t + i*0.1); osc.stop(t + i*0.1 + 0.3);
+            });
+        }
+    }
+
+    // --- GAME DATA ---
+    const MINE_TIERS = [
+        { d: 0, name: "Estrato Terrestre", bgTop: "#2d1b15", bgBot: "#0a0503", hpBase: 10, hpMulti: 1.1, rock: "🪨", drops: [{id:'stone', ch:1}, {id:'iron', ch:0.05}] },
+        { d: 100, name: "Cavernas de Granito", bgTop: "#1e293b", bgBot: "#0f172a", hpBase: 50, hpMulti: 1.12, rock: "🪨", drops: [{id:'stone', ch:1}, {id:'iron', ch:0.1}, {id:'coal', ch:0.05}] },
+        { d: 300, name: "Fisura Magmática", bgTop: "#450a0a", bgBot: "#000000", hpBase: 200, hpMulti: 1.15, rock: "🌋", drops: [{id:'stone', ch:1}, {id:'iron', ch:0.15}, {id:'gold_raw', ch:0.02}] },
+        { d: 600, name: "Vetas de Diamante", bgTop: "#083344", bgBot: "#020617", hpBase: 1000, hpMulti: 1.2, rock: "🧊", drops: [{id:'stone', ch:1}, {id:'iron', ch:0.2}, {id:'gold_raw', ch:0.05}, {id:'diamond', ch:0.01}] },
+        { d: 1000, name: "El Abismo del Vacío", bgTop: "#2e1065", bgBot: "#000000", hpBase: 5000, hpMulti: 1.25, rock: "🌌", drops: [{id:'stone', ch:1}, {id:'iron', ch:0.3}, {id:'diamond', ch:0.05}, {id:'void_matter', ch:0.005}] }
+    ];
+
+    const ITEMS = {
+        stone: { name: 'Piedra', icon: '🪨', c: 'tier-1' },
+        iron: { name: 'Hierro', icon: '⚪', c: 'tier-1' },
+        coal: { name: 'Carbón', icon: '⬛', c: 'tier-1' },
+        gold_raw: { name: 'Menas Oro', icon: '✨', c: 'tier-2' },
+        gold_ingot: { name: 'Oro Puro', icon: '📀', c: 'tier-3' },
+        diamond: { name: 'Diamante', icon: '💎', c: 'tier-4' },
+        void_matter: { name: 'Materia Vacío', icon: '🌌', c: 'tier-5' },
+        geode: { name: 'Geoda', icon: '🔮', c: 'purple' }
+    };
+
+    const ARTIFACTS = [
+        { id: 'a1', name: 'Linterna del Enano', icon: '🏮', desc: '+10% prob. Geodas' },
+        { id: 'a2', name: 'Guantes de Minero', icon: '🧤', desc: '+20% Daño Clic' },
+        { id: 'a3', name: 'Reloj de Arena', icon: '⏳', desc: 'Refinería 2x Rápida' },
+        { id: 'a4', name: 'Imán de Oro', icon: '🧲', desc: 'Los jefes sueltan más monedas' }
+    ];
+
+    // --- STATE ---
+    let state = {
+        coins: 0, gems: 0, depth: 0, maxDepth: 0,
+        inv: { stone: 0, iron: 0, coal: 0, gold_raw: 0, gold_ingot: 0, diamond: 0, void_matter: 0, geode: 0 },
+        upg: { pickaxe: 1, autominer: 0, carts: 0, luck: 0, combo: 0 },
+        workers: { total: 1, iron: 0, gold: 0 },
+        artifacts: [],
+        lastOffline: Date.now()
+    };
+
+    // Session vars
+    let rock = { hp: 10, maxHp: 10, isBoss: false };
+    let combo = { val: 1.0, timer: 0 };
+    let skills = { 
+        dynamite: { cd: 0, maxCd: 60 }, 
+        laser: { cd: 0, maxCd: 120, active: false, time: 0 },
+        frenzy: { cd: 0, maxCd: 180, active: false, time: 0 }
+    };
+    
+    let loopInt;
+    let geodeModal = { active: false, clicks: 0 };
+
+    // --- INIT ---
+    function init() {
+        try { const s = localStorage.getItem('LifeQuestMine'); if(s) state = {...state, ...JSON.parse(s)}; } catch(e){}
+        spawnRock(true);
+        calcOffline();
+        updateUI();
+        navTo('mine');
+        
+        loopInt = setInterval(gameLoop, 100); // 10 ticks/sec
+    }
+
+    function save() { state.lastOffline = Date.now(); localStorage.setItem('LifeQuestMine', JSON.stringify(state)); }
+    function hardReset() { if(confirm("¿BORRAR TODO?")) { localStorage.removeItem('LifeQuestMine'); location.reload(); } }
+
+    // --- CORE LOGIC ---
+    function getBiome() {
+        let b = MINE_TIERS[0];
+        for(let i=1; i<MINE_TIERS.length; i++) { if(state.depth >= MINE_TIERS[i].d) b = MINE_TIERS[i]; else break; }
+        return b;
+    }
+
+    function spawnRock(isInit = false) {
+        let b = getBiome();
+        rock.isBoss = (state.depth > 0 && state.depth % 50 === 0);
+        
+        let hpCalc = b.hpBase * Math.pow(b.hpMulti, state.depth - b.d);
+        if(rock.isBoss) hpCalc *= 5; // Boss has 5x HP
+        
+        rock.maxHp = Math.floor(hpCalc);
+        rock.hp = rock.maxHp;
+        
+        let el = document.getElementById('the-rock');
+        el.innerText = rock.isBoss ? "🗿" : b.rock;
+        el.style.filter = rock.isBoss ? 'drop-shadow(0 0 20px red)' : 'drop-shadow(0 10px 20px rgba(0,0,0,0.8))';
+        
+        if(!isInit) el.classList.add('rock-break');
+        setTimeout(() => { el.classList.remove('rock-break'); }, 500);
+
+        document.documentElement.style.setProperty('--biome-top', b.bgTop);
+        document.documentElement.style.setProperty('--biome-bot', b.bgBot);
+        document.getElementById('ui-biome').innerText = rock.isBoss ? "Roca de Jefe" : b.name;
+        
+        updateRockUI();
+    }
+
+    // --- INTERACTION ---
+    function hitRock(e) {
+        if(e) e.preventDefault(); // Prevent double firing on touch
+        playSound('hit');
+        
+        let baseDmg = state.upg.pickaxe;
+        if(state.artifacts.includes('a2')) baseDmg *= 1.2;
+        if(skills.frenzy.active) baseDmg *= 5;
+        
+        let dmg = baseDmg * combo.val;
+        
+        // Crit (Luck)
+        let isCrit = Math.random() < (state.upg.luck * 0.01);
+        if(isCrit) { dmg *= 3; playSound('rare'); spawnParticle("¡CRIT!", "var(--gold)"); }
+        
+        dealDamage(dmg);
+
+        // Combo build
+        let maxCombo = 2.0 + (state.upg.combo * 0.5);
+        combo.val = Math.min(maxCombo, combo.val + 0.05);
+        combo.timer = 20; // 2 seconds at 10 ticks/s
+
+        // Visuals
+        let el = document.getElementById('the-rock');
+        el.classList.remove('rock-shake'); void el.offsetWidth; el.classList.add('rock-shake');
+        spawnParticle("-" + Math.floor(dmg), "white");
+    }
+
+    function dealDamage(amt) {
+        rock.hp -= amt;
+        if(rock.hp <= 0) breakRock();
+        else updateRockUI();
+    }
+
+    function breakRock() {
+        playSound('break');
+        let b = getBiome();
+        
+        // Drops
+        let dropsText = [];
+        b.drops.forEach(d => {
+            let ch = d.ch;
+            if(d.id === 'geode' && state.artifacts.includes('a1')) ch *= 1.1; // Lantern buff
+            if(Math.random() < ch) {
+                let qty = 1 + Math.floor(Math.random() * (1 + state.upg.pickaxe*0.1));
+                if(rock.isBoss) qty *= 3;
+                state.inv[d.id] = (state.inv[d.id] || 0) + qty;
+                dropsText.push(`${ITEMS[d.id].icon} ${qty}`);
+            }
+        });
+        
+        // Geode chance global
+        let geodeCh = 0.02 + (state.upg.luck * 0.005);
+        if(state.artifacts.includes('a1')) geodeCh *= 1.1;
+        if(Math.random() < geodeCh) { state.inv.geode++; dropsText.push("🔮 1"); playSound('rare'); }
+
+        // Boss drops
+        if(rock.isBoss) {
+            playSound('rare');
+            let coins = 50 + (state.depth * 2);
+            if(state.artifacts.includes('a4')) coins *= 1.5;
+            state.coins += Math.floor(coins);
+            dropsText.push(`🪙 ${Math.floor(coins)}`);
+            
+            // Artifact drop chance
+            if(Math.random() < 0.2) {
+                let unowned = ARTIFACTS.filter(a => !state.artifacts.includes(a.id));
+                if(unowned.length > 0) {
+                    let art = unowned[Math.floor(Math.random() * unowned.length)];
+                    state.artifacts.push(art.id);
+                    alert(`🏆 HAS ENCONTRADO UN ARTEFACTO: ${art.name}\n${art.desc}`);
+                }
+            }
+        } else {
+            state.coins += 1 + Math.floor(state.depth * 0.1);
+        }
+
+        spawnParticle(dropsText.join(" | "), "var(--green)");
+
+        state.depth++;
+        if(state.depth > state.maxDepth) state.maxDepth = state.depth;
+        
+        spawnRock();
+        updateUI();
+        save();
+    }
+
+    function updateRockUI() {
+        let pct = Math.max(0, (rock.hp / rock.maxHp) * 100);
+        document.getElementById('rock-hp-bar').style.width = pct + "%";
+        document.getElementById('rock-hp-txt').innerText = `${Math.floor(rock.hp)} / ${Math.floor(rock.maxHp)}`;
+        document.getElementById('ui-depth').innerText = `-${state.depth}m`;
+    }
+
+    // --- LOOP & IDLE ---
+    let refineTick = 0;
+    function gameLoop() {
+        // Combo Decay
+        if(combo.timer > 0) {
+            combo.timer--;
+            if(combo.timer === 0) combo.val = 1.0;
+        } else { combo.val = 1.0; }
+        
+        // Update Combo UI
+        document.getElementById('combo-txt').innerText = combo.val.toFixed(1);
+        let maxCombo = 2.0 + (state.upg.combo * 0.5);
+        document.getElementById('combo-bar').style.width = ((combo.val - 1) / (maxCombo - 1)) * 100 + "%";
+
+        // AutoMiner Damage (1 tick/sec equivalent)
+        if(state.upg.autominer > 0 && Math.random() < 0.1) {
+            dealDamage(state.upg.autominer * (skills.frenzy.active ? 5 : 1));
+        }
+
+        // Active Skills logic
+        if(skills.laser.active) { dealDamage(state.upg.pickaxe * 5); skills.laser.time--; if(skills.laser.time<=0) skills.laser.active = false; }
+        if(skills.frenzy.active) { skills.frenzy.time--; if(skills.frenzy.time<=0) skills.frenzy.active = false; }
+
+        // Cooldowns
+        ['dynamite', 'laser', 'frenzy'].forEach(k => {
+            if(skills[k].cd > 0) {
+                skills[k].cd -= 0.1;
+                let el = document.getElementById(`cd-${k}`);
+                el.style.display = 'flex'; el.innerText = Math.ceil(skills[k].cd);
+            } else { document.getElementById(`cd-${k}`).style.display = 'none'; }
+        });
+
+        // Refinery (Every 5 seconds = 50 ticks)
+        let refSpeed = state.artifacts.includes('a3') ? 25 : 50;
+        refineTick++;
+        if(refineTick >= refSpeed) {
+            refineTick = 0;
+            processRefinery();
+        }
+        
+        // Update Refine UI Bars smoothly
+        let refPct = (refineTick / refSpeed) * 100;
+        document.getElementById('refine-bar-iron').style.width = refPct + "%";
+        document.getElementById('refine-bar-gold').style.width = refPct + "%";
+    }
+
+    function processRefinery() {
+        // Iron
+        if(state.workers.iron > 0) {
+            let consume = state.workers.iron * 10;
+            if(state.inv.stone >= consume) {
+                state.inv.stone -= consume;
+                state.inv.iron = (state.inv.iron||0) + state.workers.iron;
+            }
+        }
+        // Gold
+        if(state.workers.gold > 0) {
+            let consume = state.workers.gold * 50;
+            if((state.inv.iron||0) >= consume) {
+                state.inv.iron -= consume;
+                state.inv.gold_ingot = (state.inv.gold_ingot||0) + state.workers.gold;
+            }
+        }
+        updateInventoryUI(); updateUI();
+    }
+
+    function calcOffline() {
+        let now = Date.now();
+        let mins = Math.floor((now - state.lastOffline) / 60000);
+        if(mins > 1 && state.upg.autominer > 0) {
+            let maxMins = (2 + state.upg.carts * 2) * 60;
+            let effMins = Math.min(mins, maxMins);
+            
+            // Approx autominer kills
+            let dmgPerMin = state.upg.autominer * 60;
+            let avgHp = 50; // simplificado
+            let rocksBroken = Math.floor((dmgPerMin * effMins) / avgHp);
+            
+            if(rocksBroken > 0) {
+                let stoneGain = rocksBroken * 2;
+                state.inv.stone = (state.inv.stone||0) + stoneGain;
+                state.coins += rocksBroken;
+                alert(`⛺ Mientras estabas fuera...\nTus mineros rompieron ${rocksBroken} rocas.\nObtienes: ${stoneGain} 🪨 y ${rocksBroken} 🪙`);
+            }
+        }
+        state.lastOffline = now;
+    }
+
+    // --- SKILLS ---
+    function useSkill(type) {
+        if(skills[type].cd > 0) return;
+        playSound('rare');
+        if(type === 'dynamite') { dealDamage(state.upg.pickaxe * 100); spawnParticle("💥 BOOM", "var(--red)"); }
+        if(type === 'laser') { skills.laser.active = true; skills.laser.time = 300; } // 30s
+        if(type === 'frenzy') { skills.frenzy.active = true; skills.frenzy.time = 150; } // 15s
+        
+        skills[type].cd = skills[type].maxCd;
+    }
+
+    // --- UPGRADES ---
+    const UPG_COSTS = {
+        pickaxe: (l) => Math.floor(10 * Math.pow(1.5, l-1)),
+        autominer: (l) => Math.floor(50 * Math.pow(1.6, l)),
+        carts: (l) => Math.floor(200 * Math.pow(2, l)),
+        luck: (l) => Math.floor(5 * Math.pow(1.5, l)),
+        combo: (l) => Math.floor(10 * Math.pow(2, l))
+    };
+
+    function buyUpgrade(type) {
+        playSound('click');
+        let cost = UPG_COSTS[type](state.upg[type] === 0 && type!=='pickaxe' ? 0 : state.upg[type]);
+        let isGem = (type === 'luck' || type === 'combo');
+        
+        if(isGem) { if(state.gems < cost) return alert("Faltan Gemas 💎"); state.gems -= cost; } 
+        else { if(state.coins < cost) return alert("Faltan Monedas 🪙"); state.coins -= cost; }
+        
+        state.upg[type]++;
+        if(type === 'pickaxe') {
+            let el = document.getElementById('pickaxe-icon');
+            if(state.upg.pickaxe >= 50) el.innerText = "🌌";
+            else if(state.upg.pickaxe >= 30) el.innerText = "💎";
+            else if(state.upg.pickaxe >= 10) el.innerText = "⚙️";
+        }
+        
+        save(); updateGuildUI(); updateUI();
+    }
+
+    // --- REFINERY & MARKET ---
+    function assignWorker(type, dir) {
+        playSound('click');
+        let used = state.workers.iron + state.workers.gold;
+        if(dir > 0 && used < state.workers.total) state.workers[type]++;
+        if(dir < 0 && state.workers[type] > 0) state.workers[type]--;
+        updateMarketUI();
+    }
+
+    function sellMat(type) {
+        playSound('coin');
+        if(type === 'stone') { if((state.inv.stone||0) < 1000) return; state.inv.stone -= 1000; state.coins += 10; }
+        if(type === 'iron') { if((state.inv.iron||0) < 100) return; state.inv.iron -= 100; state.coins += 50; }
+        if(type === 'gold_ingot') { if((state.inv.gold_ingot||0) < 10) return; state.inv.gold_ingot -= 10; state.gems += 1; }
+        save(); updateInventoryUI(); updateUI();
+    }
+
+    function crackGeode() {
+        if(state.inv.geode <= 0) return alert("No tienes geodas.");
+        geodeModal.active = true; geodeModal.clicks = 10;
+        document.getElementById('geode-modal').style.display = 'flex';
+        document.getElementById('geode-clicks-left').innerText = "10 Clics Restantes";
+    }
+
+    function doCrack() {
+        if(!geodeModal.active) return;
+        playSound('hit');
+        geodeModal.clicks--;
+        document.getElementById('geode-clicks-left').innerText = `${geodeModal.clicks} Clics Restantes`;
+        
+        let el = document.getElementById('geode-icon');
+        el.style.transform = `scale(${1 + (10-geodeModal.clicks)*0.05})`;
+
+        if(geodeModal.clicks <= 0) {
+            playSound('break');
+            state.inv.geode--; geodeModal.active = false;
+            document.getElementById('geode-modal').style.display = 'none';
+            el.style.transform = 'scale(1)';
+            
+            let r = Math.random(); let msg = "";
+            if(r < 0.5) { state.coins += 100; msg = "+100 🪙"; }
+            else if(r < 0.8) { state.inv.diamond = (state.inv.diamond||0)+1; msg = "+1 💎 Diamante"; }
+            else { state.gems += 5; msg = "+5 Gemas Premium 💎"; }
+            
+            setTimeout(()=>alert(`🔮 Geoda Abierta:\n${msg}`), 100);
+            save(); updateInventoryUI(); updateUI();
+        }
+    }
+    // Bind the geode image click
+    document.getElementById('geode-icon').onclick = doCrack;
+
+    // --- UI UPDATES ---
+    function updateUI() {
+        document.getElementById('ui-coins').innerText = state.coins;
+        document.getElementById('ui-gems').innerText = state.gems;
+    }
+
+    function updateGuildUI() {
+        const setT = (id,v) => {let e=document.getElementById(id); if(e) e.innerText=v;};
+        setT('upg-pick-lvl', state.upg.pickaxe); setT('upg-pick-dmg', state.upg.pickaxe);
+        setT('upg-auto-lvl', state.upg.autominer); setT('upg-auto-dps', state.upg.autominer * 10);
+        setT('upg-cart-lvl', state.upg.carts); setT('upg-cart-cap', (2 + state.upg.carts*2) + 'h');
+        setT('upg-luck-lvl', state.upg.luck); setT('upg-luck-pct', state.upg.luck);
+        setT('upg-combo-lvl', state.upg.combo); setT('upg-combo-max', (2.0 + state.upg.combo*0.5).toFixed(1));
+
+        setT('cost-pick', UPG_COSTS.pickaxe(state.upg.pickaxe) + " 🪙");
+        setT('cost-auto', UPG_COSTS.autominer(state.upg.autominer) + " 🪙");
+        setT('cost-cart', UPG_COSTS.carts(state.upg.carts) + " 🪙");
+        setT('cost-luck', UPG_COSTS.luck(state.upg.luck) + " 💎");
+        setT('cost-combo', UPG_COSTS.combo(state.upg.combo) + " 💎");
+    }
+
+    function updateMarketUI() {
+        document.getElementById('workers-iron').innerText = state.workers.iron;
+        document.getElementById('workers-gold').innerText = state.workers.gold;
+        let used = state.workers.iron + state.workers.gold;
+        document.getElementById('free-workers').innerText = state.workers.total - used;
+    }
+
+    function updateInventoryUI() {
+        const r = document.getElementById('inv-render'); r.innerHTML = '';
+        Object.entries(state.inv).forEach(([k, v]) => {
+            if(v > 0 && ITEMS[k]) {
+                r.innerHTML += `<div class="inv-slot"><div style="font-size:24px;">${ITEMS[k].icon}</div><div class="inv-qty">${v}</div><div style="font-size:9px; color:var(--text-sub);">${ITEMS[k].name}</div></div>`;
+            }
+        });
+
+        // Add Geode open button if any
+        if((state.inv.geode||0) > 0) {
+            r.innerHTML += `<div class="inv-slot" style="background:var(--purple); border-color:var(--gold); cursor:pointer;" onclick="crackGeode()"><div style="font-size:24px;">🔮</div><div class="inv-qty" style="color:white;">ABRIR (${state.inv.geode})</div></div>`;
+        }
+
+        const aR = document.getElementById('artifacts-render'); aR.innerHTML = '';
+        if(state.artifacts.length === 0) aR.innerHTML = '<div style="color:var(--text-sub); font-size:12px;">Ninguno. Sigue picando jefes.</div>';
+        state.artifacts.forEach(aid => {
+            let art = ARTIFACTS.find(x => x.id === aid);
+            aR.innerHTML += `<div class="list-item" style="padding:10px;"><div class="item-icon" style="color:var(--gold); font-size:20px; width:35px; height:35px;">${art.icon}</div><div><div style="font-weight:900; font-size:12px; color:var(--gold);">${art.name}</div><div style="font-size:10px; color:var(--text-sub);">${art.desc}</div></div></div>`;
+        });
+    }
+
+    function navTo(id) {
+        playSound('click');
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+        
+        if(id === 'guild') updateGuildUI();
+        if(id === 'market') updateMarketUI();
+        if(id === 'inventory') updateInventoryUI();
+    }
+
+    // --- PARTICLES ---
+    function spawnParticle(text, color) {
+        const el = document.createElement('div');
+        el.className = 'particle'; el.innerText = text; el.style.color = color;
+        
+        // Random spread from center
+        let angle = Math.random() * Math.PI * 2;
+        let dist = 50 + Math.random() * 50;
+        el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+        el.style.setProperty('--dy', ((Math.sin(angle) * dist) - 100) + 'px');
+        
+        // Center of screen
+        el.style.left = (window.innerWidth / 2) + 'px';
+        el.style.top = (window.innerHeight / 2 - 50) + 'px';
+        
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    // Start
+    init();
+
+</script>
+</body>
+</html>
+
+```
