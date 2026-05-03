@@ -215,7 +215,7 @@
                 
                 <div id="shop-list-items" style="margin-bottom: 25px;"></div>
 
-                <div style="font-size: 11px; font-weight: bold; color: var(--text-sec); margin-bottom: 10px;">Añadir nuevos artículos</div>
+                <div style="font-size: 11px; font-weight: bold; color: var(--text-sec); margin-bottom: 10px;">Añadir nuevos artículos (Solo Favoritos)</div>
                 <select id="shop-db-select" style="margin-bottom: 10px;"></select>
                 <div class="row">
                     <input type="number" id="shop-add-qty" placeholder="Cantidad (x)" value="1">
@@ -240,7 +240,7 @@
                 <div style="font-size: 12px; margin-bottom: 5px; display:flex; justify-content:space-between; color:#e9d5ff;"><span>Experiencia Nvl <span id="rpg-lvl">1</span></span> <span><span id="rpg-xp">0</span> / <span id="rpg-next">500</span> XP</span></div>
                 <div class="m-bar-bg" style="height: 10px; margin-bottom: 15px; border: 1px solid var(--border-temple);"><div id="b-xp" class="m-bar-fill" style="background:var(--c-xp); width: 0%;"></div></div>
                 
-                <div style="font-size: 13px; font-weight:800; margin-bottom:10px; margin-top:20px; color:#f3e8ff;">Mercado Negro (Comprar un Capricho)</div>
+                <div style="font-size: 13px; font-weight:800; margin-bottom:10px; margin-top:20px; color:#f3e8ff;">Mercado Negro (Tus Favoritos)</div>
                 <p style="font-size:10px; color:var(--text-sec); margin-bottom:15px;">¿Quieres saltarte la dieta sin ensuciar tus estadísticas? Elige tu capricho, gasta tu oro, y el Nexo hará la vista gorda. (Costo: 1000 G)</p>
                 <select id="temple-sin-select" style="margin-bottom: 10px; background: rgba(0,0,0,0.3); border-color: var(--border-temple);"></select>
                 <button class="btn" style="background: var(--c-gold); color: black;" onclick="buySin()">Comprar Capricho (-1000 G)</button>
@@ -282,7 +282,8 @@
     </nav>
 
     <script>
-                // ORDEN DE LOS DATOS: [Kcal, Prot, Carb, Grasa, Fibra, Azúcar, VitA(µg), VitC(mg), VitD(µg), Calcio(mg), Hierro(mg), Potasio(mg), Magnesio(mg), Sodio(mg)]
+        // SOLO 2 ALIMENTOS COMO PEDISTE
+        // ORDEN DE LOS DATOS: [Kcal, Prot, Carb, Grasa, Fibra, Azúcar, VitA(µg), VitC(mg), VitD(µg), Calcio(mg), Hierro(mg), Potasio(mg), Magnesio(mg), Sodio(mg)]
         const rawDB = {
             // === TUS PETICIONES ESPECIALES ===
             "Pistachos 0% sal tostados Hacendado (100g)": [604, 21.0, 16.0, 48.0, 10.0, 6.0, 26, 3, 0, 105, 4.0, 1025, 121, 0],
@@ -458,11 +459,12 @@
         let state = JSON.parse(localStorage.getItem('nexo_dieta_rpg_v4')) || {
             targets: { kcal: 2200, prot: 150, carb: 200, fat: 70, fib: 30, sug: 50, va: 900, vc: 90, vd: 20, ca: 1000, fe: 18, po: 3400, mg: 400, na: 2300 },
             customDB: [], inventory: [], history: {}, shopLists: { "Principal": [] }, currentList: "Principal", shopHistory: [],
-            gold: 0, lvl: 1, xp: 0
+            gold: 0, lvl: 1, xp: 0, favorites: []
         };
 
         if(!state.targets.fib) state.targets = { ...state.targets, fib: 30, sug: 50, va: 900, vc: 90, vd: 20, ca: 1000, fe: 18, po: 3400, mg: 400, na: 2300 };
         if(!state.shopHistory) state.shopHistory = [];
+        if(!state.favorites) state.favorites = [];
         
         let fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name));
         let charts = { kcal: null, macro: null };
@@ -492,10 +494,18 @@
             if(!state.quests || state.quests.date !== today) {
                 state.quests = {
                     date: today,
+                    // 10 MISIONES NUEVAS
                     list: [
-                        { text: "💧 Salud: Beber 2.5L de agua", done: false, g: 50, xp: 50 },
-                        { text: "🏃 Fitness: 10k pasos o 45m entreno", done: false, g: 50, xp: 50 },
-                        { text: "🥗 Dieta: 0 azúcar añadido / 80% natural", done: false, g: 50, xp: 50 }
+                        { text: "💧 Manantial: Bebe 3 litros de agua", done: false, g: 50, xp: 50 },
+                        { text: "🏃 Trotamundos: 10,000 pasos diarios", done: false, g: 80, xp: 80 },
+                        { text: "🥗 Pureza: 0 azúcar añadido hoy", done: false, g: 100, xp: 60 },
+                        { text: "🧘 Mente Clara: 10 min de meditación o estiramiento", done: false, g: 40, xp: 30 },
+                        { text: "💪 Hierro Puro: Entrenamiento de fuerza o calistenia", done: false, g: 100, xp: 100 },
+                        { text: "🍏 Naturaleza: Come 3 piezas de fruta", done: false, g: 40, xp: 40 },
+                        { text: "🥦 Verde Vida: Incluye verdura en 2 comidas", done: false, g: 50, xp: 50 },
+                        { text: "😴 Reposo del Guerrero: Duerme 8 horas del tirón", done: false, g: 70, xp: 70 },
+                        { text: "🚫 Ayuno Táctico: 12 horas sin comer (ej. de cena a desayuno)", done: false, g: 60, xp: 60 },
+                        { text: "📚 Sabiduría: Lee 15 páginas de un libro o aprende algo útil", done: false, g: 40, xp: 40 }
                     ]
                 };
                 save();
@@ -519,6 +529,33 @@
         }
         setInterval(updateClock, 1000); updateClock();
 
+        // GESTOR DE FAVORITOS
+        function toggleFav(id) {
+            if (state.favorites.includes(id)) {
+                state.favorites = state.favorites.filter(x => x !== id);
+            } else {
+                state.favorites.push(id);
+            }
+            save();
+            renderDB();
+            
+            // Actualizar vistas si están abiertas
+            if(document.getElementById('view-shop').classList.contains('active')) renderShop();
+            if(document.getElementById('view-templo').classList.contains('active')) {
+                let favs = fullDB.filter(f => state.favorites.includes(f.id));
+                document.getElementById('temple-sin-select').innerHTML = favs.length > 0 
+                    ? favs.map(f => `<option value="${f.id}">${f.name}</option>`).join('') 
+                    : `<option value="" disabled selected>No tienes favoritos guardados</option>`;
+            }
+        }
+
+        function getFavOptionsHTML() {
+            let favs = fullDB.filter(f => state.favorites.includes(f.id));
+            return favs.length > 0 
+                ? favs.map(f => `<option value="${f.id}">${f.name}</option>`).join('') 
+                : `<option value="" disabled selected>Añade favoritos en Compendio (⭐)</option>`;
+        }
+
         function switchTab(id, btn) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -529,7 +566,10 @@
             if(id === 'inv') renderInv();
             if(id === 'shop') renderShop();
             if(id === 'stats') { renderCharts(); renderManageDays(); }
-            if(id === 'templo') { updateRPG(); document.getElementById('temple-sin-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join(''); }
+            if(id === 'templo') { 
+                updateRPG(); 
+                document.getElementById('temple-sin-select').innerHTML = getFavOptionsHTML(); 
+            }
         }
 
         function getSums(date = activeDate) {
@@ -573,7 +613,9 @@
             let isPast = activeDate !== today;
             document.getElementById('ui-date').innerText = isPast ? activeDate : "HOY";
             document.getElementById('edit-mode-banner').style.display = isPast ? "flex" : "none";
-            document.getElementById('food-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+            
+            // EL SELECT DEL DASH SOLO MUESTRA FAVORITOS
+            document.getElementById('food-select').innerHTML = getFavOptionsHTML();
             
             let { t, burn } = getSums(); let T = state.targets; let r = state.history[activeDate]?.rewards || {};
             
@@ -649,11 +691,17 @@
         }
         function renderDB() { 
             let q = document.getElementById('search-db').value.toLowerCase(); 
-            document.getElementById('db-render-list').innerHTML = fullDB.filter(x => x.name.toLowerCase().includes(q)).map(f => `
+            document.getElementById('db-render-list').innerHTML = fullDB.filter(x => x.name.toLowerCase().includes(q)).map(f => {
+                let isFav = state.favorites.includes(f.id);
+                return `
                 <div class="list-item" style="border-color:var(--border-forge)">
                     <div class="item-info"><div class="item-name">${f.name}</div><div class="item-sub">${Math.round(f.k)} kc | ${Math.round(f.p)}g P</div></div>
-                    <div class="item-actions"><button class="btn-icon" style="color:var(--text-pri);" onclick="addInv(${f.id})" title="Añadir inventario">📦</button></div>
-                </div>`).join(''); 
+                    <div class="item-actions">
+                        <button class="btn-icon" style="color:${isFav ? 'var(--c-gold)' : 'var(--text-sec)'};" onclick="toggleFav(${f.id})" title="Favorito">${isFav ? '⭐' : '☆'}</button>
+                        <button class="btn-icon" style="color:var(--text-pri);" onclick="addInv(${f.id})" title="Añadir inventario">📦</button>
+                    </div>
+                </div>`;
+            }).join(''); 
         }
 
         function renderInv() { 
@@ -663,11 +711,13 @@
         function addInv(id) { let item = fullDB.find(x => x.id == id); let ex = state.inventory.find(x => x.id == id); if(ex) ex.invQty++; else state.inventory.push({...item, invQty: 1}); save(); alert("Añadido"); }
         function delInv(idx) { state.inventory.splice(idx, 1); save(); renderInv(); }
 
-        // === TIENDA Y CALENDARIO CORREGIDO ===
+        // === TIENDA Y CALENDARIO ===
         function renderShop() {
             let sel = document.getElementById('shop-list-select');
             sel.innerHTML = Object.keys(state.shopLists).map(k => `<option value="${k}" ${k===state.currentList?'selected':''}>${k}</option>`).join('');
-            document.getElementById('shop-db-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+            
+            // EL SELECT DE LA TIENDA SOLO MUESTRA FAVORITOS
+            document.getElementById('shop-db-select').innerHTML = getFavOptionsHTML();
             
             let list = state.shopLists[state.currentList] || []; let totCost = 0;
             document.getElementById('shop-list-items').innerHTML = list.map((i, idx) => {
@@ -797,8 +847,10 @@
         }
 
         function buySin() { 
+            let sel = document.getElementById('temple-sin-select');
+            if (!sel.value) return alert("Primero debes marcar algún alimento como favorito en el Compendio.");
             if (state.gold < 1000) return alert("No tienes suficiente Oro para sobornar al Nexo.");
-            let n = document.getElementById('temple-sin-select').options[document.getElementById('temple-sin-select').selectedIndex].text; 
+            let n = sel.options[sel.selectedIndex].text; 
             if(confirm(`¿Gastar 1000 Oro para comerte "${n}" sin remordimientos?`)) { 
                 state.gold -= 1000; save(); alert("Transacción completada. Disfruta tu capricho, el Nexo mirará hacia otro lado."); 
             } 
