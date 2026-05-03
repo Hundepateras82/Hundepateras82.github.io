@@ -41,6 +41,7 @@
         .btn-pri { background: var(--text-pri); color: var(--bg-base); }
         .btn-sec { background: var(--bg-surface); color: var(--text-pri); border: 1px solid var(--border); }
         .btn-nexo-bg { background: var(--c-nexo); color: white; }
+        .btn-shop { background: var(--c-shop); color: black; }
         .btn-dark { background: var(--c-dark); color: white; border: 1px solid red; box-shadow: 0 0 10px rgba(255,0,0,0.2); }
         .btn-icon { background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 6px; width: 32px; height: 32px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; }
 
@@ -56,7 +57,7 @@
         .micro-bar-fill { height: 100%; border-radius: 2px; background: var(--c-nexo); transition: width 0.3s; }
 
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-surface); border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); }
-        .list-item.bought { opacity: 0.5; text-decoration: line-through; }
+        .list-item.bought { opacity: 0.5; text-decoration: line-through; border-color: var(--c-shop); }
         .item-info { flex: 1; }
         .item-name { font-size: 14px; font-weight: 800; }
         .item-sub { font-size: 11px; color: var(--text-sec); margin-top: 4px; }
@@ -65,8 +66,11 @@
         .chart-container { position: relative; height: 200px; width: 100%; margin-top: 10px;}
 
         /* CALENDARIO */
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
-        .cal-day { aspect-ratio: 1; border-radius: 6px; background: var(--bg-surface); display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 800; border: 1px solid var(--border); }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 800; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .cal-day-header { font-size: 10px; color: var(--text-sec); text-align: center; margin-bottom: 5px; }
+        .cal-day { aspect-ratio: 1; border-radius: 6px; background: var(--bg-surface); display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 800; border: 1px solid var(--border); cursor: pointer; }
+        .cal-day.empty { background: transparent; border: none; }
         .cal-c-0 { background: #ef4444; color: black; border-color: #ef4444; } /* Rojo */
         .cal-c-1 { background: #eab308; color: black; border-color: #eab308; } /* Amarillo */
         .cal-c-2 { background: #22c55e; color: black; border-color: #22c55e; } /* Verde */
@@ -76,6 +80,10 @@
         .nav-btn { flex: 1; background: none; border: none; color: var(--text-sec); font-size: 9px; font-weight: 800; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
         .nav-btn.active { color: var(--c-nexo); }
         .nav-icon { font-size: 18px; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab { flex: 1; text-align: center; padding: 10px; background: var(--bg-surface); border-radius: 8px; font-size: 12px; font-weight: 800; color: var(--text-sec); border: 1px solid var(--border); cursor: pointer; }
+        .tab.active { background: var(--c-shop); color: black; border-color: var(--c-shop); }
     </style>
 </head>
 <body>
@@ -106,7 +114,7 @@
             </div>
 
             <div class="card">
-                <div class="card-title">Micronutrientes (Mínimos Diarios)</div>
+                <div class="card-title">Micronutrientes (Mínimos y Máximos)</div>
                 <div class="micro-list">
                     <div class="micro-item"><span>Fibra (30g)</span> <div class="micro-bar-bg"><div id="b-fib" class="micro-bar-fill"></div></div> <span id="t-fib">0</span></div>
                     <div class="micro-item"><span>Azúcar (<50g)</span> <div class="micro-bar-bg"><div id="b-sug" class="micro-bar-fill" style="background:var(--c-danger)"></div></div> <span id="t-sug">0</span></div>
@@ -140,7 +148,7 @@
                 <div class="row"><input type="number" id="burn-input" placeholder="Kcal quemadas" style="margin-bottom:0;"><button class="btn btn-sec" style="margin-bottom:0;" onclick="logBurn()">Quemar</button></div>
             </div>
 
-            <button class="btn" style="background: var(--border); color: white;" onclick="endDay()">🌙 CERRAR DÍA Y JUZGAR</button>
+            <button class="btn" style="background: var(--border); color: white;" onclick="endDay()">🌙 CERRAR DÍA Y RECLAMAR ORO</button>
         </div>
 
         <div id="view-db" class="view">
@@ -150,15 +158,16 @@
                 <div id="db-render-list" style="max-height: 300px; overflow-y: auto; margin-top: 10px;"></div>
             </div>
             <div class="card">
-                <div class="card-title">Forja (Crear Alimento x 100g)</div>
+                <div class="card-title">Forja (Crear Alimento)</div>
                 <input type="text" id="c-name" placeholder="Nombre">
+                <input type="number" id="c-qty" placeholder="¿Para cuántos gramos son estos valores?" value="100">
                 <div class="row"><input type="number" id="c-k" placeholder="Kcal"><input type="number" id="c-p" placeholder="Prot"></div>
                 <div class="row"><input type="number" id="c-c" placeholder="Carb"><input type="number" id="c-f" placeholder="Grasa"></div>
                 <div class="row"><input type="number" id="c-fib" placeholder="Fibra"><input type="number" id="c-sug" placeholder="Azúcar"></div>
                 <div class="row"><input type="number" id="c-va" placeholder="Vit A"><input type="number" id="c-vc" placeholder="Vit C"><input type="number" id="c-vd" placeholder="Vit D"></div>
                 <div class="row"><input type="number" id="c-ca" placeholder="Calcio"><input type="number" id="c-fe" placeholder="Hierro"></div>
                 <div class="row"><input type="number" id="c-po" placeholder="Potasio"><input type="number" id="c-mg" placeholder="Magnesio"><input type="number" id="c-na" placeholder="Sodio"></div>
-                <button class="btn btn-nexo-bg" onclick="createFood()">Añadir al Compendio</button>
+                <button class="btn btn-nexo-bg" onclick="createFood()">Forjar y Añadir al Compendio</button>
             </div>
         </div>
 
@@ -170,11 +179,39 @@
         </div>
 
         <div id="view-shop" class="view">
-            <div class="card">
-                <div class="card-title">Lista de la Compra</div>
-                <div class="row" style="margin-bottom: 15px;"><input type="text" id="shop-input" placeholder="Añadir..." style="margin-bottom:0;"><button class="btn btn-sec" style="margin-bottom:0; flex: 0.3;" onclick="addShopManual()">+</button></div>
-                <div id="shop-list"></div>
-                <button class="btn btn-danger" style="background:rgba(244, 63, 94, 0.2); color:var(--c-danger); margin-top:15px;" onclick="clearBought()">Limpiar Comprados</button>
+            <div class="tabs">
+                <div class="tab active" id="tab-shop-active" onclick="switchShopTab('active')">Lista Actual</div>
+                <div class="tab" id="tab-shop-history" onclick="switchShopTab('history')">Historial</div>
+            </div>
+
+            <div id="shop-view-active">
+                <div class="card">
+                    <div class="card-title">Añadir Producto</div>
+                    <select id="shop-db-select" style="margin-bottom: 10px;"></select>
+                    <div class="row">
+                        <input type="number" id="shop-add-qty" placeholder="Gramos" value="100">
+                        <input type="number" id="shop-add-price" placeholder="Precio (€)">
+                    </div>
+                    <button class="btn btn-shop" onclick="addToShop()">Añadir a la Cesta</button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Cesta Actual</div>
+                    <div id="shop-list-items"></div>
+                    <div style="border-top:1px solid var(--border); margin-top:15px; padding-top:15px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:800;"><span>Total Gastado:</span> <span id="shop-total-cost" style="color:var(--c-shop)">0.00 €</span></div>
+                        <div style="font-size:11px; color:var(--text-sec); margin-top:8px;" id="shop-total-nutrients">Nutrientes: 0 Kcal | 0g P | 0g C | 0g G</div>
+                    </div>
+                    <button class="btn btn-nexo-bg" style="margin-top:15px;" onclick="finishShopping()">Finalizar y Guardar Compra</button>
+                </div>
+            </div>
+
+            <div id="shop-view-history" style="display:none;">
+                <div class="card">
+                    <div class="card-title">Gráfica de Gastos</div>
+                    <div class="chart-container"><canvas id="shopChart"></canvas></div>
+                </div>
+                <div id="shop-history-list"></div>
             </div>
         </div>
 
@@ -183,10 +220,10 @@
                 <div class="card-title">Camino del Titán <span><span id="t-h">00</span>:<span id="t-m">00</span>:<span id="t-s">00</span></span></div>
                 <div style="font-size: 12px; margin-bottom: 5px; display:flex; justify-content:space-between;"><span>Experiencia Nvl <span id="rpg-lvl">1</span></span> <span><span id="rpg-xp">0</span> / <span id="rpg-next">500</span> XP</span></div>
                 <div class="m-bar-bg" style="height: 10px; margin-bottom: 15px;"><div id="b-xp" class="m-bar-fill" style="background:var(--c-xp); width: 0%;"></div></div>
-                <div style="font-size: 13px; font-weight:800; margin-bottom:10px;">Misiones Diarias (Cierre)</div>
+                <div style="font-size: 13px; font-weight:800; margin-bottom:10px;">Recompensas Diarias (Al Cerrar Día)</div>
                 <div class="micro-item" style="margin-bottom:5px;"><span>🎯 Cuadrar Calorías Límite</span> <span style="color:var(--c-gold)">+50 G</span></div>
-                <div class="micro-item" style="margin-bottom:5px;"><span>🥩 Cuadrar Macros (P/C/F)</span> <span style="color:var(--c-gold)">+150 G</span></div>
-                <div class="micro-item"><span>💊 Cuadrar Todos los Micros</span> <span style="color:var(--c-gold)">+75 G</span></div>
+                <div class="micro-item" style="margin-bottom:5px;"><span>🥩 Por cada Macro cumplido (P/C/G)</span> <span style="color:var(--c-gold)">+150 G / c.u</span></div>
+                <div class="micro-item"><span>💊 Por cada Micro cumplido</span> <span style="color:var(--c-gold)">+75 G / c.u</span></div>
             </div>
 
             <div class="card" style="border-color: var(--c-dark); background: #1a0505;">
@@ -201,9 +238,17 @@
         <div id="view-stats" class="view">
             <div class="card">
                 <div class="card-title">Calendario de Disciplina</div>
-                <p style="font-size:10px; color:var(--text-sec); display:flex; gap:10px; margin-bottom:10px;">
+                <div class="cal-header">
+                    <button class="btn-icon" onclick="changeMonth(-1)">◀</button>
+                    <span id="cal-month-title">Mes Año</span>
+                    <button class="btn-icon" onclick="changeMonth(1)">▶</button>
+                </div>
+                <p style="font-size:10px; color:var(--text-sec); display:flex; gap:10px; margin-bottom:10px; justify-content:center;">
                     <span style="color:#ef4444">■ Mal</span> <span style="color:#eab308">■ Aceptable</span> <span style="color:#22c55e">■ Bien</span> <span style="color:#3b82f6">■ Perfecto</span>
                 </p>
+                <div style="display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:5px;">
+                    <div class="cal-day-header">L</div><div class="cal-day-header">M</div><div class="cal-day-header">X</div><div class="cal-day-header">J</div><div class="cal-day-header">V</div><div class="cal-day-header">S</div><div class="cal-day-header">D</div>
+                </div>
                 <div id="cal-grid" class="cal-grid"></div>
             </div>
 
@@ -212,14 +257,6 @@
                 <div class="chart-container"><canvas id="macroChart"></canvas></div>
             </div>
 
-            <div class="card">
-                <div class="card-title">Calc. BMR</div>
-                <div class="row"><input type="number" id="p-w" placeholder="Peso (kg)"><input type="number" id="p-h" placeholder="Altura (cm)"></div>
-                <div class="row"><input type="number" id="p-a" placeholder="Edad"><select id="p-g"><option value="m">Hombre</option><option value="f">Mujer</option></select></div>
-                <select id="p-act"><option value="1.2">Sedentario</option><option value="1.375">Ligero</option><option value="1.55">Moderado</option><option value="1.725">Intenso</option></select>
-                <button class="btn btn-nexo-bg" onclick="calcBMR()">Recalcular</button>
-            </div>
-            
             <div class="card">
                 <div class="card-title">Backup</div>
                 <button class="btn btn-sec" onclick="exportData()">Exportar JSON</button>
@@ -263,17 +300,22 @@
         let state = JSON.parse(localStorage.getItem('nexo_dieta_rpg')) || {
             targets: { kcal: 2200, prot: 150, carb: 200, fat: 70, fib: 30, sug: 50, va: 900, vc: 90, vd: 20, ca: 1000, fe: 8, po: 3500, mg: 400, na: 2300 },
             bio: { w: 75, h: 175, a: 25, g: 'm', act: 1.375 },
-            customDB: [], inventory: [], shopping: [], history: {}
+            customDB: [], inventory: [], history: {}
         };
         
-        // INIT NUEVAS VARIABLES RPG SI NO EXISTEN
+        // INIT NUEVAS VARIABLES
         if(state.gold === undefined) state.gold = 0;
         if(state.lvl === undefined) state.lvl = 1;
         if(state.xp === undefined) state.xp = 0;
         if(!state.history[today]) state.history[today] = { log: [], burn: 0, done: false, score: -1 };
+        
+        // INIT VARIABLES DE TIENDA NUEVA
+        if(!state.activeShop) state.activeShop = [];
+        if(!state.shopHistory) state.shopHistory = [];
 
         let fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name));
-        let chartInst = null;
+        let chartInst = null; let shopChartInst = null;
+        let calViewDate = new Date(); // Para el calendario
 
         function save() { localStorage.setItem('nexo_dieta_rpg', JSON.stringify(state)); updateDash(); updateRPG(); }
 
@@ -285,8 +327,8 @@
             if(id === 'db') renderDB();
             if(id === 'inv') renderInv();
             if(id === 'shop') renderShop();
-            if(id === 'stats') { fillBio(); renderChart(); renderCalendar(); }
-            if(id === 'templo') { updateRPG(); }
+            if(id === 'stats') { renderChart(); renderCalendar(); }
+            if(id === 'templo') updateRPG();
         }
 
         function getSums() {
@@ -330,7 +372,48 @@
         function updateQty(idx, val) { let n = parseFloat(val); if(isNaN(n) || n <= 0) { delLog(idx); return; } state.history[today].log[idx].qty = n; save(); if(document.getElementById('view-stats').classList.contains('active')) renderChart(); }
         function logBurn() { let v = parseFloat(document.getElementById('burn-input').value); if(v>0) { state.history[today].burn += v; document.getElementById('burn-input').value=""; save(); } }
 
-        // === LÓGICA RPG Y DÍA ===
+        // === FORJA REPARADA ===
+        function createFood() {
+            let n = document.getElementById('c-name').value;
+            let q = parseFloat(document.getElementById('c-qty').value);
+            if(!n || isNaN(q) || q <= 0) return alert("Introduce nombre y gramos base válidos.");
+            
+            // Función para normalizar a 100g. Si el user pone valores para 50g, los multiplicamos por (100/50) = 2.
+            let r = 100 / q; 
+            const gv = (id) => (parseFloat(document.getElementById(id).value) || 0) * r;
+
+            let f = {
+                id: Date.now(), name: n, k: gv('c-k'), p: gv('c-p'), c: gv('c-c'), f: gv('c-f'),
+                fib: gv('c-fib'), sug: gv('c-sug'), va: gv('c-va'), vc: gv('c-vc'), vd: gv('c-vd'),
+                ca: gv('c-ca'), fe: gv('c-fe'), po: gv('c-po'), mg: gv('c-mg'), na: gv('c-na')
+            };
+
+            state.customDB.push(f);
+            fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name));
+            save(); renderDB();
+            alert(`¡${n} forjado y guardado para 100g!`);
+            ['c-name','c-qty','c-k','c-p','c-c','c-f','c-fib','c-sug','c-va','c-vc','c-vd','c-ca','c-fe','c-po','c-mg','c-na'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('c-qty').value = "100";
+        }
+
+        function renderDB() { 
+            let q = document.getElementById('search-db').value.toLowerCase(); 
+            document.getElementById('db-render-list').innerHTML = fullDB.filter(x => x.name.toLowerCase().includes(q)).map(f => `
+                <div class="list-item">
+                    <div class="item-info"><div class="item-name">${f.name}</div></div>
+                    <div class="item-actions">
+                        <button class="btn-icon" style="background:var(--c-kcal); color:black;" onclick="addInv(${f.id})">📦</button>
+                    </div>
+                </div>`).join(''); 
+        }
+
+        // === INVENTARIO ===
+        function renderInv() { document.getElementById('inv-list').innerHTML = state.inventory.map((i, idx) => `<div class="list-item"><div class="item-info"><div class="item-name">${i.name}</div></div><div class="item-actions"><button class="btn-icon" style="background:var(--c-nexo); font-size:10px;" onclick="logFromInv(${i.id})">EAT</button><button class="btn-icon" style="color:var(--c-danger);" onclick="delInv(${idx})">✖</button></div></div>`).join(''); }
+        function addInv(id) { let item = fullDB.find(x => x.id == id); if(!state.inventory.some(x => x.id == id)) { state.inventory.push(item); save(); renderDB(); alert("A la despensa"); } }
+        function delInv(idx) { state.inventory.splice(idx, 1); save(); renderInv(); }
+        function logFromInv(id) { document.getElementById('food-select').value = id; switchTab('dash', document.querySelector('.nav-btn')); }
+
+        // === LÓGICA RPG ORO Y DÍA REPARADA ===
         function updateRPG() {
             document.getElementById('ui-gold').innerText = state.gold; document.getElementById('ui-lvl').innerText = state.lvl;
             document.getElementById('rpg-lvl').innerText = state.lvl; document.getElementById('rpg-xp').innerText = state.xp;
@@ -342,18 +425,33 @@
         function endDay() {
             if(state.history[today].done) return alert("El día ya ha sido juzgado por el Nexo.");
             let { t } = getSums(); let T = state.targets;
-            let msMacro = (t.p >= T.prot && t.c >= T.carb && t.f >= T.fat);
-            let msMicro = (t.fib>=T.fib && t.sug<=T.sug && t.va>=T.va && t.vc>=T.vc && t.vd>=T.vd && t.ca>=T.ca && t.fe>=T.fe && t.po>=T.po && t.mg>=T.mg && t.na<=T.na);
-            let msKcal = (t.netK <= T.kcal && t.netK >= T.kcal*0.8);
+            let g = 0, xp = 0;
 
-            let g = 0, xp = 0, sc = 0;
-            if(msMacro) { g += 150; xp += 100; }
-            if(msMicro) { g += 75; xp += 50; }
+            // Kcal
+            let msKcal = (t.netK <= T.kcal && t.netK >= T.kcal*0.8);
             if(msKcal) { g += 50; xp += 50; }
 
+            // Macros Individuales (Mínimos)
+            let mProt = t.p >= T.prot; if(mProt){ g += 150; xp += 30; }
+            let mCarb = t.c >= T.carb; if(mCarb){ g += 150; xp += 30; }
+            let mFat = t.f >= T.fat; if(mFat){ g += 150; xp += 30; }
+            let msMacro = (mProt && mCarb && mFat);
+
+            // Micros Individuales
+            let mMet = 0; // Contador de micros cumplidos
+            const checkMin = (val, max) => { if(val >= max) { g+=75; xp+=15; mMet++; } };
+            const checkMax = (val, max) => { if(val <= max) { g+=75; xp+=15; mMet++; } }; // Para azúcar y sodio
+
+            checkMin(t.fib, T.fib); checkMax(t.sug, T.sug); checkMin(t.va, T.va); checkMin(t.vc, T.vc); checkMin(t.vd, T.vd);
+            checkMin(t.ca, T.ca); checkMin(t.fe, T.fe); checkMin(t.po, T.po); checkMin(t.mg, T.mg); checkMax(t.na, T.na);
+
+            let msMicro = mMet === 10;
+
+            // Score para el calendario
+            let sc = 0;
             if(msMacro && msMicro && msKcal) sc = 3; // Azul
             else if(msMacro && msKcal) sc = 2; // Verde
-            else if(msMacro || msKcal || msMicro) sc = 1; // Amarillo
+            else if(msMacro || msKcal || mMet >= 5) sc = 1; // Amarillo
             else sc = 0; // Rojo
 
             state.gold += g; state.xp += xp;
@@ -361,11 +459,11 @@
             if(state.xp >= nXP) { state.xp -= nXP; state.lvl++; alert(`¡EL NEXO RECONOCE TU ESFUERZO! \nSubes al NIVEL ${state.lvl}.`); }
             
             state.history[today].score = sc; state.history[today].done = true; save();
-            alert(`Día sellado.\nValoración: ${sc===3?'PERFECTO':sc===2?'BIEN':sc===1?'ACEPTABLE':'MAL'}\nHas ganado +${g} Oro y +${xp} XP.`);
+            alert(`Día sellado.\nHas cumplido ${mMet}/10 micros.\nHas ganado +${g} Oro y +${xp} XP.`);
         }
 
         function buyDarkFood() {
-            if(state.gold < 2000) return alert("No tienes suficiente Oro para el sacrificio. El Mercader Oscuro te rechaza.");
+            if(state.gold < 2000) return alert("No tienes suficiente Oro para el sacrificio.");
             let id = document.getElementById('dark-select').value; let qty = parseFloat(document.getElementById('dark-qty').value);
             if(!id || isNaN(qty) || qty<=0) return;
             state.gold -= 2000;
@@ -383,33 +481,131 @@
         }, 1000);
 
         // === CALENDARIO ===
+        function changeMonth(dir) {
+            calViewDate.setMonth(calViewDate.getMonth() + dir);
+            renderCalendar();
+        }
+
         function renderCalendar() {
+            const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+            let y = calViewDate.getFullYear(); let m = calViewDate.getMonth();
+            document.getElementById('cal-month-title').innerText = `${months[m]} ${y}`;
+            
             let grid = document.getElementById('cal-grid'); grid.innerHTML = '';
-            let d = new Date(); d.setDate(d.getDate() - 29); // Últimos 30 días
-            for(let i=0; i<30; i++) {
-                let ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            
+            let firstDay = new Date(y, m, 1).getDay();
+            firstDay = firstDay === 0 ? 6 : firstDay - 1; // Ajustar a Lunes
+            let daysInMonth = new Date(y, m + 1, 0).getDate();
+
+            for(let i=0; i<firstDay; i++) { grid.innerHTML += `<div class="cal-day empty"></div>`; }
+
+            for(let d=1; d<=daysInMonth; d++) {
+                let ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 let sc = state.history[ds] ? state.history[ds].score : -1;
                 let cClass = sc === -1 ? '' : `cal-c-${sc}`;
-                grid.innerHTML += `<div class="cal-day ${cClass}">${d.getDate()}</div>`;
-                d.setDate(d.getDate() + 1);
+                grid.innerHTML += `<div class="cal-day ${cClass}">${d}</div>`;
             }
         }
 
-        // === RESTO DE FUNCIONES ESTÁNDAR ===
-        function renderDB() { let q = document.getElementById('search-db').value.toLowerCase(); document.getElementById('db-render-list').innerHTML = fullDB.filter(x => x.name.toLowerCase().includes(q)).map(f => `<div class="list-item"><div class="item-info"><div class="item-name">${f.name}</div></div><div class="item-actions"><button class="btn-icon" style="background:var(--c-kcal); color:black;" onclick="addInv(${f.id})">📦</button><button class="btn-icon" style="background:var(--c-shop); color:black;" onclick="addShop('${f.name}')">🛒</button></div></div>`).join(''); }
-        function createFood() { /* Lógica intacta, abreviada por espacio */ }
-        function renderInv() { document.getElementById('inv-list').innerHTML = state.inventory.map((i, idx) => `<div class="list-item"><div class="item-info"><div class="item-name">${i.name}</div></div><div class="item-actions"><button class="btn-icon" style="background:var(--c-nexo); font-size:10px;" onclick="logFromInv(${i.id})">EAT</button><button class="btn-icon" style="color:var(--c-danger);" onclick="delInv(${idx})">✖</button></div></div>`).join(''); }
-        function addInv(id) { let item = fullDB.find(x => x.id == id); if(!state.inventory.some(x => x.id == id)) { state.inventory.push(item); save(); renderDB(); alert("A la despensa"); } }
-        function delInv(idx) { state.inventory.splice(idx, 1); save(); renderInv(); }
-        function logFromInv(id) { document.getElementById('food-select').value = id; switchTab('dash', document.querySelector('.nav-btn')); }
-        function addShop(name) { if(!state.shopping.some(x => x.name === name)) { state.shopping.push({name, done:false}); save(); renderShop(); } }
-        function addShopManual() { let v = document.getElementById('shop-input').value; if(v) { addShop(v); document.getElementById('shop-input').value=""; } }
-        function renderShop() { document.getElementById('shop-list').innerHTML = state.shopping.map((i, idx) => `<div class="list-item ${i.done ? 'bought' : ''}" onclick="toggleShop(${idx})"><div class="item-name">${i.name}</div>${i.done ? '✅' : '⭕'}</div>`).join(''); }
-        function toggleShop(idx) { state.shopping[idx].done = !state.shopping[idx].done; save(); renderShop(); }
-        function clearBought() { state.shopping = state.shopping.filter(x => !x.done); save(); renderShop(); }
-        function fillBio() { let b = state.bio; document.getElementById('p-w').value=b.w; document.getElementById('p-h').value=b.h; document.getElementById('p-a').value=b.a; }
-        function calcBMR() { /* Abreviada */ }
-        function renderChart() { /* Abreviada */ }
+        // === SISTEMA DE TIENDA COMPLEJO ===
+        function switchShopTab(tab) {
+            document.getElementById('tab-shop-active').classList.remove('active');
+            document.getElementById('tab-shop-history').classList.remove('active');
+            document.getElementById(`tab-shop-${tab}`).classList.add('active');
+            document.getElementById('shop-view-active').style.display = tab === 'active' ? 'block' : 'none';
+            document.getElementById('shop-view-history').style.display = tab === 'history' ? 'block' : 'none';
+            if(tab === 'history') renderShopChart();
+        }
+
+        function renderShop() {
+            document.getElementById('shop-db-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+            
+            // Render Lista Activa
+            let totCost = 0; let tk=0, tp=0, tc=0, tf=0;
+            document.getElementById('shop-list-items').innerHTML = state.activeShop.map((i, idx) => {
+                totCost += i.price;
+                let m = i.qty / 100; tk += i.k*m; tp += i.p*m; tc += i.c*m; tf += i.f*m;
+                return `
+                <div class="list-item ${i.done ? 'bought' : ''}" onclick="toggleShopItem(${idx})">
+                    <div class="item-info">
+                        <div class="item-name">${i.name}</div>
+                        <div class="item-sub">${i.qty}g | ${i.price.toFixed(2)}€</div>
+                    </div>
+                    <button class="btn-icon" style="color:var(--c-danger);" onclick="event.stopPropagation(); delShopItem(${idx})">✖</button>
+                </div>`;
+            }).join('') || '<div style="font-size:12px; color:var(--text-sec);">Cesta vacía.</div>';
+
+            document.getElementById('shop-total-cost').innerText = `${totCost.toFixed(2)} €`;
+            document.getElementById('shop-total-nutrients').innerText = `Total: ${Math.round(tk)} Kc | ${Math.round(tp)}g P | ${Math.round(tc)}g C | ${Math.round(tf)}g G`;
+
+            // Render Historial
+            document.getElementById('shop-history-list').innerHTML = state.shopHistory.map(h => `
+                <div class="card" style="padding:12px;">
+                    <div style="font-size:12px; font-weight:800; display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span>${h.date}</span> <span style="color:var(--c-shop)">${h.cost.toFixed(2)} €</span>
+                    </div>
+                    <div style="font-size:10px; color:var(--text-sec);">${h.items} Artículos</div>
+                </div>
+            `).reverse().join('');
+        }
+
+        function addToShop() {
+            let id = document.getElementById('shop-db-select').value;
+            let qty = parseFloat(document.getElementById('shop-add-qty').value);
+            let price = parseFloat(document.getElementById('shop-add-price').value) || 0;
+            if(!id || isNaN(qty) || qty <= 0) return alert("Introduce gramos válidos.");
+            let item = fullDB.find(x => x.id == id);
+            state.activeShop.push({ ...item, qty, price, done: false });
+            save(); renderShop();
+            document.getElementById('shop-add-price').value = "";
+        }
+
+        function toggleShopItem(idx) { state.activeShop[idx].done = !state.activeShop[idx].done; save(); renderShop(); }
+        function delShopItem(idx) { state.activeShop.splice(idx, 1); save(); renderShop(); }
+
+        function finishShopping() {
+            if(state.activeShop.length === 0) return;
+            let cost = state.activeShop.reduce((acc, curr) => acc + curr.price, 0);
+            state.shopHistory.push({ date: today, items: state.activeShop.length, cost: cost });
+            state.activeShop = []; // Vaciamos
+            save(); switchShopTab('history'); renderShop();
+        }
+
+        function renderShopChart() {
+            if(shopChartInst) shopChartInst.destroy();
+            let hist = state.shopHistory.slice(-7); // ultimas 7 compras
+            let ctx = document.getElementById('shopChart').getContext('2d');
+            shopChartInst = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: hist.map(h => h.date.substring(5)), datasets: [{ label: 'Gasto (€)', data: hist.map(h => h.cost), backgroundColor: '#eab308', borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: '#333' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+            });
+        }
+
+        // === ESTADISTICAS Y GRAFICAS ===
+        function renderChart() {
+            if(chartInst) chartInst.destroy();
+            let d = new Date(); let labels = [], kData = [], pData = [];
+            for(let i=6; i>=0; i--) {
+                let dt = new Date(d); dt.setDate(d.getDate() - i);
+                let ds = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+                labels.push(dt.getDate());
+                let s = state.history[ds] ? getPastSums(ds) : {k:0, p:0};
+                kData.push(s.k); pData.push(s.p);
+            }
+            let ctx = document.getElementById('macroChart').getContext('2d');
+            chartInst = new Chart(ctx, {
+                type: 'line', data: { labels, datasets: [{label:'Kcal', data:kData, borderColor:'#fbbf24', tension:0.3}, {label:'Prot', data:pData, borderColor:'#ef4444', tension:0.3, yAxisID:'y1'}] },
+                options: { responsive:true, maintainAspectRatio:false, scales: { y: { beginAtZero:true, grid:{color:'#333'} }, y1: { position:'right', grid:{display:false} } }, plugins:{legend:{labels:{color:'#fff', font:{size:10}}}} }
+            });
+        }
+
+        function getPastSums(dateStr) {
+            let log = state.history[dateStr].log; let k=0, p=0;
+            log.forEach(i => { let m = i.name.includes('Unidad') ? i.qty : i.qty/100; k += (i.k||0)*m; p += (i.p||0)*m; });
+            return {k, p};
+        }
+
         function exportData() { let a=document.createElement('a'); a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(state)); a.download=`NexoRPG_${today}.json`; a.click(); }
 
         updateDash(); updateRPG();
