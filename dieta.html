@@ -272,6 +272,39 @@
 
     </div>
 
+    <div id="modal-variator" class="view" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(5px); z-index:200; justify-content:center; align-items:center; padding:15px;">
+        <div class="card card-forge" style="width:100%; max-height:90vh; overflow-y:auto; position:relative;">
+            <button class="btn-icon" style="position:absolute; top:15px; right:15px; background:var(--c-danger);" onclick="closeVariator()">✖</button>
+            <div class="card-title" style="color:var(--c-nexo);">🪄 Variador Automático</div>
+            <p style="font-size:11px; color:var(--text-sec); margin-bottom:15px;">Modifica los gramos y el sistema escalará los macros por ti automáticamente.</p>
+            
+            <input type="text" id="v-name" placeholder="Nombre de la variación">
+            <div class="row">
+                <div style="flex:1">
+                    <div style="font-size:10px; color:var(--text-sec); margin-bottom:4px;">Gramos Base</div>
+                    <input type="number" id="v-old-qty" value="100" oninput="scaleVariation()">
+                </div>
+                <div style="flex:1">
+                    <div style="font-size:10px; color:var(--c-nexo); font-weight:bold; margin-bottom:4px;">Nuevos Gramos</div>
+                    <input type="number" id="v-new-qty" value="100" oninput="scaleVariation()" style="border-color:var(--c-nexo);">
+                </div>
+            </div>
+            
+            <div style="font-size:11px; color:var(--text-sec); margin-bottom:8px; font-weight:bold; margin-top:10px;">MACROS ESCALADOS</div>
+            <div class="row"><input type="number" id="v-k" placeholder="Kcal"><input type="number" id="v-p" placeholder="Prot (g)"></div>
+            <div class="row"><input type="number" id="v-c" placeholder="Carb (g)"><input type="number" id="v-f" placeholder="Grasa (g)"></div>
+            
+            <div style="font-size:11px; color:var(--text-sec); margin-bottom:8px; font-weight:bold;">MICROS ESCALADOS</div>
+            <div class="row"><input type="number" id="v-fib" placeholder="Fibra (g)"><input type="number" id="v-sug" placeholder="Azúcar (g)"></div>
+            <div class="row"><input type="number" id="v-va" placeholder="Vit A"><input type="number" id="v-vc" placeholder="Vit C"></div>
+            <div class="row"><input type="number" id="v-vd" placeholder="Vit D"><input type="number" id="v-ca" placeholder="Calcio"></div>
+            <div class="row"><input type="number" id="v-fe" placeholder="Hierro"><input type="number" id="v-po" placeholder="Potasio"></div>
+            <div class="row"><input type="number" id="v-mg" placeholder="Magnesio"><input type="number" id="v-na" placeholder="Sodio"></div>
+
+            <button class="btn btn-nexo-bg" onclick="saveVariation()" style="margin-top: 10px;">Guardar Variación y Añadir a ⭐</button>
+        </div>
+    </div>
+
     <nav>
         <button class="nav-btn active" onclick="switchTab('dash', this)"><span class="nav-icon">📊</span>Dash</button>
         <button class="nav-btn" onclick="switchTab('db', this)"><span class="nav-icon">🔍</span>Comp.</button>
@@ -282,7 +315,6 @@
     </nav>
 
     <script>
-        // SOLO 2 ALIMENTOS COMO PEDISTE
         // ORDEN DE LOS DATOS: [Kcal, Prot, Carb, Grasa, Fibra, Azúcar, VitA(µg), VitC(mg), VitD(µg), Calcio(mg), Hierro(mg), Potasio(mg), Magnesio(mg), Sodio(mg)]
         const rawDB = {
             // === TUS PETICIONES ESPECIALES ===
@@ -494,7 +526,6 @@
             if(!state.quests || state.quests.date !== today) {
                 state.quests = {
                     date: today,
-                    // 10 MISIONES NUEVAS
                     list: [
                         { text: "💧 Manantial: Bebe 3 litros de agua", done: false, g: 50, xp: 50 },
                         { text: "🏃 Trotamundos: 10,000 pasos diarios", done: false, g: 80, xp: 80 },
@@ -504,8 +535,8 @@
                         { text: "🍏 Naturaleza: Come 3 piezas de fruta", done: false, g: 40, xp: 40 },
                         { text: "🥦 Verde Vida: Incluye verdura en 2 comidas", done: false, g: 50, xp: 50 },
                         { text: "😴 Reposo del Guerrero: Duerme 8 horas del tirón", done: false, g: 70, xp: 70 },
-                        { text: "🚫 Ayuno Táctico: 12 horas sin comer (ej. de cena a desayuno)", done: false, g: 60, xp: 60 },
-                        { text: "📚 Sabiduría: Lee 15 páginas de un libro o aprende algo útil", done: false, g: 40, xp: 40 }
+                        { text: "🚫 Ayuno Táctico: 12 horas sin comer", done: false, g: 60, xp: 60 },
+                        { text: "📚 Sabiduría: Lee 15 páginas o aprende algo", done: false, g: 40, xp: 40 }
                     ]
                 };
                 save();
@@ -516,30 +547,20 @@
         function save() { localStorage.setItem('nexo_dieta_rpg_v4', JSON.stringify(state)); updateDash(); updateRPG(); }
         function hardReset() { if(confirm("⚠️ ¿Estás seguro? Se borrarán TODOS tus datos de forma permanente.")) { localStorage.removeItem('nexo_dieta_rpg_v4'); location.reload(); } }
 
-        function levelUpCheck() {
-            while(state.xp >= state.lvl * 500) { state.xp -= state.lvl * 500; state.lvl++; }
-        }
+        function levelUpCheck() { while(state.xp >= state.lvl * 500) { state.xp -= state.lvl * 500; state.lvl++; } }
 
         function updateClock() {
-            let now = new Date();
-            let ms = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0) - now;
+            let now = new Date(); let ms = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0) - now;
             let h = Math.floor(ms / 3600000); let m = Math.floor((ms % 3600000) / 60000); let s = Math.floor((ms % 60000) / 1000);
             document.getElementById('countdown').innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
             if(getDay() !== today) location.reload(); 
         }
         setInterval(updateClock, 1000); updateClock();
 
-        // GESTOR DE FAVORITOS
         function toggleFav(id) {
-            if (state.favorites.includes(id)) {
-                state.favorites = state.favorites.filter(x => x !== id);
-            } else {
-                state.favorites.push(id);
-            }
-            save();
-            renderDB();
-            
-            // Actualizar vistas si están abiertas
+            if (state.favorites.includes(id)) { state.favorites = state.favorites.filter(x => x !== id); } 
+            else { state.favorites.push(id); }
+            save(); renderDB();
             if(document.getElementById('view-shop').classList.contains('active')) renderShop();
             if(document.getElementById('view-templo').classList.contains('active')) {
                 let favs = fullDB.filter(f => state.favorites.includes(f.id));
@@ -551,9 +572,7 @@
 
         function getFavOptionsHTML() {
             let favs = fullDB.filter(f => state.favorites.includes(f.id));
-            return favs.length > 0 
-                ? favs.map(f => `<option value="${f.id}">${f.name}</option>`).join('') 
-                : `<option value="" disabled selected>Añade favoritos en Compendio (⭐)</option>`;
+            return favs.length > 0 ? favs.map(f => `<option value="${f.id}">${f.name}</option>`).join('') : `<option value="" disabled selected>Añade favoritos en Compendio (⭐)</option>`;
         }
 
         function switchTab(id, btn) {
@@ -566,10 +585,7 @@
             if(id === 'inv') renderInv();
             if(id === 'shop') renderShop();
             if(id === 'stats') { renderCharts(); renderManageDays(); }
-            if(id === 'templo') { 
-                updateRPG(); 
-                document.getElementById('temple-sin-select').innerHTML = getFavOptionsHTML(); 
-            }
+            if(id === 'templo') { updateRPG(); document.getElementById('temple-sin-select').innerHTML = getFavOptionsHTML(); }
         }
 
         function getSums(date = activeDate) {
@@ -582,8 +598,7 @@
 
         function claimReward(type) {
             if (activeDate !== today) return; 
-            let { t } = getSums(); let T = state.targets;
-            let r = state.history[today].rewards;
+            let { t } = getSums(); let T = state.targets; let r = state.history[today].rewards;
             if (r[type]) return; 
 
             let canClaim = false; let g = 0; let xp = 0;
@@ -598,23 +613,16 @@
         function claimMicro(id) {
             if (activeDate !== today) return; 
             if (id === 'sug' || id === 'na') { alert("Azúcar y Sodio son límites máximos de salud. No otorgan oro extra al llenarlos."); return; }
-            
             let { t } = getSums(); let T = state.targets;
             if (!state.history[today].rewards.micros) state.history[today].rewards.micros = {};
             if (state.history[today].rewards.micros[id]) return; 
-            
-            if (t[id] >= T[id]) {
-                state.history[today].rewards.micros[id] = true;
-                state.gold += 50; state.xp += 10; levelUpCheck(); save();
-            }
+            if (t[id] >= T[id]) { state.history[today].rewards.micros[id] = true; state.gold += 50; state.xp += 10; levelUpCheck(); save(); }
         }
 
         function updateDash() {
             let isPast = activeDate !== today;
             document.getElementById('ui-date').innerText = isPast ? activeDate : "HOY";
             document.getElementById('edit-mode-banner').style.display = isPast ? "flex" : "none";
-            
-            // EL SELECT DEL DASH SOLO MUESTRA FAVORITOS
             document.getElementById('food-select').innerHTML = getFavOptionsHTML();
             
             let { t, burn } = getSums(); let T = state.targets; let r = state.history[activeDate]?.rewards || {};
@@ -642,19 +650,12 @@
                         box.classList.remove('gold-glow-micro');
                     } else {
                         bar.style.background = 'var(--c-nexo)';
-                        if(!isPast && val >= max && (!r.micros || !r.micros[id])) {
-                            box.classList.add('gold-glow-micro');
-                        } else {
-                            box.classList.remove('gold-glow-micro');
-                        }
+                        if(!isPast && val >= max && (!r.micros || !r.micros[id])) box.classList.add('gold-glow-micro');
+                        else box.classList.remove('gold-glow-micro');
                     }
                 }
             };
-            uMicro('fib', t.fib, T.fib, 'g'); uMicro('sug', t.sug, T.sug, 'g');
-            uMicro('va', t.va, T.va, ''); uMicro('vc', t.vc, T.vc, '');
-            uMicro('vd', t.vd, T.vd, ''); uMicro('ca', t.ca, T.ca, '');
-            uMicro('fe', t.fe, T.fe, ''); uMicro('po', t.po, T.po, '');
-            uMicro('mg', t.mg, T.mg, ''); uMicro('na', t.na, T.na, '');
+            uMicro('fib', t.fib, T.fib, 'g'); uMicro('sug', t.sug, T.sug, 'g'); uMicro('va', t.va, T.va, ''); uMicro('vc', t.vc, T.vc, ''); uMicro('vd', t.vd, T.vd, ''); uMicro('ca', t.ca, T.ca, ''); uMicro('fe', t.fe, T.fe, ''); uMicro('po', t.po, T.po, ''); uMicro('mg', t.mg, T.mg, ''); uMicro('na', t.na, T.na, '');
 
             document.getElementById('today-log').innerHTML = state.history[activeDate].log.map((i, idx) => `
                 <div class="list-item">
@@ -689,6 +690,7 @@
             state.customDB.push(f); fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name));
             save(); renderDB(); alert(`¡Añadido!`);
         }
+
         function renderDB() { 
             let q = document.getElementById('search-db').value.toLowerCase(); 
             document.getElementById('db-render-list').innerHTML = fullDB.filter(x => x.name.toLowerCase().includes(q)).map(f => {
@@ -697,11 +699,75 @@
                 <div class="list-item" style="border-color:var(--border-forge)">
                     <div class="item-info"><div class="item-name">${f.name}</div><div class="item-sub">${Math.round(f.k)} kc | ${Math.round(f.p)}g P</div></div>
                     <div class="item-actions">
+                        <button class="btn-icon" style="color:var(--c-nexo); font-size:16px;" onclick="openVariator(${f.id})" title="Crear Variación">🪄</button>
                         <button class="btn-icon" style="color:${isFav ? 'var(--c-gold)' : 'var(--text-sec)'};" onclick="toggleFav(${f.id})" title="Favorito">${isFav ? '⭐' : '☆'}</button>
                         <button class="btn-icon" style="color:var(--text-pri);" onclick="addInv(${f.id})" title="Añadir inventario">📦</button>
                     </div>
                 </div>`;
             }).join(''); 
+        }
+
+        // === LOGICA DEL VARIADOR MÁGICO ===
+        let activeVarItem = null;
+
+        function openVariator(id) {
+            activeVarItem = fullDB.find(x => x.id == id);
+            document.getElementById('v-name').value = activeVarItem.name + " (Variación)";
+            document.getElementById('v-old-qty').value = 100;
+            document.getElementById('v-new-qty').value = 100;
+            
+            // Poblar inputs originales
+            ['k','p','c','f','fib','sug','va','vc','vd','ca','fe','po','mg','na'].forEach(m => {
+                document.getElementById(`v-${m}`).value = activeVarItem[m] || 0;
+            });
+            
+            document.getElementById('modal-variator').style.display = 'flex';
+        }
+
+        function scaleVariation() {
+            if(!activeVarItem) return;
+            let oldQ = parseFloat(document.getElementById('v-old-qty').value) || 1;
+            let newQ = parseFloat(document.getElementById('v-new-qty').value) || 1;
+            let ratio = newQ / oldQ;
+            
+            ['k','p','c','f','fib','sug','va','vc','vd','ca','fe','po','mg','na'].forEach(m => {
+                let val = (activeVarItem[m] || 0) * ratio;
+                // Redondeamos a 1 decimal para limpieza
+                document.getElementById(`v-${m}`).value = parseFloat(val.toFixed(1));
+            });
+        }
+
+        function saveVariation() {
+            let n = document.getElementById('v-name').value;
+            if(!n) return alert("Por favor, ponle un nombre a la variación.");
+            
+            const gv = (id) => parseFloat(document.getElementById(`v-${id}`).value) || 0;
+            
+            let f = { 
+                id: Date.now(), name: n, 
+                k: gv('k'), p: gv('p'), c: gv('c'), f: gv('f'),
+                fib: gv('fib'), sug: gv('sug'), va: gv('va'), vc: gv('vc'), 
+                vd: gv('vd'), ca: gv('ca'), fe: gv('fe'), po: gv('po'), 
+                mg: gv('mg'), na: gv('na')
+            };
+            
+            state.customDB.push(f);
+            state.favorites.push(f.id); // Lo añadimos automáticamente a favoritos
+            
+            fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name));
+            save(); 
+            renderDB(); 
+            closeVariator();
+            
+            // Si estábamos en alguna vista que usa favoritos, refrescamos los selects
+            if(document.getElementById('view-dash').classList.contains('active')) document.getElementById('food-select').innerHTML = getFavOptionsHTML();
+            
+            alert(`¡Variación "${n}" creada y añadida a tus favoritos! ⭐`);
+        }
+
+        function closeVariator() {
+            document.getElementById('modal-variator').style.display = 'none';
+            activeVarItem = null;
         }
 
         function renderInv() { 
@@ -715,8 +781,6 @@
         function renderShop() {
             let sel = document.getElementById('shop-list-select');
             sel.innerHTML = Object.keys(state.shopLists).map(k => `<option value="${k}" ${k===state.currentList?'selected':''}>${k}</option>`).join('');
-            
-            // EL SELECT DE LA TIENDA SOLO MUESTRA FAVORITOS
             document.getElementById('shop-db-select').innerHTML = getFavOptionsHTML();
             
             let list = state.shopLists[state.currentList] || []; let totCost = 0;
@@ -735,8 +799,7 @@
 
         function renderShopCalendar() {
             let monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            let firstDay = new Date(calYear, calMonth, 1).getDay();
-            firstDay = firstDay === 0 ? 6 : firstDay - 1; 
+            let firstDay = new Date(calYear, calMonth, 1).getDay(); firstDay = firstDay === 0 ? 6 : firstDay - 1; 
             let daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
 
             let html = `
@@ -751,53 +814,31 @@
             daysStr.forEach(d => html += `<div class="cal-day-label">${d}</div>`);
 
             for(let i=0; i<firstDay; i++) html += `<div class="cal-day empty"></div>`;
-            
             for(let d=1; d<=daysInMonth; d++) {
                 let dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 let hasP = state.shopHistory.some(h => h.date === dateStr);
                 let cls = "cal-day" + (hasP ? " has-purchase" : "") + (activeShopDate === dateStr ? " selected" : "");
                 html += `<div class="${cls}" onclick="showShopDate('${dateStr}')">${d}</div>`;
             }
-            
             html += `</div><div id="shop-cal-details" style="margin-top:15px; padding-top:15px; border-top:1px solid var(--border-shop);"></div>`;
             document.getElementById('shop-history-list').innerHTML = html;
-            
             if(activeShopDate) renderShopDetails();
         }
 
-        function changeCalMonth(d) {
-            calMonth += d;
-            if (calMonth > 11) { calMonth = 0; calYear++; }
-            else if (calMonth < 0) { calMonth = 11; calYear--; }
-            renderShopCalendar();
-        }
-
-        function showShopDate(dateStr) {
-            activeShopDate = dateStr;
-            renderShopCalendar(); 
-        }
+        function changeCalMonth(d) { calMonth += d; if (calMonth > 11) { calMonth = 0; calYear++; } else if (calMonth < 0) { calMonth = 11; calYear--; } renderShopCalendar(); }
+        function showShopDate(dateStr) { activeShopDate = dateStr; renderShopCalendar(); }
 
         function renderShopDetails() {
-            let detailDiv = document.getElementById('shop-cal-details');
-            if(!detailDiv) return;
-            
+            let detailDiv = document.getElementById('shop-cal-details'); if(!detailDiv) return;
             let dayData = state.shopHistory.filter(h => h.date === activeShopDate);
-            
-            if(dayData.length === 0) {
-                detailDiv.innerHTML = `<div style="font-size:12px; color:var(--text-sec); text-align:center;">No hay compras el ${activeShopDate}.</div>`;
-                return;
-            }
+            if(dayData.length === 0) { detailDiv.innerHTML = `<div style="font-size:12px; color:var(--text-sec); text-align:center;">No hay compras el ${activeShopDate}.</div>`; return; }
             
             let dHtml = `<div style="font-size: 12px; color:var(--c-shop); font-weight:bold; margin-bottom:10px;">Ticket del ${activeShopDate}</div>`;
             dayData.forEach(compra => {
                 let tCost = compra.items.reduce((s,i) => s + (i.price || 0)*i.qty, 0);
                 dHtml += `<div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:10px;">
                     <div style="font-size:11px; color:var(--text-sec); margin-bottom:5px; border-bottom:1px solid var(--border-shop); padding-bottom:5px;">Lista: ${compra.listName} - Total: ${tCost.toFixed(2)}€</div>`;
-                compra.items.forEach(i => {
-                    dHtml += `<div style="display:flex; justify-content:space-between; font-size:12px; margin-top:3px;">
-                        <span>${i.name} <span style="color:var(--text-sec)">(x${i.qty})</span></span><span>${((i.price||0)*i.qty).toFixed(2)}€</span>
-                    </div>`;
-                });
+                compra.items.forEach(i => { dHtml += `<div style="display:flex; justify-content:space-between; font-size:12px; margin-top:3px;"><span>${i.name} <span style="color:var(--text-sec)">(x${i.qty})</span></span><span>${((i.price||0)*i.qty).toFixed(2)}€</span></div>`; });
                 dHtml += `</div>`;
             });
             detailDiv.innerHTML = dHtml;
@@ -816,18 +857,13 @@
         function finishShopping() { 
             let bought = state.shopLists[state.currentList].filter(i => i.done);
             if(bought.length === 0) return alert("No hay artículos marcados como comprados.");
-            
             state.shopHistory.push({ date: getDay(), listName: state.currentList, items: bought });
             state.shopLists[state.currentList] = state.shopLists[state.currentList].filter(i => !i.done); 
             save(); activeShopDate = getDay(); renderShop(); alert("¡Compra finalizada y guardada en el historial!"); 
         }
 
         // === RPG TEMPLO ===
-        function updateRPG() { 
-            document.getElementById('ui-gold').innerText = state.gold; document.getElementById('ui-lvl').innerText = state.lvl; document.getElementById('rpg-lvl').innerText = state.lvl; document.getElementById('rpg-xp').innerText = state.xp; document.getElementById('rpg-next').innerText = state.lvl * 500; document.getElementById('b-xp').style.width = `${Math.min(100, (state.xp/(state.lvl*500))*100)}%`; 
-            renderQuests();
-        }
-        
+        function updateRPG() { document.getElementById('ui-gold').innerText = state.gold; document.getElementById('ui-lvl').innerText = state.lvl; document.getElementById('rpg-lvl').innerText = state.lvl; document.getElementById('rpg-xp').innerText = state.xp; document.getElementById('rpg-next').innerText = state.lvl * 500; document.getElementById('b-xp').style.width = `${Math.min(100, (state.xp/(state.lvl*500))*100)}%`; renderQuests(); }
         function renderQuests() {
             document.getElementById('quest-list').innerHTML = state.quests.list.map((q, i) => `
                 <div class="list-item" style="border-color:${q.done ? 'var(--border)' : '#059669'}; cursor:${q.done?'default':'pointer'}; opacity:${q.done?0.5:1}; padding: 10px;" onclick="completeQuest(${i})">
@@ -839,54 +875,30 @@
                 </div>
             `).join('');
         }
-
-        function completeQuest(i) {
-            let q = state.quests.list[i];
-            if(q.done) return;
-            q.done = true; state.gold += q.g; state.xp += q.xp; levelUpCheck(); save();
-        }
-
-        function buySin() { 
-            let sel = document.getElementById('temple-sin-select');
-            if (!sel.value) return alert("Primero debes marcar algún alimento como favorito en el Compendio.");
-            if (state.gold < 1000) return alert("No tienes suficiente Oro para sobornar al Nexo.");
-            let n = sel.options[sel.selectedIndex].text; 
-            if(confirm(`¿Gastar 1000 Oro para comerte "${n}" sin remordimientos?`)) { 
-                state.gold -= 1000; save(); alert("Transacción completada. Disfruta tu capricho, el Nexo mirará hacia otro lado."); 
-            } 
-        }
+        function completeQuest(i) { let q = state.quests.list[i]; if(q.done) return; q.done = true; state.gold += q.g; state.xp += q.xp; levelUpCheck(); save(); }
+        function buySin() { let sel = document.getElementById('temple-sin-select'); if (!sel.value) return alert("Primero debes marcar algún alimento como favorito."); if (state.gold < 1000) return alert("No tienes suficiente Oro."); let n = sel.options[sel.selectedIndex].text; if(confirm(`¿Gastar 1000 Oro para comerte "${n}" sin remordimientos?`)) { state.gold -= 1000; save(); alert("Transacción completada."); } }
 
         // === DIARIO ===
         function exitEditMode() { activeDate = today; updateDash(); }
         function startEditMode(date) { activeDate = date; switchTab('dash', document.querySelector('.nav-btn')); updateDash(); }
-        
         function renderManageDays() {
             let list = Object.keys(state.history).sort((a,b)=>new Date(b)-new Date(a));
             document.getElementById('manage-days-list').innerHTML = list.map(date => {
                 let s = getSums(date);
-                return `
-                <div class="list-item" style="padding: 8px 12px;">
-                    <div class="item-info"><div class="item-name" style="font-size:12px;">${date} ${date===today ? '(Hoy)' : ''}</div><div class="item-sub" style="font-size:10px;">${Math.round(s.t.netK)}kc neta</div></div>
-                    <div class="item-actions"><button class="btn-icon" style="background:var(--border);" onclick="startEditMode('${date}')">✏️</button></div>
-                </div>`;
+                return `<div class="list-item" style="padding: 8px 12px;"><div class="item-info"><div class="item-name" style="font-size:12px;">${date} ${date===today ? '(Hoy)' : ''}</div><div class="item-sub" style="font-size:10px;">${Math.round(s.t.netK)}kc neta</div></div><div class="item-actions"><button class="btn-icon" style="background:var(--border);" onclick="startEditMode('${date}')">✏️</button></div></div>`;
             }).join('');
         }
 
         function renderCharts() {
             if(typeof Chart === 'undefined') return;
             let d = new Date(); let labels = []; let inData=[], outData=[], pData=[], cData=[], fData=[];
-
             for(let i=6; i>=0; i--) {
-                let dt = new Date(d); dt.setDate(d.getDate() - i);
-                let ds = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
-                labels.push(`${dt.getDate()}/${dt.getMonth()+1}`);
-                let s = getSums(ds);
+                let dt = new Date(d); dt.setDate(d.getDate() - i); let ds = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+                labels.push(`${dt.getDate()}/${dt.getMonth()+1}`); let s = getSums(ds);
                 inData.push(s.t.k); outData.push(s.burn); pData.push(s.t.p); cData.push(s.t.c); fData.push(s.t.f);
             }
-
             if(charts.kcal) charts.kcal.destroy();
             charts.kcal = new Chart(document.getElementById('kcalChart').getContext('2d'), { type: 'bar', data: { labels, datasets: [{label:'Consumidas', data:inData, backgroundColor:'#fbbf24'}, {label:'Quemadas', data:outData, backgroundColor:'#f43f5e'}] }, options: { responsive:true, maintainAspectRatio:false, scales: { y: { beginAtZero:true, grid:{color:'#33'} }, x: {stacked:false, grid:{display:false}} } } });
-
             if(charts.macro) charts.macro.destroy();
             charts.macro = new Chart(document.getElementById('macroChart').getContext('2d'), { type: 'line', data: { labels, datasets: [{label:'Prot', data:pData, borderColor:'#ef4444', tension:0.3}, {label:'Carb', data:cData, borderColor:'#3b82f6', tension:0.3}, {label:'Grasa', data:fData, borderColor:'#22c55e', tension:0.3}] }, options: { responsive:true, maintainAspectRatio:false, scales: { y: { beginAtZero:true, grid:{color:'#33'} }, x: {grid:{display:false}} }, plugins:{legend:{labels:{color:'#fff', font:{size:10}}}} } });
         }
