@@ -305,12 +305,10 @@
         let fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name));
         let charts = { kcal: null, macro: null };
 
-        // Variables calendario de compras
         let calYear = new Date().getFullYear();
         let calMonth = new Date().getMonth();
         let activeShopDate = null;
 
-        // Auto-pago y validación de días anteriores
         Object.keys(state.history).forEach(date => {
             if (date !== today && !state.history[date].done) {
                 let s = getSums(date); let tD = state.history[date].rewards || {};
@@ -503,7 +501,7 @@
         function addInv(id) { let item = fullDB.find(x => x.id == id); let ex = state.inventory.find(x => x.id == id); if(ex) ex.invQty++; else state.inventory.push({...item, invQty: 1}); save(); alert("Añadido"); }
         function delInv(idx) { state.inventory.splice(idx, 1); save(); renderInv(); }
 
-        // === TIENDA Y CALENDARIO ===
+        // === TIENDA Y CALENDARIO CORREGIDO ===
         function renderShop() {
             let sel = document.getElementById('shop-list-select');
             sel.innerHTML = Object.keys(state.shopLists).map(k => `<option value="${k}" ${k===state.currentList?'selected':''}>${k}</option>`).join('');
@@ -526,7 +524,7 @@
         function renderShopCalendar() {
             let monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             let firstDay = new Date(calYear, calMonth, 1).getDay();
-            firstDay = firstDay === 0 ? 6 : firstDay - 1; // Lunes=0
+            firstDay = firstDay === 0 ? 6 : firstDay - 1; 
             let daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
 
             let html = `
@@ -548,10 +546,11 @@
                 let cls = "cal-day" + (hasP ? " has-purchase" : "") + (activeShopDate === dateStr ? " selected" : "");
                 html += `<div class="${cls}" onclick="showShopDate('${dateStr}')">${d}</div>`;
             }
-            html += `</div><div id="shop-cal-details" style="margin-top:15px; padding-top:15px; border-top:1px solid var(--border-shop);"></div>`;
             
+            html += `</div><div id="shop-cal-details" style="margin-top:15px; padding-top:15px; border-top:1px solid var(--border-shop);"></div>`;
             document.getElementById('shop-history-list').innerHTML = html;
-            if(activeShopDate) showShopDate(activeShopDate);
+            
+            if(activeShopDate) renderShopDetails();
         }
 
         function changeCalMonth(d) {
@@ -564,15 +563,20 @@
         function showShopDate(dateStr) {
             activeShopDate = dateStr;
             renderShopCalendar(); 
-            
-            let dayData = state.shopHistory.filter(h => h.date === dateStr);
+        }
+
+        function renderShopDetails() {
             let detailDiv = document.getElementById('shop-cal-details');
+            if(!detailDiv) return;
+            
+            let dayData = state.shopHistory.filter(h => h.date === activeShopDate);
+            
             if(dayData.length === 0) {
-                detailDiv.innerHTML = `<div style="font-size:12px; color:var(--text-sec); text-align:center;">No hay compras el ${dateStr}.</div>`;
+                detailDiv.innerHTML = `<div style="font-size:12px; color:var(--text-sec); text-align:center;">No hay compras el ${activeShopDate}.</div>`;
                 return;
             }
             
-            let dHtml = `<div style="font-size: 12px; color:var(--c-shop); font-weight:bold; margin-bottom:10px;">Ticket del ${dateStr}</div>`;
+            let dHtml = `<div style="font-size: 12px; color:var(--c-shop); font-weight:bold; margin-bottom:10px;">Ticket del ${activeShopDate}</div>`;
             dayData.forEach(compra => {
                 let tCost = compra.items.reduce((s,i) => s + (i.price || 0)*i.qty, 0);
                 dHtml += `<div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:10px;">
