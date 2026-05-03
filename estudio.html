@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>LifeQuest AAA: V16.0 (Gamified)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-page: #050914; --panel: #0d1424; --panel-light: #162032; 
+            --text-main: #e2e8f0; --text-sub: #94a3b8; --border-dark: #1e293b;
+            --green: #10b981; --blue: #3b82f6; --red: #ef4444; --purple: #a855f7; --gold: #f59e0b; --cyan: #06b6d4; --shield: #38bdf8;
+            --tier-1: #94a3b8; --tier-2: #3b82f6; --tier-3: #a855f7; --tier-4: #f59e0b; --tier-5: #ef4444;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Nunito', sans-serif; background: #000; display: flex; justify-content: center; height: 100dvh; width: 100vw; overflow: hidden; color: var(--text-main); }
+
+        #app-container { width: 100%; max-width: 600px; height: 100dvh; background: var(--bg-page); display: flex; flex-direction: column; position: relative; padding-top: env(safe-area-inset-top); }
+
+        .screen { display: none; flex: 1; flex-direction: column; overflow-y: hidden; background: var(--bg-page); }
+        .screen.active { display: flex; animation: fade 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .content { padding: 20px; flex: 1; overflow-y: auto; padding-bottom: 120px; }
+
+        /* HUD MEJORADO */
+        #hud-advanced { background: var(--panel); border-bottom: 2px solid var(--border-dark); padding: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 50; box-shadow: 0 4px 15px rgba(0,0,0,0.5);}
+        .hud-top-row { display: flex; justify-content: space-between; align-items: center; }
+        .hud-currencies { display: flex; gap: 10px; font-weight: 900; font-size: 13px; }
+        .hud-curr-box { background: var(--panel-light); padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border-dark); display: flex; align-items: center; gap: 5px; cursor: pointer;}
+        .hud-bars-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .hud-bar-container { display: flex; flex-direction: column; font-size: 10px; font-weight: 900; color: var(--text-sub); }
+        .bar-bg { width: 100%; height: 8px; background: var(--border-dark); border-radius: 4px; overflow: hidden; margin-top: 3px; position: relative;}
+        .bar-fill { height: 100%; transition: width 0.3s ease; position: absolute; top:0; left:0;}
+
+        /* HUD MINIMAL FIJADO */
+        #hud-minimal { background: var(--panel); border-bottom: 1px solid var(--border-dark); padding: 15px; display: none; justify-content: space-between; align-items: center; position: relative; width: 100%; z-index: 10; }
+        .min-curr { background: var(--panel-light); padding: 5px 10px; border-radius: 12px; font-weight: 900; font-size: 12px; border: 1px solid var(--border-dark); }
+
+        /* BTNS */
+        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; font-size: 13px; text-transform: uppercase; cursor: pointer; transition: 0.1s; text-align: center; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn:active { transform: translateY(4px); margin-bottom: -4px; }
+        .btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+        .btn-green { background: var(--green); color: white; box-shadow: 0 4px 0 #047857; }
+        .btn-blue { background: var(--blue); color: white; box-shadow: 0 4px 0 #1d4ed8; }
+        .btn-purple { background: var(--purple); color: white; box-shadow: 0 4px 0 #7e22ce; }
+        .btn-gold { background: var(--gold); color: black; box-shadow: 0 4px 0 #b45309; }
+        .btn-red { background: var(--red); color: white; box-shadow: 0 4px 0 #b91c1c; }
+        .btn-dark { background: var(--panel-light); color: var(--text-main); border: 1px solid var(--border-dark); box-shadow: 0 4px 0 var(--border-dark); }
+        .btn-mythic { background: linear-gradient(45deg, var(--purple), var(--cyan)); color: white; box-shadow: 0 4px 0 #581c87; border: 1px solid var(--cyan); }
+
+        /* CARDS & GRIDS */
+        .card { background: var(--panel); border: 1px solid var(--border-dark); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; margin-bottom: 15px;}
+        .stat-box { background: var(--panel-light); padding: 10px 5px; border-radius: 12px; border: 1px solid var(--border-dark); font-weight: 900; font-size: 11px;}
+        
+        .equip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .equip-slot { background: var(--panel-light); border: 2px dashed var(--border-dark); border-radius: 12px; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 5px; transition: 0.2s; position: relative;}
+        .equip-slot.filled { border-style: solid; background: var(--panel); }
+        .equip-icon { font-size: 30px; margin-bottom: 5px; }
+        .equip-name { font-size: 9px; font-weight: 900; text-transform: uppercase; }
+        
+        .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-dark); flex-wrap: wrap;}
+        .item-icon { font-size: 30px; background: var(--panel-light); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); flex-shrink:0;}
+        .item-details { flex: 1; min-width: 120px; }
+
+        .inv-list-item { display: flex; align-items: center; gap: 15px; padding: 10px; background: var(--panel-light); border-radius: 10px; border: 1px solid var(--border-dark); margin-bottom: 8px;}
+        .inv-icon { font-size: 24px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--panel); border-radius: 8px;}
+        
+        /* MAPA */
+        .node-path { display: flex; flex-direction: column; align-items: center; gap: 35px; padding: 40px 0; }
+        .node { width: 70px; height: 70px; border-radius: 50%; font-size: 26px; border: 4px solid var(--border-dark); background: var(--panel); display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 0 var(--border-dark); transition: 0.2s;}
+        .node.completed { background: var(--gold); border-color: #b45309; box-shadow: 0 6px 0 #b45309; color: black;}
+        .node.unlocked { background: var(--blue); border-color: #1d4ed8; box-shadow: 0 6px 0 #1d4ed8; color: white; animation: pulse 2s infinite;}
+        .node.boss { border-color: var(--red); border-width: 5px; }
+
+        /* COMBATE */
+        .combat-container { display: flex; flex-direction: column; height: 100%; transition: background 0.3s; }
+        .combat-header { padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border-dark); flex-shrink: 0;}
+        .combat-progress-bg { flex: 1; height: 10px; background: var(--border-dark); border-radius: 10px; overflow: hidden; }
+        .combat-progress-fill { height: 100%; background: var(--green); transition: width 0.3s ease; }
+        .combat-body { flex: 1; overflow-y: auto; padding: 20px; }
+        .combat-footer { flex-shrink: 0; padding: 15px 20px; background: var(--panel); border-top: 1px solid var(--border-dark); padding-bottom: calc(40px + env(safe-area-inset-bottom)); z-index: 200; }
+        .option { background: var(--panel-light); border: 2px solid var(--border-dark); border-radius: 12px; padding: 16px; margin-bottom: 10px; font-weight: 700; transition: 0.2s; cursor: pointer; }
+        .option.selected { border-color: var(--blue); background: rgba(59,130,246,0.1); }
+        .option.correct { border-color: var(--green); background: rgba(16,185,129,0.1); color: var(--green); }
+        .option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); opacity: 0.5; }
+
+        /* NAV */
+        .nav { position: absolute; bottom: 0; width: 100%; display: flex; background: rgba(13,20,36,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border-dark); z-index: 100; padding-bottom: env(safe-area-inset-bottom); overflow-x: auto;}
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 9px; transition: 0.2s; min-width: 60px; padding: 10px 0; cursor: pointer;}
+        .nav-item.active { color: var(--cyan); transform: translateY(-3px); }
+        .nav-item span { font-size: 20px; margin-bottom: 2px; }
+
+        /* FX Y MODALS */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 200; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 16px; padding: 20px; width: 100%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; }
+        .forge-textarea { flex: 1; width: 100%; background: var(--panel-light); border: 1px solid var(--border-dark); border-radius: 8px; color: var(--text-main); font-family: monospace; padding: 10px; margin: 15px 0; resize: none; min-height: 200px; font-size: 12px; }
+
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); } 70% { box-shadow: 0 0 0 15px rgba(59,130,246,0); } 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); } }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 50% { transform: translateX(12px); } 75% { transform: translateX(-12px); } }
+        .floating-text { position: absolute; font-weight: 900; font-size: 20px; pointer-events: none; z-index: 1000; animation: floatUp 1s ease-out forwards; text-shadow: 2px 2px 0 #000; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-80px) scale(1.5); opacity: 0; } }
+        #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,0,0,0.5); z-index: 999; display: none; pointer-events: none; mix-blend-mode: multiply; }
+        @keyframes chestAnim { 0% {transform: rotate(0deg) scale(1);} 25% {transform: rotate(-15deg) scale(1.1);} 50% {transform: rotate(15deg) scale(1.2);} 75% {transform: rotate(-15deg) scale(1.1);} 100% {transform: rotate(0deg) scale(1.3);} }
+        .chest-anim { animation: chestAnim 1s ease-in-out forwards; }
+        
+        /* MINERIA AAA */
+        .mine-rock { font-size: 100px; text-align: center; cursor: pointer; transition: 0.05s; user-select: none; margin: 20px 0; position: relative;}
+        .mine-rock:active { transform: scale(0.9); }
+        .heat-bar-bg { width: 150px; height: 10px; background: var(--border-dark); border-radius: 5px; margin: 0 auto; overflow: hidden; }
+        .heat-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--red)); width: 0%; transition: width 0.1s; }
+        .combo-text { position: absolute; right: 20px; top: 10px; font-size: 24px; font-weight: 900; color: var(--gold); opacity: 0; transition: opacity 0.2s;}
+        
+        .depth-bg { background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px; text-align: center; border: 1px solid var(--border-dark); margin-bottom: 15px;}
+        .boss-worm { font-size: 80px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 10; animation: shake 0.2s infinite; display: none;}
+        
+        /* TIENDA VIP / BANK */
+        .vip-card { background: linear-gradient(135deg, var(--purple), #1e1b4b); border: 2px solid var(--cyan); border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);}
+    </style>
+</head>
+<body>
+
+<div id="damage-overlay"></div>
+<div id="modal-gacha" class="modal-overlay" style="z-index:9999;"><div style="display:flex; flex-direction:column; align-items:center; justify-content:center;"><div id="gacha-chest" style="font-size:100px;">📦</div></div></div>
+
+<div id="modal-forge" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="margin:0; color:var(--gold); font-weight:900;">⚒️ Forjar Mazmorra</h2>
+        <textarea id="forge-input" class="forge-textarea" placeholder="[ { 'id': 'n1'... } ]"></textarea>
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-dark" style="flex:1;" onclick="playSound('click'); document.getElementById('modal-forge').style.display='none'">CANCELAR</button>
+            <button class="btn btn-green" style="flex:1;" onclick="processForge()">FORJAR</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-worlds" class="modal-overlay">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <h2 style="margin:0; color:var(--cyan); font-weight:900;">🌌 Multiverso</h2>
+        <button class="btn btn-gold" style="margin: 15px 0;" onclick="createNewWorld()">➕ CREAR NUEVO MUNDO</button>
+        <div id="worlds-manager-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <button class="btn btn-dark" style="margin-top:20px;" onclick="playSound('click'); document.getElementById('modal-worlds').style.display='none'">CERRAR</button>
+    </div>
+</div>
+
+<div id="app-container">
+
+    <div id="hud-advanced">
+        <div class="hud-top-row">
+            <div style="font-weight:900; font-size:18px; color:var(--text-main);"> Nivel <span id="ui-lvl" style="color:var(--cyan);">1</span></div>
+            <div class="hud-currencies">
+                <div class="hud-curr-box">🟡 <span id="ui-gold">0</span></div>
+                <div class="hud-curr-box">💎 <span id="ui-gems">0</span></div>
+                <div class="hud-curr-box">SP <span id="ui-sp" style="color:var(--purple);">0</span></div>
+            </div>
+        </div>
+        <div class="hud-bars-row">
+            <div class="hud-bar-container">HP: <span id="ui-hp-txt">100/100</span><div class="bar-bg"><div id="ui-hp-bar" class="bar-fill" style="background:var(--red); width:100%;"></div></div></div>
+            <div class="hud-bar-container">EN: <span id="ui-en-txt">50/50</span><div class="bar-bg"><div id="ui-en-bar" class="bar-fill" style="background:var(--gold); width:100%;"></div></div></div>
+        </div>
+    </div>
+
+    <div id="hud-minimal">
+        <div class="min-curr" style="color:var(--cyan);">LVL <span id="ui-min-lvl">1</span></div>
+        <div style="display:flex; gap:10px;">
+            <div class="min-curr">🟡 <span id="ui-min-gold">0</span></div>
+            <div class="min-curr">💎 <span id="ui-min-gems">0</span></div>
+        </div>
+    </div>
+
+    <div id="screen-home" class="screen active">
+        <div class="content">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <h2 style="margin-top:0; color:var(--cyan); font-weight:900;" id="profile-rank">Rango: F</h2>
+                    <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="window.location.href='index.html'">🌌 NEXO</button>
+                </div>
+                <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="navTo('skills')">✨ SKILLS</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box" style="color:var(--red); border-color:var(--red);">⚔️ ATQ<br><span id="stat-atk" style="font-size:18px; color:white;">10</span></div>
+                <div class="stat-box" style="color:var(--blue); border-color:var(--blue);">🛡️ DEF<br><span id="stat-def" style="font-size:18px; color:white;">10</span></div>
+                <div class="stat-box" style="color:var(--gold); border-color:var(--gold);">🍀 SUE<br><span id="stat-luck" style="font-size:18px; color:white;">5</span></div>
+                <div class="stat-box" style="color:var(--purple); border-color:var(--purple);">🔥 CRIT<br><span id="stat-crit" style="font-size:18px; color:white;">0%</span></div>
+            </div>
+            
+            <div class="card" style="margin-top:15px; border-color:var(--green); text-align:center; background: rgba(16, 185, 129, 0.1);">
+                <h3 style="margin-top:0; color:var(--green); font-weight:900;">🏕️ El Campamento</h3>
+                <p style="font-size:12px; color:var(--text-main);">Quédate en esta pantalla. Recuperas 2 HP y 1 EN cada 2 segundos sin hacer nada.</p>
+                <div style="font-size:30px; transition:0.2s;" id="camp-fire">🔥</div>
+            </div>
+
+            <h3 style="font-weight: 900; margin-bottom: 10px;">Equipamiento</h3>
+            <div class="equip-grid">
+                <div class="equip-slot" id="slot-weapon"><div class="equip-icon">🗡️</div><div class="equip-name">Arma</div></div>
+                <div class="equip-slot" id="slot-armor"><div class="equip-icon">🛡️</div><div class="equip-name">Armadura</div></div>
+                <div class="equip-slot" id="slot-accessory"><div class="equip-icon">💍</div><div class="equip-name">Amuleto</div></div>
+                <div class="equip-slot" id="slot-pet"><div class="equip-icon">🥚</div><div class="equip-name">Mascota</div></div>
+            </div>
+
+            <h3 style="font-weight: 900; margin-bottom: 10px; margin-top: 20px;">Mochila & Inventario</h3>
+            <div id="inventory-list-detailed" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            
+            <div style="margin-top: 40px; text-align: center; border-top: 1px solid var(--border-dark); padding-top: 20px;">
+                <p style="font-size:11px; color:var(--text-sub);">Opciones del Sistema</p>
+                <button class="btn btn-dark" style="border-color:var(--red); color:var(--red);" onclick="hardReset()">⚠️ REINICIAR TODO</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-skills" class="screen">
+        <div class="content">
+            <h2 style="margin-top:0; color:var(--purple); font-weight:900;">✨ Constelación AAA</h2>
+            <div style="font-size:18px; font-weight:bold; margin-bottom:20px; text-align:center;">SP Disp: <span id="skill-points-display" style="color:var(--purple);">0</span></div>
+            <div id="skills-list"></div>
+            <button class="btn btn-dark" style="margin-top:20px;" onclick="navTo('home')">VOLVER</button>
+        </div>
+    </div>
+
+    <div id="screen-worlds" class="screen">
+        <div class="content">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; font-weight:900; color:var(--cyan); cursor:pointer;" id="world-title" onclick="openWorldsManager()">Mazmorra ▾</h2>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openWorldsManager()">🌌 MUNDOS</button>
+                    <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ CARGAR JSON</button>
+                </div>
+            </div>
+            <div class="node-path" id="map-render"></div>
+        </div>
+    </div>
+
+    <div id="screen-combat" class="screen" style="background:var(--panel);">
+        <div class="combat-container" id="combat-container">
+            <div class="combat-header" id="combat-header">
+                <div style="font-size:20px; cursor:pointer; color:var(--text-sub); padding-right:15px;" onclick="fleeCombat()">✖</div>
+                <div class="combat-progress-bg" id="ui-combat-prog"><div id="combat-prog-bar" class="combat-progress-fill" style="width:0%;"></div></div>
+                <div style="font-weight:900; color:var(--red);" id="ui-combat-hp">❤️ <span id="combat-hp">100</span></div>
+            </div>
+            <div class="combat-body">
+                <div id="boss-ui" style="display:none; text-align:center; margin-bottom:15px;">
+                    <div style="font-size:50px;" id="boss-emoji">👹</div>
+                    <div style="width:100%; height:15px; background:#330; border:2px solid var(--red); border-radius:10px; overflow:hidden; margin-top:5px;"><div id="boss-hp-fill" style="height:100%; background:var(--red); width:100%; transition:0.3s;"></div></div>
+                </div>
+                <h2 id="question-text" style="font-weight:900; font-size:18px; margin-bottom:20px;">Cargando...</h2>
+                <div id="options-container"></div>
+            </div>
+            <div class="combat-footer" id="combat-footer">
+                <div id="active-skills" style="display:flex; gap:5px; margin-bottom:10px;">
+                    <button id="btn-hint" class="btn btn-dark" style="flex:1; padding:8px; font-size:11px;" onclick="useOraculo()">👁️ ORÁCULO</button>
+                    <button class="btn btn-green" style="flex:0.5; padding:8px; font-size:11px;" onclick="usePotion()">💊 <span id="combat-pots">0</span></button>
+                </div>
+                <button id="btn-check" class="btn btn-dark" onclick="checkAnswer()">COMPROBAR</button>
+                <button id="btn-reading-done" class="btn btn-green" onclick="finishReading()" style="display:none;">¡LECCIÓN COMPLETADA!</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-crafting" class="screen">
+        <div class="content">
+            <div style="display:flex; gap:5px; margin-bottom: 15px; overflow-x:auto; padding-bottom:5px;">
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-weapon" onclick="renderCrafting('weapon')">🗡️ Armas</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-armor" onclick="renderCrafting('armor')">🛡️ Armor</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-accessory" onclick="renderCrafting('accessory')">💍 Amu</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-refine" onclick="renderCrafting('refine')">⚙️ Refinar</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-upgrades" onclick="renderCrafting('upgrades')">⭐ Mejoras</button>
+                <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-salvage" onclick="renderCrafting('salvage')">♻️ Reciclar</button>
+            </div>
+            <div id="craft-list"></div>
+        </div>
+    </div>
+
+    <div id="screen-shop" class="screen">
+        <div class="content">
+            <div class="vip-card">
+                <div style="font-size:12px; color:var(--cyan); font-weight:900;">CLUB VIP AAA</div>
+                <div style="font-size:24px; font-weight:900; color:white;"><span id="shop-vip-pts">0</span> VP</div>
+                <div style="font-size:10px; color:var(--text-sub);">Gana VP comprando. Úsalos en el Mercado Negro.</div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin-top:0; color:var(--gold); font-weight:900;">⏳ Ofertas Diarias</h2>
+                <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="refreshShop(true)">🔄 50 💎</button>
+            </div>
+            <div id="daily-shop-list" style="margin-bottom: 30px;"></div>
+
+            <h2 style="margin-top:0; color:var(--purple); font-weight:900;">📦 Gacha Pity System</h2>
+            <div style="font-size:10px; text-align:right; color:var(--text-sub); margin-bottom:5px;">Pity: <span id="gacha-pity">0</span>/10 (Épico Asegurado)</div>
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <button class="btn btn-dark" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(1)"><span style="font-size:30px;">🪵</span>100 🟡</button>
+                <button class="btn btn-blue" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(2)"><span style="font-size:30px;">🧰</span>500 🟡</button>
+                <button class="btn btn-mythic" style="flex:1; flex-direction:column; padding:10px;" onclick="pullGacha(3)"><span style="font-size:30px;">💎</span>50 💎</button>
+            </div>
+            
+            <h2 style="margin-top:30px; font-weight:900;">🏦 Banco Imperial</h2>
+            <div class="list-item">
+                <div class="item-icon">🏦</div>
+                <div class="item-details"><div style="font-weight:900;">Caja Fuerte</div><div style="font-size:11px; color:var(--text-sub);">Ahorrado: <span id="bank-gold" style="color:var(--gold)">0</span> 🟡 (+2%/h)</div></div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <button class="btn btn-gold" style="width:auto; padding:5px 10px; font-size:10px;" onclick="bankAction('dep')">DEPOSITAR</button>
+                    <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="bankAction('wit')">RETIRAR</button>
+                </div>
+            </div>
+
+            <h2 style="margin-top:30px; font-weight:900; color:var(--red);">💀 Mercado Negro VIP</h2>
+            <div id="black-market-list"></div>
+        </div>
+    </div>
+
+    <div id="screen-mining" class="screen">
+        <div class="content">
+            <h2 style="margin-top:0; color:var(--gold); font-weight:900;">⛏️ Profundidades</h2>
+            
+            <div class="depth-bg">
+                <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;">
+                    <div>Profundidad: <span style="color:var(--cyan); font-size:14px; font-weight:bold;">-<span id="mine-depth">0</span>m</span></div>
+                    <div>Clics: <span id="mine-clicks" style="color:var(--gold);">0</span></div>
+                </div>
+                <div style="font-size:11px; color:var(--text-sub); text-align:left;">
+                    Auto: <span id="idle-stone-rate" style="color:white; font-weight:bold;">0</span> 🪨/min | Capacidad: <span id="idle-cap-hrs" style="color:white; font-weight:bold;">2</span>h
+                </div>
+            </div>
+            
+            <div class="mine-rock" onclick="mineRock()">
+                <span id="rock-emoji">🪨</span>
+                <div class="boss-worm" id="mine-boss" onclick="event.stopPropagation(); hitBoss()">🐛</div>
+                <div class="combo-text" id="mine-combo">x1.0</div>
+            </div>
+            
+            <div class="heat-bar-bg"><div class="heat-bar-fill" id="heat-bar"></div></div>
+            <div style="text-align:center; font-size:10px; color:var(--red); font-weight:bold; margin-top:5px;" id="frenzy-txt">Calor / Sobrecarga</div>
+
+            <div style="text-align:center; font-weight:900; font-size:24px; margin:20px 0;">
+                <span id="mine-stone-qty" style="color:var(--text-main);">0</span> 🪨
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+                <button class="btn btn-dark" style="flex-direction:column; padding:10px;" onclick="openGeode()">
+                    <span style="font-size:20px;">🔮</span> Geodas: <span id="mine-geodes">0</span>
+                </button>
+                <button class="btn btn-dark" style="flex-direction:column; padding:10px;" onclick="useDrill()">
+                    <span style="font-size:20px;">⚡</span> Taladro (50 EN)
+                </button>
+            </div>
+
+            <div id="mine-upgrades-list"></div>
+        </div>
+    </div>
+
+    <div class="nav">
+        <div class="nav-item active" id="tab-home" onclick="navTo('home')"><span>👤</span>PERFIL</div>
+        <div class="nav-item" id="tab-worlds" onclick="navTo('worlds')"><span>🗺️</span>MAPA</div>
+        <div class="nav-item" id="tab-mining" onclick="navTo('mining')"><span>⛏️</span>MINA</div>
+        <div class="nav-item" id="tab-crafting" onclick="navTo('crafting')"><span>⚒️</span>FORJA</div>
+        <div class="nav-item" id="tab-shop" onclick="navTo('shop')"><span>⚖️</span>TIENDA</div>
+    </div>
+</div>
+
+<script>
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    function playSound(type) {
+        if(audioCtx.state === 'suspended') audioCtx.resume(); const t = audioCtx.currentTime;
+        if(type === 'click') { const osc=audioCtx.createOscillator(), gain=audioCtx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(600,t); osc.frequency.exponentialRampToValueAtTime(300,t+0.05); gain.gain.setValueAtTime(0.3,t); gain.gain.exponentialRampToValueAtTime(0.01,t+0.1); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t+0.1); } 
+        else if(type === 'gacha') { [523.25, 659.25, 783.99, 1046.50].forEach((freq,i)=>{ const osc=audioCtx.createOscillator(), gain=audioCtx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(freq,t+i*0.1); gain.gain.setValueAtTime(0,t+i*0.1); gain.gain.linearRampToValueAtTime(0.15,t+i*0.1+0.05); gain.gain.exponentialRampToValueAtTime(0.01,t+i*0.1+0.4); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(t+i*0.1); osc.stop(t+i*0.1+0.5); }); } 
+        else if(type === 'mine') { const osc=audioCtx.createOscillator(), gain=audioCtx.createGain(), filter=audioCtx.createBiquadFilter(); osc.type='square'; osc.frequency.setValueAtTime(150,t); osc.frequency.exponentialRampToValueAtTime(40,t+0.1); filter.type='lowpass'; filter.frequency.setValueAtTime(800,t); filter.frequency.exponentialRampToValueAtTime(100,t+0.1); gain.gain.setValueAtTime(0.4,t); gain.gain.exponentialRampToValueAtTime(0.01,t+0.15); osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); osc.start(t); osc.stop(t+0.15); }
+    }
+
+    // --- DB MEJORADA ---
+    const matsDB = { 
+        m1:{icon:'⚪',t:1,n:'Hierro',desc:'Mina'}, m2:{icon:'🟤',t:1,n:'Cuero',desc:'Monstruos'}, m3:{icon:'🪵',t:1,n:'Madera',desc:'Básico'},
+        m4:{icon:'🟣',t:2,n:'Cristal O.',desc:'Jefes'}, m5:{icon:'🧵',t:2,n:'Hilo Mag.',desc:'Tienda'}, m6:{icon:'⚙️',t:2,n:'Acero',desc:'Forja'},
+        m7:{icon:'✨',t:3,n:'Polvo Est.',desc:'Sint.'}, m8:{icon:'🦴',t:3,n:'Hueso',desc:'Drops'}, m9:{icon:'📀',t:3,n:'Oro Puro',desc:'Jefes'},
+        m10:{icon:'👹',t:4,n:'Alma',desc:'Final'}, m11:{icon:'🩸',t:4,n:'Sangre',desc:'VIP'}, m12:{icon:'🐉',t:5,n:'Escama',desc:'Abismo'}
+    };
+    
+    const gearDB = {
+        w1:{id:'w1',t:'weapon',name:'Daga Novato',icon:'🗡️',r:1,stats:{atk:5},cost:{m1:3}},
+        w2:{id:'w2',t:'weapon',name:'Hoja Cazador',icon:'⚔️',r:2,stats:{atk:15},cost:{m6:5,m2:5}},
+        w3:{id:'w3',t:'weapon',name:'Excalibur',icon:'⚔️',r:5,stats:{atk:100},cost:{m9:10,m12:2}},
+        a1:{id:'a1',t:'armor',name:'Harapos',icon:'👕',r:1,stats:{def:5},cost:{m2:4}},
+        a2:{id:'a2',t:'armor',name:'Malla Hierro',icon:'🛡️',r:2,stats:{def:15},cost:{m1:10}},
+        ac1:{id:'ac1',t:'accessory',name:'Anillo Suerte',icon:'💍',r:1,stats:{luck:2},cost:{m3:5}},
+        r1:{id:'r1',t:'refine',name:'Fundir Acero',icon:'⚙️',r:2,isConsumable:true,gives:'m6',cost:{m1:5}},
+        r2:{id:'r2',t:'refine',name:'Tejer Hilo',icon:'🧵',r:2,isConsumable:true,gives:'m5',cost:{m2:5}},
+    };
+    const rColor = { 1:'tier-1', 2:'tier-2', 3:'tier-3', 4:'tier-4', 5:'tier-5' };
+
+    // --- ESTADO ---
+    let state = {
+        lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 100, gems: 0, potions: 3, maxPots: 5, sp: 0,
+        stats: { atk: 10, def: 10, luck: 5, crit: 0, dodge: 0 }, baseBonus: { atk: 0, def: 0 }, 
+        skills: { hp: 0, atk: 0, def: 0, crit: 0, evasion: 0 },
+        inventory: {}, equipment: { weapon: null, armor: null, accessory: null, pet: null }, ownedGear: [], gearUpgrades: {},
+        worlds: [{ id: 0, name: "Mundo Inicial", campaign: [], completed: [], unlocked: ['n1'] }], activeW: 0,
+        mining: { power: 1, auto: 0, carts: 0, stone: 0, geodes: 0, totalClicks: 0, depth: 0, lastMineTime: Date.now() },
+        shop: { date: "", items: [], vipPoints: 0, bankGold: 0, lastBankTime: Date.now(), pity: 0, bagLvl: 0, elixirCost: 20 }
+    };
+
+    let currFilter = 'weapon'; let campInterval = null; 
+    let mineLogic = { heat: 0, frenzyTime: 0, combo: 1, comboTimer: 0, bossActive: false, bossHp: 0 };
+    let combat = { active: false, node: null, qIndex: 0, selIdx: null, isDone: false, corrects: 0 };
+
+    function init() {
+        try { 
+            const saved = localStorage.getItem('LifeQuest_V16'); 
+            if (saved) {
+                const p = JSON.parse(saved);
+                state = { ...state, ...p, mining: {...state.mining, ...(p.mining||{})}, shop: {...state.shop, ...(p.shop||{})}, skills: {...state.skills, ...(p.skills||{})}, inventory: {...(p.inventory||{})}, equipment: {...state.equipment, ...(p.equipment||{})}, gearUpgrades: {...(p.gearUpgrades||{})} };
+            } 
+        } catch(e) {}
+        
+        if(state.worlds[0].campaign.length === 0) {
+            state.worlds[0].campaign = [
+                {id:'n1', type:'reading', title:'📖 Intro Gamificada', content:'Nuevas mecánicas cargadas. ¡Bienvenido a Moria y al VIP Club!', energyCost:0, rewardXp:50, rewardGold:100, unlocks:['n2']},
+                {id:'n2', type:'test', title:'⚔️ Test Combat', energyCost:5, rewardXp:100, rewardGold:50, damagePenalization:10, unlocks:[], questions: [{q:'¿Estás listo?', options:['Sí','No'], correct:0}]}
+            ];
+        }
+
+        checkIdleLogic(); generateDailyShop(false); recalcStats(); navTo('home'); renderSkills();
+        
+        setInterval(checkIdleLogic, 60000); 
+        setInterval(mineTick, 100);
+    }
+    
+    function save() { localStorage.setItem('LifeQuest_V16', JSON.stringify(state)); updateUI(); }
+    function hardReset() { if(confirm("🚨 ¿BORRAR TODO?")) { localStorage.removeItem('LifeQuest_V16'); location.reload(); } }
+
+    // --- MINA GAMIFICADA ---
+    function mineTick() {
+        // Combo
+        if(mineLogic.comboTimer > 0) {
+            mineLogic.comboTimer -= 100;
+            if(mineLogic.comboTimer <= 0) { mineLogic.combo = 1; document.getElementById('mine-combo').style.opacity = 0; }
+        }
+        // Frenesí
+        if(mineLogic.frenzyTime > 0) mineLogic.frenzyTime -= 0.1;
+        else if(mineLogic.heat > 0) mineLogic.heat = Math.max(0, mineLogic.heat - 1); 
+        updateMineUI_Live();
+    }
+
+    function mineRock() {
+        if(mineLogic.bossActive) return; // Si hay boss, la roca se desactiva
+        playSound('mine');
+        
+        // COMBO
+        mineLogic.comboTimer = 1500; // 1.5s window
+        mineLogic.combo = Math.min(5.0, mineLogic.combo + 0.1);
+        let cbEl = document.getElementById('mine-combo'); cbEl.innerText = `x${mineLogic.combo.toFixed(1)}`; cbEl.style.opacity = 1;
+
+        let multiplier = (mineLogic.frenzyTime > 0 ? 2 : 1) * mineLogic.combo;
+        let gain = Math.floor(state.mining.power * multiplier);
+        state.mining.stone += gain;
+        state.mining.totalClicks++;
+        
+        if(state.mining.totalClicks % 100 === 0) state.mining.depth++;
+
+        // HEAT
+        if(mineLogic.frenzyTime <= 0) {
+            mineLogic.heat += 5;
+            if(mineLogic.heat >= 100) { 
+                mineLogic.heat = 100; mineLogic.frenzyTime = 10; 
+                showFloatingText("¡FRENESÍ x2!", "var(--cyan)"); 
+            }
+        }
+
+        // BOSS SPAWN (1% per click si combo > 2)
+        if(mineLogic.combo > 2 && Math.random() < 0.01 && !mineLogic.bossActive) {
+            spawnMineBoss();
+        }
+
+        // DROPS AUMENTAN CON PROFUNDIDAD
+        let r = Math.random(); let dBonus = state.mining.depth * 0.0001;
+        if(r < (0.1 + dBonus)) { state.inventory.m1 = (state.inventory.m1||0)+1; showFloatingText("+1 Hierro", "var(--tier-1)"); }
+        else if(r < (0.01 + dBonus)) { state.mining.geodes++; showFloatingText("+1 Geoda 🔮", "var(--purple)"); }
+        else showFloatingText("+" + gain, "gray");
+
+        updateMineDataUI(); save();
+    }
+
+    function spawnMineBoss() {
+        mineLogic.bossActive = true; mineLogic.bossHp = 20 * state.mining.power;
+        let bEl = document.getElementById('mine-boss'); bEl.style.display = 'block'; bEl.innerText = '🐛';
+        document.getElementById('rock-emoji').style.opacity = 0.2;
+        showFloatingText("¡GUSANO DE ROCA!", "var(--red)");
+        
+        setTimeout(() => {
+            if(mineLogic.bossActive) {
+                mineLogic.bossActive = false; document.getElementById('mine-boss').style.display = 'none'; document.getElementById('rock-emoji').style.opacity = 1;
+                showFloatingText("Se escapó...", "gray");
+            }
+        }, 5000); // 5 segundos para matarlo
+    }
+
+    function hitBoss() {
+        if(!mineLogic.bossActive) return;
+        playSound('click');
+        mineLogic.bossHp -= state.mining.power;
+        document.getElementById('mine-boss').style.transform = `scale(${1 + Math.random()*0.5})`;
+        if(mineLogic.bossHp <= 0) {
+            mineLogic.bossActive = false; document.getElementById('mine-boss').style.display = 'none'; document.getElementById('rock-emoji').style.opacity = 1;
+            state.gold += 500; state.inventory.m4 = (state.inventory.m4||0)+2;
+            showFloatingText("¡MUERTO! +500🟡 +2🟣", "var(--gold)"); save(); updateMineDataUI();
+        }
+    }
+
+    function updateMineUI_Live() {
+        let b = document.getElementById('heat-bar'); let txt = document.getElementById('frenzy-txt');
+        if(!b) return;
+        b.style.width = mineLogic.heat + "%";
+        if(mineLogic.frenzyTime > 0) { b.style.background = "var(--cyan)"; txt.innerText = `¡FRENESÍ! (${Math.ceil(mineLogic.frenzyTime)}s)`; }
+        else { b.style.background = "linear-gradient(90deg, var(--gold), var(--red))"; txt.innerText = "Calor del Pico"; }
+    }
+
+    function checkIdleLogic() {
+        let now = Date.now();
+        // Mina
+        if(state.mining.auto > 0) {
+            let mins = Math.floor((now - state.mining.lastMineTime) / 60000);
+            if(mins > 0) {
+                let maxMins = (2 + (state.mining.carts * 2)) * 60;
+                let eff = Math.min(mins, maxMins);
+                state.mining.stone += (eff * state.mining.auto * 10);
+                state.inventory.m1 = (state.inventory.m1||0) + (eff * state.mining.auto * 1);
+                state.mining.lastMineTime = now;
+            }
+        } else { state.mining.lastMineTime = now; }
+
+        // Banco
+        if(state.shop.bankGold > 0) {
+            let h = Math.floor((now - state.shop.lastBankTime) / 3600000);
+            if(h > 0) {
+                // 2% interes simple por hora para no romper el juego fácil
+                let interest = Math.floor(state.shop.bankGold * 0.02 * h);
+                state.shop.bankGold += interest;
+                state.shop.lastBankTime = now;
+            }
+        } else { state.shop.lastBankTime = now; }
+        
+        save();
+    }
+
+    function updateMineDataUI() {
+        const setT = (id,v) => {let e=document.getElementById(id); if(e) e.innerText=v;};
+        setT('mine-stone-qty', state.mining.stone); setT('mine-depth', state.mining.depth); setT('mine-clicks', state.mining.totalClicks); setT('mine-geodes', state.mining.geodes);
+        setT('idle-stone-rate', state.mining.auto * 10); setT('idle-cap-hrs', 2 + (state.mining.carts * 2));
+        
+        let html = `
+            <div class="list-item"><div class="item-icon">⛏️</div><div class="item-details"><div style="font-weight:900;">Mejorar Pico</div><div style="font-size:11px; color:var(--text-sub);">Poder +1 (Nv: ${state.mining.power})</div></div><button class="btn btn-gold" style="width:auto; padding:8px;" onclick="upgMine('pow')">${state.mining.power * 50} 🪨</button></div>
+            <div class="list-item"><div class="item-icon">👷</div><div class="item-details"><div style="font-weight:900;">Auto-Miner</div><div style="font-size:11px; color:var(--text-sub);">+10 🪨/m (Nv: ${state.mining.auto})</div></div><button class="btn btn-blue" style="width:auto; padding:8px;" onclick="upgMine('auto')">${(state.mining.auto + 1) * 100} 🟡</button></div>
+            <div class="list-item"><div class="item-icon">🛒</div><div class="item-details"><div style="font-weight:900;">Vagoneta</div><div style="font-size:11px; color:var(--text-sub);">+2h Capacidad (Nv: ${state.mining.carts})</div></div><button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgMine('cart')">${(state.mining.carts + 1) * 500} 🟡</button></div>
+        `;
+        document.getElementById('mine-upgrades-list').innerHTML = html;
+    }
+    
+    function upgMine(t) {
+        playSound('click');
+        if(t==='pow') { let c=state.mining.power*50; if(state.mining.stone<c) return; state.mining.stone-=c; state.mining.power++; }
+        if(t==='auto') { let c=(state.mining.auto+1)*100; if(state.gold<c) return; state.gold-=c; grantVIP(Math.floor(c/10)); state.mining.auto++; }
+        if(t==='cart') { let c=(state.mining.carts+1)*500; if(state.gold<c) return; state.gold-=c; grantVIP(Math.floor(c/10)); state.mining.carts++; }
+        updateMineDataUI(); save();
+    }
+
+    function useDrill() { if(state.en < 50) return alert("Cuesta 50 EN."); state.en -= 50; playSound('gacha'); let t=20; let int=setInterval(()=>{mineRock(); t--; if(t<=0)clearInterval(int);},100); }
+    function openGeode() { if(state.mining.geodes<=0) return; state.mining.geodes--; playSound('gacha'); let r=Math.random(); let m= r<0.4?'+100 🟡':(r<0.8?'+1 Cristal 🟣':'+5 💎'); if(r<0.4)state.gold+=100; else if(r<0.8)state.inventory.m4=(state.inventory.m4||0)+1; else state.gems+=5; alert(`🔮 ${m}`); updateMineDataUI(); save(); }
+
+    // --- TIENDA VIP Y BANCO ---
+    function grantVIP(amt) { state.shop.vipPoints += amt; document.getElementById('shop-vip-pts').innerText = state.shop.vipPoints; }
+
+    function bankAction(type) {
+        playSound('click');
+        if(type === 'dep') {
+            let amt = prompt("¿Cuánto Oro depositar?", state.gold);
+            amt = parseInt(amt); if(isNaN(amt) || amt <= 0 || amt > state.gold) return alert("Monto inválido.");
+            state.gold -= amt; state.shop.bankGold += amt;
+        } else {
+            let amt = prompt("¿Cuánto Oro retirar?", state.shop.bankGold);
+            amt = parseInt(amt); if(isNaN(amt) || amt <= 0 || amt > state.shop.bankGold) return alert("Monto inválido.");
+            state.shop.bankGold -= amt; state.gold += amt;
+        }
+        state.shop.lastBankTime = Date.now(); save(); document.getElementById('bank-gold').innerText = state.shop.bankGold;
+    }
+
+    function renderShopEx() {
+        document.getElementById('shop-vip-pts').innerText = state.shop.vipPoints;
+        document.getElementById('bank-gold').innerText = state.shop.bankGold;
+        document.getElementById('gacha-pity').innerText = state.shop.pity;
+        
+        let bm = `
+            <div class="list-item"><div class="item-icon">🎒</div><div class="item-details"><div style="font-weight:900;">Mochila Plus</div><div style="font-size:11px; color:var(--text-sub);">+1 Límite Pociones.</div></div><button class="btn btn-red" style="width:auto; padding:8px 12px;" onclick="buyVIP('bag')">${(state.shop.bagLvl+1)*500} VP</button></div>
+            <div class="list-item"><div class="item-icon">💉</div><div class="item-details"><div style="font-weight:900;">Elixir ATQ</div><div style="font-size:11px; color:var(--text-sub);">+1 ATQ Base (Sube precio)</div></div><button class="btn btn-red" style="width:auto; padding:8px 12px;" onclick="buyVIP('atk')">${state.shop.elixirCost} 💎</button></div>
+        `;
+        document.getElementById('black-market-list').innerHTML = bm;
+    }
+
+    function buyVIP(t) {
+        playSound('click');
+        if(t==='bag') { let c = (state.shop.bagLvl+1)*500; if(state.shop.vipPoints<c) return alert("Faltan VP"); state.shop.vipPoints-=c; state.shop.bagLvl++; state.maxPots++; }
+        if(t==='atk') { let c = state.shop.elixirCost; if(state.gems<c) return alert("Faltan Gemas"); state.gems-=c; state.baseBonus.atk++; state.shop.elixirCost=Math.floor(state.shop.elixirCost*1.1); recalcStats(); alert("+1 ATQ Permanente"); }
+        save(); renderShopEx();
+    }
+
+    function generateDailyShop(force) {
+        const today = new Date().toDateString();
+        if(state.shop.date !== today || force) {
+            state.shop.date = today; state.shop.items = [];
+            const keys = Object.keys(matsDB);
+            for(let i=0; i<4; i++) {
+                let k = keys[Math.floor(Math.random() * keys.length)];
+                state.shop.items.push({ id: k, cost: matsDB[k].t * 50, b: false });
+            }
+            save();
+        }
+    }
+    function refreshShop(paid) { if(paid) { if(state.gems < 50) return alert("Faltan Gemas."); state.gems -= 50; grantVIP(50); } generateDailyShop(true); renderDailyShop(); playSound('click'); }
+    function renderDailyShop() {
+        const container = document.getElementById('daily-shop-list'); if(!container) return;
+        container.innerHTML = state.shop.items.map((item, idx) => {
+            let m = matsDB[item.id];
+            return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[m.t]})">${m.icon}</div>
+                <div class="item-details"><div style="font-weight:900; color:var(--${rColor[m.t]})">${m.n}</div></div>
+                <button class="btn ${item.b?'btn-dark':'btn-gold'}" style="width:auto; padding:8px 12px; font-size:11px;" onclick="buyDaily(${idx})" ${item.b?'disabled':''}>${item.b?'AGOTADO':'🟡 '+item.cost}</button></div>`;
+        }).join('');
+        renderShopEx();
+    }
+    function buyDaily(idx) {
+        playSound('click'); const item = state.shop.items[idx]; if(state.gold < item.cost) return alert("Falta Oro.");
+        state.gold -= item.cost; grantVIP(Math.floor(item.cost/10)); item.b = true; state.inventory[item.id] = (state.inventory[item.id]||0) + 1; save(); renderDailyShop();
+    }
+
+    function pullGacha(tier) {
+        playSound('click'); let cost = tier===1?100:tier===2?500:50;
+        if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas."); state.gems -= cost; grantVIP(50); } 
+        else { if(state.gold < cost) return alert("Falta Oro."); state.gold -= cost; grantVIP(Math.floor(cost/10)); }
+        
+        let m = document.getElementById('modal-gacha'); m.style.display = 'flex';
+        let c = document.getElementById('gacha-chest'); c.className = 'chest-anim'; playSound('gacha');
+        setTimeout(() => {
+            m.style.display = 'none'; c.className = '';
+            let r = Math.random(); let msg = "";
+            let gearChance = tier === 1 ? 0.05 : tier === 2 ? 0.10 : 0.15;
+            
+            // PITY SYSTEM (Solo en tier 3 mítico)
+            if(tier===3) state.shop.pity++;
+            if(tier===3 && state.shop.pity >= 10) { gearChance = 1.0; state.shop.pity = 0; msg = "[PITY] "; }
+
+            if(Math.random() < gearChance) { 
+                let pGears = Object.values(gearDB).filter(g => g.r <= tier + 2 && !g.isConsumable && !state.ownedGear.includes(g.id)); 
+                if(pGears.length > 0) { 
+                    let won = pGears[Math.floor(Math.random() * pGears.length)]; 
+                    state.ownedGear.push(won.id); msg += `¡ÉPICO! Equipo: ${won.icon} ${won.name}`; 
+                    if(tier===3) state.shop.pity = 0; // Reset pity si sacas épico
+                    save(); alert(`🎁 ¡BOOOM!\n${msg}`); renderShopEx(); return; 
+                } 
+            }
+            if(tier === 1) { if(r<0.6) { state.inventory.m1=(state.inventory.m1||0)+3; msg="3x Hierro"; } else { state.inventory.m4=(state.inventory.m4||0)+1; msg="1x Cristal Oscuro"; } }
+            else if (tier === 2) { if(r<0.5) { state.inventory.m4=(state.inventory.m4||0)+3; msg="3x Cristal"; } else { state.inventory.m10=(state.inventory.m10||0)+1; msg="1x Alma Demonio"; } }
+            else { if(r<0.5) { state.inventory.m10=(state.inventory.m10||0)+3; msg="3x Alma Demonio"; } else { state.inventory.m12=(state.inventory.m12||0)+1; msg="1x Escama Mítica 🐉"; } }
+            save(); alert(`📦 Botín: ${msg}`); renderShopEx();
+        }, 1200);
+    }
+
+    // --- FORJA GAMIFICADA (+ MEJORAS + DESGUACE) ---
+    function renderCrafting(f) {
+        currFilter = f; document.querySelectorAll('#screen-crafting .btn-dark, #screen-crafting .btn-blue').forEach(b => b.className='btn btn-dark'); document.getElementById('filter-'+f).className='btn btn-blue';
+        const c = document.getElementById('craft-list');
+        
+        if(f === 'upgrades') {
+            c.innerHTML = state.ownedGear.map(id => {
+                let g = gearDB[id]; let lvl = state.gearUpgrades[id] || 0;
+                let costGold = (lvl+1)*500; let costDust = lvl+1;
+                let canUpg = state.gold >= costGold && (state.inventory.m7||0) >= costDust;
+                return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name} <span style="color:var(--cyan)">+${lvl}</span></div><div style="font-size:10px;">Coste: ${costGold}🟡 | ${costDust}✨</div></div><button class="btn ${canUpg?'btn-mythic':'btn-dark'}" style="width:auto; padding:8px;" onclick="upgradeGear('${id}')">MEJORAR</button></div>`;
+            }).join('') || '<div style="color:var(--text-sub); text-align:center; margin-top:20px;">No tienes equipo para mejorar.</div>';
+            return;
+        }
+
+        if(f === 'salvage') {
+            c.innerHTML = state.ownedGear.map(id => {
+                let g = gearDB[id]; let isEq = Object.values(state.equipment).includes(id);
+                return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div><div style="font-size:10px; color:var(--text-sub);">Devuelve 50% Mats</div></div><button class="btn ${isEq?'btn-dark':'btn-red'}" style="width:auto; padding:8px;" ${isEq?'disabled':''} onclick="salvageGear('${id}')">${isEq?'EQUIPADO':'RECICLAR'}</button></div>`;
+            }).join('') || '<div style="color:var(--text-sub); text-align:center; margin-top:20px;">No tienes equipo para reciclar.</div>';
+            return;
+        }
+
+        c.innerHTML = Object.values(gearDB).filter(g => g.t === f).map(g => {
+            let canCraft = Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v); let isEq = state.equipment[g.t] === g.id;
+            let costHTML = Object.entries(g.cost).map(([k,v]) => { let m=matsDB[k]; let h=state.inventory[k]||0; return `<div style="font-size:10px;"><span style="color:var(--${rColor[m.t]})">${m.icon} ${m.n}</span>: <span style="color:${h>=v?'var(--green)':'var(--red)'}">(${h}/${v})</span></div>`; }).join('');
+            if(g.isConsumable) return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div>${costHTML}</div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">SINTETIZAR</button></div>`;
+            if(state.ownedGear.includes(g.id)) return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div></div><button class="btn ${isEq?'btn-dark':'btn-blue'}" style="width:auto; padding:8px;" onclick="equip('${g.id}')">${isEq?'EQ':'EQUIPAR'}</button></div>`;
+            return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div>${costHTML}</div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">FORJAR</button></div>`;
+        }).join('');
+    }
+
+    function craft(id) { 
+        playSound('click'); const g = gearDB[id]; if(!Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v)) return; 
+        
+        // SWEET SPOT LUCK (5% chance of free craft)
+        let free = Math.random() < 0.05;
+        if(free) alert("🌟 ¡FORJA CRÍTICA! No has gastado materiales.");
+        else Object.entries(g.cost).forEach(([k,v]) => state.inventory[k] -= v); 
+        
+        if(!g.isConsumable) state.ownedGear.push(id); else state.inventory[g.gives] = (state.inventory[g.gives]||0)+1; 
+        save(); renderCrafting(currFilter); 
+    }
+
+    function equip(id) { playSound('click'); const g = gearDB[id]; state.equipment[g.t] = id; recalcStats(); save(); renderCrafting(currFilter); }
+
+    function upgradeGear(id) {
+        playSound('click'); let lvl = state.gearUpgrades[id] || 0; let costGold = (lvl+1)*500; let costDust = lvl+1;
+        if(state.gold < costGold || (state.inventory.m7||0) < costDust) return alert("Faltan recursos.");
+        state.gold -= costGold; state.inventory.m7 -= costDust;
+        state.gearUpgrades[id] = lvl + 1;
+        recalcStats(); save(); renderCrafting(currFilter); showFloatingText("¡MEJORA +1!", "var(--cyan)");
+    }
+
+    function salvageGear(id) {
+        if(!confirm("¿Destruir ítem para recuperar 50% materiales?")) return;
+        playSound('click');
+        let g = gearDB[id];
+        Object.entries(g.cost).forEach(([k,v]) => { let refund = Math.max(1, Math.floor(v*0.5)); state.inventory[k] = (state.inventory[k]||0) + refund; });
+        state.ownedGear = state.ownedGear.filter(i => i !== id);
+        delete state.gearUpgrades[id];
+        save(); renderCrafting(currFilter); alert("♻️ Ítem reciclado.");
+    }
+
+    // --- STATS, CAMP & SISTEMAS BASE ---
+    function recalcStats() {
+        let bA = 10 + state.baseBonus.atk, bD = 10 + state.baseBonus.def, bL = 5, bC = 0, bE = 0;
+        bA += (state.skills.atk * 5); bD += (state.skills.def * 5); bC += (state.skills.crit * 1); bE += (state.skills.evasion * 1);
+        
+        let eqTiers = [];
+        Object.values(state.equipment).forEach(gId => {
+            if(gId && gearDB[gId]) {
+                let g = gearDB[gId]; let upg = (state.gearUpgrades[gId]||0);
+                if(g.stats.atk) bA += g.stats.atk + (upg*2); if(g.stats.def) bD += g.stats.def + (upg*2); if(g.stats.luck) bL += g.stats.luck + upg;
+                eqTiers.push(g.r);
+            }
+        });
+
+        // SET BONUS AAA: Si llevas 2 items del mismo Tier, +10% Stats base
+        if(eqTiers.length >= 2 && eqTiers[0] === eqTiers[1]) { bA = Math.floor(bA * 1.1); bD = Math.floor(bD * 1.1); }
+
+        state.stats = { atk: bA, def: bD, luck: bL, crit: bC, dodge: bE };
+        state.maxHp = 100 + (state.lvl * 10) + (state.skills.hp * 10);
+    }
+
+    function startCamp() { if(campInterval) clearInterval(campInterval); campInterval = setInterval(() => { if(state.hp < state.maxHp || state.en < state.maxEn) { state.hp = Math.min(state.maxHp, state.hp + 2); state.en = Math.min(state.maxEn, state.en + 1); updateUI(); let f = document.getElementById('camp-fire'); if(f) f.style.transform = `scale(${1 + Math.random()*0.2})`; } }, 2000); }
+    function stopCamp() { if(campInterval) clearInterval(campInterval); }
+
+    function navTo(id) {
+        playSound('click');
+        if(combat.active && id !== 'combat') return alert("⚔️ ¡SAL del combate primero!");
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+        const tab = document.getElementById('tab-' + id); if(tab) tab.classList.add('active');
+        
+        const hA = document.getElementById('hud-advanced'), hM = document.getElementById('hud-minimal'), nBar = document.querySelector('.nav');
+        if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; nBar.style.display = 'flex'; renderMap(); }
+        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; nBar.style.display = 'none'; } 
+        else { hA.style.display = 'flex'; hM.style.display = 'none'; nBar.style.display = 'flex'; }
+        
+        if(id === 'home') { updateProfile(); startCamp(); } else stopCamp();
+        if(id === 'skills') renderSkills();
+        if(id === 'crafting') renderCrafting(currFilter);
+        if(id === 'shop') renderDailyShop();
+        if(id === 'mining') updateMineDataUI();
+    }
+
+    function renderSkills() {
+        document.getElementById('skill-points-display').innerText = state.sp;
+        let s = [
+            {id:'hp', n:'Vitalidad', d:'+10 HP', i:'❤️', v:state.skills.hp}, {id:'atk', n:'Fuerza', d:'+5 ATQ', i:'⚔️', v:state.skills.atk},
+            {id:'def', n:'Resistencia', d:'+5 DEF', i:'🛡️', v:state.skills.def}, {id:'crit', n:'Precisión', d:'+1% Crit', i:'🔥', v:state.skills.crit},
+            {id:'evasion', n:'Evasión', d:'+1% Esq.', i:'💨', v:state.skills.evasion}
+        ];
+        document.getElementById('skills-list').innerHTML = s.map(x => `<div class="list-item"><div class="item-icon">${x.i}</div><div class="item-details"><div style="font-weight:900;">${x.n} (${x.d})</div><div style="font-size:11px; color:var(--text-sub);">Nv: ${x.v}</div></div><button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('${x.id}')">1 SP</button></div>`).join('');
+    }
+    function upgradeSkill(type) { playSound('click'); if(state.sp <= 0) return alert("Sin SP."); state.sp--; state.skills[type]++; recalcStats(); save(); renderSkills(); }
+
+    function updateProfile() {
+        document.getElementById('stat-atk').innerText = state.stats.atk; document.getElementById('stat-def').innerText = state.stats.def; document.getElementById('stat-luck').innerText = state.stats.luck; document.getElementById('stat-crit').innerText = state.stats.crit + "%";
+        ['weapon', 'armor', 'accessory', 'pet'].forEach(t => {
+            const slot = document.getElementById(`slot-${t}`); const eqId = state.equipment[t];
+            if(eqId && gearDB[eqId]) {
+                const g = gearDB[eqId]; let lvl = state.gearUpgrades[eqId]||0; let lStr = lvl>0?` <span style="color:var(--cyan)">+${lvl}</span>`:''; let sStr = g.stats.atk ? `(+${g.stats.atk+(lvl*2)} ATQ)` : g.stats.def ? `(+${g.stats.def+(lvl*2)} DEF)` : `(+${g.stats.luck+lvl} SUE)`;
+                slot.className = `equip-slot filled`; slot.style.borderColor = `var(--${rColor[g.r]})`;
+                slot.innerHTML = `<div class="equip-icon">${g.icon}</div><div class="equip-name" style="color:var(--${rColor[g.r]})">${g.name}${lStr} <br> <span style="color:var(--green)">${sStr}</span></div>`;
+            } else { slot.className = `equip-slot`; slot.style.borderColor = `var(--border-dark)`; slot.innerHTML = `<div class="equip-icon">🎒</div><div class="equip-name">Vacío</div>`; }
+        });
+
+        const inv = document.getElementById('inventory-list-detailed'); inv.innerHTML = '';
+        Object.entries(state.inventory).forEach(([k, v]) => { if(v > 0 && matsDB[k]) inv.innerHTML += `<div class="inv-list-item"><div class="inv-icon" style="color:var(--${rColor[matsDB[k].t]})">${matsDB[k].icon}</div><div><div style="font-weight:900; color:var(--${rColor[matsDB[k].t]})">${matsDB[k].n} x${v}</div><div style="font-size:10px; color:var(--text-sub)">${matsDB[k].desc}</div></div></div>`; });
+        if(state.potions >= 0) inv.innerHTML += `<div class="inv-list-item"><div class="inv-icon">💊</div><div><div style="font-weight:900; color:var(--green)">Pociones x${state.potions}/${state.maxPots}</div><div style="font-size:10px; color:var(--text-sub)">Cura 50 HP en combate.</div></div></div>`;
+    }
+
+    function updateUI() {
+        const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; }; const setW = (id, w) => { const el = document.getElementById(id); if(el) el.style.width = w; };
+        setTxt('ui-lvl', state.lvl); setTxt('ui-min-lvl', state.lvl); setTxt('ui-gold', state.gold); setTxt('ui-min-gold', state.gold); setTxt('ui-gems', state.gems); setTxt('ui-min-gems', state.gems); setTxt('ui-sp', state.sp);
+        setTxt('ui-hp-txt', `${state.hp}/${state.maxHp}`); setW('ui-hp-bar', `${(state.hp/state.maxHp)*100}%`); setTxt('ui-en-txt', `${state.en}/${state.maxEn}`); setW('ui-en-bar', `${(state.en/state.maxEn)*100}%`);
+    }
+
+    function showFloatingText(txt, col) { const el = document.createElement('div'); el.className = 'floating-text'; el.innerText = txt; el.style.color = col; el.style.left = (window.innerWidth / 2 - 40) + 'px'; el.style.top = (window.innerHeight / 2 - 50) + 'px'; document.body.appendChild(el); setTimeout(() => el.remove(), 1000); }
+
+    // --- MAPA, MUNDOS, COMBATE ---
+    function renderMap() {
+        const w = state.worlds[state.activeW]; document.getElementById('world-title').innerText = w.name + " ▾";
+        const c = document.getElementById('map-render'); c.innerHTML = w.campaign.length ? '' : '<div style="color:var(--text-sub);">Vacío.</div>';
+        w.campaign.forEach((n, i) => {
+            const isDone = w.completed.includes(n.id); const isUnl = w.unlocked.includes(n.id); let cls = isDone ? 'completed' : (isUnl ? 'unlocked' : ''); if(n.type === 'boss') cls += ' boss';
+            let icon = isDone ? '⭐' : (n.type === 'reading' ? '📖' : (n.type === 'boss' ? '👹' : '⚔️'));
+            c.innerHTML += `<div style="transform: translateX(${(i%2!==0)?'20px':'-20px'}); text-align:center;"><button class="node ${cls}" onclick="startNode('${n.id}')">${icon}</button><div style="font-weight:900; font-size:12px; margin-top:8px;">${n.title}</div></div>`;
+        });
+    }
+
+    function openWorldsManager() { playSound('click'); document.getElementById('modal-worlds').style.display = 'flex'; renderWorldsManager(); }
+    function renderWorldsManager() { document.getElementById('worlds-manager-list').innerHTML = state.worlds.map((w, idx) => `<div class="list-item" style="flex-direction:column; align-items:flex-start;"><div style="display:flex; width:100%; gap:10px; align-items:center;"><div style="font-weight:900; flex:1;">${w.name}</div>${state.activeW === idx ? `<span style="color:var(--green); font-weight:900; font-size:12px;">ACTIVO</span>` : `<button class="btn btn-blue" style="width:auto; padding:5px 10px; font-size:10px;" onclick="playSound('click'); state.activeW=${idx}; save(); document.getElementById('modal-worlds').style.display='none'; renderMap();">ENTRAR</button>`}</div></div>`).join(''); }
+    function createNewWorld() { playSound('click'); let nm = prompt("Nombre:"); if(nm) { state.worlds.push({ id: Date.now(), name: nm, campaign: [], completed: [], unlocked: [] }); save(); renderWorldsManager(); } }
+    function openForgeModal() { playSound('click'); document.getElementById('modal-forge').style.display = 'flex'; document.getElementById('forge-input').value = JSON.stringify(state.worlds[state.activeW].campaign, null, 2); }
+    function processForge() { playSound('click'); try { let p = JSON.parse(document.getElementById('forge-input').value.replace(/
+http://googleusercontent.com/immersive_entry_chip/0
