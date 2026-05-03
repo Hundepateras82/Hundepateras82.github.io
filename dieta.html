@@ -5,650 +5,455 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Nutrición RPG Tracker</title>
+    <title>Nutrición RPG: Titanium</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        /* ================= LENGUAJE VISUAL Y VARIABLES ================= */
         :root {
-            --bg-dark: #0a0f1c; --bg-panel: #131b2f; --bg-card: #1a243d; --border: #2a3754;
-            --text-main: #f8fafc; --text-muted: #94a3b8; --text-dark: #0f172a;
-            /* Lenguaje de Macros */
-            --c-kcal: #fbbf24; --c-kcal-dim: rgba(251, 191, 36, 0.2);
-            --c-prot: #ef4444; --c-prot-dim: rgba(239, 68, 68, 0.2);
-            --c-carb: #3b82f6; --c-carb-dim: rgba(59, 130, 246, 0.2);
-            --c-fat:  #f97316; --c-fat-dim: rgba(249, 115, 22, 0.2);
-            --c-exp:  #8b5cf6; --c-success: #10b981; --c-danger: #f43f5e;
+            --bg-dark: #070b14; --bg-panel: #111827; --bg-card: #1f2937; --border: #374151;
+            --text-main: #f8fafc; --text-muted: #9ca3af;
+            
+            /* Macros Principales */
+            --c-kcal: #fbbf24; --c-prot: #ef4444; --c-carb: #3b82f6; --c-fat: #f97316;
+            
+            /* Micros y Atributos */
+            --c-fiber: #10b981; --c-sugar: #ec4899; 
+            --c-vit: #8b5cf6; /* Morado para vitaminas */
+            --c-min: #06b6d4; /* Cyan para minerales */
+            
+            --c-exp: #8b5cf6; --c-success: #10b981; --c-danger: #f43f5e;
             --safe-top: env(safe-area-inset-top, 40px);
             --safe-bot: env(safe-area-inset-bottom, 20px);
         }
 
-        /* ================= RESET Y ESTRUCTURA ================= */
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg-dark); color: var(--text-main); font-family: 'Nunito', sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-        h1, h2, h3 { font-weight: 900; letter-spacing: 0.5px; }
         
-        /* ================= HEADER (STATUS BAR) ================= */
-        .top-status { background: var(--bg-panel); padding: calc(var(--safe-top) + 10px) 20px 15px; border-bottom: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 10; position: relative;}
+        .top-status { background: var(--bg-panel); padding: calc(var(--safe-top) + 10px) 20px 15px; border-bottom: 1px solid var(--border); z-index: 10;}
         .level-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
-        .level-title { font-size: 20px; color: var(--c-exp); text-shadow: 0 0 10px var(--c-exp); }
-        .exp-text { font-size: 12px; color: var(--text-muted); font-weight: 600; }
-        .exp-track { background: #000; height: 10px; border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
-        .exp-fill { height: 100%; background: linear-gradient(90deg, #8b5cf6, #d946ef); width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .level-title { font-size: 22px; color: var(--c-exp); font-weight: 900; text-shadow: 0 0 10px rgba(139, 92, 246, 0.5); }
+        .exp-track { background: #000; height: 8px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+        .exp-fill { height: 100%; background: linear-gradient(90deg, #8b5cf6, #d946ef); width: 0%; transition: width 0.5s; }
 
-        /* ================= CONTENEDOR PRINCIPAL ================= */
-        .app-body { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px; padding-bottom: calc(90px + var(--safe-bot)); scroll-behavior: smooth; }
+        .app-body { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 15px; padding-bottom: calc(90px + var(--safe-bot)); }
         .view { display: none; animation: fadeIn 0.3s ease; }
         .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ================= UI COMPONENTS ================= */
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .card-title { font-size: 14px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .card-title { font-size: 13px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; font-weight: 900; letter-spacing: 1px;}
         
-        /* Forms & Inputs */
-        input, select { width: 100%; background: #0b1120; border: 1px solid var(--border); color: var(--text-main); padding: 14px; border-radius: 12px; font-family: inherit; font-size: 15px; margin-bottom: 12px; outline: none; transition: 0.2s; }
-        input:focus, select:focus { border-color: var(--c-carb); box-shadow: 0 0 0 2px var(--c-carb-dim); }
+        input, select { width: 100%; background: #0b1120; border: 1px solid var(--border); color: var(--text-main); padding: 12px; border-radius: 10px; font-family: inherit; font-size: 14px; margin-bottom: 10px; outline: none; }
+        input:focus, select:focus { border-color: var(--c-carb); }
         
-        /* Buttons */
-        .btn { width: 100%; background: var(--bg-panel); color: var(--text-main); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.1s; display: flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase;}
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: var(--c-kcal); color: var(--text-dark); border: none; box-shadow: 0 4px 0 #b4850b; margin-bottom: 4px;}
-        .btn-primary:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; margin-bottom: 0; margin-top: 4px;}
-        .btn-success { background: var(--c-success); color: var(--text-dark); border: none; box-shadow: 0 4px 0 #047857; margin-bottom: 4px;}
-        .btn-success:active { transform: translateY(4px); box-shadow: none; margin-bottom: 0; margin-top: 4px;}
-        .btn-danger { background: var(--c-danger); color: white; border: none; box-shadow: 0 4px 0 #9f1239; margin-bottom: 4px;}
-        .btn-icon { width: 36px; height: 36px; padding: 0; border-radius: 8px; background: rgba(244, 63, 94, 0.1); color: var(--c-danger); border: 1px solid rgba(244, 63, 94, 0.2); }
+        .btn { width: 100%; background: var(--bg-panel); color: var(--text-main); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.1s; text-align: center; margin-bottom: 10px;}
+        .btn-primary { background: var(--c-kcal); color: #000; border: none; box-shadow: 0 4px 0 #b4850b; margin-bottom: 14px;}
+        .btn-primary:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; margin-bottom: 10px; margin-top: 4px;}
+        .btn-success { background: var(--c-success); color: #000; border: none; box-shadow: 0 4px 0 #047857; }
+        .btn-success:active { transform: translateY(4px); box-shadow: none; }
+        .btn-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(244, 63, 94, 0.1); color: var(--c-danger); border: 1px solid rgba(244, 63, 94, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;}
 
-        /* ================= MACROS VISUALS ================= */
-        .macro-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
-        .macro-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 14px; border: 1px solid var(--border); }
-        .macro-header { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; margin-bottom: 8px; }
-        .macro-bar-bg { height: 8px; background: #000; border-radius: 4px; overflow: hidden; }
-        .macro-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+        /* BARRAS DE PROGRESO */
+        .bar-container { margin-bottom: 10px; }
+        .bar-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; margin-bottom: 4px; }
+        .bar-bg { background: rgba(0,0,0,0.5); height: 8px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+        .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
         
-        .c-kcal { color: var(--c-kcal); } .bg-kcal { background: var(--c-kcal); }
-        .c-prot { color: var(--c-prot); } .bg-prot { background: var(--c-prot); }
-        .c-carb { color: var(--c-carb); } .bg-carb { background: var(--c-carb); }
-        .c-fat { color: var(--c-fat); } .bg-fat { background: var(--c-fat); }
+        .micro-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 15px; }
+        .micro-item .bar-bg { height: 6px; }
+        .micro-item .bar-header { font-size: 10px; color: var(--text-muted); }
 
-        /* ================= LISTAS Y TABLAS ================= */
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 8px; }
-        .item-info h4 { font-size: 15px; margin-bottom: 4px; }
-        .item-macros { font-size: 11px; color: var(--text-muted); display: flex; gap: 8px; font-weight: 700;}
-        .item-macros span.p { color: var(--c-prot); } .item-macros span.c { color: var(--c-carb); } .item-macros span.f { color: var(--c-fat); }
-
-        /* ================= CALENDARIO ================= */
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: 800; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .cal-day-name { font-size: 11px; color: var(--text-muted); padding-bottom: 5px; }
-        .cal-day { aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 14px; cursor: pointer; border: 1px solid transparent; position: relative;}
-        .cal-day.logged { border-color: var(--c-success); background: rgba(16, 185, 129, 0.1); font-weight: 900;}
-        .cal-day.today { border-color: var(--c-kcal); background: var(--c-kcal-dim); }
-        .cal-day.empty { opacity: 0.3; pointer-events: none; }
-        
-        .search-bar { display: flex; gap: 10px; margin-bottom: 15px; }
-        
-        /* ================= BOTTOM NAVIGATION ================= */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(19, 27, 47, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 15px 10px calc(15px + var(--safe-bot)); z-index: 100; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: var(--text-muted); background: none; border: none; cursor: pointer; transition: 0.2s; font-family: inherit; }
-        .nav-icon { font-size: 22px; margin-bottom: 4px; transition: transform 0.2s; }
-        .nav-text { font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .nav-item.active { color: var(--c-kcal); }
-        .nav-item.active .nav-icon { transform: translateY(-4px) scale(1.1); filter: drop-shadow(0 2px 5px var(--c-kcal-dim)); }
-
-        .flex-row { display: flex; gap: 10px; }
+        .flex-row { display: flex; gap: 8px; }
         .flex-row > * { flex: 1; }
+
+        .item-list { font-size: 13px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* CALENDARIO */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px;}
+        .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); border-radius: 8px; font-size: 13px; font-weight: bold; position: relative; border: 1px solid transparent; cursor: pointer;}
+        .cal-day.logged { border-color: var(--c-success); background: rgba(16, 185, 129, 0.1); }
+        .cal-day.today { border-color: var(--c-kcal); }
+        
+        /* NAV */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 5px var(--safe-bot); z-index: 100; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: var(--text-muted); background: none; border: none; cursor: pointer; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .nav-item.active { color: var(--c-kcal); }
+        .nav-item.active span { transform: scale(1.2); transition: 0.2s; }
+        .nav-icon { font-size: 20px; margin-bottom: 2px; display: block; }
     </style>
 </head>
 <body>
 
     <div class="top-status">
         <div class="level-header">
-            <h2 class="level-title">LVL <span id="ui-level">1</span></h2>
-            <span class="exp-text">EXP: <span id="ui-exp">0</span> / <span id="ui-max-exp">100</span></span>
+            <h2 class="level-title">LVL <span id="ui-lvl">1</span></h2>
+            <span style="font-size:11px; font-weight:bold; color:var(--text-muted);">EXP: <span id="ui-exp">0</span>/<span id="ui-max">100</span></span>
         </div>
         <div class="exp-track"><div class="exp-fill" id="ui-exp-bar"></div></div>
     </div>
 
     <div class="app-body">
-
+        
         <div id="view-dash" class="view active">
-            <div class="card">
-                <div class="card-title">Resumen Diario <span id="ui-date-today" style="color:var(--text-main); font-weight:900;"></span></div>
-                
-                <div class="macro-box" style="margin-bottom: 15px;">
-                    <div class="macro-header c-kcal"><span>🔥 Calorías Netas</span> <span id="dash-kcal-text">0 / 2200</span></div>
-                    <div class="macro-bar-bg"><div id="dash-kcal-bar" class="macro-bar-fill bg-kcal" style="width: 0%;"></div></div>
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-                        <span>Consumido: <span id="dash-kcal-in" style="color:var(--text-main)">0</span></span>
-                        <span>Quemado: <span id="dash-kcal-out" class="c-success">0</span></span>
-                    </div>
-                </div>
-
-                <div class="macro-grid">
-                    <div class="macro-box">
-                        <div class="macro-header c-prot"><span>🥩 PROT</span> <span id="dash-prot-text">0g</span></div>
-                        <div class="macro-bar-bg"><div id="dash-prot-bar" class="macro-bar-fill bg-prot" style="width: 0%;"></div></div>
-                        <div style="font-size: 10px; text-align: right; margin-top:4px; color:var(--text-muted)">Obj: 150g</div>
-                    </div>
-                    <div class="macro-box">
-                        <div class="macro-header c-carb"><span>🌾 CARB</span> <span id="dash-carb-text">0g</span></div>
-                        <div class="macro-bar-bg"><div id="dash-carb-bar" class="macro-bar-fill bg-carb" style="width: 0%;"></div></div>
-                        <div style="font-size: 10px; text-align: right; margin-top:4px; color:var(--text-muted)">Obj: 200g</div>
-                    </div>
-                    <div class="macro-box">
-                        <div class="macro-header c-fat"><span>🥑 FAT</span> <span id="dash-fat-text">0g</span></div>
-                        <div class="macro-bar-bg"><div id="dash-fat-bar" class="macro-bar-fill bg-fat" style="width: 0%;"></div></div>
-                        <div style="font-size: 10px; text-align: right; margin-top:4px; color:var(--text-muted)">Obj: 70g</div>
-                    </div>
-                    <div class="macro-box" style="display:flex; flex-direction:column; justify-content:center; align-items:center; background: rgba(16, 185, 129, 0.1); border-color: var(--c-success);">
-                        <span style="font-size: 24px; font-weight: 900; color: var(--c-success);" id="dash-streak">🔥 0</span>
-                        <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Días en Racha</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">Registro Rápido</div>
-                <div class="search-bar">
-                    <select id="quick-food-select" style="margin-bottom:0; flex: 2;"></select>
-                    <input type="number" id="quick-food-qty" placeholder="Gramos" value="100" style="margin-bottom:0; flex: 1;">
-                </div>
-                <button class="btn btn-primary" onclick="logFood()">⚔️ Consumir</button>
-            </div>
-
-            <div class="card">
-                <div class="card-title">Historial de Batalla (Hoy)</div>
-                <div id="today-log-list"></div>
-                <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
-                <input type="number" id="burn-input" placeholder="Calorías quemadas (Cardio/Pesas)">
-                <button class="btn btn-success" onclick="logBurn()">💦 Registrar Sudor</button>
-            </div>
             
-            <button class="btn btn-primary" style="background: var(--c-exp); box-shadow: 0 4px 0 #5b21b6; color: white;" onclick="endDay()">🌙 Finalizar Día (Guardar y Cobrar EXP)</button>
-        </div>
-
-        <div id="view-calendar" class="view">
             <div class="card">
-                <div class="calendar-header">
-                    <button class="btn" style="width: auto; padding: 5px 15px;" onclick="changeMonth(-1)">◀</button>
-                    <span id="cal-month-year">Mayo 2026</span>
-                    <button class="btn" style="width: auto; padding: 5px 15px;" onclick="changeMonth(1)">▶</button>
+                <div class="card-title">Atributos Principales (Macros)</div>
+                <div class="bar-container">
+                    <div class="bar-header" style="color: var(--c-kcal);"><span>🔥 Kcal Netas</span> <span id="b-kcal-t">0 / 2200</span></div>
+                    <div class="bar-bg"><div class="bar-fill" id="b-kcal" style="background: var(--c-kcal);"></div></div>
                 </div>
-                <div class="calendar-grid">
-                    <div class="cal-day-name">L</div><div class="cal-day-name">M</div><div class="cal-day-name">X</div><div class="cal-day-name">J</div><div class="cal-day-name">V</div><div class="cal-day-name">S</div><div class="cal-day-name">D</div>
-                    </div>
+                <div class="bar-container">
+                    <div class="bar-header" style="color: var(--c-prot);"><span>🥩 Proteína</span> <span id="b-prot-t">0 / 150g</span></div>
+                    <div class="bar-bg"><div class="bar-fill" id="b-prot" style="background: var(--c-prot);"></div></div>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-header" style="color: var(--c-carb);"><span>🌾 Carbohidratos</span> <span id="b-carb-t">0 / 200g</span></div>
+                    <div class="bar-bg"><div class="bar-fill" id="b-carb" style="background: var(--c-carb);"></div></div>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-header" style="color: var(--c-fat);"><span>🥑 Grasas</span> <span id="b-fat-t">0 / 70g</span></div>
+                    <div class="bar-bg"><div class="bar-fill" id="b-fat" style="background: var(--c-fat);"></div></div>
+                </div>
             </div>
 
-            <div class="card" id="cal-details" style="display:none;">
-                <div class="card-title" style="color: var(--c-kcal);">Reporte del Día: <span id="cal-detail-date"></span></div>
-                <div class="macro-grid">
-                    <div class="macro-box"><div class="macro-header c-kcal">Kcal<span id="det-kcal">0</span></div></div>
-                    <div class="macro-box"><div class="macro-header c-prot">Prot<span id="det-prot">0g</span></div></div>
-                    <div class="macro-box"><div class="macro-header c-carb">Carb<span id="det-carb">0g</span></div></div>
-                    <div class="macro-box"><div class="macro-header c-fat">Fat<span id="det-fat">0g</span></div></div>
+            <div class="card">
+                <div class="card-title">Resistencias y Secundarios (Micros)</div>
+                <div class="micro-grid">
+                    <div class="micro-item"><div class="bar-header"><span>Fibra (30g)</span><span id="m-fib">0</span></div><div class="bar-bg"><div class="bar-fill" id="f-fib" style="background:var(--c-fiber)"></div></div></div>
+                    <div class="micro-item"><div class="bar-header"><span>Azúcar (<50g)</span><span id="m-sug">0</span></div><div class="bar-bg"><div class="bar-fill" id="f-sug" style="background:var(--c-sugar)"></div></div></div>
+                    
+                    <div class="micro-item"><div class="bar-header"><span>Vit A (900mcg)</span><span id="m-va">0</span></div><div class="bar-bg"><div class="bar-fill" id="f-va" style="background:var(--c-vit)"></div></div></div>
+                    <div class="micro-item"><div class="bar-header"><span>Vit C (90mg)</span><span id="m-vc">0</span></div><div class="bar-bg"><div class="bar-fill" id="f-vc" style="background:var(--c-vit)"></div></div></div>
+                    <div class="micro-item"><div class="bar-header"><span>Vit D (20mcg)</span><span id="m-vd">0</span></div><div class="bar-bg"><div class="bar-fill" id="f-vd" style="background:var(--c-vit)"></div></div></div>
+                    
+                    <div class="micro-item"><div class="bar-header"><span>Calcio (1000mg)</span><span id="m-ca">0</span></div><div class="bar-bg"><div class="bar-fill" id="f-ca" style="background:var(--c-min)"></div></div></div>
+                    <div class="micro-item"><div class="bar-header"><span>Hierro (8mg)</span><span id="m-fe">0</span></div><div class="bar-bg"><div class="bar-fill" id="f-fe" style="background:var(--c-min)"></div></div></div>
+                    <div class="micro-item"><div class="bar-header"><span>Potasio (3500mg)</span><span id="m-po">0</span></div><div class="bar-bg"><div class="bar-fill" id="f-po" style="background:var(--c-min)"></div></div></div>
+                    <div class="micro-item"><div class="bar-header"><span>Magnesio (400mg)</span><span id="m-mg">0</span></div><div class="bar-bg"><div class="bar-fill" id="f-mg" style="background:var(--c-min)"></div></div></div>
+                    <div class="micro-item"><div class="bar-header"><span>Sodio (<2300mg)</span><span id="m-na">0</span></div><div class="bar-bg"><div class="bar-fill" id="f-na" style="background:var(--c-min)"></div></div></div>
                 </div>
-                <h4 style="margin-top: 15px; margin-bottom: 10px; font-size: 14px;">Alimentos Consumidos:</h4>
-                <div id="det-food-list"></div>
             </div>
+
+            <div class="card">
+                <div class="card-title">Inventario de Consumibles</div>
+                <div class="flex-row">
+                    <select id="food-select" style="flex:2;"></select>
+                    <input type="number" id="food-qty" placeholder="g / ud" value="100">
+                </div>
+                <button class="btn btn-primary" onclick="logFood()">Consumir Ítem</button>
+                <div id="log-list" style="margin-top: 10px;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Gasto de Energía</div>
+                <div class="flex-row">
+                    <input type="number" id="burn-kcal" placeholder="Kcal quemadas (ej. 300)">
+                    <button class="btn btn-success" style="flex:0.5; padding: 10px;" onclick="logBurn()">Quemar</button>
+                </div>
+            </div>
+
+            <button class="btn" style="background: var(--c-exp); color: white; border:none;" onclick="endDay()">🌙 GUARDAR DÍA Y COBRAR EXP</button>
         </div>
 
         <div id="view-db" class="view">
             <div class="card">
-                <div class="card-title">Forjar Alimento (Añadir a DB)</div>
-                <input type="text" id="new-f-name" placeholder="Nombre (ej. Salmón Noruego)">
-                <div class="flex-row">
-                    <input type="number" id="new-f-kcal" placeholder="Kcal/100g">
-                    <input type="number" id="new-f-prot" placeholder="Prot/100g">
-                </div>
-                <div class="flex-row">
-                    <input type="number" id="new-f-carb" placeholder="Carb/100g">
-                    <input type="number" id="new-f-fat" placeholder="Grasa/100g">
-                </div>
-                <button class="btn btn-success" onclick="createCustomFood()">🔨 Forjar y Guardar</button>
+                <div class="card-title">El Compendio (Buscador)</div>
+                <input type="text" id="search-db" placeholder="Buscar alimento..." onkeyup="renderDB()">
+                <div id="db-render-list" style="max-height: 250px; overflow-y: auto; margin-top: 10px;"></div>
             </div>
 
             <div class="card">
-                <div class="card-title">Librería de Alimentos</div>
-                <input type="text" id="db-search" placeholder="🔍 Buscar alimento..." onkeyup="renderDB()">
-                <div id="db-list" style="margin-top: 15px;"></div>
+                <div class="card-title">Forjar Nuevo Alimento (Por 100g)</div>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Deja en blanco lo que no sepas. El sistema lo calculará como 0.</p>
+                <input type="text" id="c-name" placeholder="Nombre del Alimento">
+                <div class="flex-row">
+                    <input type="number" id="c-kcal" placeholder="Kcal">
+                    <input type="number" id="c-prot" placeholder="Proteína">
+                </div>
+                <div class="flex-row">
+                    <input type="number" id="c-carb" placeholder="Carbs">
+                    <input type="number" id="c-fat" placeholder="Grasa">
+                </div>
+                <div class="flex-row">
+                    <input type="number" id="c-fib" placeholder="Fibra">
+                    <input type="number" id="c-sug" placeholder="Azúcar">
+                </div>
+                <div class="card-title" style="margin-top: 10px; font-size: 11px;">Micros Avanzados</div>
+                <div class="flex-row">
+                    <input type="number" id="c-va" placeholder="Vit A (mcg)">
+                    <input type="number" id="c-vc" placeholder="Vit C (mg)">
+                    <input type="number" id="c-vd" placeholder="Vit D (mcg)">
+                </div>
+                <div class="flex-row">
+                    <input type="number" id="c-ca" placeholder="Calcio (mg)">
+                    <input type="number" id="c-fe" placeholder="Hierro (mg)">
+                </div>
+                <div class="flex-row">
+                    <input type="number" id="c-po" placeholder="Potasio (mg)">
+                    <input type="number" id="c-mg" placeholder="Magnesio">
+                    <input type="number" id="c-na" placeholder="Sodio (mg)">
+                </div>
+                <button class="btn btn-success" onclick="createFood()">🔨 Añadir al Compendio</button>
             </div>
         </div>
 
-        <div id="view-inv" class="view">
+        <div id="view-cal" class="view">
             <div class="card">
-                <div class="card-title">🎒 Inventario Físico (Despensa)</div>
-                <div class="flex-row">
-                    <input type="text" id="inv-name" placeholder="Item">
-                    <input type="text" id="inv-qty" placeholder="Cant." style="flex: 0.5;">
+                <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+                    <button class="btn" style="width:auto; padding:5px 15px; margin:0;" onclick="changeMonth(-1)">◀</button>
+                    <span id="cal-title" style="color:white; font-size: 16px;"></span>
+                    <button class="btn" style="width:auto; padding:5px 15px; margin:0;" onclick="changeMonth(1)">▶</button>
                 </div>
-                <button class="btn" onclick="addInv()">Guardar</button>
-                <div id="inv-list" style="margin-top: 15px;"></div>
+                <div class="cal-grid" id="cal-grid"></div>
             </div>
-
-            <div class="card">
-                <div class="card-title">🛒 Mercader (Lista de la Compra)</div>
-                <input type="text" id="shop-name" placeholder="Item a comprar">
-                <div class="flex-row">
-                    <input type="number" id="shop-price" placeholder="Precio Total (€)">
-                    <input type="number" id="shop-dur" placeholder="Dura X días">
-                </div>
-                <button class="btn btn-success" onclick="addShop()">Añadir a la lista</button>
-                
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
-                    <div id="shop-list"></div>
-                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top: 15px; text-align: center;">
-                        <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Mantenimiento Base Semanal</span><br>
-                        <span style="font-size: 24px; font-weight: 900; color: var(--c-danger);" id="weekly-cost">0.00€</span>
-                    </div>
-                </div>
+            <div class="card" id="cal-detail" style="display:none;">
+                <div class="card-title" id="cal-det-title" style="color:var(--c-kcal)"></div>
+                <div id="cal-det-content" style="font-size: 13px; color: var(--text-muted);"></div>
             </div>
         </div>
 
     </div>
 
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="switchView('dash', this)">
-            <div class="nav-icon">📊</div><div class="nav-text">Hoy</div>
-        </button>
-        <button class="nav-item" onclick="switchView('calendar', this)">
-            <div class="nav-icon">📅</div><div class="nav-text">Crónicas</div>
-        </button>
-        <button class="nav-item" onclick="switchView('db', this)">
-            <div class="nav-icon">📖</div><div class="nav-text">Compendio</div>
-        </button>
-        <button class="nav-item" onclick="switchView('inv', this)">
-            <div class="nav-icon">🎒</div><div class="nav-text">Bolsa</div>
-        </button>
+        <button class="nav-item active" onclick="switchView('dash', this)"><span class="nav-icon">📊</span>Status</button>
+        <button class="nav-item" onclick="switchView('db', this)"><span class="nav-icon">📖</span>Compendio</button>
+        <button class="nav-item" onclick="switchView('cal', this)"><span class="nav-icon">📅</span>Crónicas</button>
     </nav>
 
     <script>
-        /* ================= 1. BASE DE DATOS MASIVA (Por 100g o unidad indicada) ================= */
-        const coreDB = [
-            // Carnes y Pescados
-            { id: 1, name: "Pechuga de Pollo", kcal: 165, prot: 31, carb: 0, fat: 3.6 },
-            { id: 2, name: "Ternera (Magra)", kcal: 250, prot: 26, carb: 0, fat: 15 },
-            { id: 3, name: "Salmón Fresco", kcal: 208, prot: 20, carb: 0, fat: 13 },
-            { id: 4, name: "Atún en lata (Natural)", kcal: 116, prot: 26, carb: 0, fat: 0.8 },
-            { id: 5, name: "Pavo (Pechuga)", kcal: 104, prot: 24, carb: 0, fat: 1 },
-            { id: 6, name: "Lomo de Cerdo", kcal: 143, prot: 21, carb: 0, fat: 6 },
-            { id: 7, name: "Merluza", kcal: 89, prot: 15, carb: 0, fat: 2.8 },
-            // Hidratos y Cereales
-            { id: 10, name: "Arroz Blanco (Crudo)", kcal: 360, prot: 7, carb: 79, fat: 0.6 },
-            { id: 11, name: "Avena (Copos)", kcal: 389, prot: 16.9, carb: 66, fat: 6.9 },
-            { id: 12, name: "Pasta de Trigo (Cruda)", kcal: 371, prot: 13, carb: 74, fat: 1.5 },
-            { id: 13, name: "Patata (Cruda)", kcal: 77, prot: 2, carb: 17, fat: 0.1 },
-            { id: 14, name: "Boniato/Batata", kcal: 86, prot: 1.6, carb: 20, fat: 0.1 },
-            { id: 15, name: "Pan Integral", kcal: 247, prot: 13, carb: 41, fat: 3.4 },
-            { id: 16, name: "Lentejas (Crudas)", kcal: 353, prot: 25, carb: 60, fat: 1 },
-            { id: 17, name: "Garbanzos (Crudos)", kcal: 364, prot: 19, carb: 61, fat: 6 },
-            // Huevos y Lácteos
-            { id: 20, name: "Huevo (1 Unidad, ~50g)", kcal: 78, prot: 6, carb: 0.6, fat: 5.3 },
-            { id: 21, name: "Claras de Huevo (Líquidas)", kcal: 48, prot: 11, carb: 0.7, fat: 0 },
-            { id: 22, name: "Leche Entera", kcal: 61, prot: 3.2, carb: 4.8, fat: 3.3 },
-            { id: 23, name: "Leche Desnatada", kcal: 34, prot: 3.4, carb: 5, fat: 0.1 },
-            { id: 24, name: "Queso Fresco Batido 0%", kcal: 46, prot: 8, carb: 3.5, fat: 0 },
-            { id: 25, name: "Yogur Griego Natural", kcal: 97, prot: 9, carb: 3.9, fat: 5 },
-            // Grasas y Snacks
-            { id: 30, name: "Aceite de Oliva VE", kcal: 884, prot: 0, carb: 0, fat: 100 },
-            { id: 31, name: "Almendras", kcal: 579, prot: 21, carb: 21, fat: 49 },
-            { id: 32, name: "Nueces", kcal: 654, prot: 15, carb: 13, fat: 65 },
-            { id: 33, name: "Crema de Cacahuete", kcal: 588, prot: 25, carb: 20, fat: 50 },
-            { id: 34, name: "Aguacate", kcal: 160, prot: 2, carb: 8.5, fat: 14.6 },
-            // Verduras y Frutas
-            { id: 40, name: "Plátano", kcal: 89, prot: 1.1, carb: 22.8, fat: 0.3 },
-            { id: 41, name: "Manzana", kcal: 52, prot: 0.3, carb: 13.8, fat: 0.2 },
-            { id: 42, name: "Brócoli", kcal: 34, prot: 2.8, carb: 6.6, fat: 0.3 },
-            { id: 43, name: "Espinacas", kcal: 23, prot: 2.9, carb: 3.6, fat: 0.4 },
-            { id: 44, name: "Tomate", kcal: 18, prot: 0.9, carb: 3.9, fat: 0.2 },
-            // Suplementos
-            { id: 50, name: "Whey Protein (1 Scoop 30g)", kcal: 110, prot: 24, carb: 2, fat: 1.5 },
-            { id: 51, name: "Creatina (5g)", kcal: 0, prot: 0, carb: 0, fat: 0 }
-        ];
-
-        // ================= 2. ESTADO Y LOCALSTORAGE =================
-        const TARGETS = { kcal: 2200, prot: 150, carb: 200, fat: 70 };
-        
-        function getTodayStr() {
-            const d = new Date(); 
-            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        }
-        
-        let state = JSON.parse(localStorage.getItem('nexoDiet_v2')) || {
-            level: 1, exp: 0, streak: 0,
-            customFoods: [],
-            history: {}, // { "YYYY-MM-DD": { log: [], burn: 0, completed: false } }
-            inventory: [], shop: []
+        // ================= OBJETIVOS NUTRICIONALES =================
+        const T = {
+            kcal: 2200, prot: 150, carb: 200, fat: 70, 
+            fib: 30, sug: 50, // Azúcar es límite máximo
+            va: 900, vc: 90, vd: 20, 
+            ca: 1000, fe: 8, po: 3500, mg: 400, na: 2300 // Sodio es límite
         };
 
-        let todayStr = getTodayStr();
-        // Inicializar el día de hoy si no existe
-        if (!state.history[todayStr]) { state.history[todayStr] = { log: [], burn: 0, completed: false }; }
+        // ================= BASE DE DATOS TITANIUM =================
+        // Formato: [id, name, kcal, prot, carb, fat, fib, sug, va, vc, vd, ca, fe, po, mg, na]
+        const coreDB = [
+            { id:1, name: "Pechuga de Pollo", val: [165, 31, 0, 3.6, 0, 0, 6, 0, 0, 15, 1, 256, 29, 74] },
+            { id:2, name: "Avena (Copos)", val: [389, 16.9, 66, 6.9, 10.6, 0.8, 0, 0, 0, 54, 4.7, 429, 177, 2] },
+            { id:3, name: "Huevos (1 Ud, ~50g)", val: [78, 6, 0.6, 5.3, 0, 0.6, 80, 0, 1, 28, 0.9, 69, 6, 71] },
+            { id:4, name: "Arroz Blanco", val: [130, 2.7, 28, 0.3, 0.4, 0.1, 0, 0, 0, 10, 1.2, 35, 12, 1] },
+            { id:5, name: "Salmón Fresco", val: [208, 20, 0, 13, 0, 0, 12, 0, 11, 9, 0.3, 363, 27, 59] },
+            { id:6, name: "Brócoli", val: [34, 2.8, 6.6, 0.3, 2.6, 1.7, 31, 89, 0, 47, 0.7, 316, 21, 33] },
+            { id:7, name: "Plátano", val: [89, 1.1, 22.8, 0.3, 2.6, 12.2, 3, 8.7, 0, 5, 0.3, 358, 27, 1] },
+            { id:8, name: "Lentejas", val: [353, 25, 60, 1.1, 30, 2, 2, 4.4, 0, 56, 7.5, 955, 122, 6] },
+            { id:9, name: "Leche Entera", val: [61, 3.2, 4.8, 3.3, 0, 5, 46, 0, 1.3, 113, 0.1, 132, 10, 43] },
+            { id:10, name: "Whey Protein (30g)", val: [110, 24, 2, 1.5, 0, 1, 0, 0, 0, 100, 0.5, 150, 20, 50] }
+        ].map(i => ({
+            id: i.id, name: i.name,
+            k: i.val[0], p: i.val[1], c: i.val[2], f: i.val[3],
+            fb: i.val[4], sg: i.val[5], va: i.val[6], vc: i.val[7], vd: i.val[8],
+            ca: i.val[9], fe: i.val[10], po: i.val[11], mg: i.val[12], na: i.val[13]
+        }));
+
+        // ================= ESTADO GLOBAL =================
+        function getDateStr(d = new Date()) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
         
-        let fullDB = [...coreDB, ...state.customFoods].sort((a,b) => a.name.localeCompare(b.name));
+        let state = JSON.parse(localStorage.getItem('nexo_rpg_v3')) || {
+            lvl: 1, exp: 0, custom: [],
+            history: {} // { "YYYY-MM-DD": { log: [], burn: 0, done: false } }
+        };
+        
+        let today = getDateStr();
+        if(!state.history[today]) state.history[today] = { log: [], burn: 0, done: false };
+        
+        let db = [...coreDB, ...state.custom].sort((a,b) => a.name.localeCompare(b.name));
 
-        function saveState() {
-            localStorage.setItem('nexoDiet_v2', JSON.stringify(state));
-            updateDashboard();
-        }
+        function save() { localStorage.setItem('nexo_rpg_v3', JSON.stringify(state)); updateUI(); }
 
-        // ================= 3. LÓGICA DE INTERFAZ Y NAVEGACIÓN =================
-        function switchView(viewId, btn) {
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${viewId}`).classList.add('active');
+        // ================= NAVEGACIÓN =================
+        function switchView(id, btn) {
+            document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+            document.getElementById(`view-${id}`).classList.add('active');
             btn.classList.add('active');
-            if(viewId === 'calendar') renderCalendar();
-            if(viewId === 'db') renderDB();
-            if(viewId === 'inv') renderInvShop();
+            if(id === 'db') renderDB();
+            if(id === 'cal') renderCal();
         }
 
-        function updateHeaderUI() {
-            let maxExp = state.level * 150;
-            document.getElementById('ui-level').innerText = state.level;
-            document.getElementById('ui-exp').innerText = state.exp;
-            document.getElementById('ui-max-exp').innerText = maxExp;
-            document.getElementById('ui-exp-bar').style.width = `${Math.min(100, (state.exp / maxExp) * 100)}%`;
-        }
-
-        // ================= 4. DASHBOARD (HOY) =================
-        function updateDashboard() {
-            updateHeaderUI();
+        // ================= LÓGICA PRINCIPAL =================
+        function getTotals(dateStr) {
+            let log = state.history[dateStr].log;
+            let burn = state.history[dateStr].burn;
+            let sum = { k:0, p:0, c:0, f:0, fb:0, sg:0, va:0, vc:0, vd:0, ca:0, fe:0, po:0, mg:0, na:0 };
             
-            // Formatear fecha
-            const d = new Date();
-            const options = { weekday: 'long', day: 'numeric', month: 'short' };
-            document.getElementById('ui-date-today').innerText = d.toLocaleDateString('es-ES', options).toUpperCase();
-
-            let todayData = state.history[todayStr];
-            let totals = todayData.log.reduce((acc, f) => {
-                return { kcal: acc.kcal+f.kcal, prot: acc.prot+f.prot, carb: acc.carb+f.carb, fat: acc.fat+f.fat };
-            }, {kcal:0, prot:0, carb:0, fat:0});
-
-            let netKcal = Math.max(0, totals.kcal - todayData.burn);
-
-            // Actualizar Textos
-            document.getElementById('dash-kcal-in').innerText = Math.round(totals.kcal);
-            document.getElementById('dash-kcal-out').innerText = Math.round(todayData.burn);
-            document.getElementById('dash-kcal-text').innerText = `${Math.round(netKcal)} / ${TARGETS.kcal}`;
-            document.getElementById('dash-prot-text').innerText = `${Math.round(totals.prot)}g`;
-            document.getElementById('dash-carb-text').innerText = `${Math.round(totals.carb)}g`;
-            document.getElementById('dash-fat-text').innerText = `${Math.round(totals.fat)}g`;
-            document.getElementById('dash-streak').innerText = `🔥 ${state.streak}`;
-
-            // Actualizar Barras
-            document.getElementById('dash-kcal-bar').style.width = `${Math.min(100, (netKcal / TARGETS.kcal) * 100)}%`;
-            document.getElementById('dash-kcal-bar').style.background = netKcal > TARGETS.kcal ? "var(--c-danger)" : "var(--c-kcal)";
-            
-            document.getElementById('dash-prot-bar').style.width = `${Math.min(100, (totals.prot / TARGETS.prot) * 100)}%`;
-            document.getElementById('dash-carb-bar').style.width = `${Math.min(100, (totals.carb / TARGETS.carb) * 100)}%`;
-            document.getElementById('dash-fat-bar').style.width = `${Math.min(100, (totals.fat / TARGETS.fat) * 100)}%`;
-
-            // Llenar Select de Comida Rápida
-            let selectHtml = `<option value="" disabled selected>Selecciona alimento...</option>`;
-            fullDB.forEach(f => selectHtml += `<option value="${f.id}">${f.name}</option>`);
-            document.getElementById('quick-food-select').innerHTML = selectHtml;
-
-            // Render Lista de Hoy
-            let listHtml = "";
-            todayData.log.forEach(item => {
-                listHtml += `
-                <div class="item-row">
-                    <div class="item-info">
-                        <h4>${item.name} (${item.qty}g/u)</h4>
-                        <div class="item-macros">
-                            <span>${Math.round(item.kcal)} kcal</span> | 
-                            <span class="p">${Math.round(item.prot)}P</span> 
-                            <span class="c">${Math.round(item.carb)}C</span> 
-                            <span class="f">${Math.round(item.fat)}F</span>
-                        </div>
-                    </div>
-                    <button class="btn-icon" onclick="deleteLog(${item.id})">✖</button>
-                </div>`;
+            log.forEach(i => {
+                let m = (i.name.includes('Ud') || i.name.includes('30g')) ? i.qty : i.qty/100;
+                for(let key in sum) sum[key] += (i[key] * m);
             });
-            if(listHtml === "") listHtml = "<p style='color:var(--text-muted); font-size: 13px; text-align:center;'>Aún no has consumido nada hoy.</p>";
-            document.getElementById('today-log-list').innerHTML = listHtml;
+            sum.netK = Math.max(0, sum.k - burn);
+            return sum;
+        }
+
+        function updateUI() {
+            // Header
+            let maxE = state.lvl * 200;
+            document.getElementById('ui-lvl').innerText = state.lvl;
+            document.getElementById('ui-exp').innerText = state.exp;
+            document.getElementById('ui-max').innerText = maxE;
+            document.getElementById('ui-exp-bar').style.width = `${Math.min(100, (state.exp/maxE)*100)}%`;
+
+            // Select
+            document.getElementById('food-select').innerHTML = db.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+
+            let t = getTotals(today);
+
+            // Macros
+            document.getElementById('b-kcal-t').innerText = `${Math.round(t.netK)} / ${T.kcal}`;
+            document.getElementById('b-kcal').style.width = `${Math.min(100, (t.netK/T.kcal)*100)}%`;
+            document.getElementById('b-kcal').style.background = t.netK > T.kcal ? "var(--c-danger)" : "var(--c-kcal)";
+
+            document.getElementById('b-prot-t').innerText = `${Math.round(t.p)} / ${T.prot}g`;
+            document.getElementById('b-prot').style.width = `${Math.min(100, (t.p/T.prot)*100)}%`;
+
+            document.getElementById('b-carb-t').innerText = `${Math.round(t.c)} / ${T.carb}g`;
+            document.getElementById('b-carb').style.width = `${Math.min(100, (t.c/T.carb)*100)}%`;
+
+            document.getElementById('b-fat-t').innerText = `${Math.round(t.f)} / ${T.fat}g`;
+            document.getElementById('b-fat').style.width = `${Math.min(100, (t.f/T.fat)*100)}%`;
+
+            // Micros
+            const updateMicro = (id, val, target, isMax = false) => {
+                document.getElementById(`m-${id}`).innerText = Math.round(val);
+                let pct = Math.min(100, (val/target)*100);
+                document.getElementById(`f-${id}`).style.width = `${pct}%`;
+                if(isMax && val > target) document.getElementById(`f-${id}`).style.background = "var(--c-danger)";
+            };
+
+            updateMicro('fib', t.fb, T.fib); updateMicro('sug', t.sg, T.sug, true);
+            updateMicro('va', t.va, T.va); updateMicro('vc', t.vc, T.vc); updateMicro('vd', t.vd, T.vd);
+            updateMicro('ca', t.ca, T.ca); updateMicro('fe', t.fe, T.fe); updateMicro('po', t.po, T.po);
+            updateMicro('mg', t.mg, T.mg); updateMicro('na', t.na, T.na, true);
+
+            // Log
+            document.getElementById('log-list').innerHTML = state.history[today].log.map((i, idx) => `
+                <div class="item-list">
+                    <div><b>${i.name}</b> (${i.qty})<br><span style="font-size:10px; color:var(--text-muted)">${Math.round(i.k)}kc | ${Math.round(i.p)}P | ${Math.round(i.c)}C | ${Math.round(i.f)}F</span></div>
+                    <button class="btn-icon" onclick="delLog(${idx})">✖</button>
+                </div>
+            `).join('');
         }
 
         function logFood() {
-            const id = document.getElementById('quick-food-select').value;
-            const qty = parseFloat(document.getElementById('quick-food-qty').value);
-            if(!id || isNaN(qty) || qty <= 0) return alert("Selecciona alimento y cantidad válida.");
-            
-            const food = fullDB.find(f => f.id == id);
-            // Determinamos multiplicador (si es Scoop o Unidad, el valor base es 1 unidad. Si no, es por 100g)
-            const isUnit = food.name.toLowerCase().includes('unidad') || food.name.toLowerCase().includes('scoop');
-            const mult = isUnit ? qty : qty / 100;
-
-            state.history[todayStr].log.push({
-                id: Date.now(), name: food.name, qty: qty,
-                kcal: food.kcal * mult, prot: food.prot * mult, carb: food.carb * mult, fat: food.fat * mult
-            });
-            saveState();
+            let id = document.getElementById('food-select').value;
+            let qty = parseFloat(document.getElementById('food-qty').value);
+            if(!id || isNaN(qty) || qty <= 0) return;
+            let item = db.find(x => x.id == id);
+            state.history[today].log.push({ ...item, qty }); // Guardamos copia con qty
+            document.getElementById('food-qty').value = "100";
+            save();
         }
 
-        function deleteLog(id) {
-            state.history[todayStr].log = state.history[todayStr].log.filter(l => l.id !== id);
-            saveState();
-        }
-
-        function logBurn() {
-            const burn = parseFloat(document.getElementById('burn-input').value);
-            if(!isNaN(burn) && burn > 0) {
-                state.history[todayStr].burn += burn;
-                document.getElementById('burn-input').value = "";
-                saveState();
-            }
+        function delLog(idx) { state.history[today].log.splice(idx, 1); save(); }
+        function logBurn() { 
+            let v = parseFloat(document.getElementById('burn-kcal').value); 
+            if(v > 0) { state.history[today].burn += v; document.getElementById('burn-kcal').value = ""; save(); }
         }
 
         function endDay() {
-            if(state.history[todayStr].completed) return alert("Ya finalizaste este día.");
+            if(state.history[today].done) return alert("Día ya guardado.");
+            let t = getTotals(today);
+            let expGained = 0;
             
-            let todayData = state.history[todayStr];
-            let totals = todayData.log.reduce((acc, f) => ({ prot: acc.prot+f.prot, kcal: acc.kcal+f.kcal }), {prot:0, kcal:0});
-            let netKcal = totals.kcal - todayData.burn;
+            if(t.p >= T.prot * 0.9) expGained += 50; // Misión proteina
+            if(t.netK <= T.kcal + 100) expGained += 50; // Misión déficit
             
-            let earned = 0;
-            // Lógica de gamificación
-            if(totals.prot >= TARGETS.prot * 0.9) earned += 40; // 90% de la prot requerida
-            if(netKcal > 1200 && netKcal <= TARGETS.kcal + 100) earned += 60; // En déficit pero sin matarse de hambre
+            // Bonus por micros (10 exp por cada uno cumplido > 80%)
+            if(t.fb > T.fib*0.8) expGained += 10;
+            if(t.va > T.va*0.8) expGained += 10;
+            if(t.ca > T.ca*0.8) expGained += 10;
+            if(t.fe > T.fe*0.8) expGained += 10;
 
-            if(earned > 0) {
-                state.streak++;
-                earned += (state.streak * 5); // Bonus por racha
-                state.exp += earned;
-                
-                let maxExp = state.level * 150;
-                if(state.exp >= maxExp) {
-                    state.level++;
-                    state.exp -= maxExp;
-                    alert(`¡SUBISTE AL NIVEL ${state.level}! 🎉 Stats aumentados.`);
-                } else {
-                    alert(`Día completado. Misión exitosa.\nHas ganado ${earned} EXP.`);
-                }
+            if(expGained > 0) {
+                state.exp += expGained;
+                let maxE = state.lvl * 200;
+                if(state.exp >= maxE) { state.lvl++; state.exp -= maxE; alert(`¡LEVEL UP! Nivel ${state.lvl}`); }
+                alert(`Guardado. Ganaste +${expGained} EXP.`);
             } else {
-                state.streak = 0;
-                alert("Día completado, pero fallaste las misiones de macros. Racha perdida. Mañana será otro día.");
+                alert("Guardado sin bonus. Alimentación deficiente hoy.");
             }
-            
-            state.history[todayStr].completed = true;
-            saveState();
+            state.history[today].done = true; save();
         }
 
-        // ================= 5. COMPENDIO (BASE DE DATOS) =================
+        // ================= BASE DE DATOS (FORJA) =================
         function renderDB() {
-            const search = document.getElementById('db-search').value.toLowerCase();
-            const filtered = fullDB.filter(f => f.name.toLowerCase().includes(search));
-            
-            let html = "";
-            filtered.forEach(f => {
-                const isCustom = state.customFoods.some(cf => cf.id === f.id);
-                const delBtn = isCustom ? `<button class="btn-icon" onclick="deleteCustomFood(${f.id})">✖</button>` : '';
-                html += `
-                <div class="item-row">
-                    <div class="item-info">
-                        <h4 style="color: ${isCustom ? 'var(--c-exp)' : 'var(--text-main)'}">${f.name}</h4>
-                        <div class="item-macros">
-                            <span>${f.kcal} kcal</span> | 
-                            <span class="p">${f.prot}P</span> 
-                            <span class="c">${f.carb}C</span> 
-                            <span class="f">${f.fat}F</span>
-                            <span>(/100g)</span>
-                        </div>
+            let q = document.getElementById('search-db').value.toLowerCase();
+            document.getElementById('db-render-list').innerHTML = db.filter(x => x.name.toLowerCase().includes(q)).map(f => `
+                <div class="item-list" style="display:block;">
+                    <div style="font-weight:900; color:${state.custom.some(c=>c.id==f.id)?'var(--c-exp)':'white'}">${f.name}</div>
+                    <div style="font-size:10px; color:var(--text-muted); display:flex; gap:10px; margin-top:4px;">
+                        <span>${f.k}kc</span><span style="color:var(--c-prot)">${f.p}P</span><span style="color:var(--c-carb)">${f.c}C</span><span style="color:var(--c-fat)">${f.f}F</span>
                     </div>
-                    ${delBtn}
-                </div>`;
-            });
-            document.getElementById('db-list').innerHTML = html;
-        }
-
-        function createCustomFood() {
-            const name = document.getElementById('new-f-name').value;
-            const kcal = parseFloat(document.getElementById('new-f-kcal').value);
-            const prot = parseFloat(document.getElementById('new-f-prot').value);
-            const carb = parseFloat(document.getElementById('new-f-carb').value);
-            const fat = parseFloat(document.getElementById('new-f-fat').value);
-            
-            if(!name || isNaN(kcal) || isNaN(prot) || isNaN(carb) || isNaN(fat)) return alert("Forja fallida: Faltan materiales (datos).");
-            
-            const newFood = { id: Date.now(), name, kcal, prot, carb, fat };
-            state.customFoods.push(newFood);
-            fullDB = [...coreDB, ...state.customFoods].sort((a,b) => a.name.localeCompare(b.name));
-            
-            document.getElementById('new-f-name').value = "";
-            document.querySelectorAll('#view-db input[type="number"]').forEach(inpt => inpt.value = "");
-            
-            saveState(); renderDB();
-        }
-
-        function deleteCustomFood(id) {
-            state.customFoods = state.customFoods.filter(f => f.id !== id);
-            fullDB = [...coreDB, ...state.customFoods].sort((a,b) => a.name.localeCompare(b.name));
-            saveState(); renderDB();
-        }
-
-        // ================= 6. INVENTARIO Y MERCADO =================
-        function renderInvShop() {
-            document.getElementById('inv-list').innerHTML = state.inventory.map(i => `
-                <div class="item-row"><span>${i.name} [${i.qty}]</span><button class="btn-icon" onclick="deleteInv(${i.id})">✖</button></div>
+                </div>
             `).join('');
-
-            let weeklyCost = 0;
-            document.getElementById('shop-list').innerHTML = state.shop.map(s => {
-                weeklyCost += (s.price / s.dur) * 7;
-                return `<div class="item-row">
-                    <div class="item-info"><h4>${s.name}</h4><span style="font-size:11px; color:var(--text-muted);">${s.price}€ / dura ${s.dur} días</span></div>
-                    <button class="btn-icon" onclick="deleteShop(${s.id})">✖</button>
-                </div>`;
-            }).join('');
-            document.getElementById('weekly-cost').innerText = `${weeklyCost.toFixed(2)} €`;
         }
 
-        function addInv() {
-            const name = document.getElementById('inv-name').value;
-            const qty = document.getElementById('inv-qty').value;
-            if(!name) return;
-            state.inventory.push({ id: Date.now(), name, qty });
-            document.getElementById('inv-name').value = ""; document.getElementById('inv-qty').value = "";
-            saveState(); renderInvShop();
-        }
-        function deleteInv(id) { state.inventory = state.inventory.filter(i => i.id !== id); saveState(); renderInvShop(); }
+        function createFood() {
+            let g = (id) => parseFloat(document.getElementById(id).value) || 0;
+            let name = document.getElementById('c-name').value;
+            if(!name || g('c-kcal') === 0) return alert("Mínimo nombre y Kcal.");
 
-        function addShop() {
-            const name = document.getElementById('shop-name').value;
-            const price = parseFloat(document.getElementById('shop-price').value);
-            const dur = parseFloat(document.getElementById('shop-dur').value);
-            if(!name || isNaN(price) || isNaN(dur)) return;
-            state.shop.push({ id: Date.now(), name, price, dur });
-            document.getElementById('shop-name').value = ""; document.getElementById('shop-price').value = ""; document.getElementById('shop-dur').value = "";
-            saveState(); renderInvShop();
-        }
-        function deleteShop(id) { state.shop = state.shop.filter(s => s.id !== id); saveState(); renderInvShop(); }
-
-        // ================= 7. CALENDARIO (MOTOR DE TIEMPO) =================
-        let calDate = new Date();
-        function changeMonth(offset) {
-            calDate.setMonth(calDate.getMonth() + offset);
-            renderCalendar();
-        }
-
-        function renderCalendar() {
-            const monthYearStr = calDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-            document.getElementById('cal-month-year').innerText = monthYearStr.charAt(0).toUpperCase() + monthYearStr.slice(1);
+            let nF = {
+                id: Date.now(), name, k: g('c-kcal'), p: g('c-prot'), c: g('c-carb'), f: g('c-fat'),
+                fb: g('c-fib'), sg: g('c-sug'), va: g('c-va'), vc: g('c-vc'), vd: g('c-vd'),
+                ca: g('c-ca'), fe: g('c-fe'), po: g('c-po'), mg: g('c-mg'), na: g('c-na')
+            };
             
-            const grid = document.querySelector('.calendar-grid');
-            // Limpiar días anteriores (manteniendo cabeceras L M X J V S D)
-            Array.from(grid.children).forEach((child, i) => { if(i > 6) child.remove(); });
+            state.custom.push(nF);
+            db = [...coreDB, ...state.custom].sort((a,b) => a.name.localeCompare(b.name));
+            document.querySelectorAll('#view-db input').forEach(i => i.value = "");
+            save(); renderDB(); alert("Alimento forjado.");
+        }
 
-            const year = calDate.getFullYear();
-            const month = calDate.getMonth();
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+        // ================= CALENDARIO =================
+        let cD = new Date();
+        function changeMonth(o) { cD.setMonth(cD.getMonth() + o); renderCal(); }
+        
+        function renderCal() {
+            document.getElementById('cal-title').innerText = cD.toLocaleDateString('es-ES', {month:'long', year:'numeric'}).toUpperCase();
+            let y = cD.getFullYear(), m = cD.getMonth();
+            let d1 = new Date(y, m, 1).getDay(); d1 = d1===0?6:d1-1;
+            let days = new Date(y, m+1, 0).getDate();
             
-            // Ajustar para que Lunes sea el primer día (getDay() -> 0 es Domingo)
-            let startOffset = firstDay === 0 ? 6 : firstDay - 1;
-
-            // Rellenar huecos vacíos
-            for(let i = 0; i < startOffset; i++) {
-                let empty = document.createElement('div'); empty.className = 'cal-day empty'; grid.appendChild(empty);
+            let html = `<div style="color:var(--text-muted); font-size:10px;">L</div><div style="color:var(--text-muted); font-size:10px;">M</div><div style="color:var(--text-muted); font-size:10px;">X</div><div style="color:var(--text-muted); font-size:10px;">J</div><div style="color:var(--text-muted); font-size:10px;">V</div><div style="color:var(--text-muted); font-size:10px;">S</div><div style="color:var(--text-muted); font-size:10px;">D</div>`;
+            for(let i=0; i<d1; i++) html += `<div></div>`;
+            
+            for(let d=1; d<=days; d++) {
+                let str = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                let cls = 'cal-day';
+                if(str === today) cls += ' today';
+                if(state.history[str] && state.history[str].log.length > 0) cls += ' logged';
+                html += `<div class="${cls}" onclick="showCal('${str}')">${d}</div>`;
             }
-
-            // Crear días
-            for(let d = 1; d <= daysInMonth; d++) {
-                let dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                let dayEl = document.createElement('div');
-                dayEl.className = 'cal-day';
-                dayEl.innerText = d;
-                
-                if(dateStr === todayStr) dayEl.classList.add('today');
-                if(state.history[dateStr] && state.history[dateStr].log.length > 0) {
-                    dayEl.classList.add('logged');
-                    // Indicador de completado
-                    if(state.history[dateStr].completed) {
-                        let dot = document.createElement('div');
-                        dot.style = "width:4px; height:4px; background:var(--c-kcal); border-radius:50%; position:absolute; bottom:4px;";
-                        dayEl.appendChild(dot);
-                    }
-                }
-
-                dayEl.onclick = () => showCalDetails(dateStr);
-                grid.appendChild(dayEl);
-            }
+            document.getElementById('cal-grid').innerHTML = html;
         }
 
-        function showCalDetails(dateStr) {
-            const detailsPanel = document.getElementById('cal-details');
-            document.getElementById('cal-detail-date').innerText = dateStr;
-            
-            let data = state.history[dateStr];
+        function showCal(str) {
+            let data = state.history[str];
+            let p = document.getElementById('cal-detail');
+            document.getElementById('cal-det-title').innerText = "Reporte: " + str;
             if(!data || data.log.length === 0) {
-                detailsPanel.style.display = 'block';
-                document.getElementById('det-food-list').innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>No hay registros en esta fecha.</p>";
-                document.getElementById('det-kcal').innerText = "0"; document.getElementById('det-prot').innerText = "0g";
-                document.getElementById('det-carb').innerText = "0g"; document.getElementById('det-fat').innerText = "0g";
-                return;
+                document.getElementById('cal-det-content').innerText = "Sin registros.";
+            } else {
+                let t = getTotals(str); // Reutilizamos la función
+                document.getElementById('cal-det-content').innerHTML = `
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+                        <div>🔥 Kcal: ${Math.round(t.netK)}</div>
+                        <div style="color:var(--c-prot)">🥩 Prot: ${Math.round(t.p)}g</div>
+                        <div style="color:var(--c-carb)">🌾 Carb: ${Math.round(t.c)}g</div>
+                        <div style="color:var(--c-fat)">🥑 Fat: ${Math.round(t.f)}g</div>
+                    </div>
+                    <hr style="border-color:var(--border); margin: 10px 0;">
+                    <b>Micros destacados:</b> Fibra ${Math.round(t.fb)}g | Hierro ${Math.round(t.fe)}mg | Calcio ${Math.round(t.ca)}mg
+                `;
             }
-
-            let totals = data.log.reduce((acc, f) => ({ kcal: acc.kcal+f.kcal, prot: acc.prot+f.prot, carb: acc.carb+f.carb, fat: acc.fat+f.fat }), {kcal:0, prot:0, carb:0, fat:0});
-            
-            document.getElementById('det-kcal').innerText = Math.round(totals.kcal - data.burn);
-            document.getElementById('det-prot').innerText = Math.round(totals.prot) + "g";
-            document.getElementById('det-carb').innerText = Math.round(totals.carb) + "g";
-            document.getElementById('det-fat').innerText = Math.round(totals.fat) + "g";
-
-            let listHtml = "";
-            data.log.forEach(item => {
-                listHtml += `<div style="font-size: 13px; color: var(--text-main); margin-bottom: 5px; border-bottom: 1px dashed var(--border); padding-bottom: 5px;">
-                    <span style="font-weight:bold;">${item.name} (${item.qty}g)</span><br>
-                    <span style="color:var(--text-muted); font-size: 11px;">${Math.round(item.kcal)}kc | ${Math.round(item.prot)}P | ${Math.round(item.carb)}C | ${Math.round(item.fat)}F</span>
-                </div>`;
-            });
-            document.getElementById('det-food-list').innerHTML = listHtml;
-            detailsPanel.style.display = 'block';
+            p.style.display = 'block';
         }
 
-        // ================= INICIALIZACIÓN =================
-        updateDashboard();
+        // Init
+        updateUI();
     </script>
 </body>
 </html>
