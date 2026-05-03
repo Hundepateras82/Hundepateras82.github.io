@@ -5,652 +5,317 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>LifeQuest: V4</title>
+    <title>Dieta & Stats</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* === PALETA MODO OSCURO === */
         :root {
-            --bg-page: #0f171e; --panel: #1b262c; --text-main: #ffffff; --text-sub: #8b9eb0;
-            --border-dark: #2c3e50;
-            --duo-green: #58cc02; --duo-green-shadow: #46a302;
-            --duo-blue: #1cb0f6; --duo-blue-shadow: #1899d6;
-            --duo-orange: #ff9600; --duo-orange-shadow: #cc7800;
-            --duo-red: #ff4b4b; --duo-red-shadow: #ea2b2b;
-            --duo-purple: #9b59b6; --duo-purple-shadow: #8e44ad;
-            --duo-yellow: #ffc800; --duo-yellow-shadow: #cc9a00;
+            --bg: #050914; --panel: #162032; --border: #1e293b;
+            --primary: #f59e0b; --primary-dark: #b45309;
+            --hp: #ef4444; --mp: #3b82f6; --exp: #eab308; --stamina: #10b981;
+            --text: #e2e8f0; --text-muted: #94a3b8;
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        /* Fondo negro para rellenar los bordes en iOS */
-        body { margin: 0; font-family: 'Nunito', sans-serif; background: #000; display: flex; justify-content: center; height: 100dvh; width: 100vw; overflow: hidden; color: var(--text-main); }
-
-        /* SAFE AREAS DE IOS IMPLEMENTADAS */
-        #phone-container { 
-            width: 100%; max-width: 600px; height: 100dvh; 
-            background: var(--bg-page); 
-            display: flex; flex-direction: column; 
-            position: relative;
-            padding-top: env(safe-area-inset-top, 0px);
-            padding-bottom: env(safe-area-inset-bottom, 0px);
+        body {
+            background: var(--bg); color: var(--text); font-family: 'Nunito', sans-serif;
+            margin: 0; padding: 0; padding-top: env(safe-area-inset-top, 40px);
+            height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
         }
-
-        #global-hud { flex-shrink: 0; background: var(--panel); }
+        h2, h3 { margin: 0 0 15px 0; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+        .header { padding: 10px 20px; text-align: center; border-bottom: 2px solid var(--border); }
+        .level-bar-container { background: #000; border-radius: 10px; height: 12px; width: 100%; margin-top: 5px; overflow: hidden; border: 1px solid var(--border); }
+        .level-bar { height: 100%; background: var(--exp); width: 0%; transition: 0.5s; }
         
-        .screen { display: none; flex: 1; flex-direction: column; background: var(--bg-page); overflow-y: auto; }
-        .screen.active { display: flex; animation: screenIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes screenIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-
-        .content { padding: 20px; flex: 1; }
-
-        /* HUD Global */
-        .rpg-hud { padding: 12px 15px; border-bottom: 2px solid var(--border-dark); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-weight: 900; font-size: 13px; z-index: 50; }
-        .bar-wrap { width: 100%; height: 10px; background: var(--border-dark); border-radius: 10px; margin-top: 4px; overflow: hidden; position: relative;}
-        .bar-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
-        .combo-badge { background: var(--duo-orange); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 5px; animation: pulse 1s infinite; display: none; }
-
-        /* Botones 3D Neon */
-        .btn-3d { padding: 15px 20px; border-radius: 16px; border: none; font-family: inherit; font-weight: 900; font-size: 15px; text-transform: uppercase; cursor: pointer; position: relative; transition: all 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; width: 100%; }
-        .btn-3d:active { transform: translateY(4px); box-shadow: none !important; margin-bottom: 8px; margin-top: 4px; }
-        .btn-3d:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; margin-bottom: 12px !important; margin-top: 0 !important; }
-        .btn-blue { background: var(--duo-blue); color: white; box-shadow: 0 5px 0 var(--duo-blue-shadow); }
-        .btn-green { background: var(--duo-green); color: white; box-shadow: 0 5px 0 var(--duo-green-shadow); }
-        .btn-red { background: var(--duo-red); color: white; box-shadow: 0 5px 0 var(--duo-red-shadow); }
-        .btn-purple { background: var(--duo-purple); color: white; box-shadow: 0 5px 0 var(--duo-purple-shadow); }
-        .btn-yellow { background: var(--duo-yellow); color: black; box-shadow: 0 5px 0 var(--duo-yellow-shadow); }
-        .btn-dark { background: var(--panel); color: var(--text-main); border: 2px solid var(--border-dark); box-shadow: 0 4px 0 var(--border-dark); }
-        .btn-magic { background: #17a2b8; color: white; box-shadow: 0 5px 0 #117a8b; border: 1px solid #1fc8e3; }
-
-        /* Navbar Inferior */
-        .main-nav { flex-shrink: 0; height: 65px; background: var(--panel); border-top: 2px solid var(--border-dark); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .nav-tab { display: flex; flex-direction: column; align-items: center; color: var(--text-sub); font-weight: 900; font-size: 10px; cursor: pointer; transition: 0.2s; padding: 5px; }
-        .nav-tab.active { color: var(--duo-blue); transform: scale(1.1); }
-        .nav-tab span { font-size: 20px; margin-bottom: 2px; }
-
-        /* Elementos UI */
-        .card { background: var(--panel); border: 2px solid var(--border-dark); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
-        .shop-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-dark); padding-bottom: 15px; margin-bottom: 15px; }
-        .shop-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
-        .loot-pill { display: inline-block; background: var(--bg-page); border: 1px solid var(--border-dark); padding: 4px 10px; border-radius: 20px; font-size: 12px; margin: 2px; font-weight: bold;}
+        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: calc(80px + var(--safe-bottom)); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         
-        /* Mapas */
-        .node-path { display: flex; flex-direction: column; align-items: center; gap: 30px; padding-top: 20px; padding-bottom: 40px; }
-        .node { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; cursor: pointer; border: none; position: relative; box-shadow: 0 6px 0 var(--border-dark); background: var(--border-dark); transition: 0.2s;}
-        .node.completed { background: var(--duo-yellow); box-shadow: 0 6px 0 var(--duo-yellow-shadow); color: white; }
-        .node.unlocked { background: var(--duo-green); box-shadow: 0 6px 0 var(--duo-green-shadow); color: white; animation: pulse 2s infinite; }
-        .node.boss { border: 2px solid var(--duo-purple); }
-        .node.unlocked.boss { background: var(--duo-purple); box-shadow: 0 6px 0 var(--duo-purple-shadow); }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
-        /* Examen */
-        .option-card { background: var(--panel); border: 2px solid var(--border-dark); border-radius: 15px; padding: 15px; margin-bottom: 12px; cursor: pointer; font-weight: 700; transition: 0.2s; color: var(--text-main); }
-        .option-card.selected { border-color: var(--duo-blue); box-shadow: 0 0 10px rgba(28,176,246,0.3); }
-        .option-card.correct { border-color: var(--duo-green); background: rgba(88,204,2,0.1); }
-        .option-card.wrong { border-color: var(--duo-red); background: rgba(255,75,75,0.1); opacity: 0.5; }
-        .option-card.hidden { display: none; }
-
-        /* Animaciones Visuales (Para compensar falta de vibración en iOS) */
-        @keyframes damageShake { 0% { transform: translateX(0); filter: drop-shadow(0 0 10px red); } 25% { transform: translateX(-20px); } 50% { transform: translateX(20px); } 75% { transform: translateX(-20px); } 100% { transform: translateX(0); } }
-        .damage-effect { animation: damageShake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,0,0,0.5); z-index: 999; display: none; pointer-events: none; mix-blend-mode: multiply; }
+        .card { background: var(--panel); border: 2px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
         
-        @keyframes critFlash { 0% { background: rgba(255, 200, 0, 0.8); } 100% { background: transparent; } }
-        #crit-overlay { position: fixed; top:0; left:0; width:100%; height:100%; z-index: 998; display: none; pointer-events: none; }
-        .crit-effect { animation: critFlash 0.5s ease-out; }
-
-        .gacha-box { background: linear-gradient(45deg, #1b262c, #2c3e50); border: 2px dashed var(--duo-purple); text-align: center; padding: 20px; border-radius: 16px; margin-top: 15px;}
+        /* Progress bars */
+        .stat-row { margin-bottom: 10px; }
+        .stat-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+        .bar-bg { background: #000; height: 10px; border-radius: 5px; overflow: hidden; }
+        .bar-fill { height: 100%; transition: 0.3s; }
         
-        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-80px) scale(1.5); opacity: 0; } }
-        .floating-text { position: absolute; font-weight: 900; font-size: 24px; pointer-events: none; z-index: 1000; animation: floatUp 1s ease-out forwards; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; }
+        input, select, button { width: 100%; padding: 12px; border-radius: 10px; border: none; font-family: inherit; font-size: 14px; margin-bottom: 10px; box-sizing: border-box; }
+        input, select { background: #000; color: white; border: 1px solid var(--border); }
+        button { background: var(--primary); color: #000; font-weight: 900; text-transform: uppercase; cursor: pointer; border-bottom: 4px solid var(--primary-dark); transition: 0.1s; }
+        button:active { transform: translateY(4px); border-bottom: 0px; margin-bottom: 14px; }
+        button.danger { background: var(--hp); border-bottom-color: #991b1b; }
+        button.success { background: var(--stamina); border-bottom-color: #047857; }
         
-        .title-badge { display: inline-block; padding: 3px 8px; background: rgba(255,255,255,0.1); border-radius: 10px; font-size: 11px; margin-top: 5px; color: var(--duo-yellow); border: 1px solid var(--duo-yellow); }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
+        .delete-btn { background: var(--hp); color: white; width: 30px; height: 30px; padding: 0; border-radius: 5px; border: none; font-weight: bold; margin: 0; margin-left: 10px; display: flex; align-items: center; justify-content: center;}
+        
+        .navbar {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--panel);
+            border-top: 2px solid var(--border); display: flex; justify-content: space-around;
+            padding-bottom: var(--safe-bottom); padding-top: 10px; z-index: 100;
+        }
+        .nav-btn { background: transparent; border: none; color: var(--text-muted); font-size: 24px; padding: 10px; margin: 0; cursor: pointer; transition: 0.2s; border-radius: 10px; }
+        .nav-btn.active { color: var(--primary); background: rgba(245, 158, 11, 0.1); transform: translateY(-5px); }
+        
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row > * { flex: 1; }
+        
+        .streak-box { text-align: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 10px; }
+        .streak-box span { font-size: 24px; display: block; margin-top: 5px; font-weight: 900; color: var(--primary); }
     </style>
 </head>
 <body>
 
-<div id="damage-overlay"></div>
-<div id="crit-overlay"></div>
-
-<div id="phone-container">
-
-    <div id="global-hud" class="rpg-hud" style="display:none;">
-        <div>👑 NVL <span id="ui-lvl">1</span> • 🟡 <span id="ui-gold">0</span> <span id="combo-badge" class="combo-badge">🔥 x1.5</span>
-            <div class="bar-wrap"><div id="bar-xp" class="bar-fill" style="background:var(--duo-blue)"></div></div>
-        </div>
-        <div style="text-align:right">XP <span id="ui-xp">0</span>/<span id="ui-max-xp">100</span></div>
-        <div>❤️ HP <span id="ui-hp">100</span>/<span id="ui-maxhp">100</span><div class="bar-wrap"><div id="bar-hp" class="bar-fill" style="background:var(--duo-red)"></div></div></div>
-        <div style="text-align:right">⚡ EN <span id="ui-en">50</span>/<span id="ui-maxen">50</span><div class="bar-wrap"><div id="bar-en" class="bar-fill" style="background:var(--duo-yellow)"></div></div></div>
+    <div class="header">
+        <h3 style="color: white; margin: 0;">LVL <span id="player-level">1</span> | EXP: <span id="player-exp">0</span>/<span id="player-max-exp">100</span></h3>
+        <div class="level-bar-container"><div class="level-bar" id="exp-bar"></div></div>
     </div>
 
-    <div id="screen-home" class="screen active">
-        <div class="content">
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div>
-                    <div style="font-weight: 900; font-size: 24px; color: var(--duo-blue); line-height: 1;">Erudito RPG</div>
-                    <div id="player-title" class="title-badge">Mendigo Ignorante</div>
-                </div>
-                <span style="color:var(--duo-orange); font-weight: 900; font-size: 16px;">🔥 <span id="hub-streak">0</span> Días</span>
-            </div>
-
-            <div class="card" style="text-align: center; border-color: var(--duo-blue);">
-                <div style="font-size: 60px; margin-bottom: 10px;">⚔️</div>
-                <h1 style="font-weight: 900; font-size: 20px; margin-bottom: 10px;">La Forja del Saber</h1>
-                <button class="btn-3d btn-blue" onclick="navTo('worlds')">ENTRAR A LA MAZMORRA</button>
-            </div>
-
-            <h2 style="font-weight: 900; font-size: 16px; margin: 20px 0 10px; color: var(--text-sub);">Equipamiento Activo</h2>
-            <div class="card" style="display:flex; align-items:center; gap:15px; border-color:var(--duo-yellow);">
-                <div style="font-size: 40px;" id="eq-icon">🗡️</div>
-                <div>
-                    <div style="font-weight:900;" id="eq-name">Sin Arma</div>
-                    <div style="font-size:12px; color:var(--text-sub);" id="eq-desc">Ningún bonus activo.</div>
-                </div>
-            </div>
-
-            <h2 style="font-weight: 900; font-size: 16px; margin: 20px 0 10px; color: var(--text-sub);">Bolsa de Materiales</h2>
-            <div class="card" id="inventory-ui"></div>
-        </div>
-    </div>
-
-    <div id="screen-worlds" class="screen">
-        <div class="content">
-            <h2 style="font-weight: 900; margin-bottom: 20px;">🗺️ Mazmorras Descubiertas</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" id="worlds-list"></div>
-        </div>
-    </div>
-
-    <div id="screen-study" class="screen">
-        <div class="content" id="study-map-view">
-            <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 15px;">
-                <h2 id="current-world-title" style="font-weight: 900; margin:0; font-size: 16px;">Mundo</h2>
-                <button class="btn-3d btn-dark" style="width:auto; padding: 6px 12px; margin:0; font-size: 11px;" onclick="openForge()">⚒️ FORJA JSON</button>
-            </div>
-            <div class="node-path" id="node-path-render"></div>
-        </div>
-
-        <div class="content" id="study-node-view" style="display:none;">
-            <button class="btn-3d btn-dark" style="margin-bottom: 10px;" onclick="closeNode()">← HUIR DEL COMBATE</button>
-            
-            <h2 id="node-title" style="font-weight:900; margin:0; font-size:18px; border-bottom:1px solid var(--border-dark); padding-bottom:10px;">Cargando...</h2>
-            
-            <div id="active-skills" style="display:flex; gap:5px; margin-top:15px;">
-                <button id="btn-hint" class="btn-3d btn-dark" style="flex:1; margin:0; padding:8px; font-size:11px;" onclick="useOraculo()">👁️ ORÁCULO</button>
-                <button id="btn-magic" class="btn-3d btn-magic" style="flex:1; margin:0; padding:8px; font-size:11px;" onclick="useMagic()">✨ REVELAR</button>
-                <button id="btn-pot" class="btn-3d btn-green" style="flex:0.5; margin:0; padding:8px; font-size:12px;" onclick="usePotionCombat()">💊 <span id="combat-pots">0</span></button>
-            </div>
-            
-            <div id="node-text" style="line-height:1.5; margin:20px 0; font-size:15px;"></div>
-            <div id="game-container"></div>
-            <div style="margin-top:30px;"><button id="btn-action-1" class="btn-3d btn-blue" style="display:none;"></button></div>
-        </div>
-    </div>
-
-    <div id="screen-guild" class="screen">
-        <div class="content">
-            <h2 style="font-weight: 900; margin-bottom: 15px;">📜 Misiones Diarias</h2>
-            <div class="card" id="quest-1">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <div style="font-weight:900;">🎯 Cazador: Combo</div>
-                    <div style="color:var(--duo-yellow); font-weight:bold;">100 🟡</div>
-                </div>
-                <div class="bar-wrap" style="margin-bottom:10px;"><div id="bar-q1" class="bar-fill" style="background:var(--duo-green);"></div></div>
-                <button id="btn-q1" class="btn-3d btn-dark" style="padding:10px;" disabled>EN PROGRESO</button>
-            </div>
-
-            <div class="card" id="quest-2">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <div style="font-weight:900;">📚 Lector: Teoría</div>
-                    <div style="color:var(--duo-blue); font-weight:bold;">200 XP</div>
-                </div>
-                <div class="bar-wrap" style="margin-bottom:10px;"><div id="bar-q2" class="bar-fill" style="background:var(--duo-blue);"></div></div>
-                <button id="btn-q2" class="btn-3d btn-dark" style="padding:10px;" disabled>EN PROGRESO</button>
-            </div>
-
-            <h2 style="font-weight: 900; margin-bottom: 15px; margin-top:30px; color:var(--duo-yellow);">🏆 Salón de Logros</h2>
-            <div id="achievements-list"></div>
-        </div>
-    </div>
-
-    <div id="screen-shop" class="screen">
-        <div class="content">
-            <h2 style="font-weight: 900; margin-bottom: 15px;">Mercado Común</h2>
+    <div class="content">
+        <div id="tab-dash" class="tab-content active">
+            <h2>📈 Stats Diarias</h2>
             <div class="card">
-                <div class="shop-item">
-                    <div><div style="font-weight:900;">❤️ Poción Menor</div><div style="font-size:11px; color:var(--text-sub);">Cura 50 HP. Puedes usarlas en combate.</div></div>
-                    <button class="btn-3d btn-green" style="width:auto; margin:0; padding:8px 12px;" onclick="buyItem('pot', 25, 1)">🟡 25</button>
+                <div class="stat-row">
+                    <div class="stat-labels"><span>Calorías (Netas)</span> <span id="kcal-text">0 / 2000</span></div>
+                    <div class="bar-bg"><div class="bar-fill" id="kcal-bar" style="background: var(--primary); width: 0%;"></div></div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Consumidas: <span id="kcal-in">0</span> | Quemadas: <span id="kcal-out">0</span></div>
                 </div>
-                <div class="shop-item">
-                    <div><div style="font-weight:900;">⚡ Éter Vigorizante</div><div style="font-size:11px; color:var(--text-sub);">Recupera 25 Energía al instante.</div></div>
-                    <button class="btn-3d btn-yellow" style="width:auto; margin:0; padding:8px 12px;" onclick="buyItem('en', 20, 25)">🟡 20</button>
+                <div class="stat-row" style="margin-top: 15px;">
+                    <div class="stat-labels"><span>Proteína</span> <span id="prot-text">0 / 120g</span></div>
+                    <div class="bar-bg"><div class="bar-fill" id="prot-bar" style="background: var(--hp); width: 0%;"></div></div>
                 </div>
             </div>
 
-            <div class="gacha-box">
-                <div style="font-size:40px; margin-bottom:10px;">📦</div>
-                <div style="font-weight:900; color:var(--duo-purple);">Cofre de la Penumbra</div>
-                <div style="font-size:12px; color:var(--text-sub); margin-bottom:15px;">Materiales de crafteo aleatorios.</div>
-                <button class="btn-3d btn-purple" onclick="openGacha()">ABRIR (🟡 50)</button>
+            <div class="flex-row" style="margin-bottom: 15px;">
+                <div class="streak-box">🔥 Racha Proteína <span id="streak-prot">0</span></div>
+                <div class="streak-box">⚖️ Racha Déficit <span id="streak-def">0</span></div>
             </div>
 
-            <h2 style="font-weight: 900; margin-bottom: 15px; margin-top: 30px;">⚒️ La Herrería</h2>
-            <div class="card" id="craft-ui"></div>
+            <button class="success" onclick="endDay()">🌙 Finalizar Día (Cobrar EXP)</button>
+        </div>
+
+        <div id="tab-log" class="tab-content">
+            <h2>🍽️ Log de Batalla</h2>
+            <div class="card">
+                <h3>Comer</h3>
+                <select id="food-select"></select>
+                <input type="number" id="food-qty" placeholder="Cantidad (gramos o unidades)" value="100">
+                <button onclick="logFood()">Consumir</button>
+            </div>
+            <div class="card">
+                <h3>Quemar (Ejercicio)</h3>
+                <input type="number" id="burn-kcal" placeholder="Calorías quemadas" value="300">
+                <button class="danger" onclick="logBurn()">Registrar Sudor</button>
+            </div>
+            <div class="card">
+                <h3>Historial de Hoy</h3>
+                <div id="today-log"></div>
+            </div>
+        </div>
+
+        <div id="tab-db" class="tab-content">
+            <h2>🍎 Compendio (DB)</h2>
+            <div class="card">
+                <h3>Crear Alimento</h3>
+                <input type="text" id="new-food-name" placeholder="Nombre (ej. Pechuga Pollo)">
+                <div class="flex-row">
+                    <input type="number" id="new-food-kcal" placeholder="Kcal / 100g">
+                    <input type="number" id="new-food-prot" placeholder="Prot / 100g">
+                </div>
+                <button onclick="createFood()">Añadir a la DB</button>
+            </div>
+            <div class="card">
+                <h3>Mis Alimentos</h3>
+                <div id="food-db-list"></div>
+            </div>
+        </div>
+
+        <div id="tab-inv" class="tab-content">
+            <h2>🎒 Inventario</h2>
+            <div class="card">
+                <div class="flex-row">
+                    <input type="text" id="inv-name" placeholder="Objeto (ej. Arroz)">
+                    <input type="number" id="inv-qty" placeholder="Cant." style="flex: 0.5;">
+                </div>
+                <button onclick="addInv()">Guardar en Despensa</button>
+                <div id="inv-list" style="margin-top: 10px;"></div>
+            </div>
+
+            <h2>🛒 Mercader</h2>
+            <div class="card">
+                <input type="text" id="shop-name" placeholder="Item a comprar">
+                <div class="flex-row">
+                    <input type="number" id="shop-price" placeholder="Precio (€)">
+                    <input type="number" id="shop-dur" placeholder="Dura X días">
+                </div>
+                <button class="success" onclick="addShop()">Añadir a la lista</button>
+                
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
+                    <div id="shop-list"></div>
+                    <h3 style="margin-top: 10px; color: var(--stamina);">Gasto Semanal: <span id="weekly-cost">0</span>€</h3>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="main-nav">
-        <div class="nav-tab active" id="tab-home" onclick="navTo('home')"><span>🏠</span>INICIO</div>
-        <div class="nav-tab" id="tab-worlds" onclick="navTo('worlds')"><span>🗺️</span>MAZMORRA</div>
-        <div class="nav-tab" id="tab-guild" onclick="navTo('guild')"><span>📜</span>GREMIO</div>
-        <div class="nav-tab" id="tab-shop" onclick="navTo('shop')"><span>⚖️</span>TIENDA</div>
+    <div class="navbar">
+        <button class="nav-btn active" onclick="switchTab('dash', this)">📊</button>
+        <button class="nav-btn" onclick="switchTab('log', this)">⚔️</button>
+        <button class="nav-btn" onclick="switchTab('db', this)">📖</button>
+        <button class="nav-btn" onclick="switchTab('inv', this)">🎒</button>
     </div>
 
-</div>
+    <script>
+        // --- ESTADO INICIAL Y LOCALSTORAGE ---
+        const defaultFoods = [
+            { id: 1, name: "Pechuga de Pollo", kcal: 165, prot: 31 },
+            { id: 2, name: "Arroz Blanco", kcal: 130, prot: 2.7 },
+            { id: 3, name: "Huevo (unidad)", kcal: 78, prot: 6 },
+            { id: 4, name: "Whey Protein (30g)", kcal: 110, prot: 24 }
+        ];
 
-<script>
-    // --- AUDIO & HAPTICS FALLBACK ---
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioContext();
+        let state = JSON.parse(localStorage.getItem('rpgDietState')) || {
+            level: 1, exp: 0, 
+            streakProt: 0, streakDef: 0,
+            db: defaultFoods,
+            log: [], burn: 0,
+            inv: [], shop: []
+        };
 
-    function playSound(type) {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        if(type === 'click') {
-            osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-        } else if(type === 'hit') {
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-        } else if (type === 'success') {
-            osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-        } else if (type === 'crit') {
-            osc.type = 'square'; osc.frequency.setValueAtTime(1000, audioCtx.currentTime); osc.frequency.setValueAtTime(2000, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.4);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+        const TARGETS = { kcal: 2000, prot: 120 };
+
+        function saveState() { localStorage.setItem('rpgDietState', JSON.stringify(state)); updateUI(); }
+
+        // --- NAVEGACIÓN ---
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            btn.classList.add('active');
         }
-    }
 
-    function showFloatingText(text, color) {
-        const el = document.createElement('div');
-        el.className = 'floating-text'; el.innerText = text; el.style.color = color;
-        el.style.left = (window.innerWidth / 2 - 40) + 'px'; el.style.top = (window.innerHeight / 2 - 50) + 'px';
-        document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
-    }
-
-    // --- ESTADO CORE ---
-    let state = {
-        streak: 0, lastDate: null, combo: 0, maxCombo: 0,
-        lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 0,
-        potions: 0,
-        inventory: { iron: 0, dark_shard: 0, star_dust: 0 },
-        quests: { q1_prog: 0, q1_req: 5, q2_prog: 0, q2_req: 3 },
-        achievements: { 
-            a1: { name: "Sangre Nueva", desc: "Alcanza el Nivel 5", req: 5, type: 'lvl', done: false, rew: "500 XP" },
-            a2: { name: "Mente Maestra", desc: "Combo x10", req: 10, type: 'combo', done: false, rew: "300 🟡" },
-            a3: { name: "Superviviente", desc: "Sobrevive con menos de 10 HP", req: 10, type: 'hp', done: false, rew: "1 Fragmento Oscuro" }
-        },
-        equipment: {
-            w1: { id: 'w1', name: 'Espada de Erudito', icon:'🗡️', desc: '+20% XP obtenida', cost: {iron:5}, owned: false },
-            w2: { id: 'w2', name: 'Escudo de Verdad', icon:'🛡️', desc: '-30% Daño recibido', cost: {iron:3, dark_shard:2}, owned: false },
-            w3: { id: 'w3', name: 'Anillo Astral', icon:'💍', desc: '-50% Coste Energía', cost: {star_dust:3}, owned: false }
-        },
-        equipped: null,
-        worlds: Array.from({length: 5}, (_, i) => ({ id: i, name: `Mazmorra ${i+1}`, campaign: [], completed: [], unlocked: ['n1'] }))
-    };
-
-    let activeW = null; let currNode = null; let selIdx = null; let hintsUsed = false; let magicUsed = false; let critLanded = false;
-
-    function init() {
-        const saved = localStorage.getItem('lq_v4');
-        if (saved) {
-            let parsed = JSON.parse(saved);
-            state = { ...state, ...parsed };
-            if(!state.achievements) state.achievements = { a1: { name: "Sangre Nueva", desc: "Alcanza el Nivel 5", req: 5, type: 'lvl', done: false, rew: "500 XP" }, a2: { name: "Mente Maestra", desc: "Combo x10", req: 10, type: 'combo', done: false, rew: "300 🟡" }, a3: { name: "Superviviente", desc: "Sobrevive con menos de 10 HP", req: 10, type: 'hp', done: false, rew: "1 Fragmento Oscuro" }};
-            if(typeof state.potions === 'undefined') state.potions = 0;
+        // --- LÓGICA DE BATALLA (COMIDA) ---
+        function createFood() {
+            const name = document.getElementById('new-food-name').value;
+            const kcal = parseFloat(document.getElementById('new-food-kcal').value);
+            const prot = parseFloat(document.getElementById('new-food-prot').value);
+            if (!name || isNaN(kcal) || isNaN(prot)) return alert("Rellena todos los campos");
+            state.db.push({ id: Date.now(), name, kcal, prot });
+            document.getElementById('new-food-name').value = '';
+            document.getElementById('new-food-kcal').value = '';
+            document.getElementById('new-food-prot').value = '';
+            saveState();
         }
-        
-        if(state.worlds[0].campaign.length === 0) {
-            state.worlds[0].campaign = [
-                {id:'n1', type:'reading', title:'La Puerta', content:'Bienvenido a la mazmorra. Usa pociones en combate si lo necesitas.', energyCost:0, rewardXp:10, rewardGold:5, unlocks:['n2']}
-            ];
-            state.worlds[0].name = "Catacumbas de Prueba";
+
+        function deleteFood(id) { state.db = state.db.filter(f => f.id !== id); saveState(); }
+
+        function logFood() {
+            const id = parseInt(document.getElementById('food-select').value);
+            const qty = parseFloat(document.getElementById('food-qty').value);
+            if (isNaN(qty) || qty <= 0) return alert("Cantidad inválida");
+            const food = state.db.find(f => f.id === id);
+            // Si es por 100g, calculamos la proporción (excepto cosas como huevo que pueden ser por unidad)
+            // Para simplificar, asumimos que todo en la DB es por 100g excepto si dice unidad.
+            const mult = food.name.includes('unidad') || food.name.includes('30g') ? qty : qty / 100; 
+            state.log.push({ id: Date.now(), name: food.name, kcal: food.kcal * mult, prot: food.prot * mult });
+            saveState();
         }
-        checkStreak(); updateUI();
-    }
-    function save() { localStorage.setItem('lq_v4', JSON.stringify(state)); updateUI(); }
 
-    function checkStreak() {
-        const today = new Date().toDateString();
-        if (state.lastDate !== today) {
-            if (state.lastDate) {
-                const diff = Math.ceil(Math.abs(new Date(today) - new Date(state.lastDate)) / (1000*60*60*24));
-                state.streak = (diff === 1) ? state.streak + 1 : 1;
-            } else state.streak = 1;
-            state.lastDate = today; save();
+        function deleteLog(id) { state.log = state.log.filter(l => l.id !== id); saveState(); }
+        function logBurn() { state.burn += parseFloat(document.getElementById('burn-kcal').value) || 0; saveState(); }
+
+        // --- LÓGICA DE INVENTARIO Y TIENDA ---
+        function addInv() {
+            const name = document.getElementById('inv-name').value;
+            const qty = document.getElementById('inv-qty').value;
+            if(!name) return;
+            state.inv.push({ id: Date.now(), name, qty });
+            saveState();
         }
-    }
+        function deleteInv(id) { state.inv = state.inv.filter(i => i.id !== id); saveState(); }
 
-    function navTo(screenId) {
-        playSound('click');
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('screen-' + screenId).classList.add('active');
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        const tab = document.getElementById('tab-' + (screenId === 'study' ? 'worlds' : screenId));
-        if(tab) tab.classList.add('active');
-        document.getElementById('global-hud').style.display = (screenId === 'home') ? 'none' : 'grid';
-        
-        if(screenId === 'worlds') renderWorlds();
-        if(screenId === 'shop') renderCrafting();
-        if(screenId === 'guild') renderGuild();
-    }
+        function addShop() {
+            const name = document.getElementById('shop-name').value;
+            const price = parseFloat(document.getElementById('shop-price').value);
+            const dur = parseFloat(document.getElementById('shop-dur').value);
+            if(!name || isNaN(price) || isNaN(dur)) return;
+            state.shop.push({ id: Date.now(), name, price, dur });
+            saveState();
+        }
+        function deleteShop(id) { state.shop = state.shop.filter(s => s.id !== id); saveState(); }
 
-    // --- MUNDOS Y MAPA ---
-    function renderWorlds() {
-        document.getElementById('worlds-list').innerHTML = state.worlds.map((w, i) => `
-            <div class="card" style="text-align:center; padding:15px; cursor:pointer;" onclick="enterWorld(${i})">
-                <div style="font-size:30px; margin-bottom:5px;">${w.campaign.length ? '🗺️' : '🔒'}</div>
-                <div style="font-weight:900; font-size:13px;">${w.name}</div>
-                <div style="font-size:10px; color:var(--text-sub);">Progreso: ${w.campaign.length ? Math.floor((w.completed.length/w.campaign.length)*100) : 0}%</div>
-            </div>
-        `).join('');
-    }
+        // --- GAMIFICACIÓN ---
+        function endDay() {
+            const totals = state.log.reduce((acc, val) => ({ kcal: acc.kcal + val.kcal, prot: acc.prot + val.prot }), {kcal:0, prot:0});
+            const netKcal = totals.kcal - state.burn;
+            
+            let expGained = 0;
+            if (totals.prot >= TARGETS.prot) { expGained += 50; state.streakProt++; } else { state.streakProt = 0; }
+            if (netKcal <= TARGETS.kcal && netKcal > 1000) { expGained += 50; state.streakDef++; } else { state.streakDef = 0; }
 
-    function enterWorld(idx) { playSound('click'); activeW = idx; navTo('study'); document.getElementById('study-map-view').style.display = 'block'; document.getElementById('study-node-view').style.display = 'none'; document.getElementById('current-world-title').innerText = state.worlds[activeW].name; renderMap(); }
-
-    function renderMap() {
-        const w = state.worlds[activeW];
-        const container = document.getElementById('node-path-render');
-        container.innerHTML = w.campaign.length ? '' : '<div style="text-align:center; color:var(--text-sub);">Mazmorra vacía. Usa la Forja.</div>';
-        
-        w.campaign.forEach((n, i) => {
-            const isDone = w.completed.includes(n.id); const isUnlocked = w.unlocked.includes(n.id);
-            let status = isDone ? 'completed' : (isUnlocked ? 'unlocked' : '');
-            if(n.type === 'boss') status += ' boss';
-            let icon = isDone ? '⭐' : (n.type === 'reading' ? '📖' : (n.type === 'boss' ? '👹' : '⚔️'));
-            const offset = (i % 2 !== 0) ? 'translateX(20px)' : 'translateX(-20px)';
-            container.innerHTML += `<div style="transform: ${offset}; text-align:center;"><button class="node ${status}" onclick="openNode('${n.id}')">${icon}</button><div style="font-weight:900; font-size:11px; margin-top:8px; color:${n.type === 'boss' && !isDone?'var(--duo-purple)':'var(--text-main)'}">${n.title}</div></div>`;
-        });
-    }
-
-    // --- NODOS Y COMBATE ---
-    function openNode(id) {
-        playSound('click');
-        const w = state.worlds[activeW];
-        if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Camino cerrado.");
-        
-        currNode = w.campaign.find(n => n.id === id);
-        const isDone = w.completed.includes(id);
-
-        let cost = currNode.energyCost;
-        if(state.equipped === 'w3') cost = Math.floor(cost * 0.5);
-        if(!isDone && state.en < cost) return alert("⚡ Energía insuficiente.");
-        if(!isDone) { state.en -= cost; save(); }
-
-        hintsUsed = false; magicUsed = false; critLanded = false;
-        const isCombat = currNode.type === 'test' || currNode.type === 'boss';
-        document.getElementById('active-skills').style.display = isCombat && !isDone ? 'flex' : 'none';
-        document.getElementById('btn-hint').disabled = false;
-        document.getElementById('btn-magic').disabled = false;
-        document.getElementById('combat-pots').innerText = state.potions;
-
-        document.getElementById('study-map-view').style.display = 'none';
-        document.getElementById('study-node-view').style.display = 'block';
-        document.getElementById('node-title').innerText = currNode.title;
-        document.getElementById('node-text').innerHTML = currNode.content;
-        
-        const gameDiv = document.getElementById('game-container');
-        const b1 = document.getElementById('btn-action-1');
-        gameDiv.innerHTML = ''; b1.style.display = 'none'; b1.className = 'btn-3d btn-blue'; selIdx = null;
-
-        if(isDone) {
-            b1.style.display = 'block'; b1.innerText = "YA COMPLETADO"; b1.onclick = closeNode; b1.className = 'btn-3d btn-dark';
-        } else {
-            if(currNode.type === 'reading') {
-                b1.style.display = 'block'; b1.innerText = "ENTENDIDO"; b1.onclick = finishNode; b1.className = 'btn-3d btn-green';
+            if(expGained > 0) {
+                state.exp += expGained;
+                let maxExp = state.level * 100;
+                if(state.exp >= maxExp) { state.level++; state.exp -= maxExp; alert("¡SUBIDA DE NIVEL! 🥳"); }
+                alert(`Día finalizado. Has ganado ${expGained} EXP.`);
             } else {
-                currNode.options.forEach((o, i) => { gameDiv.innerHTML += `<div class="option-card" id="opt-${i}" onclick="selectOpt(${i})">${o}</div>`; });
-                b1.style.display = 'block'; b1.innerText = "ATACAR"; b1.onclick = checkAnswer;
-                if(currNode.type === 'boss') b1.className = 'btn-3d btn-purple';
-            }
-        }
-    }
-
-    function selectOpt(idx) { playSound('click'); selIdx = idx; document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected')); document.getElementById(`opt-${idx}`).classList.add('selected'); }
-
-    function usePotionCombat() {
-        if(state.potions <= 0) return alert("No tienes pociones.");
-        if(state.hp >= state.maxHp) return alert("Vida al máximo.");
-        state.potions--; state.hp = Math.min(state.maxHp, state.hp + 50);
-        playSound('success'); showFloatingText("+50 HP", "#58cc02");
-        document.getElementById('combat-pots').innerText = state.potions; save();
-    }
-
-    function useOraculo() {
-        if(state.gold < 15) return alert("Falta Oro (-15).");
-        if(hintsUsed || magicUsed) return;
-        const wrong = []; currNode.options.forEach((_, i) => { if(i !== currNode.correctAnswer) wrong.push(i); });
-        if(wrong.length > 0) {
-            state.gold -= 15; hintsUsed = true; playSound('click');
-            document.getElementById(`opt-${wrong[Math.floor(Math.random() * wrong.length)]}`).classList.add('hidden');
-            document.getElementById('btn-hint').disabled = true; save();
-        }
-    }
-
-    function useMagic() {
-        if(state.en < 30) return alert("Falta Energía (-30).");
-        if(magicUsed) return;
-        state.en -= 30; magicUsed = true; playSound('success');
-        document.getElementById(`opt-${currNode.correctAnswer}`).classList.add('correct');
-        document.getElementById('btn-magic').disabled = true; save();
-    }
-
-    function checkAnswer() {
-        if(selIdx === null) return;
-        const el = document.getElementById(`opt-${selIdx}`);
-        const isCorrect = selIdx === currNode.correctAnswer;
-        document.getElementById('btn-action-1').style.display = 'none';
-
-        if(isCorrect) {
-            // CRÍTICO RNG (20%)
-            if(Math.random() < 0.20) {
-                critLanded = true;
-                playSound('crit');
-                document.getElementById('crit-overlay').style.display = 'block';
-                document.getElementById('crit-overlay').classList.add('crit-effect');
-                showFloatingText("¡CRÍTICO!", "#ffc800");
-                setTimeout(() => { document.getElementById('crit-overlay').style.display = 'none'; document.getElementById('crit-overlay').classList.remove('crit-effect'); }, 500);
-            } else {
-                playSound('success');
+                alert("Día finalizado sin bonus. A farmear mejor mañana.");
             }
 
-            el.classList.add('correct');
-            state.combo++; if(state.combo > state.maxCombo) state.maxCombo = state.combo;
-            checkAchievements();
-            if(state.quests.q1_prog < state.quests.q1_req) { state.quests.q1_prog = state.combo; save(); }
-            setTimeout(() => finishNode(), 800);
-        } else {
-            playSound('hit');
-            el.classList.add('wrong');
-            state.combo = 0; state.quests.q1_prog = 0;
-            
-            let dmg = currNode.damagePenalization;
-            if(state.equipped === 'w2') dmg = Math.floor(dmg * 0.7);
-            state.hp -= dmg;
-            
-            showFloatingText(`-${dmg}`, '#ff4b4b');
-            document.getElementById('phone-container').classList.add('damage-effect');
-            document.getElementById('damage-overlay').style.display = 'block';
-            
-            setTimeout(() => { 
-                document.getElementById('phone-container').classList.remove('damage-effect'); 
-                document.getElementById('damage-overlay').style.display = 'none';
-                checkAchievements();
-                if(state.hp <= 0) { alert("💀 HAS MUERTO."); state.hp = state.maxHp; state.en = state.maxEn; save(); navTo('home'); } 
-                else { alert(`❌ Fallaste. Recibes ${dmg} de daño.\nCombo Reiniciado.`); save(); closeNode(); }
-            }, 400);
+            // Reset day
+            state.log = []; state.burn = 0;
+            saveState();
         }
-    }
 
-    function finishNode() {
-        const w = state.worlds[activeW];
-        if(!w.completed.includes(currNode.id)) {
-            w.completed.push(currNode.id);
-            if(currNode.type === 'reading' && state.quests.q2_prog < state.quests.q2_req) state.quests.q2_prog++;
-
-            let multiplier = 1 + (state.combo * 0.1);
-            if(critLanded) multiplier *= 2; // Crítico duplica!
-
-            let finalGold = Math.floor(currNode.rewardGold * multiplier);
-            let xpGain = Math.floor(currNode.rewardXp * multiplier);
-            if(state.equipped === 'w1') xpGain = Math.floor(xpGain * 1.2);
+        // --- RENDERIZADO UI ---
+        function updateUI() {
+            // Stats
+            let maxExp = state.level * 100;
+            document.getElementById('player-level').innerText = state.level;
+            document.getElementById('player-exp').innerText = state.exp;
+            document.getElementById('player-max-exp').innerText = maxExp;
+            document.getElementById('exp-bar').style.width = `${(state.exp / maxExp) * 100}%`;
             
-            state.gold += finalGold;
-            if(finalGold > 0) setTimeout(()=>showFloatingText(`+${finalGold}🟡`, '#ffc800'), 200);
+            document.getElementById('streak-prot').innerText = state.streakProt;
+            document.getElementById('streak-def').innerText = state.streakDef;
+
+            // Calculations
+            const totals = state.log.reduce((acc, val) => ({ kcal: acc.kcal + val.kcal, prot: acc.prot + val.prot }), {kcal:0, prot:0});
+            const netKcal = Math.max(0, totals.kcal - state.burn);
             
-            gainXP(xpGain);
-            dropLoot(currNode.type === 'boss');
+            document.getElementById('kcal-in').innerText = Math.round(totals.kcal);
+            document.getElementById('kcal-out').innerText = Math.round(state.burn);
+            document.getElementById('kcal-text').innerText = `${Math.round(netKcal)} / ${TARGETS.kcal}`;
+            document.getElementById('kcal-bar').style.width = `${Math.min(100, (netKcal / TARGETS.kcal) * 100)}%`;
+            document.getElementById('kcal-bar').style.background = netKcal > TARGETS.kcal ? "var(--hp)" : "var(--primary)";
 
-            if(currNode.unlocks) currNode.unlocks.forEach(uid => { if(!w.unlocked.includes(uid)) w.unlocked.push(uid); });
-            save();
+            document.getElementById('prot-text').innerText = `${Math.round(totals.prot)} / ${TARGETS.prot}g`;
+            document.getElementById('prot-bar').style.width = `${Math.min(100, (totals.prot / TARGETS.prot) * 100)}%`;
+
+            // Selects & Lists
+            document.getElementById('food-select').innerHTML = state.db.map(f => `<option value="${f.id}">${f.name} (${f.kcal} kcal/100g)</option>`).join('');
+            
+            document.getElementById('food-db-list').innerHTML = state.db.map(f => `
+                <div class="list-item"><span>${f.name} (Prot: ${f.prot}g)</span><button class="delete-btn" onclick="deleteFood(${f.id})">X</button></div>
+            `).join('');
+
+            document.getElementById('today-log').innerHTML = state.log.map(l => `
+                <div class="list-item"><span>${l.name} - ${Math.round(l.kcal)}kcal</span><button class="delete-btn" onclick="deleteLog(${l.id})">X</button></div>
+            `).join('');
+
+            document.getElementById('inv-list').innerHTML = state.inv.map(i => `
+                <div class="list-item"><span>${i.name} [${i.qty}]</span><button class="delete-btn" onclick="deleteInv(${i.id})">X</button></div>
+            `).join('');
+
+            // Compra & Gastos
+            let weekCost = 0;
+            document.getElementById('shop-list').innerHTML = state.shop.map(s => {
+                weekCost += (s.price / s.dur) * 7;
+                return `<div class="list-item"><span>${s.name} (${s.price}€ / ${s.dur}d)</span><button class="delete-btn" onclick="deleteShop(${s.id})">X</button></div>`;
+            }).join('');
+            document.getElementById('weekly-cost').innerText = weekCost.toFixed(2);
         }
-        closeNode();
-    }
 
-    function dropLoot(isBoss) {
-        let msg = "";
-        if(Math.random() > 0.5 || isBoss) { state.inventory.iron++; msg += "1x Hierro "; }
-        if(Math.random() > 0.75 || (isBoss && Math.random() > 0.3)) { state.inventory.dark_shard++; msg += "1x Fragmento Oscuro "; }
-        if(Math.random() > 0.95 || isBoss) { state.inventory.star_dust++; msg += "1x Polvo Estelar "; }
-        if(msg !== "") { setTimeout(()=> { playSound('success'); alert("🎁 ¡Botín!\n" + msg);}, 600); }
-    }
-
-    function closeNode() { playSound('click'); document.getElementById('study-node-view').style.display = 'none'; document.getElementById('study-map-view').style.display = 'block'; renderMap(); }
-
-    function gainXP(amt) {
-        state.xp += amt; showFloatingText(`+${amt}XP`, '#1cb0f6');
-        if(state.xp >= state.maxXp) {
-            playSound('crit');
-            state.lvl++; state.xp -= state.maxXp; state.maxXp = Math.floor(state.maxXp * 1.5);
-            state.maxHp += 10; state.hp = state.maxHp; state.en = state.maxEn;
-            alert(`⚡ ¡NIVEL ${state.lvl}!\nVida Máxima aumentada.`);
-            checkAchievements();
-        }
-    }
-
-    // --- LOGROS Y GREMIO ---
-    function checkAchievements() {
-        if(state.lvl >= 5 && !state.achievements.a1.done) unlockAch('a1');
-        if(state.maxCombo >= 10 && !state.achievements.a2.done) unlockAch('a2');
-        if(state.hp > 0 && state.hp < 10 && !state.achievements.a3.done) unlockAch('a3');
-    }
-
-    function unlockAch(id) {
-        state.achievements[id].done = true; playSound('crit');
-        alert(`🏆 LOGRO DESBLOQUEADO: ${state.achievements[id].name}\nRecompensa: ${state.achievements[id].rew}`);
-        if(id === 'a1') gainXP(500);
-        if(id === 'a2') state.gold += 300;
-        if(id === 'a3') state.inventory.dark_shard += 1;
-        save();
-    }
-
-    function renderGuild() {
-        let p1 = Math.min(100, (state.quests.q1_prog / state.quests.q1_req) * 100);
-        document.getElementById('bar-q1').style.width = p1 + '%';
-        let b1 = document.getElementById('btn-q1');
-        if(state.quests.q1_prog >= state.quests.q1_req) { b1.disabled = false; b1.className = 'btn-3d btn-green'; b1.innerText = "COBRAR"; b1.onclick = () => claimQuest(1, 'gold', 100); } 
-        else { b1.disabled = true; b1.className = 'btn-3d btn-dark'; b1.innerText = `${state.quests.q1_prog}/${state.quests.q1_req}`; }
-
-        let p2 = Math.min(100, (state.quests.q2_prog / state.quests.q2_req) * 100);
-        document.getElementById('bar-q2').style.width = p2 + '%';
-        let b2 = document.getElementById('btn-q2');
-        if(state.quests.q2_prog >= state.quests.q2_req) { b2.disabled = false; b2.className = 'btn-3d btn-blue'; b2.innerText = "COBRAR"; b2.onclick = () => claimQuest(2, 'xp', 200); } 
-        else { b2.disabled = true; b2.className = 'btn-3d btn-dark'; b2.innerText = `${state.quests.q2_prog}/${state.quests.q2_req}`; }
-
-        document.getElementById('achievements-list').innerHTML = Object.values(state.achievements).map(a => `
-            <div class="shop-item" style="opacity: ${a.done ? '1' : '0.5'}; border-color: ${a.done ? 'var(--duo-yellow)' : 'var(--border-dark)'}">
-                <div><div style="font-weight:900; color: ${a.done ? 'var(--duo-yellow)' : 'inherit'}">${a.done?'🏆':'🔒'} ${a.name}</div><div style="font-size:11px; color:var(--text-sub);">${a.desc}</div></div>
-                <div style="font-size:12px; font-weight:bold;">${a.rew}</div>
-            </div>
-        `).join('');
-    }
-
-    function claimQuest(id, type, amount) {
-        playSound('success');
-        if(type === 'gold') { state.gold += amount; showFloatingText(`+${amount}🟡`, '#ffc800'); }
-        if(type === 'xp') { gainXP(amount); }
-        if(id === 1) { state.quests.q1_prog = 0; state.quests.q1_req += 2; }
-        if(id === 2) { state.quests.q2_prog = 0; state.quests.q2_req += 1; }
-        save(); renderGuild();
-    }
-
-    // --- MERCADO ---
-    function buyItem(type, cost, amount) {
-        playSound('click');
-        if(state.gold < cost) return alert("Falta Oro.");
-        state.gold -= cost;
-        if(type === 'pot') state.potions += amount;
-        if(type === 'en') state.en = Math.min(state.maxEn, state.en + amount);
-        playSound('success'); save();
-    }
-
-    function openGacha() {
-        if(state.gold < 50) return alert("Falta Oro.");
-        state.gold -= 50; playSound('crit');
-        const roll = Math.random(); let reward = "";
-        if(roll < 0.50) { state.inventory.iron += 2; reward = "2x Hierro ⚪"; }
-        else if(roll < 0.80) { state.inventory.dark_shard += 1; reward = "1x Fragmento Oscuro 🟣"; }
-        else if(roll < 0.95) { state.inventory.star_dust += 1; reward = "1x Polvo Estelar ✨"; }
-        else { state.maxHp += 5; state.hp += 5; reward = "¡BENDICIÓN! +5 Vida Máxima ❤️"; }
-        save(); alert(`📦 Has abierto el cofre...\n¡Obtienes: ${reward}!`);
-    }
-
-    function renderCrafting() {
-        document.getElementById('craft-ui').innerHTML = Object.values(state.equipment).map(w => {
-            let costStr = Object.entries(w.cost).map(([k,v]) => `${v} ${k==='iron'?'Hierro':k==='dark_shard'?'Frag.':'Polvo'}`).join(', ');
-            let canBuy = Object.entries(w.cost).every(([k,v]) => state.inventory[k] >= v);
-            if(w.owned) return `<div class="shop-item"><div><div style="font-weight:900;">${w.icon} ${w.name}</div><div style="font-size:11px; color:var(--text-sub);">${w.desc}</div></div><button class="btn-3d ${state.equipped===w.id?'btn-dark':'btn-blue'}" style="width:auto; margin:0; padding:8px 12px;" onclick="equip('${w.id}')">${state.equipped===w.id?'EQUIPADO':'EQUIPAR'}</button></div>`;
-            return `<div class="shop-item"><div><div style="font-weight:900;">${w.icon} ${w.name}</div><div style="font-size:11px; color:var(--duo-orange);">${costStr}</div><div style="font-size:10px; color:var(--text-sub);">${w.desc}</div></div><button class="btn-3d ${canBuy?'btn-purple':'btn-dark'}" style="width:auto; margin:0; padding:8px 12px;" onclick="craft('${w.id}')">FORJAR</button></div>`;
-        }).join('');
-    }
-
-    function craft(id) { playSound('click'); const w = state.equipment[id]; if(!Object.entries(w.cost).every(([k,v]) => state.inventory[k] >= v)) return; Object.entries(w.cost).forEach(([k,v]) => state.inventory[k] -= v); w.owned = true; playSound('crit'); save(); renderCrafting(); alert(`Forjado: ${w.name}!`); }
-    function equip(id) { playSound('success'); state.equipped = id; save(); renderCrafting(); }
-    function openForge() { playSound('click'); const code = JSON.stringify(state.worlds[activeW].campaign, null, 2); const newCode = prompt("⚒️ PEGA TU CÓDIGO JSON AQUÍ:", code); if(newCode) { try { const p = JSON.parse(newCode); state.worlds[activeW].campaign = p; state.worlds[activeW].completed = []; state.worlds[activeW].unlocked = p.length?[p[0].id]:[]; save(); renderMap(); } catch(e) {alert("Error JSON");} } }
-
-    function updateUI() {
-        document.getElementById('ui-lvl').innerText = state.lvl; document.getElementById('ui-gold').innerText = state.gold;
-        document.getElementById('ui-xp').innerText = state.xp; document.getElementById('ui-max-xp').innerText = state.maxXp;
-        document.getElementById('bar-xp').style.width = (state.xp / state.maxXp * 100) + '%';
-        document.getElementById('ui-hp').innerText = state.hp; document.getElementById('ui-maxhp').innerText = state.maxHp;
-        document.getElementById('bar-hp').style.width = (state.hp / state.maxHp * 100) + '%';
-        document.getElementById('ui-en').innerText = state.en; document.getElementById('ui-maxen').innerText = state.maxEn;
-        document.getElementById('bar-en').style.width = (state.en / state.maxEn * 100) + '%';
-
-        const titles = ["Mendigo Ignorante", "Novato Curioso", "Estudiante Aplicado", "Cazador Prometedor", "Mago de la Letra", "Caballero del Saber", "Maestro de Mazmorras", "Semidiós Cognitivo", "Monarca de las Sombras"];
-        let tIdx = Math.floor(state.lvl / 5); if(tIdx >= titles.length) tIdx = titles.length - 1;
-        document.getElementById('player-title').innerText = titles[tIdx];
-
-        const comboBadge = document.getElementById('combo-badge');
-        if(state.combo > 0) { comboBadge.style.display = 'inline-block'; comboBadge.innerText = `🔥 x${(1 + (state.combo * 0.1)).toFixed(1)}`; } else { comboBadge.style.display = 'none'; }
-
-        const inv = document.getElementById('inventory-ui');
-        if(inv) inv.innerHTML = `<span class="loot-pill">⚪ Hierro: ${state.inventory.iron}</span> <span class="loot-pill">🟣 Frag: ${state.inventory.dark_shard}</span> <span class="loot-pill">✨ Polvo: ${state.inventory.star_dust}</span> <span class="loot-pill">💊 Pociones: ${state.potions}</span>`;
-        
-        const eqEl = document.getElementById('eq-icon');
-        if(eqEl) {
-            if(state.equipped && state.equipment[state.equipped]) { const eq = state.equipment[state.equipped]; eqEl.innerText = eq.icon; document.getElementById('eq-name').innerText = eq.name; document.getElementById('eq-desc').innerText = eq.desc; } 
-            else { eqEl.innerText = '🎒'; document.getElementById('eq-name').innerText = 'Sin Arma'; document.getElementById('eq-desc').innerText = 'Sin bonus.'; }
-        }
-        document.getElementById('hub-streak').innerText = state.streak;
-    }
-
-    document.body.addEventListener('touchmove', function(e) { if(e.target.closest('.content') === null) e.preventDefault(); }, { passive: false });
-    init();
-</script>
+        // Init
+        updateUI();
+    </script>
 </body>
 </html>
