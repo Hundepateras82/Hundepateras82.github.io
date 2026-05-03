@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Nexo Dieta Titan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-base: #050505; --bg-surface: #121212; --bg-card: #1e1e1e; --border: #333;
+            --text-pri: #f5f5f5; --text-sec: #a0a0a0;
+            --c-kcal: #fbbf24; --c-prot: #ef4444; --c-carb: #3b82f6; --c-fat: #22c55e;
+            --c-nexo: #8b5cf6; --c-danger: #f43f5e; --c-shop: #4ade80;
+            --c-gold: #fbbf24; --c-xp: #06b6d4;
+            
+            /* Tonos neutralizados */
+            --bg-forge: #151515; --border-forge: #3a2222;
+            --bg-shop: #121814; --border-shop: #223a2a;
+            --bg-temple: #1b1724; --border-temple: #3c2a5c;
+
+            --safe-top: env(safe-area-inset-top, 40px);
+            --safe-bot: env(safe-area-inset-bottom, 20px);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-base); color: var(--text-pri); display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+        
+        header { background: var(--bg-surface); padding: calc(var(--safe-top) + 10px) 20px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 10;}
+        .brand { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; display: flex; flex-direction: column;}
+        .rpg-stats { font-size: 11px; font-weight: 800; display: flex; gap: 10px; margin-top: 4px; }
+        .stat-gold { color: var(--c-gold); } .stat-lvl { color: var(--c-xp); }
+
+        .container { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: calc(90px + var(--safe-bot)); }
+        .view { display: none; animation: fadeIn 0.2s ease; } .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--bg-card); border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+        .card-forge { background: var(--bg-forge); border-left: 3px solid var(--c-danger); }
+        .card-shop { background: var(--bg-shop); border-left: 3px solid var(--c-shop); }
+        .card-temple { background: var(--bg-temple); border-left: 3px solid var(--c-nexo); }
+
+        .card-title { font-size: 13px; font-weight: 800; color: var(--text-sec); text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;}
+        
+        input, select { width: 100%; background: var(--bg-base); border: 1px solid var(--border); color: var(--text-pri); padding: 12px; border-radius: 10px; font-size: 14px; margin-bottom: 10px; outline: none; }
+        input:focus { border-color: var(--c-nexo); }
+        .row { display: flex; gap: 10px; } .row > * { flex: 1; margin-bottom: 0;}
+        
+        .btn { width: 100%; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; text-align: center; margin-bottom: 10px; transition: 0.1s;}
+        .btn:active { transform: scale(0.98); }
+        .btn-pri { background: var(--text-pri); color: var(--bg-base); }
+        .btn-sec { background: var(--bg-surface); color: var(--text-pri); border: 1px solid var(--border); }
+        .btn-nexo-bg { background: var(--c-nexo); color: white; }
+        .btn-danger { background: var(--c-danger); color: white; }
+        .btn-icon { background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 6px; width: 32px; height: 32px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+
+        .macro-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;}
+        .m-box { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; border: 1px solid var(--border); }
+        .m-head { display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; margin-bottom: 5px; color: var(--text-sec); text-transform: uppercase;}
+        .m-bar-bg { height: 6px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden; }
+        .m-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+        .micro-list { display: flex; flex-direction: column; gap: 8px; }
+        .micro-item { display: flex; align-items: center; justify-content: space-between; font-size: 11px; background: var(--bg-surface); padding: 6px 10px; border-radius: 6px; }
+        .micro-bar-bg { width: 50%; height: 4px; background: rgba(0,0,0,0.5); border-radius: 2px; display:flex; align-items:center;}
+        .micro-bar-fill { height: 100%; border-radius: 2px; background: var(--c-nexo); transition: width 0.3s; }
+
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-surface); border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); }
+        .item-info { flex: 1; }
+        .item-name { font-size: 14px; font-weight: 800; }
+        .item-sub { font-size: 11px; color: var(--text-sec); margin-top: 4px; display:flex; gap: 8px; align-items: center; }
+        .item-actions { display: flex; gap: 5px; }
+
+        .chart-container { position: relative; height: 180px; width: 100%; margin-top: 10px; margin-bottom: 15px;}
+
+        nav { position: fixed; bottom: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 5px var(--safe-bot); z-index: 100; }
+        .nav-btn { flex: 1; background: none; border: none; color: var(--text-sec); font-size: 9px; font-weight: 800; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .nav-btn.active { color: var(--c-nexo); }
+        .nav-icon { font-size: 18px; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;}
+        .tab { flex: 1; text-align: center; padding: 10px; background: var(--bg-surface); border-radius: 8px; font-size: 12px; font-weight: 800; color: var(--text-sec); border: 1px solid var(--border); cursor: pointer; white-space: nowrap;}
+        .tab.active { background: var(--text-pri); color: black; border-color: var(--text-pri); }
+        
+        .danger-zone { background: rgba(244, 63, 94, 0.1); border: 1px solid var(--c-danger); color: #fda4af; padding: 15px; border-radius: 10px; font-size: 12px; font-weight: 800; text-align: center; margin-top: 10px;}
+        .edit-banner { background: var(--c-kcal); color: black; padding: 10px; text-align: center; font-weight: 900; font-size: 12px; border-radius: 8px; margin-bottom: 15px; display: none; justify-content: space-between; align-items: center;}
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            NEXO DIETA
+            <div class="rpg-stats">
+                <span class="stat-lvl">⭐ NVL <span id="ui-lvl">1</span></span>
+                <span class="stat-gold">🪙 <span id="ui-gold">0</span> G</span>
+            </div>
+        </div>
+        <div style="font-size: 12px; font-weight: 800; color: var(--c-nexo);" id="ui-date">HOY</div>
+    </header>
+
+    <div class="container">
+        
+        <div id="view-dash" class="view active">
+            <div id="edit-mode-banner" class="edit-banner">
+                <span id="edit-mode-text">EDITANDO DÍA PASADO</span>
+                <button onclick="exitEditMode()" style="background: black; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; cursor: pointer;">Volver a Hoy</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Balance Energético</div>
+                <div class="macro-grid">
+                    <div class="m-box"><div class="m-head"><span style="color:var(--c-kcal)">KCAL</span> <span id="t-kcal">0</span></div><div class="m-bar-bg"><div id="b-kcal" class="m-bar-fill" style="background:var(--c-kcal)"></div></div></div>
+                    <div class="m-box"><div class="m-head"><span style="color:var(--c-prot)">PROT</span> <span id="t-prot">0g</span></div><div class="m-bar-bg"><div id="b-prot" class="m-bar-fill" style="background:var(--c-prot)"></div></div></div>
+                    <div class="m-box"><div class="m-head"><span style="color:var(--c-carb)">CARB</span> <span id="t-carb">0g</span></div><div class="m-bar-bg"><div id="b-carb" class="m-bar-fill" style="background:var(--c-carb)"></div></div></div>
+                    <div class="m-box"><div class="m-head"><span style="color:var(--c-fat)">GRASA</span> <span id="t-fat">0g</span></div><div class="m-bar-bg"><div id="b-fat" class="m-bar-fill" style="background:var(--c-fat)"></div></div></div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-sec); text-align: center; margin-top: 10px;">Ingesta: <span id="st-in">0</span> | Ejercicio: <span id="st-out" style="color:var(--c-danger)">0</span> | Límite: <span id="st-max">2000</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Micronutrientes</div>
+                <div class="micro-list">
+                    <div class="micro-item"><span>🌾 Fibra</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-fib" class="micro-bar-fill"></div></div><span id="t-fib" style="width:35px; text-align:right;">0g</span></div></div>
+                    <div class="micro-item"><span>🍬 Azúcar</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-sug" class="micro-bar-fill" style="background:var(--c-danger)"></div></div><span id="t-sug" style="width:35px; text-align:right;">0g</span></div></div>
+                    <div class="micro-item"><span>👁️ Vit A</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-va" class="micro-bar-fill"></div></div><span id="t-va" style="width:35px; text-align:right;">0µg</span></div></div>
+                    <div class="micro-item"><span>🍊 Vit C</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-vc" class="micro-bar-fill"></div></div><span id="t-vc" style="width:35px; text-align:right;">0mg</span></div></div>
+                    <div class="micro-item"><span>☀️ Vit D</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-vd" class="micro-bar-fill"></div></div><span id="t-vd" style="width:35px; text-align:right;">0µg</span></div></div>
+                    <div class="micro-item"><span>🦴 Calcio</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-ca" class="micro-bar-fill"></div></div><span id="t-ca" style="width:35px; text-align:right;">0mg</span></div></div>
+                    <div class="micro-item"><span>🩸 Hierro</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-fe" class="micro-bar-fill"></div></div><span id="t-fe" style="width:35px; text-align:right;">0mg</span></div></div>
+                    <div class="micro-item"><span>🍌 Potasio</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-po" class="micro-bar-fill"></div></div><span id="t-po" style="width:35px; text-align:right;">0mg</span></div></div>
+                    <div class="micro-item"><span>⚡ Magnesio</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-mg" class="micro-bar-fill"></div></div><span id="t-mg" style="width:35px; text-align:right;">0mg</span></div></div>
+                    <div class="micro-item"><span>🧂 Sodio</span> <div style="display:flex; align-items:center; gap:5px; width:60%;"><div class="micro-bar-bg"><div id="b-na" class="micro-bar-fill" style="background:var(--c-danger)"></div></div><span id="t-na" style="width:35px; text-align:right;">0mg</span></div></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Registro Rápido</div>
+                <div class="row" style="margin-bottom: 10px;">
+                    <select id="food-select" style="flex: 2; margin-bottom:0;"></select>
+                    <input type="number" id="food-qty" placeholder="Multiplicador (ej: 2 = x2 uds o 200g)" value="1" style="margin-bottom:0;">
+                </div>
+                <button class="btn btn-nexo-bg" onclick="logFood()">Consumir</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Historial (Editable)</div>
+                <div id="today-log"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Gasto Calórico Extra</div>
+                <div class="row"><input type="number" id="burn-input" placeholder="Kcal quemadas" style="margin-bottom:0;"><button class="btn btn-sec" style="margin-bottom:0;" onclick="logBurn()">Quemar</button></div>
+            </div>
+
+            <button id="end-day-btn" class="btn" style="background: var(--border); color: white;" onclick="endDay()">🌙 CERRAR DÍA Y RECLAMAR ORO</button>
+        </div>
+
+        <div id="view-db" class="view">
+            <div class="card card-forge">
+                <div class="card-title">Biblioteca Global</div>
+                <input type="text" id="search-db" placeholder="Buscar..." onkeyup="renderDB()">
+                <div id="db-render-list" style="max-height: 350px; overflow-y: auto; margin-top: 10px;"></div>
+            </div>
+            
+            <div class="card card-forge">
+                <div class="card-title">Forja de la despensa</div>
+                <input type="text" id="c-name" placeholder="Nombre">
+                <input type="number" id="c-qty" placeholder="¿Gramos/Unidades base del envase?" value="100">
+                <div class="row"><input type="number" id="c-k" placeholder="Kcal"><input type="number" id="c-p" placeholder="Prot"></div>
+                <div class="row"><input type="number" id="c-c" placeholder="Carb"><input type="number" id="c-f" placeholder="Grasa"></div>
+                <div class="row"><input type="number" id="c-fib" placeholder="Fibra"><input type="number" id="c-sug" placeholder="Azúcar"></div>
+                <div class="row"><input type="number" id="c-va" placeholder="Vit A"><input type="number" id="c-vc" placeholder="Vit C"><input type="number" id="c-vd" placeholder="Vit D"></div>
+                <div class="row"><input type="number" id="c-ca" placeholder="Calcio"><input type="number" id="c-fe" placeholder="Hierro"></div>
+                <div class="row"><input type="number" id="c-po" placeholder="Potasio"><input type="number" id="c-mg" placeholder="Magnesio"><input type="number" id="c-na" placeholder="Sodio"></div>
+                <button class="btn btn-sec" onclick="createFood()">Forjar y Añadir</button>
+            </div>
+        </div>
+
+        <div id="view-inv" class="view">
+            <div class="card">
+                <div class="card-title">Inventario Actual (Total)</div>
+                <div id="inv-list"></div>
+            </div>
+        </div>
+
+        <div id="view-shop" class="view">
+            <div class="card card-shop" style="margin-bottom: 10px; padding: 12px;">
+                <div class="row" style="align-items: center;">
+                    <select id="shop-list-select" onchange="changeShopList()" style="margin-bottom:0; flex:2;"></select>
+                    <button class="btn-icon" style="background:var(--bg-surface); border:1px solid var(--border);" onclick="renameShopList()">✏️</button>
+                    <button class="btn-icon" style="background:var(--bg-surface); border:1px solid var(--border);" onclick="newShopList()">➕</button>
+                </div>
+            </div>
+
+            <div class="card card-shop">
+                <div class="card-title">Añadir a la Cesta Activa</div>
+                <select id="shop-db-select" style="margin-bottom: 10px;"></select>
+                <div class="row">
+                    <input type="number" id="shop-add-qty" placeholder="Cantidad (x)" value="1">
+                    <input type="number" id="shop-add-price" placeholder="Precio (€)">
+                </div>
+                <button class="btn btn-sec" onclick="addToShop()">Añadir a la Cesta</button>
+            </div>
+            
+            <div class="card card-shop">
+                <div class="card-title">Artículos (<span id="shop-total-cost">0.00 €</span>)</div>
+                <div id="shop-list-items"></div>
+                <button class="btn btn-sec" style="margin-top:15px;" onclick="finishShopping()">Guardar Compra en Historial</button>
+            </div>
+        </div>
+
+        <div id="view-templo" class="view">
+            <div class="card card-temple">
+                <div class="card-title" style="color:#d8b4fe;">Camino del Titán</div>
+                <div style="font-size: 12px; margin-bottom: 5px; display:flex; justify-content:space-between; color:#e9d5ff;"><span>Experiencia Nvl <span id="rpg-lvl">1</span></span> <span><span id="rpg-xp">0</span> / <span id="rpg-next">500</span> XP</span></div>
+                <div class="m-bar-bg" style="height: 10px; margin-bottom: 15px; border: 1px solid var(--border-temple);"><div id="b-xp" class="m-bar-fill" style="background:var(--c-xp); width: 0%;"></div></div>
+                
+                <div style="font-size: 13px; font-weight:800; margin-bottom:10px; margin-top:20px; color:#f3e8ff;">Castigos Automáticos Diarios</div>
+                <div class="micro-item" style="margin-bottom:5px; background:rgba(255,255,255,0.05);"><span>❌ Superar Límite Kcal (>110%)</span> <span style="color:var(--c-danger)">-2000 G</span></div>
+                <div class="micro-item" style="margin-bottom:5px; background:rgba(255,255,255,0.05);"><span>❌ Macros NO cumplidos (<80%)</span> <span style="color:var(--c-danger)">-500 G / c.u</span></div>
+                
+                <div style="font-size: 13px; font-weight:800; margin-bottom:10px; margin-top:20px; color:#f3e8ff;">Pecados (Añadir Manual)</div>
+                <p style="font-size:10px; color:var(--text-sec); margin-bottom:10px;">¿Has sucumbido a la gula? Confiésalo aquí para penalizar tu oro sin ensuciar tus macros, o añádelo normal en el Dash.</p>
+                <select id="temple-sin-select" style="margin-bottom: 10px; background: rgba(0,0,0,0.3); border-color: var(--border-temple);"></select>
+                <button class="btn" style="background: var(--c-danger); color: white;" onclick="commitSin()">Confesar Pecado (-500 G)</button>
+            </div>
+        </div>
+
+        <div id="view-stats" class="view">
+            <div class="tabs" style="margin-bottom: 10px;">
+                <div class="tab active" id="tab-t-7" onclick="renderCharts(7)">7 Días</div>
+                <div class="tab" id="tab-t-30" onclick="renderCharts(30)">Mes</div>
+                <div class="tab" id="tab-t-365" onclick="renderCharts(365)">Año</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Energía (Kcal In vs Out)</div>
+                <div class="chart-container"><canvas id="kcalChart"></canvas></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Tendencia de Macros</div>
+                <div class="chart-container"><canvas id="macroChart"></canvas></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Tendencia de Micros (Top)</div>
+                <div class="chart-container"><canvas id="microChart"></canvas></div>
+                <div id="danger-zone-container"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Gestión de Días</div>
+                <div id="manage-days-list" style="max-height: 300px; overflow-y:auto;"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <nav>
+        <button class="nav-btn active" onclick="switchTab('dash', this)"><span class="nav-icon">📊</span>Dash</button>
+        <button class="nav-btn" onclick="switchTab('db', this)"><span class="nav-icon">🔍</span>Comp.</button>
+        <button class="nav-btn" onclick="switchTab('inv', this)"><span class="nav-icon">📦</span>Invent.</button>
+        <button class="nav-btn" onclick="switchTab('shop', this)"><span class="nav-icon">🛒</span>Listas</button>
+        <button class="nav-btn" onclick="switchTab('templo', this)"><span class="nav-icon">⚔️</span>Templo</button>
+        <button class="nav-btn" onclick="switchTab('stats', this)"><span class="nav-icon">📖</span>Diario</button>
+    </nav>
+
+    <script>
+        const rawDB = {
+            "Pechuga de Pollo (100g)": [165, 31, 0, 3.6, 0, 0, 0, 0, 0, 15, 1, 256, 29, 74],
+            "Arroz Blanco Crudo (100g)": [353, 7, 79, 0.6, 1.3, 0.1, 0, 0, 0, 10, 1.2, 115, 25, 1],
+            "Manzana (Unidad)": [52, 0.3, 13.8, 0.2, 2.4, 10.4, 3, 4.6, 0, 6, 0.1, 107, 5, 1],
+            "Huevo Entero (Unidad L)": [93, 7.5, 0.5, 6.5, 0, 0.5, 85, 0, 1.2, 30, 1.1, 80, 7, 85]
+        };
+
+        const coreDB = Object.keys(rawDB).map((name, i) => { let v = rawDB[name]; return { id: i+1, name, k:v[0], p:v[1], c:v[2], f:v[3], fib:v[4], sug:v[5], va:v[6], vc:v[7], vd:v[8], ca:v[9], fe:v[10], po:v[11], mg:v[12], na:v[13] };});
+
+        const getDay = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+        const today = getDay();
+        let activeDate = today;
+        
+        let state = JSON.parse(localStorage.getItem('nexo_dieta_rpg_v2')) || {
+            targets: { kcal: 2200, prot: 150, carb: 200, fat: 70, fib: 30, sug: 50, va: 900, vc: 90, vd: 20, ca: 1000, fe: 8, po: 3500, mg: 400, na: 2300 },
+            bio: { w: 75, h: 175, a: 25, g: 'm', act: 1.375 },
+            customDB: [], inventory: [], history: {}, shopLists: { "Principal": [] }, currentList: "Principal",
+            gold: 0, lvl: 1, xp: 0
+        };
+        
+        // Migración de tienda vieja si existe
+        if(state.activeShop) { state.shopLists["Principal"] = state.activeShop; delete state.activeShop; }
+        if(!state.shopLists[state.currentList]) state.shopLists[state.currentList] = [];
+
+        if(!state.history[today]) state.history[today] = { log: [], burn: 0, done: false, score: -1 };
+
+        let fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name));
+        let charts = { kcal: null, macro: null, micro: null };
+        let currentChartRange = 7;
+
+        function save() { localStorage.setItem('nexo_dieta_rpg_v2', JSON.stringify(state)); updateDash(); updateRPG(); }
+
+        function switchTab(id, btn) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`view-${id}`).classList.add('active');
+            if(btn) btn.classList.add('active');
+            
+            if(id === 'db') renderDB();
+            if(id === 'inv') renderInv();
+            if(id === 'shop') renderShop();
+            if(id === 'stats') { renderCharts(currentChartRange); renderManageDays(); }
+            if(id === 'templo') { updateRPG(); document.getElementById('temple-sin-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join(''); }
+        }
+
+        // En getSums, 'qty' ya es el multiplicador directo porque introducimos base 1 ud/100g.
+        function getSums(date = activeDate) {
+            if(!state.history[date]) return { t: {k:0,p:0,c:0,f:0,fib:0,sug:0,va:0,vc:0,vd:0,ca:0,fe:0,po:0,mg:0,na:0}, burn: 0, netK: 0 };
+            let log = state.history[date].log; let burn = state.history[date].burn || 0;
+            let t = { k:0, p:0, c:0, f:0, fib:0, sug:0, va:0, vc:0, vd:0, ca:0, fe:0, po:0, mg:0, na:0 };
+            log.forEach(i => { let m = i.qty; for(let key in t) t[key] += (i[key] || 0) * m; });
+            t.netK = Math.max(0, t.k - burn); return { t, burn };
+        }
+
+        function updateDash() {
+            let isPast = activeDate !== today;
+            document.getElementById('ui-date').innerText = isPast ? activeDate : "HOY";
+            document.getElementById('edit-mode-banner').style.display = isPast ? "flex" : "none";
+            document.getElementById('edit-mode-text').innerText = `EDITANDO DÍA: ${activeDate}`;
+            document.getElementById('end-day-btn').style.display = isPast ? "none" : "block";
+
+            document.getElementById('food-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+            
+            let { t, burn } = getSums(); let T = state.targets;
+            
+            const uM = (id, val, max, unit="", inv=false) => { 
+                let elT = document.getElementById(`t-${id}`); let elB = document.getElementById(`b-${id}`);
+                if(elT) elT.innerText = `${Math.round(val)}${unit}`; 
+                if(elB) elB.style.width = `${Math.min(100, (val/max)*100)}%`;
+            };
+            
+            uM('kcal', t.netK, T.kcal); uM('prot', t.p, T.prot, 'g'); uM('carb', t.c, T.carb, 'g'); uM('fat', t.f, T.fat, 'g');
+            uM('fib', t.fib, T.fib, 'g'); uM('sug', t.sug, T.sug, 'g', true);
+            uM('va', t.va, T.va, 'µg'); uM('vc', t.vc, T.vc, 'mg'); uM('vd', t.vd, T.vd, 'µg');
+            uM('ca', t.ca, T.ca, 'mg'); uM('fe', t.fe, T.fe, 'mg'); uM('po', t.po, T.po, 'mg');
+            uM('mg', t.mg, T.mg, 'mg'); uM('na', t.na, T.na, 'mg', true);
+
+            document.getElementById('st-in').innerText = Math.round(t.k); document.getElementById('st-out').innerText = Math.round(burn); document.getElementById('st-max').innerText = Math.round(T.kcal);
+
+            document.getElementById('today-log').innerHTML = state.history[activeDate].log.map((i, idx) => `
+                <div class="list-item">
+                    <div class="item-info" style="flex: 1.5;">
+                        <div class="item-name" style="font-size: 13px;">${i.name}</div>
+                        <div class="item-sub">🔥 ${Math.round(i.k*i.qty)}kc | 🥩 ${Math.round(i.p*i.qty)}g</div>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <span style="font-size:11px; color:var(--text-sec);">x</span>
+                        <input type="number" value="${i.qty}" onchange="updateQty(${idx}, this.value)" style="width: 50px; padding: 8px 5px; margin-bottom: 0; text-align: center; font-size: 13px;">
+                        <button class="btn-icon" style="color:var(--c-danger);" onclick="delLog(${idx})">✖</button>
+                    </div>
+                </div>`).join('') || '<div style="font-size:12px; color:var(--text-sec);">Nada registrado.</div>';
+        }
+
+        function logFood() { let id = document.getElementById('food-select').value; let qty = parseFloat(document.getElementById('food-qty').value); if(!id || isNaN(qty) || qty<=0) return; let item = fullDB.find(x => x.id == id); state.history[activeDate].log.push({ ...item, qty }); save(); document.getElementById('food-qty').value = "1"; }
+        function delLog(i) { state.history[activeDate].log.splice(i, 1); save(); }
+        function updateQty(idx, val) { let n = parseFloat(val); if(isNaN(n) || n <= 0) { delLog(idx); return; } state.history[activeDate].log[idx].qty = n; save(); }
+        function logBurn() { let v = parseFloat(document.getElementById('burn-input').value); if(v>0) { state.history[activeDate].burn += v; document.getElementById('burn-input').value=""; save(); } }
+
+        // === BIBLIOTECA ===
+        function createFood() {
+            let n = document.getElementById('c-name').value; let q = parseFloat(document.getElementById('c-qty').value);
+            if(!n || isNaN(q) || q <= 0) return alert("Introduce datos válidos.");
+            let r = 100 / q; const gv = (id) => (parseFloat(document.getElementById(id).value) || 0) * r;
+            let f = { id: Date.now(), name: `${n} (100g/Base)`, k: gv('c-k'), p: gv('c-p'), c: gv('c-c'), f: gv('c-f'), fib: gv('c-fib'), sug: gv('c-sug'), va: gv('c-va'), vc: gv('c-vc'), vd: gv('c-vd'), ca: gv('c-ca'), fe: gv('c-fe'), po: gv('c-po'), mg: gv('c-mg'), na: gv('c-na') };
+            state.customDB.push(f); fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name));
+            save(); renderDB(); alert(`¡Añadido a la biblioteca!`);
+        }
+
+        function renderDB() { 
+            let q = document.getElementById('search-db').value.toLowerCase(); 
+            document.getElementById('db-render-list').innerHTML = fullDB.filter(x => x.name.toLowerCase().includes(q)).map(f => `
+                <div class="list-item" style="border-color:var(--border-forge)">
+                    <div class="item-info"><div class="item-name">${f.name}</div><div class="item-sub">${Math.round(f.k)} kc | ${Math.round(f.p)}g P</div></div>
+                    <div class="item-actions">
+                        <button class="btn-icon" style="color:var(--text-pri);" onclick="addInv(${f.id})" title="Añadir inventario">📦</button>
+                        ${f.id > 1000 ? `<button class="btn-icon" style="color:var(--c-danger);" onclick="delDB(${f.id})">✖</button>` : ''}
+                    </div>
+                </div>`).join(''); 
+        }
+        function delDB(id) { if(confirm("¿Borrar?")) { state.customDB = state.customDB.filter(x => x.id !== id); fullDB = [...coreDB, ...state.customDB].sort((a,b)=>a.name.localeCompare(b.name)); save(); renderDB(); } }
+
+        // === INVENTARIO ===
+        function renderInv() { 
+            document.getElementById('inv-list').innerHTML = state.inventory.map((i, idx) => {
+                return `
+                <div class="list-item">
+                    <div class="item-info">
+                        <div class="item-name">${i.name}</div>
+                        <div class="item-sub">Stock: ${i.invQty} (x Multiplicador base)</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-icon" style="color:var(--c-danger);" onclick="delInv(${idx})">✖</button>
+                    </div>
+                </div>`;
+            }).join('') || '<div style="font-size:12px; color:var(--text-sec);">Despensa vacía.</div>';
+        }
+        function addInv(id) { let item = fullDB.find(x => x.id == id); let ex = state.inventory.find(x => x.id == id); if(ex) ex.invQty++; else state.inventory.push({...item, invQty: 1}); save(); alert("Añadido"); }
+        function delInv(idx) { state.inventory.splice(idx, 1); save(); renderInv(); }
+
+        // === TIENDA (MÚLTIPLES LISTAS) ===
+        function renderShop() {
+            let sel = document.getElementById('shop-list-select');
+            sel.innerHTML = Object.keys(state.shopLists).map(k => `<option value="${k}" ${k===state.currentList?'selected':''}>${k}</option>`).join('');
+            document.getElementById('shop-db-select').innerHTML = fullDB.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+            
+            let list = state.shopLists[state.currentList] || [];
+            let totCost = 0;
+            document.getElementById('shop-list-items').innerHTML = list.map((i, idx) => {
+                totCost += i.price;
+                return `
+                <div class="list-item ${i.done ? 'bought' : ''}" style="border-color:var(--border-shop);" onclick="toggleShopItem(${idx})">
+                    <div class="item-info">
+                        <div class="item-name" style="${i.done ? 'color:var(--text-sec)' : 'color:#bbf7d0'}">${i.name}</div>
+                        <div class="item-sub">x${i.qty} | ${i.price.toFixed(2)}€</div>
+                    </div>
+                    <button class="btn-icon" style="color:var(--c-danger);" onclick="event.stopPropagation(); delShopItem(${idx})">✖</button>
+                </div>`;
+            }).join('') || '<div style="font-size:12px; color:var(--text-sec);">Cesta vacía.</div>';
+            document.getElementById('shop-total-cost').innerText = `${totCost.toFixed(2)} €`;
+        }
+
+        function changeShopList() { state.currentList = document.getElementById('shop-list-select').value; save(); renderShop(); }
+        function newShopList() { let n = prompt("Nombre de la nueva lista:"); if(n && !state.shopLists[n]) { state.shopLists[n] = []; state.currentList = n; save(); renderShop(); } }
+        function renameShopList() { let n = prompt("Nuevo nombre:", state.currentList); if(n && n!==state.currentList && !state.shopLists[n]) { state.shopLists[n] = state.shopLists[state.currentList]; delete state.shopLists[state.currentList]; state.currentList = n; save(); renderShop(); } }
+        function addToShop() {
+            let id = document.getElementById('shop-db-select').value; let qty = parseFloat(document.getElementById('shop-add-qty').value); let price = parseFloat(document.getElementById('shop-add-price').value) || 0;
+            if(!id || isNaN(qty) || qty <= 0) return;
+            let item = fullDB.find(x => x.id == id); state.shopLists[state.currentList].push({ ...item, qty, price, done: false }); save(); renderShop();
+        }
+        function toggleShopItem(idx) { state.shopLists[state.currentList][idx].done = !state.shopLists[state.currentList][idx].done; save(); renderShop(); }
+        function delShopItem(idx) { state.shopLists[state.currentList].splice(idx, 1); save(); renderShop(); }
+        function finishShopping() { state.shopLists[state.currentList] = state.shopLists[state.currentList].filter(i => !i.done); save(); renderShop(); alert("Comprados eliminados de la lista."); }
+
+        // === RPG TEMPLO ===
+        function updateRPG() { document.getElementById('ui-gold').innerText = state.gold; document.getElementById('ui-lvl').innerText = state.lvl; document.getElementById('rpg-lvl').innerText = state.lvl; document.getElementById('rpg-xp').innerText = state.xp; document.getElementById('rpg-next').innerText = state.lvl * 500; document.getElementById('b-xp').style.width = `${Math.min(100, (state.xp/(state.lvl*500))*100)}%`; }
+        function commitSin() { let n = document.getElementById('temple-sin-select').options[document.getElementById('temple-sin-select').selectedIndex].text; if(confirm(`¿Confiesas haber comido "${n}" fuera de tus registros? Te costará 500 Oro.`)) { state.gold -= 500; save(); alert("Pecado confesado. El Nexo te juzga."); } }
+
+        function endDay() {
+            if(state.history[today].done) return alert("El día ya ha sido juzgado.");
+            let { t } = getSums(); let T = state.targets; let g = 0, xp = 0;
+            
+            // Recompensas
+            if(t.netK <= T.kcal && t.netK >= T.kcal*0.8) { g += 50; xp += 50; }
+            let mProt = t.p >= T.prot, mCarb = t.c >= T.carb, mFat = t.f >= T.fat;
+            if(mProt){ g += 150; xp += 30; } if(mCarb){ g += 150; xp += 30; } if(mFat){ g += 150; xp += 30; }
+            
+            // Castigos
+            if(t.netK > T.kcal * 1.1) { g -= 2000; alert("¡CASTIGO! Has superado por mucho tu límite de Kcal (-2000 G)"); }
+            if(!mProt && !mCarb && !mFat) { g -= 500; alert("¡CASTIGO! Fallaste estrepitosamente tus macros (-500 G)"); }
+
+            state.gold += g; state.xp += xp;
+            if(state.xp >= state.lvl * 500) { state.xp -= state.lvl * 500; state.lvl++; alert(`¡SUBES AL NIVEL ${state.lvl}!`); }
+            state.history[today].done = true; save();
+            alert(`Día sellado.\nOro Total Modificado: ${g > 0 ? '+'+g : g}.`);
+        }
+
+        // === DIARIO Y GRÁFICAS ===
+        function exitEditMode() { activeDate = today; updateDash(); }
+        function startEditMode(date) { activeDate = date; switchTab('dash', document.querySelector('.nav-btn')); updateDash(); }
+        function deleteDay(date) { if(confirm(`¿Borrar TODO el registro del día ${date}?`)) { delete state.history[date]; save(); renderManageDays(); renderCharts(currentChartRange); } }
+
+        function renderManageDays() {
+            let list = Object.keys(state.history).sort((a,b)=>new Date(b)-new Date(a));
+            document.getElementById('manage-days-list').innerHTML = list.map(date => {
+                let s = getSums(date);
+                return `
+                <div class="list-item" style="padding: 8px 12px;">
+                    <div class="item-info">
+                        <div class="item-name" style="font-size:12px;">${date} ${date===today ? '(Hoy)' : ''}</div>
+                        <div class="item-sub" style="font-size:10px;">${Math.round(s.t.netK)}kc neta</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-icon" style="background:var(--border);" onclick="startEditMode('${date}')">✏️</button>
+                        ${date !== today ? `<button class="btn-icon" style="color:var(--c-danger);" onclick="deleteDay('${date}')">✖</button>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderCharts(days) {
+            currentChartRange = days;
+            ['7','30','365'].forEach(id => { let b = document.getElementById(`tab-t-${id}`); if(b){b.classList.remove('active'); b.style.background='var(--bg-surface)'; b.style.color='var(--text-sec)';} });
+            let ab = document.getElementById(`tab-t-${days}`); if(ab){ab.classList.add('active'); ab.style.background='var(--text-pri)'; ab.style.color='black';}
+
+            if(typeof Chart === 'undefined') return;
+            let d = new Date(); let labels = [];
+            let inData=[], outData=[], pData=[], cData=[], fData=[], avgMicros={fib:0, va:0, vc:0, vd:0, ca:0, fe:0, po:0, mg:0}, daysCount=0;
+
+            let step = days > 30 ? Math.floor(days/30) : 1;
+            for(let i=days-1; i>=0; i-=step) {
+                let dt = new Date(d); dt.setDate(d.getDate() - i);
+                let ds = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+                labels.push(days<=30 ? dt.getDate() : `${dt.getDate()}/${dt.getMonth()+1}`);
+                
+                let s = getSums(ds);
+                inData.push(s.t.k); outData.push(s.burn);
+                pData.push(s.t.p); cData.push(s.t.c); fData.push(s.t.f);
+                if(s.t.k > 0) { daysCount++; for(let key in avgMicros) avgMicros[key] += s.t[key]; }
+            }
+
+            // Gráfica 1: Kcal Barras
+            if(charts.kcal) charts.kcal.destroy();
+            charts.kcal = new Chart(document.getElementById('kcalChart').getContext('2d'), { type: 'bar', data: { labels, datasets: [{label:'Consumidas', data:inData, backgroundColor:'#fbbf24'}, {label:'Quemadas', data:outData, backgroundColor:'#f43f5e'}] }, options: { responsive:true, maintainAspectRatio:false, scales: { y: { beginAtZero:true, grid:{color:'#33'} }, x: {stacked:false, grid:{display:false}} } } });
+
+            // Gráfica 2: Macros Línea
+            if(charts.macro) charts.macro.destroy();
+            charts.macro = new Chart(document.getElementById('macroChart').getContext('2d'), { type: 'line', data: { labels, datasets: [{label:'Prot', data:pData, borderColor:'#ef4444', tension:0.3}, {label:'Carb', data:cData, borderColor:'#3b82f6', tension:0.3}, {label:'Grasa', data:fData, borderColor:'#22c55e', tension:0.3}] }, options: { responsive:true, maintainAspectRatio:false, scales: { y: { beginAtZero:true, grid:{color:'#33'} }, x: {grid:{display:false}} }, plugins:{legend:{labels:{color:'#fff', font:{size:10}}}} } });
+
+            // Gráfica 3: Micros (Radar o Bar)
+            if(daysCount>0) for(let key in avgMicros) avgMicros[key] /= daysCount;
+            let mLabels = ['Fibra','VitA','VitC','VitD','Calcio','Hierro','Potasio','Magnesio'];
+            let mKeys = ['fib','va','vc','vd','ca','fe','po','mg'];
+            let T = state.targets;
+            let mPct = mKeys.map(k => Math.min(100, (avgMicros[k] / T[k])*100));
+
+            if(charts.micro) charts.micro.destroy();
+            charts.micro = new Chart(document.getElementById('microChart').getContext('2d'), { type: 'bar', data: { labels: mLabels, datasets: [{label:'% del Objetivo Diario Medio', data:mPct, backgroundColor:'#8b5cf6', borderRadius:4}] }, options: { responsive:true, maintainAspectRatio:false, indexAxis: 'y', scales: { x: { max: 100, beginAtZero:true, grid:{color:'#33'} }, y: {grid:{display:false}} } } });
+
+            // Zona de Peligro
+            let dz = document.getElementById('danger-zone-container');
+            if(daysCount === 0) dz.innerHTML = "";
+            else {
+                let lowestVal = 100; let lowestKey = "";
+                mKeys.forEach((k, idx) => { if(mPct[idx] < lowestVal) { lowestVal = mPct[idx]; lowestKey = mLabels[idx]; } });
+                if(lowestVal < 60) dz.innerHTML = `<div class="danger-zone">⚠️ ALERTA: Tu nivel medio de <b>${lowestKey}</b> está muy bajo (${Math.round(lowestVal)}% del objetivo). ¡Priorízalo!</div>`;
+                else dz.innerHTML = `<div class="danger-zone" style="color:#4ade80; background:rgba(74, 222, 128, 0.1); border-color:#4ade80;">✅ Micros en buen estado (Todo > 60%)</div>`;
+            }
+        }
+
+        try { updateDash(); updateRPG(); } catch(e) { console.error(e); }
+    </script>
+</body>
+</html>
