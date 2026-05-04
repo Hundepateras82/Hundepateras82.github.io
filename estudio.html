@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
     <title>LifeQuest AAA: Nexo Estable</title>
-    <link href="[https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap](https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap)" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { 
             --bg-page: #050914; --panel: #0d1424; --panel-light: #162032; 
@@ -21,11 +20,24 @@
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* FIJACIÓN TOTAL PARA iPHONE */
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; position: fixed; overflow: hidden; font-family: 'Nunito', sans-serif; color: var(--text-main); background: #000; }
+        /* FIX DEFINITIVO iOS PWA: Usar -webkit-fill-available y fondear el body */
+        html, body { 
+            margin: 0; padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            height: -webkit-fill-available; /* La magia para la barra negra de iOS */
+            position: fixed; top: 0; left: 0; 
+            overflow: hidden; 
+            font-family: 'Nunito', sans-serif; color: var(--text-main); 
+            background-color: var(--bg-page); /* Sella el fondo con el color del juego */
+        }
 
-        /* CAJA FLEX RÍGIDA */
-        #app-container { width: 100%; max-width: 600px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; background: var(--bg-page); overflow: hidden; box-shadow: 0 0 20px #000; }
+        #app-container { 
+            width: 100%; max-width: 600px; margin: 0 auto; 
+            height: 100%; min-height: -webkit-fill-available; 
+            display: flex; flex-direction: column; background: var(--bg-page); 
+            position: relative; overflow: hidden; box-shadow: 0 0 20px #000; 
+        }
         
         /* HUDS SUPERIORES FIJOS */
         #hud-advanced { flex-shrink: 0; background: var(--panel); border-bottom: 2px solid var(--border-dark); padding: 15px; padding-top: calc(15px + env(safe-area-inset-top)); display: none; flex-direction: column; gap: 10px; z-index: 50; }
@@ -47,7 +59,7 @@
         .screen.active { display: flex; animation: fade 0.2s ease-out; }
         @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
         
-        .content { padding: 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; padding-bottom: 40px; }
+        .content { padding: 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
 
         /* TABS INTERNAS */
         .sub-nav { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; border-bottom: 1px solid var(--border-dark); flex-shrink: 0; }
@@ -98,7 +110,7 @@
         .combat-progress-bg { flex: 1; height: 10px; background: var(--border-dark); border-radius: 10px; overflow: hidden; }
         .combat-progress-fill { height: 100%; background: var(--green); transition: width 0.3s ease; }
         
-        .combat-body { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; padding-bottom: 180px; }
+        .combat-body { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; padding-bottom: calc(180px + env(safe-area-inset-bottom)); }
         
         /* FOOTER DE COMBATE (ABSOLUTO) */
         .combat-footer { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--panel); border-top: 2px solid var(--cyan); box-shadow: 0 -10px 30px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap:10px; padding: 15px 20px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); z-index: 9999; }
@@ -288,6 +300,7 @@
                 </div>
                 
                 <div class="combat-body">
+                    <!-- Botón de Escape Auxiliar para Lecturas (En la parte superior) -->
                     <button id="btn-reading-exit" class="btn btn-dark" style="display:none; margin-bottom:20px; border-color:var(--red); color:var(--red);" onclick="fleeCombat()">✖ SALIR SIN COMPLETAR</button>
 
                     <div id="boss-ui" style="display:none; text-align:center; margin-bottom:15px;">
@@ -307,6 +320,7 @@
                         </div>
                         <button id="btn-check" class="btn btn-dark" onclick="checkAnswer()">COMPROBAR</button>
                     </div>
+                    <!-- BOTÓN GIGANTE VERDE FIJADO -->
                     <button id="btn-reading-done" class="btn btn-green" onclick="finishReading()" style="display:none; font-size: 16px; padding: 20px; box-shadow: 0 0 20px var(--green); border: 2px solid white; animation: pulseNode 2s infinite;">¡LECCIÓN COMPLETADA!</button>
                 </div>
             </div>
@@ -372,7 +386,7 @@
         </div>
     </div> <!-- Fin screens-wrapper -->
 
-    <!-- NAVEGACIÓN INFERIOR AISLADA EN FLEX -->
+    <!-- NAVEGACIÓN INFERIOR INTEGRADA (FLEXIBLE) -->
     <div class="nav">
         <div class="nav-item active" id="tab-home" onclick="navTo('home')"><span>👤</span>PERFIL</div>
         <div class="nav-item" id="tab-worlds" onclick="navTo('worlds')"><span>🗺️</span>MAPA</div>
@@ -388,6 +402,7 @@
     const audioCtx = new AudioContext();
     function playSound(t) { if(audioCtx.state==='suspended') audioCtx.resume(); } 
 
+    // --- BASE DE DATOS AAA ---
     const matsDB = { m1:{icon:'⚪',t:1,n:'Hierro'}, m2:{icon:'🟤',t:1,n:'Cuero'}, m4:{icon:'🟣',t:2,n:'Cristal Oscuro'}, m5:{icon:'🧵',t:2,n:'Hilo Mágico'}, m6:{icon:'⚙️',t:2,n:'Acero'}, m7:{icon:'✨',t:3,n:'Polvo Estelar'}, m9:{icon:'📀',t:3,n:'Oro Puro'}, m10:{icon:'👹',t:4,n:'Alma'}, m11:{icon:'🩸',t:4,n:'Sangre'}, m12:{icon:'🐉',t:5,n:'Escama Mítica'} };
     
     const gearDB = {
@@ -401,6 +416,7 @@
     };
     const rColor = { 1:'tier-1', 2:'tier-2', 3:'tier-3', 4:'tier-4', 5:'tier-5' };
 
+    // --- ESTADO GLOBAL (NEXO) ---
     let state = {
         lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 100, gems: 0, potions: 3, maxPots: 5, sp: 0, prestige: 0, ap: 0,
         stats: { atk: 10, def: 10, luck: 5, crit: 0, dodge: 0, lifesteal: 0 }, baseBonus: { atk: 0, def: 0 }, 
@@ -521,12 +537,9 @@
     function deleteWorld(idx) { if(state.worlds.length <= 1) return alert("❌ No puedes borrar tu único mundo."); if(confirm(`⚠️ ¿Borrar "${state.worlds[idx].name}"?`)) { state.worlds.splice(idx, 1); if(state.activeW === idx) state.activeW = 0; else if (state.activeW > idx) state.activeW--; save(); renderWorldsManager(); renderMap(); } }
     function openForgeModal() { document.getElementById('modal-forge').style.display = 'flex'; document.getElementById('forge-input').value = JSON.stringify(state.worlds[state.activeW].campaign, null, 2); }
     
-    // --- ESTA ES LA FUNCIÓN QUE SE CORTÓ ANTES REPARADA ---
     function processForge() {
-        playSound('click');
         let rawCode = document.getElementById('forge-input').value;
         try {
-            // Se usa el constructor de RegExp para evitar que las tres comillas rompan el código en el chat
             rawCode = rawCode.replace(new RegExp('`{3}json', 'gi'), '').replace(new RegExp('`{3}', 'g'), '').trim();
             rawCode = rawCode.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
             const p = JSON.parse(rawCode);
@@ -540,6 +553,7 @@
         } catch(e) { alert("❌ ERROR JSON: " + e.message); }
     }
 
+    // --- COMBATE / LECTURA ---
     function startNode(id) {
         playSound('click'); const w = state.worlds[state.activeW];
         if(!w.unlocked.includes(id) && !w.completed.includes(id)) return alert("🔒 Bloqueado.");
@@ -630,7 +644,11 @@
         }
     }
 
-    function finishReading() { playSound('click'); if(!combat.isDone) finishNode(combat.node); else fleeCombat(); }
+    function finishReading() {
+        playSound('click');
+        if(!combat.isDone) finishNode(combat.node);
+        else fleeCombat();
+    }
 
     function finishNode(node) {
         const w = state.worlds[state.activeW];
@@ -651,6 +669,7 @@
     function fleeCombat() { combat.active = false; navTo('worlds'); }
     function gainXP(amt) { state.xp += amt; if(state.xp >= state.maxXp) { state.lvl++; state.sp++; state.xp -= state.maxXp; state.maxXp = Math.floor(state.maxXp * 1.5); recalcStats(); state.hp = state.maxHp; state.en = state.maxEn; } }
 
+    // --- FORJA & MERCADO ---
     function switchForgeTab(tab) { document.querySelectorAll('#screen-crafting .sub-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('#screen-crafting .tab-content').forEach(c => c.classList.remove('active')); document.getElementById('sub-forge-' + tab).classList.add('active'); document.getElementById('forge-tab-' + tab).classList.add('active'); if(tab === 'craft') renderCrafting(currCraftFilter); if(tab === 'runes') renderRunes(); }
     function renderCrafting(f) {
         currCraftFilter = f; document.querySelectorAll('#forge-tab-craft .btn-dark, #forge-tab-craft .btn-blue').forEach(b => b.className='btn btn-dark'); document.getElementById('filter-'+f).className='btn btn-blue';
@@ -669,9 +688,9 @@
             return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name} <span style="color:var(--gold)">+${upg}</span></div><div style="font-size:10px; color:var(--text-sub);">Costo: ${cost} 👹</div></div><button class="btn ${canUpg?'btn-purple':'btn-dark'}" style="width:auto; padding:8px;" onclick="upgrade('${g.id}')">REFINAR</button></div>`;
         }).join('') || '<div style="color:var(--text-sub); text-align:center;">No tienes equipo.</div>';
     }
-    function craft(id) { playSound('click'); const g = gearDB[id]; if(!Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v)) return; Object.entries(g.cost).forEach(([k,v]) => state.inventory[k] -= v); state.ownedGear.push(id); save(); renderCrafting(currCraftFilter); }
-    function equip(id) { playSound('click'); const g = gearDB[id]; state.equipment[g.t] = id; recalcStats(); save(); renderCrafting(currCraftFilter); }
-    function upgrade(id) { playSound('click'); const g = gearDB[id]; let upg = state.upgrades[id]||0; let cost = (g.r*5)+upg; if((state.inventory.m10||0)<cost) return alert("Falta Alma."); state.inventory.m10-=cost; state.upgrades[id]=upg+1; recalcStats(); save(); renderRunes(); alert("✨ Equipo Refinado!"); }
+    function craft(id) { const g = gearDB[id]; if(!Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v)) return; Object.entries(g.cost).forEach(([k,v]) => state.inventory[k] -= v); state.ownedGear.push(id); save(); renderCrafting(currCraftFilter); }
+    function equip(id) { const g = gearDB[id]; state.equipment[g.t] = id; recalcStats(); save(); renderCrafting(currCraftFilter); }
+    function upgrade(id) { const g = gearDB[id]; let upg = state.upgrades[id]||0; let cost = (g.r*5)+upg; if((state.inventory.m10||0)<cost) return alert("Falta Alma."); state.inventory.m10-=cost; state.upgrades[id]=upg+1; recalcStats(); save(); renderRunes(); alert("✨ Equipo Refinado!"); }
 
     function switchShopTab(tab) { document.querySelectorAll('#screen-shop .sub-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('#screen-shop .tab-content').forEach(c => c.classList.remove('active')); document.getElementById('sub-shop-' + tab).classList.add('active'); document.getElementById('shop-tab-' + tab).classList.add('active'); if(tab === 'daily') renderDailyShop(); if(tab === 'crypto') renderCryptoMarket(); }
     
@@ -713,7 +732,7 @@
         playSound('click'); let cost = tier===1?100:tier===2?500:50;
         if(!isFree) { if(tier===3) { if(state.gems < cost) return alert("Faltan Gemas 💎."); state.gems -= cost; } else { if(state.gold < cost) return alert("Falta Oro 🟡."); state.gold -= cost; } }
         let m = document.getElementById('modal-gacha'); m.style.display = 'flex';
-        let c = document.getElementById('gacha-chest'); c.className = 'chest-anim'; 
+        let c = document.getElementById('gacha-chest'); c.className = 'chest-anim'; playSound('gacha');
         setTimeout(() => {
             m.style.display = 'none'; c.className = '';
             let r = Math.random(); let msg = "";
