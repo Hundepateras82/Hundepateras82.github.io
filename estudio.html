@@ -21,24 +21,21 @@
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* ARQUITECTURA UNIVERSAL: 100dvh asegura compatibilidad en iOS, Android y PC */
+        /* FIJACIÓN UNIVERSAL: Centrado en iPad/PC, pantalla completa en móvil */
         html, body { 
-            margin: 0; padding: 0; 
-            width: 100%; height: 100%; height: 100dvh; 
-            overflow: hidden; /* Evita el scroll del navegador, todo ocurre dentro de la app */
-            font-family: 'Nunito', sans-serif; color: var(--text-main); 
-            background-color: #000;
+            margin: 0; padding: 0; width: 100%; height: 100%; height: 100dvh; 
+            overflow: hidden; font-family: 'Nunito', sans-serif; color: var(--text-main); 
+            background-color: #000; display: flex; justify-content: center; align-items: center;
         }
 
-        /* CONTENEDOR FLEX PRINCIPAL */
+        /* CONTENEDOR FLEX RÍGIDO (Emula el móvil en cualquier pantalla) */
         #app-container { 
-            width: 100%; max-width: 600px; margin: 0 auto; 
-            height: 100%; display: flex; flex-direction: column; 
-            background: var(--bg-page); position: relative; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.8); 
+            width: 100%; max-width: 600px; height: 100%; 
+            display: flex; flex-direction: column; background: var(--bg-page); 
+            position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8); 
         }
         
-        /* HUDS SUPERIORES FIJOS (Flex Shrink 0) */
+        /* HUDS SUPERIORES */
         #hud-advanced { flex-shrink: 0; background: var(--panel); border-bottom: 2px solid var(--border-dark); padding: 15px; padding-top: calc(15px + env(safe-area-inset-top)); display: none; flex-direction: column; gap: 10px; z-index: 50; }
         #hud-minimal { flex-shrink: 0; background: var(--panel); border-bottom: 1px solid var(--border-dark); padding: 15px; padding-top: calc(15px + env(safe-area-inset-top)); display: none; justify-content: space-between; align-items: center; width: 100%; z-index: 50; }
 
@@ -51,15 +48,15 @@
         .bar-fill { height: 100%; transition: width 0.3s ease; position: absolute; top:0; left:0;}
         .min-curr { background: var(--panel-light); padding: 5px 10px; border-radius: 12px; font-weight: 900; font-size: 12px; border: 1px solid var(--border-dark); display:flex; gap:5px; }
 
-        /* CONTENEDOR CENTRAL DE PANTALLAS (El único que cambia de tamaño dinámicamente) */
-        #screens-wrapper { flex: 1; position: relative; overflow: hidden; width: 100%; }
+        /* CONTENEDOR DE PANTALLAS (El área que cambia) */
+        #screens-wrapper { flex: 1; position: relative; width: 100%; overflow: hidden; }
         
-        .screen { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; flex-direction: column; background: var(--bg-page); overflow: hidden; }
+        /* LAS PANTALLAS SON FLEXIBLES POR DENTRO */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; background: var(--bg-page); }
         .screen.active { display: flex; animation: fade 0.2s ease-out; }
         @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
         
-        /* ZONAS DE SCROLL INTERNAS */
-        .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; display: flex; flex-direction: column; padding-bottom: 40px; }
+        .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; display: flex; flex-direction: column; }
 
         /* TABS INTERNAS */
         .sub-nav { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; border-bottom: 1px solid var(--border-dark); flex-shrink: 0; }
@@ -94,24 +91,26 @@
         .item-details { flex: 1; min-width: 120px; }
         
         .inv-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-        .inv-list-item { display: flex; align-items: center; gap: 15px; padding: 10px; background: var(--panel-light); border-radius: 10px; border: 1px solid var(--border-dark); margin-bottom: 8px;}
+        .inv-list-item { display: flex; align-items: center; gap: 15px; padding: 10px; background: var(--panel-light); border-radius: 10px; border: 1px solid var(--border-dark); margin-bottom: 8px; flex-shrink: 0;}
         .inv-icon { font-size: 24px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--panel); border-radius: 8px;}
 
         /* MAPA */
         .node-path { display: flex; flex-direction: column; align-items: center; gap: 35px; padding: 40px 0; }
-        .node { width: 70px; height: 70px; border-radius: 50%; font-size: 26px; border: 4px solid var(--border-dark); background: var(--panel); display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 0 var(--border-dark); transition: 0.2s; flex-shrink: 0; cursor: pointer; }
+        .node { width: 70px; height: 70px; border-radius: 50%; font-size: 26px; border: 4px solid var(--border-dark); background: var(--panel); display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 0 var(--border-dark); transition: 0.2s; flex-shrink: 0; cursor: pointer;}
         .node.completed { background: var(--gold); border-color: var(--gold-shadow); box-shadow: 0 6px 0 var(--gold-shadow); color: black;}
         .node.unlocked { background: var(--blue); border-color: var(--blue-shadow); box-shadow: 0 6px 0 var(--blue-shadow); color: white; animation: pulseNode 2s infinite;}
         .node.boss { border-color: var(--red); border-width: 5px; }
 
-        /* COMBATE UNIVERSAL (FLEX PURE) */
-        .combat-container { display: flex; flex-direction: column; height: 100%; width: 100%; background: var(--panel); }
+        /* COMBATE UNIVERSAL (FLEXBOX PURO, SIN POSITION ABSOLUTE) */
+        .combat-container { display: flex; flex-direction: column; height: 100%; width: 100%; transition: background 0.3s; }
         .combat-header { flex-shrink: 0; padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border-dark); }
         .combat-progress-bg { flex: 1; height: 10px; background: var(--border-dark); border-radius: 10px; overflow: hidden; }
         .combat-progress-fill { height: 100%; background: var(--green); transition: width 0.3s ease; }
         
+        /* El cuerpo hace scroll naturalmente, empujando el footer abajo */
         .combat-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; display: flex; flex-direction: column; }
         
+        /* Footer apoyado al fondo del flex */
         .combat-footer { flex-shrink: 0; background: var(--panel); border-top: 2px solid var(--cyan); padding: 15px 20px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 30px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap:10px; z-index: 10;}
 
         .option { background: var(--panel-light); border: 2px solid var(--border-dark); border-radius: 12px; padding: 16px; margin-bottom: 10px; font-weight: 700; transition: 0.2s; cursor: pointer; flex-shrink: 0; }
@@ -119,7 +118,7 @@
         .option.correct { border-color: var(--green); background: rgba(16,185,129,0.1); color: var(--green); }
         .option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); opacity: 0.5; }
 
-        /* NAV PRINCIPAL INFERIOR */
+        /* NAV PRINCIPAL INFERIOR (FLEX RÍGIDO) */
         .nav { flex-shrink: 0; display: flex; width: 100%; background: rgba(13,20,36,0.98); border-top: 1px solid var(--border-dark); padding-bottom: env(safe-area-inset-bottom); z-index: 1000; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 9px; transition: 0.2s; padding: 12px 0; cursor: pointer;}
         .nav-item.active { color: var(--cyan); }
@@ -184,10 +183,9 @@
     </div>
 </div>
 
-<!-- ESTRUCTURA PRINCIPAL FLEXIBLE -->
 <div id="app-container">
 
-    <!-- HUDS SUPERIORES -->
+    <!-- HUDS -->
     <div id="hud-advanced">
         <div class="hud-top-row">
             <div style="font-weight:900; font-size:18px; color:var(--text-main);"> Nivel <span id="ui-lvl" style="color:var(--cyan);">1</span></div>
@@ -211,7 +209,7 @@
         </div>
     </div>
 
-    <!-- ÁREA CENTRAL DE PANTALLAS (Hace Scroll aquí dentro) -->
+    <!-- PANTALLAS (El Flex Central) -->
     <div id="screens-wrapper">
         
         <!-- PANTALLA 1: PERFIL -->
@@ -293,8 +291,8 @@
             </div>
         </div>
 
-        <!-- PANTALLA COMBATE / LECTURA (FLEX PURO) -->
-        <div id="screen-combat" class="screen">
+        <!-- PANTALLA COMBATE / LECTURA UNIVERSAL -->
+        <div id="screen-combat" class="screen" style="background:var(--panel);">
             <div class="combat-container" id="combat-container">
                 <div class="combat-header" id="combat-header">
                     <div style="font-size:20px; cursor:pointer; color:var(--text-sub); padding-right:15px;" onclick="fleeCombat()">✖</div>
@@ -303,8 +301,8 @@
                 </div>
                 
                 <div class="combat-body">
-                    <!-- Botón Auxiliar Superior -->
-                    <button id="btn-reading-exit" class="btn btn-dark" style="display:none; margin-bottom:20px; border-color:var(--red); color:var(--red); flex-shrink:0;" onclick="fleeCombat()">✖ SALIR SIN COMPLETAR</button>
+                    <!-- Botón de Escape Auxiliar (Por si acaso) -->
+                    <button id="btn-reading-exit" class="btn btn-dark" style="display:none; margin-bottom:20px; border-color:var(--red); color:var(--red);" onclick="fleeCombat()">✖ SALIR SIN COMPLETAR</button>
 
                     <div id="boss-ui" style="display:none; text-align:center; margin-bottom:15px;">
                         <div style="font-size:50px;" id="boss-emoji">👹</div>
@@ -323,6 +321,7 @@
                         </div>
                         <button id="btn-check" class="btn btn-dark" onclick="checkAnswer()">COMPROBAR</button>
                     </div>
+                    <!-- BOTÓN VERDE FIJADO AL FINAL DEL FLEX -->
                     <button id="btn-reading-done" class="btn btn-green" onclick="finishReading()" style="display:none; font-size: 16px; padding: 20px; box-shadow: 0 0 20px var(--green); border: 2px solid white; animation: pulseNode 2s infinite;">¡LECCIÓN COMPLETADA!</button>
                 </div>
             </div>
@@ -389,7 +388,7 @@
 
     </div> <!-- FIN SCREENS WRAPPER -->
 
-    <!-- NAV PRINCIPAL (INTEGRADA EN EL FLEX DE LA APP) -->
+    <!-- NAV PRINCIPAL (INTEGRADA EN EL FLEX, NUNCA FLOTANTE) -->
     <div class="nav">
         <div class="nav-item active" id="tab-home" onclick="navTo('home')"><span>👤</span>PERFIL</div>
         <div class="nav-item" id="tab-worlds" onclick="navTo('worlds')"><span>🗺️</span>MAPA</div>
@@ -405,7 +404,6 @@
     const audioCtx = new AudioContext();
     function playSound(t) { if(audioCtx.state==='suspended') audioCtx.resume(); } 
 
-    // --- BASE DE DATOS AAA ---
     const matsDB = { m1:{icon:'⚪',t:1,n:'Hierro'}, m2:{icon:'🟤',t:1,n:'Cuero'}, m4:{icon:'🟣',t:2,n:'Cristal Oscuro'}, m5:{icon:'🧵',t:2,n:'Hilo Mágico'}, m6:{icon:'⚙️',t:2,n:'Acero'}, m7:{icon:'✨',t:3,n:'Polvo Estelar'}, m9:{icon:'📀',t:3,n:'Oro Puro'}, m10:{icon:'👹',t:4,n:'Alma'}, m11:{icon:'🩸',t:4,n:'Sangre'}, m12:{icon:'🐉',t:5,n:'Escama Mítica'} };
     
     const gearDB = {
@@ -419,7 +417,6 @@
     };
     const rColor = { 1:'tier-1', 2:'tier-2', 3:'tier-3', 4:'tier-4', 5:'tier-5' };
 
-    // --- ESTADO GLOBAL (NEXO) ---
     let state = {
         lvl: 1, xp: 0, maxXp: 100, hp: 100, maxHp: 100, en: 50, maxEn: 50, gold: 100, gems: 0, potions: 3, maxPots: 5, sp: 0, prestige: 0, ap: 0,
         stats: { atk: 10, def: 10, luck: 5, crit: 0, dodge: 0, lifesteal: 0 }, baseBonus: { atk: 0, def: 0 }, 
@@ -439,8 +436,8 @@
         
         if(state.worlds[0].campaign.length === 0) {
             state.worlds[0].campaign = [
-                {id:'n1', type:'reading', title:'📖 Diseño Perfecto', content:'La aplicación entera ha sido configurada en un layout Flexbox rígido universal. Funciona igual de perfecto en un PC que en un iPhone.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
-                {id:'n2', type:'test', title:'⚔️ Test Final', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿Estás listo para estudiar?', options:['Sí','A por ello'], correct:0} ]}
+                {id:'n1', type:'reading', title:'📖 UI Flexible', content:'El layout completo es ahora un Flexbox Matemático en vez de Absoluto. Esto asegura compatibilidad infinita con iPads, PCs y iPhone 15, adaptando su tamaño de forma natural.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
+                {id:'n2', type:'test', title:'⚔️ Test Seguro', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿Todo encaja perfectamente ahora?', options:['Sí','Obvio'], correct:0} ]}
             ];
         }
 
@@ -497,6 +494,8 @@
         const tab = document.getElementById('tab-' + id); if(tab) tab.classList.add('active');
         
         const hA = document.getElementById('hud-advanced'), hM = document.getElementById('hud-minimal'), nBar = document.querySelector('.nav');
+        
+        // Magia Flexbox: Si ocultamos el NAV, el Wrapper central crece automáticamente para rellenar el espacio.
         if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; nBar.style.display = 'flex'; renderMap(); }
         else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; nBar.style.display = 'none'; } 
         else { hA.style.display = 'flex'; hM.style.display = 'none'; nBar.style.display = 'flex'; }
@@ -754,4 +753,6 @@
 </script>
 </body>
 </html>
+
+
 
