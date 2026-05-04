@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
-    <title>LifeQuest AAA: Nexo Universal</title>
+    <title>LifeQuest AAA: Nexo Simétrico</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -21,51 +21,80 @@
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* FIJACIÓN UNIVERSAL: Centrado en iPad/PC, pantalla completa en móvil */
+        /* 1. ELIMINACIÓN DE LOS BORDES NEGROS LATERALES */
         html, body { 
             margin: 0; padding: 0; width: 100%; height: 100%; height: 100dvh; 
-            overflow: hidden; font-family: 'Nunito', sans-serif; color: var(--text-main); 
-            background-color: #000; display: flex; justify-content: center; align-items: center;
+            position: fixed; top: 0; left: 0; overflow: hidden; 
+            font-family: 'Nunito', sans-serif; color: var(--text-main); 
+            background-color: var(--bg-page); /* El fondo ahora es el color del juego, no negro */
         }
 
-        /* CONTENEDOR FLEX RÍGIDO (Emula el móvil en cualquier pantalla) */
+        /* 2. CONTENEDOR FLUIDO AL 100% (La caja ya no está limitada a 600px) */
         #app-container { 
-            width: 100%; max-width: 600px; height: 100%; 
-            display: flex; flex-direction: column; background: var(--bg-page); 
-            position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.8); 
+            width: 100%; height: 100%; display: flex; flex-direction: column; 
+            background: var(--bg-page); position: relative; overflow: hidden; 
+        }
+        
+        /* 3. CENTRADO INTERNO (El contenido se centra, pero el fondo abarca todo) */
+        .content { 
+            width: 100%; max-width: 1000px; margin: 0 auto; 
+            padding: 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; 
+            display: flex; flex-direction: column; padding-bottom: calc(90px + env(safe-area-inset-bottom)); 
+        }
+
+        .hud-inner, .nav-inner { 
+            width: 100%; max-width: 1000px; margin: 0 auto; 
+            display: flex; justify-content: space-between; align-items: center; 
         }
         
         /* HUDS SUPERIORES */
-        #hud-advanced { flex-shrink: 0; background: var(--panel); border-bottom: 2px solid var(--border-dark); padding: 15px; padding-top: calc(15px + env(safe-area-inset-top)); display: none; flex-direction: column; gap: 10px; z-index: 50; }
-        #hud-minimal { flex-shrink: 0; background: var(--panel); border-bottom: 1px solid var(--border-dark); padding: 15px; padding-top: calc(15px + env(safe-area-inset-top)); display: none; justify-content: space-between; align-items: center; width: 100%; z-index: 50; }
+        #hud-advanced { flex-shrink: 0; background: var(--panel); border-bottom: 2px solid var(--border-dark); padding: 15px; padding-top: calc(15px + env(safe-area-inset-top)); display: none; width: 100%; z-index: 50; }
+        #hud-advanced-inner { max-width: 1000px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        
+        #hud-minimal { flex-shrink: 0; background: var(--panel); border-bottom: 1px solid var(--border-dark); padding: 15px; padding-top: calc(15px + env(safe-area-inset-top)); display: none; width: 100%; z-index: 50; }
 
         .hud-top-row { display: flex; justify-content: space-between; align-items: center; }
-        .hud-currencies { display: flex; gap: 8px; font-weight: 900; font-size: 11px; flex-wrap: wrap;}
-        .hud-curr-box { background: var(--panel-light); padding: 5px 8px; border-radius: 8px; border: 1px solid var(--border-dark); display: flex; align-items: center; gap: 4px; cursor: pointer;}
-        .hud-bars-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .hud-bar-container { display: flex; flex-direction: column; font-size: 10px; font-weight: 900; color: var(--text-sub); }
-        .bar-bg { width: 100%; height: 8px; background: var(--border-dark); border-radius: 4px; overflow: hidden; margin-top: 3px; position: relative;}
+        .hud-currencies { display: flex; gap: 8px; font-weight: 900; font-size: 13px; flex-wrap: wrap; justify-content: flex-end;}
+        .hud-curr-box { background: var(--panel-light); padding: 5px 12px; border-radius: 8px; border: 1px solid var(--border-dark); display: flex; align-items: center; gap: 6px; cursor: pointer;}
+        .hud-bars-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;}
+        .hud-bar-container { display: flex; flex-direction: column; font-size: 11px; font-weight: 900; color: var(--text-sub); }
+        .bar-bg { width: 100%; height: 10px; background: var(--border-dark); border-radius: 5px; overflow: hidden; margin-top: 5px; position: relative;}
         .bar-fill { height: 100%; transition: width 0.3s ease; position: absolute; top:0; left:0;}
-        .min-curr { background: var(--panel-light); padding: 5px 10px; border-radius: 12px; font-weight: 900; font-size: 12px; border: 1px solid var(--border-dark); display:flex; gap:5px; }
+        .min-curr { background: var(--panel-light); padding: 8px 12px; border-radius: 12px; font-weight: 900; font-size: 13px; border: 1px solid var(--border-dark); display:flex; gap:5px; }
 
-        /* CONTENEDOR DE PANTALLAS (El área que cambia) */
-        #screens-wrapper { flex: 1; position: relative; width: 100%; overflow: hidden; }
-        
-        /* LAS PANTALLAS SON FLEXIBLES POR DENTRO */
+        /* GESTOR DE PANTALLAS */
+        #screens-wrapper { flex: 1; position: relative; overflow: hidden; width: 100%; }
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; background: var(--bg-page); }
         .screen.active { display: flex; animation: fade 0.2s ease-out; }
         @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-        
-        .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; display: flex; flex-direction: column; }
 
-        /* TABS INTERNAS */
-        .sub-nav { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; border-bottom: 1px solid var(--border-dark); flex-shrink: 0; }
-        .sub-btn { background: transparent; border: none; color: var(--text-sub); font-weight: 900; font-size: 11px; padding: 10px; cursor: pointer; white-space: nowrap; transition: 0.2s; border-bottom: 2px solid transparent;}
+        /* SIMETRÍA ESTRICTA PARA GRID (ADIÓS A LOS BOTONES DESCOLOCADOS) */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; text-align: center; margin-bottom: 15px; flex-shrink: 0; }
+        .equip-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; flex-shrink: 0; }
+        .gacha-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 30px; }
+        .responsive-grid { display: grid; grid-template-columns: 1fr; gap: 15px; width: 100%; }
+        #options-container { display: grid; grid-template-columns: 1fr; gap: 15px; width: 100%; }
+        
+        /* En pantallas más anchas (iPad, PC), convertimos a 4, 3 o 2 columnas fijas para asegurar simetría */
+        @media (min-width: 600px) {
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+            .equip-grid { grid-template-columns: repeat(4, 1fr); }
+            .gacha-grid { grid-template-columns: repeat(3, 1fr); }
+            .responsive-grid { grid-template-columns: repeat(2, 1fr); }
+            #options-container { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* NAVEGACIONES HORIZONTALES (Pestañas de Forja y Tienda) */
+        .sub-nav { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; border-bottom: 1px solid var(--border-dark); flex-shrink: 0; justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .filter-nav { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; flex-shrink: 0; justify-content: flex-start; -webkit-overflow-scrolling: touch; scrollbar-width: none;}
+        .sub-nav::-webkit-scrollbar, .filter-nav::-webkit-scrollbar { display: none; }
+        
+        .sub-btn { background: transparent; border: none; color: var(--text-sub); font-weight: 900; font-size: 13px; padding: 12px 15px; cursor: pointer; white-space: nowrap; transition: 0.2s; border-bottom: 3px solid transparent;}
         .sub-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
         .tab-content { display: none; flex: 1; flex-direction: column; }
         .tab-content.active { display: flex; animation: fade 0.2s ease-in; }
 
-        /* BOTONES */
+        /* BOTONES Y TARJETAS */
         .btn { padding: 15px; border-radius: 12px; border: none; font-weight: 900; font-size: 13px; text-transform: uppercase; cursor: pointer; transition: 0.1s; text-align: center; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; flex-shrink: 0;}
         .btn:active { transform: translateY(4px); }
         .btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
@@ -77,72 +106,66 @@
         .btn-dark { background: var(--panel-light); color: var(--text-main); border: 1px solid var(--border-dark); box-shadow: 0 4px 0 var(--border-dark); }
         .btn-ascension { background: var(--ascension); color: black; box-shadow: 0 4px 0 #ca8a04; }
 
-        /* UI ELEMENTS */
-        .card { background: var(--panel); border: 1px solid var(--border-dark); border-radius: 16px; padding: 15px; margin-bottom: 15px; flex-shrink: 0; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; margin-bottom: 15px; flex-shrink: 0; }
-        .stat-box { background: var(--panel-light); padding: 10px 5px; border-radius: 12px; border: 1px solid var(--border-dark); font-weight: 900; font-size: 11px;}
-        .equip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; flex-shrink: 0; }
-        .equip-slot { background: var(--panel-light); border: 2px dashed var(--border-dark); border-radius: 12px; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 5px; position: relative;}
+        .card { background: var(--panel); border: 1px solid var(--border-dark); border-radius: 16px; padding: 20px; margin-bottom: 15px; flex-shrink: 0; }
+        .stat-box { background: var(--panel-light); padding: 15px 5px; border-radius: 12px; border: 1px solid var(--border-dark); font-weight: 900; font-size: 13px;}
+        
+        .equip-slot { background: var(--panel-light); border: 2px dashed var(--border-dark); border-radius: 12px; height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 10px; position: relative;}
         .equip-slot.filled { border-style: solid; background: var(--panel); }
-        .equip-icon { font-size: 30px; margin-bottom: 5px; }
-        .equip-name { font-size: 9px; font-weight: 900; text-transform: uppercase; line-height: 1.2;}
-        .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border-dark); flex-wrap: wrap; flex-shrink: 0; }
-        .item-icon { font-size: 30px; background: var(--panel-light); border-radius: 12px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); flex-shrink: 0; }
+        .equip-icon { font-size: 35px; margin-bottom: 8px; }
+        .equip-name { font-size: 11px; font-weight: 900; text-transform: uppercase; line-height: 1.2;}
+        .lvl-badge { position: absolute; top: -5px; right: -5px; background: var(--gold); color: black; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 900;}
+
+        .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--panel); border-radius: 12px; border: 1px solid var(--border-dark); flex-wrap: wrap; flex-shrink: 0; height: 100%;}
+        .item-icon { font-size: 30px; background: var(--panel-light); border-radius: 12px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); flex-shrink: 0; }
         .item-details { flex: 1; min-width: 120px; }
         
-        .inv-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-        .inv-list-item { display: flex; align-items: center; gap: 15px; padding: 10px; background: var(--panel-light); border-radius: 10px; border: 1px solid var(--border-dark); margin-bottom: 8px; flex-shrink: 0;}
-        .inv-icon { font-size: 24px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--panel); border-radius: 8px;}
+        .inv-list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--panel-light); border-radius: 12px; border: 1px solid var(--border-dark); flex-shrink: 0; height: 100%;}
+        .inv-icon { font-size: 30px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: var(--panel); border-radius: 10px;}
 
-        /* MAPA */
-        .node-path { display: flex; flex-direction: column; align-items: center; gap: 35px; padding: 40px 0; }
-        .node { width: 70px; height: 70px; border-radius: 50%; font-size: 26px; border: 4px solid var(--border-dark); background: var(--panel); display: flex; justify-content: center; align-items: center; box-shadow: 0 6px 0 var(--border-dark); transition: 0.2s; flex-shrink: 0; cursor: pointer;}
-        .node.completed { background: var(--gold); border-color: var(--gold-shadow); box-shadow: 0 6px 0 var(--gold-shadow); color: black;}
-        .node.unlocked { background: var(--blue); border-color: var(--blue-shadow); box-shadow: 0 6px 0 var(--blue-shadow); color: white; animation: pulseNode 2s infinite;}
+        /* MAPA Y COMBATE */
+        .node-path { display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 50px 0; max-width: 600px; margin: 0 auto; width: 100%; }
+        .node { width: 80px; height: 80px; border-radius: 50%; font-size: 30px; border: 4px solid var(--border-dark); background: var(--panel); display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 0 var(--border-dark); transition: 0.2s; flex-shrink: 0; cursor: pointer; }
+        .node.completed { background: var(--gold); border-color: var(--gold-shadow); box-shadow: 0 8px 0 var(--gold-shadow); color: black;}
+        .node.unlocked { background: var(--blue); border-color: var(--blue-shadow); box-shadow: 0 8px 0 var(--blue-shadow); color: white; animation: pulseNode 2s infinite;}
         .node.boss { border-color: var(--red); border-width: 5px; }
 
-        /* COMBATE UNIVERSAL (FLEXBOX PURO, SIN POSITION ABSOLUTE) */
-        .combat-container { display: flex; flex-direction: column; height: 100%; width: 100%; transition: background 0.3s; }
-        .combat-header { flex-shrink: 0; padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border-dark); }
-        .combat-progress-bg { flex: 1; height: 10px; background: var(--border-dark); border-radius: 10px; overflow: hidden; }
+        .combat-container { display: flex; flex-direction: column; height: 100%; width: 100%; background: var(--panel); }
+        .combat-header { flex-shrink: 0; padding: 15px 20px; display: flex; align-items: center; gap: 20px; background: var(--panel); border-bottom: 1px solid var(--border-dark); }
+        .combat-progress-bg { flex: 1; height: 12px; background: var(--border-dark); border-radius: 10px; overflow: hidden; }
         .combat-progress-fill { height: 100%; background: var(--green); transition: width 0.3s ease; }
         
-        /* El cuerpo hace scroll naturalmente, empujando el footer abajo */
-        .combat-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; display: flex; flex-direction: column; }
+        .combat-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 30px 20px; display: flex; flex-direction: column; max-width: 1000px; margin: 0 auto; width: 100%; padding-bottom: 180px; }
         
-        /* Footer apoyado al fondo del flex */
-        .combat-footer { flex-shrink: 0; background: var(--panel); border-top: 2px solid var(--cyan); padding: 15px 20px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 30px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap:10px; z-index: 10;}
+        .combat-footer { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--panel); border-top: 2px solid var(--cyan); padding: 15px 20px; padding-bottom: calc(15px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 30px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap:10px; z-index: 9999; }
+        .combat-actions-wrapper { max-width: 1000px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 10px;}
 
-        .option { background: var(--panel-light); border: 2px solid var(--border-dark); border-radius: 12px; padding: 16px; margin-bottom: 10px; font-weight: 700; transition: 0.2s; cursor: pointer; flex-shrink: 0; }
+        .option { background: var(--panel-light); border: 2px solid var(--border-dark); border-radius: 12px; padding: 20px; font-weight: 700; font-size: 15px; transition: 0.2s; cursor: pointer; flex-shrink: 0; display: flex; align-items: center;}
         .option.selected { border-color: var(--blue); background: rgba(59,130,246,0.1); }
         .option.correct { border-color: var(--green); background: rgba(16,185,129,0.1); color: var(--green); }
         .option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); opacity: 0.5; }
 
-        /* NAV PRINCIPAL INFERIOR (FLEX RÍGIDO) */
-        .nav { flex-shrink: 0; display: flex; width: 100%; background: rgba(13,20,36,0.98); border-top: 1px solid var(--border-dark); padding-bottom: env(safe-area-inset-bottom); z-index: 1000; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 9px; transition: 0.2s; padding: 12px 0; cursor: pointer;}
-        .nav-item.active { color: var(--cyan); }
-        .nav-item span { font-size: 20px; margin-bottom: 2px; transition: 0.2s;}
-        .nav-item.active span { transform: translateY(-3px); }
+        /* NAV PRINCIPAL (CENTRADA) */
+        .nav { flex-shrink: 0; display: flex; width: 100%; background: rgba(13,20,36,0.98); border-top: 1px solid var(--border-dark); padding-bottom: env(safe-area-inset-bottom); height: calc(75px + env(safe-area-inset-bottom)); z-index: 1000; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); justify-content: center;}
+        .nav-inner { display: flex; width: 100%; max-width: 1000px; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 10px; transition: 0.2s; min-width: 60px; cursor: pointer; padding: 10px 0;}
+        .nav-item.active { color: var(--cyan); transform: translateY(-4px); }
+        .nav-item span { font-size: 24px; margin-bottom: 4px; transition: 0.2s;}
+        .nav-item.active span { transform: translateY(-4px) scale(1.1); }
 
         /* MODALS & FX */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 99999; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 16px; padding: 20px; width: 100%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; overflow-y:auto;}
-        .forge-textarea { flex: 1; width: 100%; background: var(--panel-light); border: 1px solid var(--border-dark); border-radius: 8px; color: var(--text-main); font-family: monospace; padding: 10px; margin: 15px 0; resize: none; min-height: 200px; font-size: 12px; }
+        .modal-content { background: var(--bg-page); border: 2px solid var(--border-dark); border-radius: 16px; padding: 30px; width: 100%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; overflow-y:auto;}
+        .forge-textarea { flex: 1; width: 100%; background: var(--panel-light); border: 1px solid var(--border-dark); border-radius: 8px; color: var(--text-main); font-family: monospace; padding: 15px; margin: 15px 0; resize: none; min-height: 250px; font-size: 14px; }
 
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 50% { transform: translateX(12px); } 75% { transform: translateX(-12px); } }
-        .floating-text { position: absolute; font-weight: 900; font-size: 20px; pointer-events: none; z-index: 10000; animation: floatUp 1s ease-out forwards; text-shadow: 2px 2px 0 #000; }
-        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-80px) scale(1.5); opacity: 0; } }
+        .floating-text { position: absolute; font-weight: 900; font-size: 24px; pointer-events: none; z-index: 10000; animation: floatUp 1s ease-out forwards; text-shadow: 2px 2px 0 #000; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-100px) scale(1.5); opacity: 0; } }
         #damage-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,0,0,0.5); z-index: 9000; display: none; pointer-events: none; mix-blend-mode: multiply; }
         
-        @keyframes pulseNode { 0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); } 70% { box-shadow: 0 0 0 15px rgba(59,130,246,0); } 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); } }
+        @keyframes pulseNode { 0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); } 70% { box-shadow: 0 0 0 20px rgba(59,130,246,0); } 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); } }
         @keyframes chestAnim { 0% {transform: rotate(0deg) scale(1);} 25% {transform: rotate(-15deg) scale(1.1);} 50% {transform: rotate(15deg) scale(1.2);} 75% {transform: rotate(-15deg) scale(1.1);} 100% {transform: rotate(0deg) scale(1.3);} }
         .chest-anim { animation: chestAnim 1s ease-in-out forwards; }
-        
-        .aura-prestige { box-shadow: 0 0 20px var(--gold); border-color: var(--gold) !important; }
-        .market-trend-up { color: var(--green); font-weight:bold; }
-        .market-trend-down { color: var(--red); font-weight:bold; }
     </style>
 </head>
 <body>
@@ -153,33 +176,33 @@
 <div id="modal-ascension" class="modal-overlay">
     <div class="modal-content" style="text-align: center; border-color:var(--ascension);">
         <h2 style="margin:0; color:var(--ascension); font-weight:900;">✨ RENACIMIENTO</h2>
-        <p style="font-size:12px; color:var(--text-sub); margin-bottom:15px;">Perderás Nivel, Oro, Piedra y Equipo Básico. Mantendrás Gemas, SP y ganarás Puntos de Ascensión (PA).</p>
-        <div style="color:white; font-weight:bold; font-size:18px; margin-bottom:20px;">Ganarás: <span id="ascension-gain-amt" style="color:var(--ascension); font-size:24px;">0</span> PA</div>
-        <div style="display:flex; gap:10px;"><button class="btn btn-dark" style="flex:1;" onclick="document.getElementById('modal-ascension').style.display='none'">CANCELAR</button><button class="btn btn-ascension" style="flex:1;" onclick="executePrestige()">¡RENACER!</button></div>
+        <p style="font-size:14px; color:var(--text-sub); margin-bottom:20px;">Perderás Nivel, Oro, Piedra y Equipo Básico. Mantendrás Gemas, SP y ganarás Puntos de Ascensión (PA).</p>
+        <div style="color:white; font-weight:bold; font-size:20px; margin-bottom:25px;">Ganarás: <span id="ascension-gain-amt" style="color:var(--ascension); font-size:30px;">0</span> PA</div>
+        <div style="display:flex; gap:15px;"><button class="btn btn-dark" style="flex:1;" onclick="document.getElementById('modal-ascension').style.display='none'">CANCELAR</button><button class="btn btn-ascension" style="flex:1;" onclick="executePrestige()">¡RENACER!</button></div>
     </div>
 </div>
 
 <div id="modal-forge" class="modal-overlay">
     <div class="modal-content">
         <h2 style="margin:0; color:var(--gold); font-weight:900;">⚒️ Forjar Mazmorra</h2>
-        <p style="font-size:12px; color:var(--text-sub); margin-bottom:5px;">El terminal limpiará comillas curvas automáticamente.</p>
+        <p style="font-size:14px; color:var(--text-sub); margin-bottom:10px;">Pega aquí el código JSON de tu mazmorra.</p>
         <textarea id="forge-input" class="forge-textarea" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="[ { 'id': 'n1'... } ]"></textarea>
-        <div style="display:flex; gap:10px;"><button class="btn btn-dark" style="flex:1;" onclick="playSound('click'); document.getElementById('modal-forge').style.display='none'">CANCELAR</button><button class="btn btn-green" style="flex:1;" onclick="processForge()">FORJAR</button></div>
+        <div style="display:flex; gap:15px;"><button class="btn btn-dark" style="flex:1;" onclick="playSound('click'); document.getElementById('modal-forge').style.display='none'">CANCELAR</button><button class="btn btn-green" style="flex:1;" onclick="processForge()">FORJAR</button></div>
     </div>
 </div>
 
 <div id="modal-worlds" class="modal-overlay">
     <div class="modal-content" style="max-height: 80vh;">
         <h2 style="margin:0; color:var(--cyan); font-weight:900;">🌌 Multiverso</h2>
-        <button class="btn btn-gold" style="margin: 15px 0; flex-shrink:0;" onclick="createNewWorld()">➕ CREAR NUEVO MUNDO</button>
-        <div id="worlds-manager-list" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:1;"></div>
+        <button class="btn btn-gold" style="margin: 20px 0; flex-shrink:0;" onclick="createNewWorld()">➕ CREAR NUEVO MUNDO</button>
+        <div id="worlds-manager-list" class="responsive-grid" style="overflow-y:auto; flex:1;"></div>
         <button class="btn btn-dark" style="margin-top:20px; flex-shrink:0;" onclick="playSound('click'); document.getElementById('modal-worlds').style.display='none'">CERRAR</button>
     </div>
 </div>
 
 <div id="modal-gacha" class="modal-overlay">
     <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <div id="gacha-chest" style="font-size:100px;">📦</div>
+        <div id="gacha-chest" style="font-size:120px;">📦</div>
     </div>
 </div>
 
@@ -187,56 +210,60 @@
 
     <!-- HUDS -->
     <div id="hud-advanced">
-        <div class="hud-top-row">
-            <div style="font-weight:900; font-size:18px; color:var(--text-main);"> Nivel <span id="ui-lvl" style="color:var(--cyan);">1</span></div>
-            <div class="hud-currencies">
-                <div class="hud-curr-box">🟡 <span id="ui-gold">0</span></div>
-                <div class="hud-curr-box">💎 <span id="ui-gems">0</span></div>
-                <div class="hud-curr-box" style="border-color:var(--ascension); color:var(--ascension); display:none;" id="hud-ap-box">✨ <span id="ui-ap">0</span></div>
+        <div id="hud-advanced-inner">
+            <div class="hud-top-row">
+                <div style="font-weight:900; font-size:20px; color:var(--text-main);"> Nivel <span id="ui-lvl" style="color:var(--cyan);">1</span></div>
+                <div class="hud-currencies">
+                    <div class="hud-curr-box">🟡 <span id="ui-gold">0</span></div>
+                    <div class="hud-curr-box">💎 <span id="ui-gems">0</span></div>
+                    <div class="hud-curr-box" style="border-color:var(--ascension); color:var(--ascension); display:none;" id="hud-ap-box">✨ <span id="ui-ap">0</span></div>
+                </div>
             </div>
-        </div>
-        <div class="hud-bars-row">
-            <div class="hud-bar-container">HP: <span id="ui-hp-txt">100/100</span><div class="bar-bg"><div id="ui-hp-bar" class="bar-fill" style="background:var(--red); width:100%;"></div></div></div>
-            <div class="hud-bar-container">EN: <span id="ui-en-txt">50/50</span><div class="bar-bg"><div id="ui-en-bar" class="bar-fill" style="background:var(--gold); width:100%;"></div></div></div>
+            <div class="hud-bars-row">
+                <div class="hud-bar-container">HP: <span id="ui-hp-txt">100/100</span><div class="bar-bg"><div id="ui-hp-bar" class="bar-fill" style="background:var(--red); width:100%;"></div></div></div>
+                <div class="hud-bar-container">EN: <span id="ui-en-txt">50/50</span><div class="bar-bg"><div id="ui-en-bar" class="bar-fill" style="background:var(--gold); width:100%;"></div></div></div>
+            </div>
         </div>
     </div>
 
     <div id="hud-minimal">
-        <div class="min-curr" style="color:var(--cyan);">LVL <span id="ui-min-lvl">1</span></div>
-        <div style="display:flex; gap:10px;">
-            <div class="min-curr">🟡 <span id="ui-min-gold">0</span></div>
-            <div class="min-curr">💎 <span id="ui-min-gems">0</span></div>
+        <div class="hud-inner">
+            <div class="min-curr" style="color:var(--cyan);">LVL <span id="ui-min-lvl">1</span></div>
+            <div style="display:flex; gap:10px;">
+                <div class="min-curr">🟡 <span id="ui-min-gold">0</span></div>
+                <div class="min-curr">💎 <span id="ui-min-gems">0</span></div>
+            </div>
         </div>
     </div>
 
-    <!-- PANTALLAS (El Flex Central) -->
+    <!-- ÁREA CENTRAL FLEXIBLE -->
     <div id="screens-wrapper">
         
         <!-- PANTALLA 1: PERFIL -->
         <div id="screen-home" class="screen active">
             <div class="content">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink: 0;">
-                    <h2 style="margin:0; color:var(--cyan); font-weight:900;" id="profile-rank">Rango: F</h2>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="navTo('skills')">🧠 SKILLS</button>
-                        <button class="btn btn-ascension" style="width:auto; padding:5px 10px; font-size:10px; display:none;" id="btn-prestige" onclick="openPrestige()">RENACER</button>
+                    <h2 style="margin:0; color:var(--cyan); font-weight:900; font-size: 24px;" id="profile-rank">Rango: F</h2>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-dark" style="width:auto; padding:8px 15px; font-size:12px;" onclick="navTo('skills')">🧠 SKILLS</button>
+                        <button class="btn btn-ascension" style="width:auto; padding:8px 15px; font-size:12px; display:none;" id="btn-prestige" onclick="openPrestige()">RENACER</button>
                     </div>
                 </div>
 
-                <div class="stats-grid" style="margin-top: 15px;">
-                    <div class="stat-box" style="color:var(--red); border-color:var(--red);">⚔️ ATQ<br><span id="stat-atk" style="font-size:16px; color:white;">10</span></div>
-                    <div class="stat-box" style="color:var(--blue); border-color:var(--blue);">🛡️ DEF<br><span id="stat-def" style="font-size:16px; color:white;">10</span></div>
-                    <div class="stat-box" style="color:var(--gold); border-color:var(--gold);">🍀 SUE<br><span id="stat-luck" style="font-size:16px; color:white;">5</span></div>
-                    <div class="stat-box" style="color:var(--purple); border-color:var(--purple);">🔥 CRIT<br><span id="stat-crit" style="font-size:16px; color:white;">0%</span></div>
+                <div class="stats-grid" style="margin-top: 20px;">
+                    <div class="stat-box" style="color:var(--red); border-color:var(--red);">⚔️ ATQ<br><span id="stat-atk" style="font-size:20px; color:white;">10</span></div>
+                    <div class="stat-box" style="color:var(--blue); border-color:var(--blue);">🛡️ DEF<br><span id="stat-def" style="font-size:20px; color:white;">10</span></div>
+                    <div class="stat-box" style="color:var(--gold); border-color:var(--gold);">🍀 SUE<br><span id="stat-luck" style="font-size:20px; color:white;">5</span></div>
+                    <div class="stat-box" style="color:var(--purple); border-color:var(--purple);">🔥 CRIT<br><span id="stat-crit" style="font-size:20px; color:white;">0%</span></div>
                 </div>
 
                 <div class="card" style="border-color:var(--green); text-align:center; background: rgba(16, 185, 129, 0.1);">
-                    <h3 style="margin-top:0; color:var(--green); font-weight:900;">🏕️ El Campamento</h3>
-                    <p style="font-size:12px; color:var(--text-main);">Quédate aquí y no bloquees el móvil. Recuperas HP y EN pasivamente.</p>
-                    <div style="font-size:30px; transition:0.2s;" id="camp-fire">🔥</div>
+                    <h3 style="margin-top:0; color:var(--green); font-weight:900; font-size: 20px;">🏕️ El Campamento</h3>
+                    <p style="font-size:14px; color:var(--text-main);">Quédate aquí. Recuperas HP y EN pasivamente.</p>
+                    <div style="font-size:40px; transition:0.2s;" id="camp-fire">🔥</div>
                 </div>
 
-                <h3 style="font-weight: 900; margin-bottom: 10px; flex-shrink: 0;">Equipamiento</h3>
+                <h3 style="font-weight: 900; margin-bottom: 15px; flex-shrink: 0; font-size: 20px;">Equipamiento</h3>
                 <div class="equip-grid">
                     <div class="equip-slot" id="slot-weapon"><div class="equip-icon">🗡️</div><div class="equip-name">Arma</div></div>
                     <div class="equip-slot" id="slot-armor"><div class="equip-icon">🛡️</div><div class="equip-name">Armadura</div></div>
@@ -244,21 +271,22 @@
                     <div class="equip-slot" id="slot-pet"><div class="equip-icon">🥚</div><div class="equip-name">Mascota</div></div>
                 </div>
                 
-                <div id="ascension-tree" class="card" style="display:none; border-color:var(--ascension); margin-top:20px; background:rgba(253, 224, 71, 0.05);">
-                    <h3 style="color:var(--ascension); margin-top:0;">🌟 Constelación del Nexo</h3>
-                    <p style="font-size:11px; color:var(--text-sub);">Gasta tus PA para mejoras permanentes que persisten entre renacimientos.</p>
-                    <div class="list-item" style="padding:10px;">
-                        <div style="flex:1;"><div style="font-weight:bold; font-size:12px;">Poder Ancestral</div><div style="font-size:10px; color:var(--green)">Daño y Vida x1.<span id="asc-dmg-lvl">0</span></div></div>
-                        <button class="btn btn-ascension" style="width:auto; padding:5px 10px; font-size:10px;" onclick="buyAscension('dmg')">1 PA</button>
+                <div id="ascension-tree" class="card" style="display:none; border-color:var(--ascension); margin-top:25px; background:rgba(253, 224, 71, 0.05);">
+                    <h3 style="color:var(--ascension); margin-top:0; font-size: 20px;">🌟 Constelación del Nexo</h3>
+                    <p style="font-size:13px; color:var(--text-sub);">Gasta tus PA para mejoras permanentes que persisten entre renacimientos.</p>
+                    <div class="responsive-grid">
+                        <div class="list-item" style="padding:15px; background: rgba(0,0,0,0.5);">
+                            <div style="flex:1;"><div style="font-weight:bold; font-size:14px;">Poder Ancestral</div><div style="font-size:12px; color:var(--green)">Daño y Vida x1.<span id="asc-dmg-lvl">0</span></div></div>
+                            <button class="btn btn-ascension" style="width:auto; padding:10px 15px; font-size:12px;" onclick="buyAscension('dmg')">1 PA</button>
+                        </div>
                     </div>
                 </div>
 
-                <h3 style="font-weight: 900; margin-bottom: 10px; margin-top: 20px; flex-shrink: 0;">Inventario</h3>
-                <div class="inv-grid" id="inventory-list-detailed" style="margin-bottom: 20px;"></div>
+                <h3 style="font-weight: 900; margin-bottom: 15px; margin-top: 25px; flex-shrink: 0; font-size: 20px;">Inventario</h3>
+                <div class="responsive-grid" id="inventory-list-detailed" style="margin-bottom: 20px;"></div>
                 
-                <div style="text-align: center; border-top: 1px solid var(--border-dark); padding-top: 20px; flex-shrink: 0;">
-                    <p style="font-size:11px; color:var(--text-sub);">Opciones del Sistema</p>
-                    <button class="btn btn-dark" style="border-color:var(--red); color:var(--red);" onclick="hardReset()">⚠️ REINICIAR TODO (BORRAR DATOS) ⚠️</button>
+                <div style="text-align: center; border-top: 1px solid var(--border-dark); padding-top: 25px; margin-top: 20px; flex-shrink: 0;">
+                    <button class="btn btn-dark" style="border-color:var(--red); color:var(--red); max-width: 400px; margin: 0 auto;" onclick="hardReset()">⚠️ REINICIAR TODO (BORRAR DATOS) ⚠️</button>
                 </div>
             </div>
         </div>
@@ -266,14 +294,18 @@
         <!-- PANTALLA SKILLS -->
         <div id="screen-skills" class="screen">
             <div class="content">
-                <h2 style="margin-top:0; color:var(--purple); font-weight:900; flex-shrink: 0;">✨ Habilidades</h2>
-                <div style="font-size:18px; font-weight:bold; margin-bottom:20px; text-align:center; flex-shrink: 0;">SP Disp: <span id="skill-points-display" style="color:var(--purple);">0</span></div>
-                <div class="list-item"><div class="item-icon">❤️</div><div class="item-details"><div style="font-weight:900;">Vitalidad (+10 HP)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-hp">0</span></div></div><button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('hp')">1 SP</button></div>
-                <div class="list-item"><div class="item-icon">⚔️</div><div class="item-details"><div style="font-weight:900;">Fuerza (+5 ATQ)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-atk">0</span></div></div><button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('atk')">1 SP</button></div>
-                <div class="list-item"><div class="item-icon">🛡️</div><div class="item-details"><div style="font-weight:900;">Resistencia (+5 DEF)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-def">0</span></div></div><button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('def')">1 SP</button></div>
-                <div class="list-item"><div class="item-icon">🔥</div><div class="item-details"><div style="font-weight:900;">Precisión (+1% Crit)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-crit">0</span></div></div><button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('crit')">1 SP</button></div>
-                <div class="list-item"><div class="item-icon">💨</div><div class="item-details"><div style="font-weight:900;">Evasión (+1% Esquivar)</div><div style="font-size:11px; color:var(--text-sub);">Nv: <span id="skill-evasion">0</span></div></div><button class="btn btn-purple" style="width:auto; padding:8px;" onclick="upgradeSkill('evasion')">1 SP</button></div>
-                <button class="btn btn-dark" style="margin-top:20px; flex-shrink: 0;" onclick="navTo('home')">VOLVER</button>
+                <h2 style="margin-top:0; color:var(--purple); font-weight:900; flex-shrink: 0; font-size: 24px; text-align: center;">✨ Habilidades</h2>
+                <div style="font-size:20px; font-weight:bold; margin-bottom:25px; text-align:center; flex-shrink: 0;">SP Disponibles: <span id="skill-points-display" style="color:var(--purple);">0</span></div>
+                
+                <div class="responsive-grid">
+                    <div class="list-item"><div class="item-icon">❤️</div><div class="item-details"><div style="font-weight:900; font-size:14px;">Vitalidad (+10 HP)</div><div style="font-size:12px; color:var(--text-sub);">Nv: <span id="skill-hp">0</span></div></div><button class="btn btn-purple" style="width:auto; padding:10px 15px;" onclick="upgradeSkill('hp')">1 SP</button></div>
+                    <div class="list-item"><div class="item-icon">⚔️</div><div class="item-details"><div style="font-weight:900; font-size:14px;">Fuerza (+5 ATQ)</div><div style="font-size:12px; color:var(--text-sub);">Nv: <span id="skill-atk">0</span></div></div><button class="btn btn-purple" style="width:auto; padding:10px 15px;" onclick="upgradeSkill('atk')">1 SP</button></div>
+                    <div class="list-item"><div class="item-icon">🛡️</div><div class="item-details"><div style="font-weight:900; font-size:14px;">Resistencia (+5 DEF)</div><div style="font-size:12px; color:var(--text-sub);">Nv: <span id="skill-def">0</span></div></div><button class="btn btn-purple" style="width:auto; padding:10px 15px;" onclick="upgradeSkill('def')">1 SP</button></div>
+                    <div class="list-item"><div class="item-icon">🔥</div><div class="item-details"><div style="font-weight:900; font-size:14px;">Precisión (+1% Crit)</div><div style="font-size:12px; color:var(--text-sub);">Nv: <span id="skill-crit">0</span></div></div><button class="btn btn-purple" style="width:auto; padding:10px 15px;" onclick="upgradeSkill('crit')">1 SP</button></div>
+                    <div class="list-item"><div class="item-icon">💨</div><div class="item-details"><div style="font-weight:900; font-size:14px;">Evasión (+1% Esquivar)</div><div style="font-size:12px; color:var(--text-sub);">Nv: <span id="skill-evasion">0</span></div></div><button class="btn btn-purple" style="width:auto; padding:10px 15px;" onclick="upgradeSkill('evasion')">1 SP</button></div>
+                </div>
+                
+                <button class="btn btn-dark" style="margin-top:30px; flex-shrink: 0; max-width: 400px; align-self: center;" onclick="navTo('home')">VOLVER AL PERFIL</button>
             </div>
         </div>
 
@@ -281,48 +313,50 @@
         <div id="screen-worlds" class="screen">
             <div class="content">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink: 0;">
-                    <h2 style="margin:0; font-weight:900; color:var(--cyan); cursor:pointer;" id="world-title" onclick="openWorldsManager()">Mazmorra ▾</h2>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openWorldsManager()">🌌 MUNDOS</button>
-                        <button class="btn btn-dark" style="width:auto; padding:6px 10px; font-size:10px;" onclick="openForgeModal()">⚒️ JSON</button>
+                    <h2 style="margin:0; font-weight:900; color:var(--cyan); cursor:pointer; font-size: 24px;" id="world-title" onclick="openWorldsManager()">Mazmorra ▾</h2>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-dark" style="width:auto; padding:8px 15px; font-size:12px;" onclick="openWorldsManager()">🌌 MUNDOS</button>
+                        <button class="btn btn-dark" style="width:auto; padding:8px 15px; font-size:12px;" onclick="openForgeModal()">⚒️ JSON</button>
                     </div>
                 </div>
                 <div class="node-path" id="map-render"></div>
             </div>
         </div>
 
-        <!-- PANTALLA COMBATE / LECTURA UNIVERSAL -->
+        <!-- PANTALLA COMBATE -->
         <div id="screen-combat" class="screen" style="background:var(--panel);">
             <div class="combat-container" id="combat-container">
                 <div class="combat-header" id="combat-header">
-                    <div style="font-size:20px; cursor:pointer; color:var(--text-sub); padding-right:15px;" onclick="fleeCombat()">✖</div>
+                    <div style="font-size:24px; cursor:pointer; color:var(--text-sub); padding-right:20px;" onclick="fleeCombat()">✖</div>
                     <div class="combat-progress-bg" id="ui-combat-prog"><div id="combat-prog-bar" class="combat-progress-fill" style="width:0%;"></div></div>
-                    <div style="font-weight:900; color:var(--red);" id="ui-combat-hp">❤️ <span id="combat-hp">100</span></div>
+                    <div style="font-weight:900; color:var(--red); font-size: 18px;" id="ui-combat-hp">❤️ <span id="combat-hp">100</span></div>
                 </div>
                 
                 <div class="combat-body">
-                    <!-- Botón de Escape Auxiliar (Por si acaso) -->
-                    <button id="btn-reading-exit" class="btn btn-dark" style="display:none; margin-bottom:20px; border-color:var(--red); color:var(--red);" onclick="fleeCombat()">✖ SALIR SIN COMPLETAR</button>
+                    <button id="btn-reading-exit" class="btn btn-dark" style="display:none; margin-bottom:25px; border-color:var(--red); color:var(--red); align-self: flex-start; padding: 10px 20px;" onclick="fleeCombat()">✖ SALIR SIN COMPLETAR</button>
 
-                    <div id="boss-ui" style="display:none; text-align:center; margin-bottom:15px;">
-                        <div style="font-size:50px;" id="boss-emoji">👹</div>
-                        <div style="width:100%; height:15px; background:#330; border:2px solid var(--red); border-radius:10px; overflow:hidden; margin-top:5px;"><div id="boss-hp-fill" style="height:100%; background:var(--red); width:100%; transition:0.3s;"></div></div>
+                    <div id="boss-ui" style="display:none; text-align:center; margin-bottom:25px;">
+                        <div style="font-size:70px;" id="boss-emoji">👹</div>
+                        <div style="width:100%; height:20px; background:#330; border:2px solid var(--red); border-radius:10px; overflow:hidden; margin-top:10px;"><div id="boss-hp-fill" style="height:100%; background:var(--red); width:100%; transition:0.3s;"></div></div>
                     </div>
                     
-                    <h2 id="question-text" style="font-weight:900; font-size:18px; margin-bottom:20px;">Cargando...</h2>
+                    <h2 id="question-text" style="font-weight:900; font-size:22px; margin-bottom:30px; line-height: 1.4;">Cargando...</h2>
+                    
+                    <!-- REJILLA RESPONSIVA DE OPCIONES -->
                     <div id="options-container"></div>
                 </div>
 
                 <div class="combat-footer" id="combat-footer">
-                    <div id="combat-actions">
-                        <div style="display:flex; gap:5px; margin-bottom:10px;">
-                            <button id="btn-hint" class="btn btn-dark" style="flex:1; padding:8px; font-size:11px;" onclick="useOraculo()">👁️ ORÁCULO</button>
-                            <button class="btn btn-green" style="flex:0.5; padding:8px; font-size:11px;" onclick="usePotion()">💊 <span id="combat-pots">0</span></button>
+                    <div class="combat-actions-wrapper" id="combat-actions">
+                        <div style="display:flex; gap:10px; margin-bottom:15px; width: 100%;">
+                            <button id="btn-hint" class="btn btn-dark" style="flex:1; padding:12px; font-size:13px;" onclick="useOraculo()">👁️ ORÁCULO</button>
+                            <button class="btn btn-green" style="flex:0.5; padding:12px; font-size:13px;" onclick="usePotion()">💊 <span id="combat-pots">0</span></button>
                         </div>
-                        <button id="btn-check" class="btn btn-dark" onclick="checkAnswer()">COMPROBAR</button>
+                        <button id="btn-check" class="btn btn-dark" style="padding: 20px; font-size: 16px;" onclick="checkAnswer()">COMPROBAR</button>
                     </div>
-                    <!-- BOTÓN VERDE FIJADO AL FINAL DEL FLEX -->
-                    <button id="btn-reading-done" class="btn btn-green" onclick="finishReading()" style="display:none; font-size: 16px; padding: 20px; box-shadow: 0 0 20px var(--green); border: 2px solid white; animation: pulseNode 2s infinite;">¡LECCIÓN COMPLETADA!</button>
+                    <div class="combat-actions-wrapper">
+                        <button id="btn-reading-done" class="btn btn-green" onclick="finishReading()" style="display:none; font-size: 18px; padding: 25px; box-shadow: 0 0 20px var(--green); border: 2px solid white; animation: pulseNode 2s infinite; width: 100%;">¡LECCIÓN COMPLETADA!</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -330,25 +364,26 @@
         <!-- PANTALLA FORJA -->
         <div id="screen-crafting" class="screen">
             <div class="content">
-                <h2 style="margin-top:0; color:var(--gold); font-weight:900; flex-shrink: 0;">⚒️ Herrería de Almas</h2>
+                <h2 style="margin-top:0; color:var(--gold); font-weight:900; flex-shrink: 0; font-size: 24px;">⚒️ Herrería de Almas</h2>
                 <div class="sub-nav">
                     <button class="sub-btn active" id="sub-forge-craft" onclick="switchForgeTab('craft')">FORJAR EQUIPO</button>
                     <button class="sub-btn" id="sub-forge-runes" onclick="switchForgeTab('runes')">REFINAR (RUNAS)</button>
                 </div>
                 
                 <div id="forge-tab-craft" class="tab-content active">
-                    <div style="display:flex; gap:5px; margin-bottom: 15px; overflow-x:auto; padding-bottom:5px; flex-shrink: 0;">
-                        <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-weapon" onclick="renderCrafting('weapon')">🗡️ Armas</button>
-                        <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-armor" onclick="renderCrafting('armor')">🛡️ Armor</button>
-                        <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-accessory" onclick="renderCrafting('accessory')">💍 Amu</button>
-                        <button class="btn btn-dark" style="min-width:80px; padding:10px;" id="filter-pet" onclick="renderCrafting('pet')">🥚 Mascotas</button>
+                    <div class="filter-nav">
+                        <button class="btn btn-dark" style="min-width:110px; padding:12px;" id="filter-weapon" onclick="renderCrafting('weapon')">🗡️ Armas</button>
+                        <button class="btn btn-dark" style="min-width:110px; padding:12px;" id="filter-armor" onclick="renderCrafting('armor')">🛡️ Armor</button>
+                        <button class="btn btn-dark" style="min-width:110px; padding:12px;" id="filter-accessory" onclick="renderCrafting('accessory')">💍 Amu</button>
+                        <button class="btn btn-dark" style="min-width:110px; padding:12px;" id="filter-pet" onclick="renderCrafting('pet')">🥚 Mascotas</button>
+                        <button class="btn btn-dark" style="min-width:110px; padding:12px;" id="filter-fusion" onclick="renderCrafting('fusion')">🔥 Fusión</button>
                     </div>
-                    <div id="craft-list"></div>
+                    <div class="responsive-grid" id="craft-list"></div>
                 </div>
                 
                 <div id="forge-tab-runes" class="tab-content">
-                    <p style="font-size:12px; color:var(--text-sub);">Usa Almas y Sangre para mejorar tu equipo a +1.</p>
-                    <div id="runes-list"></div>
+                    <p style="font-size:14px; color:var(--text-sub); margin-bottom: 20px;">Usa Almas y Sangre para mejorar tu equipo a +1.</p>
+                    <div class="responsive-grid" id="runes-list"></div>
                 </div>
             </div>
         </div>
@@ -356,7 +391,7 @@
         <!-- PANTALLA TIENDA Y MERCADO -->
         <div id="screen-shop" class="screen">
             <div class="content">
-                <h2 style="margin-top:0; color:var(--purple); font-weight:900; flex-shrink: 0;">⚖️ Mercado del Abismo</h2>
+                <h2 style="margin-top:0; color:var(--purple); font-weight:900; flex-shrink: 0; font-size: 24px;">⚖️ Mercado del Abismo</h2>
                 <div class="sub-nav">
                     <button class="sub-btn active" id="sub-shop-daily" onclick="switchShopTab('daily')">ROTATIVO</button>
                     <button class="sub-btn" id="sub-shop-crypto" onclick="switchShopTab('crypto')">📉 CRIPTO-MAGIA</button>
@@ -364,37 +399,52 @@
                 </div>
 
                 <div id="shop-tab-daily" class="tab-content active">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="font-weight:bold; color:var(--gold);">Ofertas Diarias</div>
-                        <button class="btn btn-dark" style="width:auto; padding:5px 10px; font-size:10px;" onclick="refreshShop(true)">🔄 50 💎</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                        <div style="font-weight:bold; color:var(--gold); font-size: 16px;">Ofertas Diarias</div>
+                        <button class="btn btn-dark" style="width:auto; padding:8px 15px; font-size:12px;" onclick="refreshShop(true)">🔄 50 💎</button>
                     </div>
-                    <div id="daily-shop-list" style="margin: 15px 0;"></div>
+                    <div class="responsive-grid" id="daily-shop-list" style="margin-bottom: 40px;"></div>
+
+                    <h2 style="margin-top:0; color:var(--purple); font-weight:900;">📦 Gacha del Abismo</h2>
+                    <div class="gacha-grid">
+                        <button class="btn btn-dark" style="flex-direction:column; padding:20px;" onclick="pullGacha(1)"><span style="font-size:40px; margin-bottom:5px;">🪵</span>100 🟡</button>
+                        <button class="btn btn-blue" style="flex-direction:column; padding:20px;" onclick="pullGacha(2)"><span style="font-size:40px; margin-bottom:5px;">🧰</span>500 🟡</button>
+                        <button class="btn btn-purple" style="flex-direction:column; padding:20px; box-shadow: 0 4px 0 #7e22ce; color:white;" onclick="pullGacha(3)"><span style="font-size:40px; margin-bottom:5px;">💎</span>50 💎</button>
+                    </div>
                 </div>
 
                 <div id="shop-tab-crypto" class="tab-content">
-                    <p style="font-size:12px; color:var(--text-sub);">Los precios cambian cada 15 segundos reales. Compra barato, vende caro.</p>
-                    <div id="crypto-market-list"></div>
+                    <p style="font-size:14px; color:var(--text-sub); margin-bottom: 20px;">Los precios cambian cada 15 segundos reales. Compra barato, vende caro.</p>
+                    <div class="responsive-grid" id="crypto-market-list"></div>
                 </div>
 
                 <div id="shop-tab-black" class="tab-content">
-                    <p style="font-size:12px; color:var(--red);">Pagos únicamente con Sangre de Jefe y Almas.</p>
-                    <div class="list-item" style="border-color:var(--red);">
-                        <div class="item-icon">💉</div><div class="item-details"><div style="font-weight:900; color:var(--red);">Elixir de Guerra</div><div style="font-size:11px; color:var(--text-sub);">+10 ATQ Permanente.</div></div>
-                        <button class="btn btn-red" style="width:auto; padding:8px;" onclick="buyBlackMarket('atk')">5 👹</button>
+                    <p style="font-size:14px; color:var(--red); margin-bottom: 20px;">Pagos únicamente con Sangre de Jefe y Almas.</p>
+                    <div class="responsive-grid">
+                        <div class="list-item" style="border-color:var(--red);">
+                            <div class="item-icon">💉</div><div class="item-details"><div style="font-weight:900; color:var(--red); font-size: 14px;">Elixir de Guerra</div><div style="font-size:12px; color:var(--text-sub);">+10 ATQ Permanente.</div></div>
+                            <button class="btn btn-red" style="width:auto; padding:12px 20px;" onclick="buyBlackMarket('atk')">5 👹</button>
+                        </div>
+                        <div class="list-item" style="border-color:var(--red);">
+                            <div class="item-icon">🍷</div><div class="item-details"><div style="font-weight:900; color:var(--red); font-size: 14px;">Elixir de Sangre</div><div style="font-size:12px; color:var(--text-sub);">+50 Max HP Permanente.</div></div>
+                            <button class="btn btn-red" style="width:auto; padding:12px 20px;" onclick="buyBlackMarket('hp')">10 🩸</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-    </div> <!-- FIN SCREENS WRAPPER -->
+    </div> <!-- Fin screens-wrapper -->
 
-    <!-- NAV PRINCIPAL (INTEGRADA EN EL FLEX, NUNCA FLOTANTE) -->
+    <!-- NAVEGACIÓN INFERIOR DE 100% ANCHO REAL -->
     <div class="nav">
-        <div class="nav-item active" id="tab-home" onclick="navTo('home')"><span>👤</span>PERFIL</div>
-        <div class="nav-item" id="tab-worlds" onclick="navTo('worlds')"><span>🗺️</span>MAPA</div>
-        <div class="nav-item" id="tab-crafting" onclick="navTo('crafting')"><span>⚒️</span>FORJA</div>
-        <div class="nav-item" id="tab-shop" onclick="navTo('shop')"><span>⚖️</span>MERCADO</div>
-        <div class="nav-item" onclick="window.location.href='mina.html'"><span>⛏️</span>MINA</div>
+        <div class="nav-inner">
+            <div class="nav-item active" id="tab-home" onclick="navTo('home')"><span>👤</span>PERFIL</div>
+            <div class="nav-item" id="tab-worlds" onclick="navTo('worlds')"><span>🗺️</span>MAPA</div>
+            <div class="nav-item" id="tab-crafting" onclick="navTo('crafting')"><span>⚒️</span>FORJA</div>
+            <div class="nav-item" id="tab-shop" onclick="navTo('shop')"><span>⚖️</span>MERCADO</div>
+            <div class="nav-item" onclick="window.location.href='mina.html'"><span>⛏️</span>MINA</div>
+        </div>
     </div>
 
 </div>
@@ -413,7 +463,9 @@
         a1: { id:'a1', t:'armor', name:'Harapos', icon:'👕', r:1, stats:{def:5}, cost:{m2:4} },
         a2: { id:'a2', t:'armor', name:'Coraza Sombra', icon:'🧥', r:3, stats:{def:20, dodge:5}, cost:{m4:10, m5:5} },
         ac1: { id:'ac1', t:'accessory', name:'Ojo de Dios', icon:'👁️', r:4, stats:{crit:10, luck:10}, cost:{m10:1, m4:10} },
-        p1: { id:'p1', t:'pet', name:'Lobo Alfa', icon:'🐺', r:3, stats:{atk:10, hp:20}, cost:{m7:5, m2:20} }
+        p1: { id:'p1', t:'pet', name:'Lobo Alfa', icon:'🐺', r:3, stats:{atk:10, hp:20}, cost:{m7:5, m2:20} },
+        f1: { id:'f1', t:'fusion', name:'Fundir Acero', icon:'⚙️', r:2, isConsumable:true, gives:'m6', cost:{m1:10} },
+        f2: { id:'f2', t:'fusion', name:'Sintetizar Cristal', icon:'🟣', r:2, isConsumable:true, gives:'m4', cost:{m2:10, m3:5} }
     };
     const rColor = { 1:'tier-1', 2:'tier-2', 3:'tier-3', 4:'tier-4', 5:'tier-5' };
 
@@ -436,8 +488,8 @@
         
         if(state.worlds[0].campaign.length === 0) {
             state.worlds[0].campaign = [
-                {id:'n1', type:'reading', title:'📖 UI Flexible', content:'El layout completo es ahora un Flexbox Matemático en vez de Absoluto. Esto asegura compatibilidad infinita con iPads, PCs y iPhone 15, adaptando su tamaño de forma natural.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
-                {id:'n2', type:'test', title:'⚔️ Test Seguro', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿Todo encaja perfectamente ahora?', options:['Sí','Obvio'], correct:0} ]}
+                {id:'n1', type:'reading', title:'📖 Simetría Absoluta', content:'Bienvenido a la versión Ultra-Responsiva. Si giras el iPad o abres esto en PC, todo se adaptará en 2, 3 o 4 columnas matemáticas para aprovechar tu pantalla sin romperse.', energyCost:0, rewardXp:10, rewardGold:10, unlocks:['n2']},
+                {id:'n2', type:'test', title:'⚔️ Test Final', energyCost:5, rewardXp:50, rewardGold:30, damagePenalization:20, unlocks:[], questions: [ {q:'¿Han desaparecido las barras negras a los lados?', options:['Sí, es increíble','Fua chaval'], correct:0} ]}
             ];
         }
 
@@ -493,12 +545,11 @@
         document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
         const tab = document.getElementById('tab-' + id); if(tab) tab.classList.add('active');
         
-        const hA = document.getElementById('hud-advanced'), hM = document.getElementById('hud-minimal'), nBar = document.querySelector('.nav');
+        const hA = document.getElementById('hud-advanced'), hM = document.getElementById('hud-minimal');
         
-        // Magia Flexbox: Si ocultamos el NAV, el Wrapper central crece automáticamente para rellenar el espacio.
-        if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; nBar.style.display = 'flex'; renderMap(); }
-        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; nBar.style.display = 'none'; } 
-        else { hA.style.display = 'flex'; hM.style.display = 'none'; nBar.style.display = 'flex'; }
+        if(id === 'worlds') { hA.style.display = 'none'; hM.style.display = 'flex'; renderMap(); }
+        else if(id === 'combat') { hA.style.display = 'none'; hM.style.display = 'none'; } 
+        else { hA.style.display = 'flex'; hM.style.display = 'none'; }
         
         if(id === 'home') { updateProfile(); startCamp(); } else stopCamp();
         if(id === 'skills') { const setT=(i,v)=>{let e=document.getElementById(i);if(e)e.innerText=v;}; setT('skill-points-display',state.sp); setT('skill-hp',state.skills.hp); setT('skill-atk',state.skills.atk); setT('skill-def',state.skills.def||0); setT('skill-crit',state.skills.crit||0); setT('skill-evasion',state.skills.evasion||0); }
@@ -531,14 +582,14 @@
         setTxt('ui-hp-txt', `${state.hp}/${state.maxHp}`); setW('ui-hp-bar', `${(state.hp/state.maxHp)*100}%`); setTxt('ui-en-txt', `${state.en}/${state.maxEn}`); setW('ui-en-bar', `${(state.en/state.maxEn)*100}%`);
     }
 
-    function renderMap() { const w = state.worlds[state.activeW]; document.getElementById('world-title').innerText = w.name + " ▾"; const c = document.getElementById('map-render'); c.innerHTML = w.campaign.length ? '' : '<div style="color:var(--text-sub);">Vacío.</div>'; w.campaign.forEach((n, i) => { const isDone = w.completed.includes(n.id); const isUnl = w.unlocked.includes(n.id); let cls = isDone ? 'completed' : (isUnl ? 'unlocked' : ''); if(n.type === 'boss') cls += ' boss'; let icon = isDone ? '⭐' : (n.type === 'reading' ? '📖' : (n.type === 'boss' ? '👹' : '⚔️')); c.innerHTML += `<div style="transform: translateX(${(i%2!==0)?'20px':'-20px'}); text-align:center;"><button class="node ${cls}" onclick="startNode('${n.id}')">${icon}</button><div style="font-weight:900; font-size:12px; margin-top:8px;">${n.title}</div></div>`; }); }
+    function renderMap() { const w = state.worlds[state.activeW]; document.getElementById('world-title').innerText = w.name + " ▾"; const c = document.getElementById('map-render'); c.innerHTML = w.campaign.length ? '' : '<div style="color:var(--text-sub);">Vacío.</div>'; w.campaign.forEach((n, i) => { const isDone = w.completed.includes(n.id); const isUnl = w.unlocked.includes(n.id); let cls = isDone ? 'completed' : (isUnl ? 'unlocked' : ''); if(n.type === 'boss') cls += ' boss'; let icon = isDone ? '⭐' : (n.type === 'reading' ? '📖' : (n.type === 'boss' ? '👹' : '⚔️')); c.innerHTML += `<div style="transform: translateX(${(i%2!==0)?'20px':'-20px'}); text-align:center;"><div class="node ${cls}" onclick="startNode('${n.id}')">${icon}</div><div style="font-weight:900; font-size:12px; margin-top:8px;">${n.title}</div></div>`; }); }
     function openWorldsManager() { document.getElementById('modal-worlds').style.display = 'flex'; renderWorldsManager(); }
-    function renderWorldsManager() { const list = document.getElementById('worlds-manager-list'); list.innerHTML = state.worlds.map((w, idx) => `<div class="list-item" style="flex-direction:column; align-items:flex-start;"><div style="display:flex; width:100%; gap:10px; align-items:center;"><div style="font-weight:900; flex:1;">${w.name}</div>${state.activeW === idx ? `<span style="color:var(--green); font-weight:900; font-size:12px;">ACTIVO</span>` : `<button class="btn btn-blue" style="width:auto; padding:5px 10px; font-size:10px;" onclick="selectWorld(${idx})">ENTRAR</button>`}<button class="btn btn-red" style="width:auto; padding:5px 10px; font-size:10px;" onclick="deleteWorld(${idx})">🗑️</button></div></div>`).join(''); }
+    function renderWorldsManager() { const list = document.getElementById('worlds-manager-list'); list.innerHTML = state.worlds.map((w, idx) => `<div class="list-item" style="flex-direction:column; align-items:flex-start;"><div style="display:flex; width:100%; gap:10px; align-items:center;"><div style="font-weight:900; flex:1;">${w.name}</div>${state.activeW === idx ? `<span style="color:var(--green); font-weight:900; font-size:12px;">ACTIVO</span>` : `<button class="btn btn-blue" style="width:auto; padding:10px 15px; font-size:10px;" onclick="selectWorld(${idx})">ENTRAR</button>`}<button class="btn btn-red" style="width:auto; padding:10px 15px; font-size:10px;" onclick="deleteWorld(${idx})">🗑️</button></div></div>`).join(''); }
     function createNewWorld() { let nm = prompt("Nombre:"); if(nm) { state.worlds.push({ id: Date.now(), name: nm, campaign: [], completed: [], unlocked: [] }); save(); renderWorldsManager(); } }
     function selectWorld(idx) { state.activeW = idx; save(); document.getElementById('modal-worlds').style.display = 'none'; renderMap(); }
-    function deleteWorld(idx) { if(state.worlds.length <= 1) return alert("❌ No puedes borrar tu único mundo."); if(confirm(`⚠️ ¿Borrar "${state.worlds[idx].name}"?`)) { state.worlds.splice(idx, 1); if(state.activeW === idx) state.activeW = 0; else if (state.activeW > idx) state.activeW--; save(); renderWorldsManager(); renderMap(); } }
-    function openForgeModal() { document.getElementById('modal-forge').style.display = 'flex'; document.getElementById('forge-input').value = JSON.stringify(state.worlds[state.activeW].campaign, null, 2); }
+    function deleteWorld(idx) { if(state.worlds.length <= 1) return alert("❌ No puedes borrar tu único mundo."); if(confirm(`⚠️ ¿Seguro que quieres borrar "${state.worlds[idx].name}"?\nSe perderá todo el progreso de esa mazmorra.`)) { state.worlds.splice(idx, 1); if(state.activeW === idx) state.activeW = 0; else if (state.activeW > idx) state.activeW--; save(); renderWorldsManager(); renderMap(); } }
     
+    function openForgeModal() { document.getElementById('modal-forge').style.display = 'flex'; document.getElementById('forge-input').value = JSON.stringify(state.worlds[state.activeW].campaign, null, 2); }
     function processForge() {
         let rawCode = document.getElementById('forge-input').value;
         try {
@@ -671,23 +722,22 @@
     function fleeCombat() { combat.active = false; navTo('worlds'); }
     function gainXP(amt) { state.xp += amt; if(state.xp >= state.maxXp) { state.lvl++; state.sp++; state.xp -= state.maxXp; state.maxXp = Math.floor(state.maxXp * 1.5); recalcStats(); state.hp = state.maxHp; state.en = state.maxEn; } }
 
-    // --- FORJA & MERCADO ---
     function switchForgeTab(tab) { document.querySelectorAll('#screen-crafting .sub-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('#screen-crafting .tab-content').forEach(c => c.classList.remove('active')); document.getElementById('sub-forge-' + tab).classList.add('active'); document.getElementById('forge-tab-' + tab).classList.add('active'); if(tab === 'craft') renderCrafting(currCraftFilter); if(tab === 'runes') renderRunes(); }
     function renderCrafting(f) {
-        currCraftFilter = f; document.querySelectorAll('#forge-tab-craft .btn-dark, #forge-tab-craft .btn-blue').forEach(b => b.className='btn btn-dark'); document.getElementById('filter-'+f).className='btn btn-blue';
+        currCraftFilter = f; document.querySelectorAll('.filter-nav .btn-blue').forEach(b => {b.classList.remove('btn-blue'); b.classList.add('btn-dark');}); document.getElementById('filter-'+f).classList.remove('btn-dark'); document.getElementById('filter-'+f).classList.add('btn-blue');
         const c = document.getElementById('craft-list');
         c.innerHTML = Object.values(gearDB).filter(g => g.t === f).map(g => {
             let canCraft = Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v); let isEq = state.equipment[g.t] === g.id;
-            let costHTML = Object.entries(g.cost).map(([k,v]) => { let m=matsDB[k]; let h=state.inventory[k]||0; return `<div style="font-size:10px;"><span style="color:var(--${rColor[m.t]})">${m.icon} ${m.n}</span>: <span style="color:${h>=v?'var(--green)':'var(--red)'}">(${h}/${v})</span></div>`; }).join('');
-            if(state.ownedGear.includes(g.id)) return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div></div><button class="btn ${isEq?'btn-dark':'btn-blue'}" style="width:auto; padding:8px;" onclick="equip('${g.id}')">${isEq?'EQ':'EQUIPAR'}</button></div>`;
-            return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div>${costHTML}</div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:8px;" onclick="craft('${g.id}')">FORJAR</button></div>`;
+            let costHTML = Object.entries(g.cost).map(([k,v]) => { let m=matsDB[k]; let h=state.inventory[k]||0; return `<div style="font-size:11px;"><span style="color:var(--${rColor[m.t]})">${m.icon} ${m.n}</span>: <span style="color:${h>=v?'var(--green)':'var(--red)'}">(${h}/${v})</span></div>`; }).join('');
+            if(state.ownedGear.includes(g.id)) return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div></div><button class="btn ${isEq?'btn-dark':'btn-blue'}" style="width:auto; padding:10px 20px;" onclick="equip('${g.id}')">${isEq?'EQ':'EQUIPAR'}</button></div>`;
+            return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name}</div>${costHTML}</div><button class="btn ${canCraft?'btn-gold':'btn-dark'}" style="width:auto; padding:10px 20px;" onclick="craft('${g.id}')">FORJAR</button></div>`;
         }).join('');
     }
     function renderRunes() {
         const c = document.getElementById('runes-list');
         c.innerHTML = state.ownedGear.map(id => {
             let g = gearDB[id]; let upg = state.upgrades[id]||0; let cost = (g.r*5)+upg; let canUpg = (state.inventory.m10||0)>=cost;
-            return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name} <span style="color:var(--gold)">+${upg}</span></div><div style="font-size:10px; color:var(--text-sub);">Costo: ${cost} 👹</div></div><button class="btn ${canUpg?'btn-purple':'btn-dark'}" style="width:auto; padding:8px;" onclick="upgrade('${g.id}')">REFINAR</button></div>`;
+            return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[g.r]})">${g.icon}</div><div class="item-details"><div style="font-weight:900;">${g.name} <span style="color:var(--gold)">+${upg}</span></div><div style="font-size:11px; color:var(--text-sub);">Costo: ${cost} 👹</div></div><button class="btn ${canUpg?'btn-purple':'btn-dark'}" style="width:auto; padding:10px 20px;" onclick="upgrade('${g.id}')">REFINAR</button></div>`;
         }).join('') || '<div style="color:var(--text-sub); text-align:center;">No tienes equipo.</div>';
     }
     function craft(id) { const g = gearDB[id]; if(!Object.entries(g.cost).every(([k,v]) => (state.inventory[k]||0) >= v)) return; Object.entries(g.cost).forEach(([k,v]) => state.inventory[k] -= v); state.ownedGear.push(id); save(); renderCrafting(currCraftFilter); }
@@ -708,7 +758,7 @@
         const c = document.getElementById('daily-shop-list'); if(!c) return;
         c.innerHTML = state.dailyShopItems.map((item, idx) => {
             let m = matsDB[item.id];
-            return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[m.t]})">${m.icon}</div><div class="item-details"><div style="font-weight:900; color:var(--${rColor[m.t]})">${m.n}</div></div><button class="btn ${item.b?'btn-dark':'btn-gold'}" style="width:auto; padding:8px 12px; font-size:11px;" onclick="buyDaily(${idx})" ${item.b?'disabled':''}>${item.b?'AGOTADO':'🟡 '+item.cost}</button></div>`;
+            return `<div class="list-item"><div class="item-icon" style="color:var(--${rColor[m.t]})">${m.icon}</div><div class="item-details"><div style="font-weight:900; color:var(--${rColor[m.t]})">${m.n}</div></div><button class="btn ${item.b?'btn-dark':'btn-gold'}" style="width:auto; padding:10px 15px; font-size:11px;" onclick="buyDaily(${idx})" ${item.b?'disabled':''}>${item.b?'AGOTADO':'🟡 '+item.cost}</button></div>`;
         }).join('');
     }
     function buyDaily(idx) { playSound('click'); const item = state.dailyShopItems[idx]; if(state.gold < item.cost) return alert("Falta Oro."); state.gold -= item.cost; item.b = true; state.inventory[item.id] = (state.inventory[item.id]||0) + 1; save(); renderDailyShop(); }
@@ -717,8 +767,8 @@
     function renderCryptoMarket() {
         const c = document.getElementById('crypto-market-list'); if(!c) return;
         c.innerHTML = `
-            <div class="list-item"><div class="item-icon">🩸</div><div class="item-details"><div style="font-weight:900;">Sangre</div><div class="market-trend-${state.crypto.blood.trend}">Precio: ${state.crypto.blood.price} 🟡 ${state.crypto.blood.trend==='up'?'▲':'▼'}</div><div style="font-size:10px; color:var(--text-sub)">Tienes: ${state.inventory.m11 || 0}</div></div><div style="display:flex; flex-direction:column; gap:5px;"><button class="btn btn-green" style="padding:5px;" onclick="buyCrypto('m11', 'blood')">COMPRAR</button><button class="btn btn-red" style="padding:5px;" onclick="sellCrypto('m11', 'blood')">VENDER</button></div></div>
-            <div class="list-item"><div class="item-icon">👹</div><div class="item-details"><div style="font-weight:900;">Almas</div><div class="market-trend-${state.crypto.soul.trend}">Precio: ${state.crypto.soul.price} 🟡 ${state.crypto.soul.trend==='up'?'▲':'▼'}</div><div style="font-size:10px; color:var(--text-sub)">Tienes: ${state.inventory.m10 || 0}</div></div><div style="display:flex; flex-direction:column; gap:5px;"><button class="btn btn-green" style="padding:5px;" onclick="buyCrypto('m10', 'soul')">COMPRAR</button><button class="btn btn-red" style="padding:5px;" onclick="sellCrypto('m10', 'soul')">VENDER</button></div></div>
+            <div class="list-item"><div class="item-icon">🩸</div><div class="item-details"><div style="font-weight:900;">Sangre</div><div class="market-trend-${state.crypto.blood.trend}">Precio: ${state.crypto.blood.price} 🟡 ${state.crypto.blood.trend==='up'?'▲':'▼'}</div><div style="font-size:11px; color:var(--text-sub)">Tienes: ${state.inventory.m11 || 0}</div></div><div style="display:flex; flex-direction:column; gap:5px;"><button class="btn btn-green" style="padding:8px 15px;" onclick="buyCrypto('m11', 'blood')">COMPRAR</button><button class="btn btn-red" style="padding:8px 15px;" onclick="sellCrypto('m11', 'blood')">VENDER</button></div></div>
+            <div class="list-item"><div class="item-icon">👹</div><div class="item-details"><div style="font-weight:900;">Almas</div><div class="market-trend-${state.crypto.soul.trend}">Precio: ${state.crypto.soul.price} 🟡 ${state.crypto.soul.trend==='up'?'▲':'▼'}</div><div style="font-size:11px; color:var(--text-sub)">Tienes: ${state.inventory.m10 || 0}</div></div><div style="display:flex; flex-direction:column; gap:5px;"><button class="btn btn-green" style="padding:8px 15px;" onclick="buyCrypto('m10', 'soul')">COMPRAR</button><button class="btn btn-red" style="padding:8px 15px;" onclick="sellCrypto('m10', 'soul')">VENDER</button></div></div>
         `;
     }
     function buyCrypto(invId, asset) { playSound('click'); let p = state.crypto[asset].price; if(state.gold < p) return alert("Falta oro."); state.gold -= p; state.inventory[invId] = (state.inventory[invId] || 0) + 1; save(); renderCryptoMarket(); }
@@ -727,6 +777,7 @@
     function buyBlackMarket(type) {
         playSound('click');
         if(type === 'atk') { if((state.inventory.m10||0) < 5) return alert("Faltan 5 Almas 👹"); state.inventory.m10 -= 5; state.baseBonus.atk += 10; recalcStats(); alert("🩸 +10 ATQ Permanente."); }
+        if(type === 'hp') { if((state.inventory.m11||0) < 10) return alert("Faltan 10 de Sangre 🩸"); state.inventory.m11 -= 10; state.skills.hp += 5; recalcStats(); alert("🍷 +50 HP Permanente."); }
         save();
     }
 
@@ -755,4 +806,4 @@
 </html>
 
 
-
+m
