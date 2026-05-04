@@ -11,9 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Colores de Bioma Dinámicos */
             --biome-top: #1a1a1a; --biome-bot: #000000;
-            
             --panel: rgba(15, 23, 42, 0.9); --panel-light: rgba(30, 41, 59, 0.95);
             --text-main: #f8fafc; --text-sub: #94a3b8; --border-dark: #334155;
             --green: #10b981; --blue: #3b82f6; --red: #ef4444; 
@@ -21,31 +19,35 @@
             --tier-1: #94a3b8; --tier-2: #3b82f6; --tier-3: #a855f7; --tier-4: #f59e0b; --tier-5: #ef4444;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-        body, html { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidden; font-family: 'Nunito', sans-serif; color: var(--text-main); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-touch-callout: none; }
+        
+        /* FIX iOS: Bloqueo absoluto del viewport para evitar rebotes y desajustes */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; position: fixed; overflow: hidden; font-family: 'Nunito', sans-serif; color: var(--text-main); background: #000; }
         
         #game-bg { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(180deg, var(--biome-top) 0%, var(--biome-bot) 100%); transition: background 2s ease; z-index: -1; }
 
-        #app-container { width: 100%; max-width: 600px; margin: 0 auto; height: 100dvh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        /* Contenedor Flex Rígido */
+        #app-container { width: 100%; max-width: 600px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         
         /* HEADER FIJADO (ISLA DINÁMICA) */
-        .header { background: var(--panel); border-bottom: 2px solid var(--border-dark); padding: 15px; padding-top: calc(15px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 10px; z-index: 50; flex-shrink: 0; box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
+        .header { background: var(--panel); border-bottom: 2px solid var(--border-dark); padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 10px; z-index: 50; flex-shrink: 0; box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
         .hud-top-row { display: flex; justify-content: space-between; align-items: center; }
         .depth-display { font-size: 24px; font-weight: 900; color: var(--cyan); text-shadow: 0 0 10px rgba(6,182,212,0.5); display: flex; flex-direction: column; align-items: flex-start; line-height: 1; }
         .biome-name { font-size: 10px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
         .hud-currencies { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
         .hud-curr-box { background: var(--panel-light); padding: 5px 8px; border-radius: 8px; border: 1px solid var(--border-dark); font-weight: 900; font-size: 11px; display: flex; align-items: center; gap: 4px; }
 
-        /* SCREENS */
-        #screens-wrapper { flex: 1; position: relative; width: 100%; }
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; overflow-y: auto; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
-        .screen.active { display: flex; animation: fade 0.2s ease-out; }
-        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-
-        /* TABS */
-        .sub-nav { display: flex; gap: 5px; padding: 15px; overflow-x: auto; padding-bottom: 5px; border-bottom: 1px solid var(--border-dark); flex-shrink: 0; background: rgba(0,0,0,0.5); }
+        /* TABS (SUB-NAV) */
+        .sub-nav { display: flex; gap: 5px; padding: 10px 15px; overflow-x: auto; border-bottom: 1px solid var(--border-dark); flex-shrink: 0; background: rgba(0,0,0,0.5); }
         .sub-btn { background: transparent; border: none; color: var(--text-sub); font-weight: 900; font-size: 11px; padding: 10px; cursor: pointer; white-space: nowrap; transition: 0.2s; border-bottom: 2px solid transparent; text-transform: uppercase;}
         .sub-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+        /* SCREENS (ZONA CENTRAL DINÁMICA) */
+        #screens-wrapper { flex: 1; position: relative; width: 100%; overflow: hidden; }
+        
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; overflow-y: auto; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
+        .screen.active { display: flex; animation: fade 0.2s ease-out; }
+        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
         /* MINE CORE AREA */
         .mine-area { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 20px; }
@@ -90,8 +92,8 @@
         .btn-dark { background: var(--panel-light); color: var(--text-main); border: 1px solid var(--border-dark); box-shadow: 0 4px 0 var(--border-dark); }
         .btn:active { transform: translateY(4px); box-shadow: none; margin-bottom: -4px; }
 
-        /* NAV PRINCIPAL ABSOLUTO (NEXO / MINA) */
-        .nav { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; background: rgba(13,20,36,0.98); border-top: 1px solid var(--border-dark); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); height: calc(70px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 20px rgba(0,0,0,0.5); }
+        /* FIX iOS: NAV INFERIOR INTEGRADA EN EL FLEX, NO FLOTANTE */
+        .nav { display: flex; background: rgba(13,20,36,0.98); border-top: 1px solid var(--border-dark); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); height: calc(70px + env(safe-area-inset-bottom)); flex-shrink: 0; box-shadow: 0 -10px 20px rgba(0,0,0,0.5); width: 100%; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); font-weight: 900; font-size: 9px; transition: 0.2s; cursor: pointer;}
         .nav-item.active { color: var(--cyan); transform: translateY(-3px); }
         .nav-item span { font-size: 22px; margin-bottom: 2px; }
@@ -283,9 +285,8 @@
 
     </div> <!-- End Screens Wrapper -->
 
-    <!-- NAVEGACIÓN INFERIOR AISLADA Y FIJA -->
+    <!-- NAVEGACIÓN INFERIOR AISLADA Y FIJA EN EL FLEX -->
     <div class="nav">
-        <!-- VUELVE A ESTUDIAR -->
         <div class="nav-item" onclick="window.location.href='index.html'"><span>📖</span>ESTUDIAR</div>
         <div class="nav-item active" style="color:var(--gold);"><span>⛏️</span>LA MINA</div>
     </div>
@@ -363,6 +364,7 @@
         try { const ms = localStorage.getItem('LifeQuest_Mine'); if(ms) { mineState = {...mineState, ...JSON.parse(ms)}; } } catch(e){}
         if(isNaN(mineState.stone)) mineState.stone = 0; if(isNaN(mineState.durability)) mineState.durability = 100;
         if(!mineState.upg) mineState.upg = {pick:1, auto:0, cart:0, luck:0};
+        if(!mineState.workers) mineState.workers = { total: 1, iron: 0, steel: 0 };
         
         calcOffline();
         spawnRock(true);
@@ -390,7 +392,7 @@
         rock.isBoss = (mineState.depth > 0 && mineState.depth % 50 === 0);
         
         let hpCalc = b.hp * Math.pow(b.hM, mineState.depth - b.d);
-        if(rock.isBoss) hpCalc *= 10; // Los jefes son muros de HP
+        if(rock.isBoss) hpCalc *= 10; 
         
         rock.maxHp = Math.floor(hpCalc); rock.hp = rock.maxHp;
         
@@ -398,7 +400,6 @@
         el.innerText = rock.isBoss ? "🗿" : b.rock;
         el.style.filter = rock.isBoss ? 'drop-shadow(0 0 20px red)' : 'drop-shadow(0 15px 15px rgba(0,0,0,0.9))';
         
-        // Quita la animación de rotura para que la nueva roca sea visible
         el.classList.remove('rock-break');
 
         document.getElementById('game-bg').style.background = `linear-gradient(180deg, ${b.bgT} 0%, ${b.bgB} 100%)`;
@@ -411,7 +412,7 @@
         if(e) e.preventDefault();
         
         if(mineState.durability <= 0) {
-            playSound('hit'); dealDamage(1); // Daño de castigo si está roto
+            playSound('hit'); dealDamage(1); 
             spawnParticle("Roto...", "gray", e);
             return;
         }
@@ -419,34 +420,28 @@
         playSound('hit');
         mineState.clicks++;
         
-        // 1. Cálculo de Daño Base
         let dmg = mineState.upg.pick;
-        if(session.frenzyTimer > 0) dmg *= 5; // Frenesí x5
-        dmg *= session.combo; // Multiplicador de combo
+        if(session.frenzyTimer > 0) dmg *= 5;
+        dmg *= session.combo; 
         
-        // 2. Críticos (Basado en Suerte)
-        let isCrit = Math.random() < (mineState.upg.luck * 0.02); // 2% por nivel
+        let isCrit = Math.random() < (mineState.upg.luck * 0.02);
         if(isCrit) { dmg *= 3; playSound('crit'); spawnParticle("CRIT!", "var(--gold)", e); }
         
-        // 3. Durabilidad y Calor
         if(session.frenzyTimer === 0) {
             session.heat += 10;
-            if(session.heat >= 100) { session.heat = 100; session.frenzyTimer = 50; } // 5 sec frenesí
-            if(Math.random() < 0.05) mineState.durability--; // 5% chance de gastar 1 durabilidad
+            if(session.heat >= 100) { session.heat = 100; session.frenzyTimer = 50; } 
+            if(Math.random() < 0.05) mineState.durability--; 
         }
 
-        // 4. Combo Building
         session.combo = Math.min(3.0, session.combo + 0.02);
-        session.comboTimer = 20; // 2 sec decay
+        session.comboTimer = 20; 
 
         dealDamage(dmg);
         
-        // Visual
         let el = document.getElementById('the-rock');
         el.classList.remove('rock-shake'); void el.offsetWidth; el.classList.add('rock-shake');
         spawnParticle(Math.floor(dmg), "white", e);
 
-        // Rare Event check
         if(Math.random() < 0.001) spawnGoldenFly();
     }
 
@@ -459,18 +454,15 @@
     function breakRock() {
         playSound('break');
         let el = document.getElementById('the-rock');
-        el.classList.add('rock-break'); // Inicia animación de estallar
+        el.classList.add('rock-break'); 
 
-        // Esperar a que la roca estalle antes de generar la siguiente (400ms)
         setTimeout(() => {
             mineState.depth++;
             
-            // RECOMPENSAS BASE
             let stoneGain = mineState.upg.pick * (session.frenzyTimer > 0 ? 2 : 1);
             mineState.stone += stoneGain;
             let dropsTxt = `🪨 ${stoneGain}`;
 
-            // DROPS DEL BIOMA
             rock.biome.drops.forEach(d => {
                 if(Math.random() < d.ch + (mineState.upg.luck * 0.005)) {
                     let qty = rock.isBoss ? 5 : 1;
@@ -479,11 +471,9 @@
                 }
             });
 
-            // GEODAS Y MATERIA OSCURA
             if(Math.random() < 0.02 + (mineState.upg.luck * 0.002)) { mineState.geodes++; dropsTxt += ` | 🔮 1`; playSound('crit'); }
             if(mineState.depth > 1000 && Math.random() < 0.01) { mineState.darkMatter++; dropsTxt += ` | 🌌 1`; }
 
-            // JEFE REWARD
             if(rock.isBoss) {
                 let gGain = 100 + (mineState.depth * 2); nexoState.gold += gGain;
                 nexoState.gems += 5;
@@ -506,24 +496,19 @@
 
     // --- GAME LOOP Y AUTOMATIZACIÓN ---
     function gameLoop() {
-        // Combo Decay
         if(session.comboTimer > 0) { session.comboTimer--; if(session.comboTimer === 0) session.combo = 1.0; } 
         else { session.combo = 1.0; }
         
-        // Heat & Frenzy Decay
         if(session.frenzyTimer > 0) { session.frenzyTimer--; if(session.frenzyTimer===0) session.heat = 0; }
         else if(session.heat > 0) { session.heat = Math.max(0, session.heat - 1); }
 
-        // Skills
         if(session.skills.las.active) { dealDamage(mineState.upg.pick * 2); session.skills.las.t--; if(session.skills.las.t<=0) session.skills.las.active=false; }
         ['dyn', 'las'].forEach(k => { if(session.skills[k].cd > 0) session.skills[k].cd -= 0.1; });
 
-        // AutoMiner (Daño Pasivo)
         if(mineState.upg.auto > 0 && Math.random() < 0.1) {
             if(mineState.durability > 0) dealDamage(mineState.upg.auto);
         }
 
-        // Refinería (Cada 5s = 50 ticks)
         session.refineTick++;
         if(session.refineTick >= 50) {
             session.refineTick = 0;
@@ -548,14 +533,12 @@
         document.getElementById('bar-dur').style.width = mineState.durability + "%";
         if(mineState.durability <= 20) document.getElementById('bar-dur').style.background = "var(--red)"; else document.getElementById('bar-dur').style.background = "var(--green)";
 
-        // Cooldowns
         ['dyn', 'las'].forEach(k => {
             let el = document.getElementById(`cd-${k=='dyn'?'dynamite':'laser'}`);
             if(session.skills[k].cd > 0) { el.style.display = 'flex'; el.innerText = Math.ceil(session.skills[k].cd); }
             else { el.style.display = 'none'; }
         });
 
-        // Refine bars
         document.getElementById('ref-bar-iron').style.width = (session.refineTick / 50) * 100 + "%";
         document.getElementById('ref-bar-steel').style.width = (session.refineTick / 50) * 100 + "%";
     }
@@ -565,7 +548,7 @@
         if(mins > 1 && mineState.upg.auto > 0) {
             let maxMins = (2 + mineState.upg.cart * 2) * 60;
             let eff = Math.min(mins, maxMins);
-            let sGain = eff * mineState.upg.auto * 6; // 60 dmg per min
+            let sGain = eff * mineState.upg.auto * 6;
             mineState.stone += sGain;
             alert(`⛺ Reporte de Mineros Offline:\nHas estado fuera ${eff} minutos.\nObtienes: ${sGain} 🪨`);
         }
@@ -577,13 +560,12 @@
         if(type === 'dynamite') {
             if(session.skills.dyn.cd > 0) return;
             playSound('explosion'); dealDamage(mineState.upg.pick * 200); spawnParticle("💥 KABOOM", "var(--red)");
-            document.getElementById('app-container').classList.add('shake'); setTimeout(()=> document.getElementById('app-container').classList.remove('shake'), 400);
             session.skills.dyn.cd = session.skills.dyn.max;
         }
         if(type === 'laser') {
             if(session.skills.las.cd > 0) return;
             if(nexoState.en < 10) return alert("El láser requiere 10 de Energía del Nexo.");
-            nexoState.en -= 10; playSound('rare');
+            nexoState.en -= 10; playSound('crit');
             session.skills.las.active = true; session.skills.las.t = 100; // 10s
             session.skills.las.cd = session.skills.las.max; save();
         }
@@ -597,15 +579,15 @@
     // --- GEODAS ---
     function openGeodeModal() {
         if(mineState.geodes <= 0) return alert("No tienes Geodas.");
-        geodeModal.active = true; geodeModal.clicks = 10;
+        session.geodeModalClicks = 10;
         document.getElementById('modal-geode').style.display = 'flex';
         document.getElementById('geode-clicks').innerText = "10";
     }
     function hitGeode() {
-        playSound('hit'); geodeModal.clicks--;
-        document.getElementById('geode-clicks').innerText = geodeModal.clicks;
-        let el = document.getElementById('geode-btn'); el.style.transform = `scale(${1 + (10-geodeModal.clicks)*0.05})`;
-        if(geodeModal.clicks <= 0) {
+        playSound('hit'); session.geodeModalClicks--;
+        document.getElementById('geode-clicks').innerText = session.geodeModalClicks;
+        let el = document.getElementById('geode-btn'); el.style.transform = `scale(${1 + (10-session.geodeModalClicks)*0.05})`;
+        if(session.geodeModalClicks <= 0) {
             playSound('break'); mineState.geodes--;
             document.getElementById('modal-geode').style.display = 'none'; el.style.transform = 'scale(1)';
             let r = Math.random(); let msg = "";
@@ -646,7 +628,7 @@
         document.getElementById('ref-free-workers').innerText = mineState.workers.total - (mineState.workers.iron + mineState.workers.steel);
     }
     function sellMat(t) {
-        playSound('coin');
+        playSound('hit');
         if(t==='stone') { if(mineState.stone < 1000) return alert("Falta Piedra."); mineState.stone-=1000; nexoState.gold+=50; }
         if(t==='iron') { if((nexoState.inventory.m1||0) < 100) return alert("Falta Hierro."); nexoState.inventory.m1-=100; nexoState.gold+=150; }
         save();
@@ -689,7 +671,6 @@
 </script>
 </body>
 </html>
-
 
 
 ```
