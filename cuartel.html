@@ -3,122 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calistenia Roguelike</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>Calistenia Roguelike - Elite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #121212;
-            --surface-color: #1e1e1e;
-            --text-color: #e0e0e0;
-            --text-muted: #888;
-            --gold: #FFD700;
-            --violet: #8A2BE2;
-            --violet-glow: rgba(138, 43, 226, 0.4);
-            --danger: #ff4444;
-            --success: #00C851;
-            --border: #333;
-        }
-
-        [data-theme="light"] {
-            --bg-color: #f5f5f5;
-            --surface-color: #ffffff;
-            --text-color: #121212;
-            --text-muted: #666;
-            --border: #ddd;
-            --violet-glow: rgba(138, 43, 226, 0.2);
+            --bg: #0a0a0c;
+            --surface: #141417;
+            --surface-hover: #1f1f24;
+            --text-main: #f0f0f0;
+            --text-muted: #8a8a93;
+            --border: #2a2a35;
+            
+            --accent: #d4af37; /* Gold */
+            --accent-dim: rgba(212, 175, 55, 0.15);
+            
+            /* Rarities */
+            --rarity-common: #a0a0a0;
+            --rarity-uncommon: #4caf50;
+            --rarity-rare: #2196f3;
+            --rarity-epic: #9c27b0;
+            --rarity-legendary: #ff9800;
+            
+            --font-ui: 'Inter', sans-serif;
+            --font-head: 'Playfair Display', serif;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Roboto', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
+            font-family: var(--font-ui);
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding-bottom: 80px;
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding-bottom: 90px;
+            -webkit-font-smoothing: antialiased;
         }
 
-        h1, h2, h3, .bebas {
-            font-family: 'Bebas Neue', sans-serif;
-            letter-spacing: 1px;
+        h1, h2, h3, .serif {
+            font-family: var(--font-head);
+            font-weight: 600;
         }
 
-        /* HEADER & GLOBAL BAR */
+        /* HEADER */
         header {
-            background: var(--surface-color);
-            padding: 15px 20px;
-            border-bottom: 2px solid var(--violet);
-            box-shadow: 0 0 15px var(--violet-glow);
+            background: rgba(20, 20, 23, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
-        }
-
-        .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
         }
 
-        .title {
-            color: var(--gold);
-            font-size: 2rem;
-            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        .brand {
+            font-size: 1.5rem;
+            color: var(--accent);
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        .controls button {
-            background: none;
-            border: 1px solid var(--text-muted);
-            color: var(--text-color);
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-            margin-left: 5px;
-        }
-
-        .controls button:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
-        .progress-container {
-            width: 100%;
-            background: var(--bg-color);
-            height: 12px;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #4b0082, var(--violet));
-            width: 0%;
-            transition: width 0.5s ease-out;
-        }
-
-        .progress-text {
-            font-size: 0.8rem;
+        .date-display {
+            font-size: 0.85rem;
             color: var(--text-muted);
             text-align: right;
-            margin-top: 4px;
         }
 
-        /* NAVIGATION */
+        /* NAV */
         nav {
-            display: flex;
-            justify-content: space-around;
-            background: var(--surface-color);
-            padding: 10px 0;
             position: fixed;
             bottom: 0;
             width: 100%;
+            background: rgba(20, 20, 23, 0.95);
+            backdrop-filter: blur(10px);
             border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
             z-index: 100;
         }
 
@@ -126,374 +92,373 @@
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            padding: 10px;
-            font-family: 'Bebas Neue', sans-serif;
+            transition: color 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         nav button.active {
-            color: var(--gold);
-            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            color: var(--accent);
         }
 
         /* SECTIONS */
         .section {
             display: none;
-            padding: 20px;
-            max-width: 800px;
+            padding: 30px 20px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .section.active {
             display: block;
+            animation: fadeIn 0.4s ease-out;
         }
 
-        /* RAID BUTTON */
-        .raid-container {
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* RAID ZONE */
+        .raid-zone {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: var(--surface-color);
-            border-radius: 8px;
-            border: 1px dashed var(--gold);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1) inset;
+            padding: 40px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
         }
 
         .raid-btn {
-            background: linear-gradient(45deg, #b8860b, var(--gold));
-            color: #000;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.8rem;
-            font-family: 'Bebas Neue', sans-serif;
-            border-radius: 8px;
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-            transition: transform 0.2s;
+            border-radius: 4px;
+            transition: all 0.3s;
+            margin-top: 15px;
         }
 
-        .raid-btn:active {
-            transform: scale(0.95);
+        .raid-btn:hover:not(:disabled) {
+            background: var(--accent-dim);
         }
 
         .raid-btn:disabled {
-            background: var(--border);
+            border-color: var(--border);
             color: var(--text-muted);
-            box-shadow: none;
             cursor: not-allowed;
+            background: transparent;
         }
 
-        .raid-info {
-            margin-top: 10px;
+        .status-text {
+            margin-top: 15px;
             font-size: 0.9rem;
             color: var(--text-muted);
         }
 
-        /* CARDS */
+        /* GRIDS & CARDS */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
         }
 
         .card {
-            background: var(--surface-color);
-            padding: 15px;
-            border-radius: 8px;
+            background: var(--surface);
             border: 1px solid var(--border);
-            position: relative;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: #444;
+            transform: translateY(-2px);
         }
 
         .card h3 {
-            color: var(--violet);
-            font-size: 1.5rem;
-            margin-bottom: 5px;
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            color: #fff;
         }
 
         .card .variant {
-            color: var(--gold);
-            font-weight: bold;
-            margin-bottom: 10px;
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .card .desc {
             font-size: 0.85rem;
             color: var(--text-muted);
-            margin-bottom: 15px;
-            min-height: 40px;
-        }
-
-        .card .level-dots {
-            display: flex;
-            gap: 5px;
-        }
-
-        .dot {
-            height: 8px;
-            flex-grow: 1;
-            background: var(--border);
-            border-radius: 4px;
-        }
-
-        .dot.filled {
-            background: var(--violet);
-            box-shadow: 0 0 5px var(--violet-glow);
-        }
-
-        /* PROFILE & STATS */
-        .stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            line-height: 1.5;
             margin-bottom: 20px;
         }
 
-        .stat-box {
-            background: var(--surface-color);
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid var(--border);
+        .progress-dots {
+            display: flex;
+            gap: 4px;
         }
 
-        .stat-box .value {
-            font-size: 2rem;
-            color: var(--gold);
-            font-family: 'Bebas Neue', sans-serif;
+        .dot {
+            height: 4px;
+            flex-grow: 1;
+            background: var(--border);
+            border-radius: 2px;
         }
 
-        .stat-box .label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
+        .dot.filled {
+            background: var(--accent);
         }
 
-        /* ACHIEVEMENTS */
-        .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-        }
-
-        .achievement {
-            background: var(--surface-color);
-            border: 1px solid var(--border);
-            padding: 15px;
-            text-align: center;
-            border-radius: 8px;
-            opacity: 0.5;
-            filter: grayscale(100%);
-            transition: all 0.3s;
-        }
-
-        .achievement.unlocked {
-            opacity: 1;
-            filter: none;
-            border-color: var(--gold);
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-        }
-
-        .achievement .icon {
-            font-size: 2rem;
-            margin-bottom: 5px;
-        }
-
-        .achievement h4 {
-            color: var(--gold);
-            font-size: 1.1rem;
-        }
-
-        .achievement p {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 5px;
-        }
-
-        /* HISTORY */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        th {
-            color: var(--violet);
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
-        }
-
-        /* OVERLAY LEVEL UP */
-        #level-up-overlay {
+        /* GACHA MODAL (CHOICE) */
+        .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.5s;
+            transition: opacity 0.3s;
         }
 
-        #level-up-overlay.show {
+        .modal-overlay.show {
             opacity: 1;
             pointer-events: all;
         }
 
-        .overlay-content {
+        .choice-container {
             text-align: center;
-            transform: scale(0.5);
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
         }
 
-        #level-up-overlay.show .overlay-content {
-            transform: scale(1);
-        }
-
-        .overlay-title {
-            font-size: 4rem;
-            color: var(--gold);
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-            margin-bottom: 10px;
-        }
-
-        .overlay-variant {
+        .choice-title {
+            color: #fff;
             font-size: 2rem;
-            color: var(--violet);
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
-        .overlay-desc {
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .choice-card {
+            background: var(--surface);
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-card:hover {
+            transform: scale(1.05);
+        }
+
+        .rarity-badge {
+            position: absolute;
+            top: 10px; right: 10px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+        }
+
+        /* EDITOR (CRUD) */
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        @media(max-width: 768px) {
+            .editor-container { grid-template-columns: 1fr; }
+        }
+
+        .list-panel, .edit-panel {
+            background: var(--surface);
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        input, textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 4px;
+            font-family: var(--font-ui);
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            background: var(--bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary { border-color: var(--accent); color: var(--accent); }
+        .btn-danger { border-color: #f44336; color: #f44336; }
+        
+        .ex-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .ex-list-item:hover { background: var(--bg); }
+
+        .variant-item {
+            background: var(--bg);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        /* UTILS */
+        .xp-text {
+            font-family: var(--font-head);
             font-size: 1.2rem;
-            color: #ddd;
-            max-width: 400px;
-            margin: 0 auto 30px auto;
-            line-height: 1.4;
+            margin-top: 15px;
         }
 
-        .overlay-xp {
-            font-size: 1.5rem;
-            color: var(--success);
-            font-weight: bold;
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
         }
+        .stat-box {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 20px; text-align: center; border-radius: 8px;
+        }
+        .stat-val { font-size: 2rem; color: var(--accent); font-family: var(--font-head); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
 
-        /* FLOATING PARTICLES */
-        .floating-xp {
-            position: fixed;
-            color: var(--gold);
-            font-weight: bold;
-            font-size: 1.5rem;
-            pointer-events: none;
-            z-index: 500;
-            animation: floatUp 1.5s ease-out forwards;
-            text-shadow: 0 0 5px rgba(0,0,0,0.8);
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
-        }
-
-        .confetti {
-            position: fixed;
-            width: 10px; height: 10px;
-            background: red;
-            z-index: 999;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="header-top">
-            <div class="title">CALISTENIA ROGUELIKE</div>
-            <div class="controls">
-                <button id="btn-sound">🔊</button>
-                <button id="btn-theme">🌙</button>
-            </div>
+        <div class="brand serif">ROGUE.FIT</div>
+        <div class="date-display">
+            <div id="current-day" style="color: var(--text-main); font-weight: 600;"></div>
+            <div id="current-date"></div>
         </div>
-        <div class="progress-container">
-            <div class="progress-bar" id="global-progress-bar"></div>
-        </div>
-        <div class="progress-text" id="global-progress-text">Progreso Global: 0 / 0</div>
     </header>
 
     <main>
         <!-- DASHBOARD -->
-        <section id="sec-dashboard" class="section active">
-            <div class="raid-container">
-                <h2 style="color: var(--violet); margin-bottom: 10px; font-size: 2rem;">Día de Raid</h2>
-                <button id="btn-raid" class="raid-btn">INICIAR RAID</button>
-                <div class="raid-info" id="raid-info">Solo disponible los Sábados. Sube un ejercicio al azar.</div>
+        <section id="tab-dashboard" class="section active">
+            <div class="raid-zone">
+                <h2 class="serif" style="font-size: 2.2rem; margin-bottom: 10px;">La Forja</h2>
+                <p style="color: var(--text-muted);">El entrenamiento intensivo solo se habilita al final del ciclo semanal.</p>
+                <button id="btn-raid" class="raid-btn">Desatar Potencial</button>
+                <div id="raid-status" class="status-text">Analizando parámetros temporales...</div>
             </div>
-            <div class="grid" id="exercises-grid">
-                <!-- Se inyectan ejercicios via JS -->
-            </div>
+            
+            <h3 class="serif" style="margin-bottom: 20px; color: var(--text-muted);">Arsenal Actual</h3>
+            <div class="grid" id="exercises-grid"></div>
         </section>
 
-        <!-- PERFIL -->
-        <section id="sec-profile" class="section">
-            <h2 class="bebas" style="font-size: 2.5rem; margin-bottom: 20px; color: var(--gold); text-align: center;" id="athlete-level-display">Rango: Novato</h2>
+        <!-- PROFILE -->
+        <section id="tab-profile" class="section">
+            <h2 class="serif" style="font-size: 2.5rem; text-align: center; margin-bottom: 30px; color: var(--accent);" id="rank-display">Rango: Iniciado</h2>
             
             <div class="stat-grid">
                 <div class="stat-box">
-                    <div class="value" id="stat-xp">0</div>
-                    <div class="label">XP Total</div>
+                    <div class="stat-val" id="stat-xp">0</div>
+                    <div class="stat-label">Experiencia</div>
                 </div>
                 <div class="stat-box">
-                    <div class="value" id="stat-saturdays">0</div>
-                    <div class="label">Sábados Completados</div>
-                </div>
-                <div class="stat-box">
-                    <div class="value" id="stat-streak">0</div>
-                    <div class="label">Racha Actual</div>
-                </div>
-                <div class="stat-box">
-                    <div class="value" id="stat-record">0</div>
-                    <div class="label">Racha Récord</div>
+                    <div class="stat-val" id="stat-saturdays">0</div>
+                    <div class="stat-label">Ciclos Completados</div>
                 </div>
             </div>
-            <div class="stat-box" style="margin-bottom: 20px;">
-                <div class="value" id="stat-fav" style="font-size: 1.5rem; color: var(--violet);">Ninguno</div>
-                <div class="label">Arma Favorita (Más subido)</div>
-            </div>
+
+            <h3 class="serif" style="margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Bitácora</h3>
+            <div id="history-list" style="font-size: 0.9rem;"></div>
         </section>
 
-        <!-- LOGROS -->
-        <section id="sec-achievements" class="section">
-            <h2 class="bebas" style="font-size: 2rem; margin-bottom: 20px; color: var(--violet);">Sala de Trofeos</h2>
-            <div class="achievements-grid" id="achievements-grid">
-                <!-- Se inyectan logros via JS -->
-            </div>
-        </section>
-
-        <!-- HISTORIAL -->
-        <section id="sec-history" class="section">
-            <h2 class="bebas" style="font-size: 2rem; margin-bottom: 20px; color: var(--violet);">Crónicas de Batalla</h2>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Ejercicio</th>
-                            <th>Evolución</th>
-                            <th>XP</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-body">
-                        <!-- Se inyecta historial via JS -->
-                    </tbody>
-                </table>
+        <!-- EDITOR (CRUD) -->
+        <section id="tab-editor" class="section">
+            <h2 class="serif" style="margin-bottom: 20px;">Gestor de Arsenal</h2>
+            <div class="editor-container">
+                <div class="list-panel">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <h3>Ejercicios</h3>
+                        <button class="btn btn-primary" onclick="createNewExercise()">+ Nuevo</button>
+                    </div>
+                    <div id="editor-exercise-list"></div>
+                </div>
+                
+                <div class="edit-panel" id="edit-panel-content" style="display: none;">
+                    <h3 style="margin-bottom: 15px; color: var(--accent);">Editando: <span id="edit-ex-title"></span></h3>
+                    <input type="hidden" id="edit-ex-id">
+                    
+                    <div class="form-group">
+                        <label>Nombre del Ejercicio</label>
+                        <input type="text" id="edit-ex-name" onchange="saveBasicExerciseInfo()">
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0 10px 0;">
+                        <h4>Fases de Evolución</h4>
+                        <button class="btn" onclick="addVariant()">+ Añadir Fase</button>
+                    </div>
+                    
+                    <div id="edit-variants-list"></div>
+                    
+                    <div style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 15px; text-align: right;">
+                        <button class="btn btn-danger" onclick="deleteCurrentExercise()">Eliminar Ejercicio Completo</button>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -501,485 +466,400 @@
     <nav>
         <button class="active" onclick="switchTab('dashboard', this)">Campamento</button>
         <button onclick="switchTab('profile', this)">Atleta</button>
-        <button onclick="switchTab('achievements', this)">Trofeos</button>
-        <button onclick="switchTab('history', this)">Crónicas</button>
+        <button onclick="switchTab('editor', this)">Gestor</button>
     </nav>
 
-    <!-- LEVEL UP OVERLAY -->
-    <div id="level-up-overlay" onclick="closeOverlay()">
-        <div class="overlay-content">
-            <div class="overlay-title">¡LEVEL UP!</div>
-            <div class="overlay-variant" id="overlay-exercise">Pseudo Flexiones</div>
-            <div class="overlay-variant" style="color: var(--gold); font-size: 1.5rem;" id="overlay-variant">Nueva Variante</div>
-            <div class="overlay-desc" id="overlay-desc">Descripción de la mecánica rogue-like.</div>
-            <div class="overlay-xp" id="overlay-xp">+150 XP</div>
+    <!-- GACHA MODAL -->
+    <div id="gacha-modal" class="modal-overlay">
+        <div class="choice-container">
+            <h2 class="choice-title serif">Elige tu Mejora</h2>
+            <div class="choice-grid" id="choice-grid">
+                <!-- Se inyectan las 3 cartas via JS -->
+            </div>
         </div>
     </div>
 
     <script>
-        // --- DATA ESTRUCTURAS ---
-        const EXERCISES = {
-            pseudo: {
-                name: "Pseudo Flexiones",
-                levels: [
-                    { name: "Rodillas", desc: "Apóyate en rodillas. Acostumbra tus muñecas a la inclinación leve." },
-                    { name: "Normal", desc: "Modo estándar. Inclínate hacia adelante, manos a la altura de la cadera." },
-                    { name: "Pausa 2s Abajo", desc: "Controla la fase isométrica. Elimina el rebote. Fuerza pura." },
-                    { name: "Pies Elevados Bajo", desc: "Aumenta la carga en hombros. Usa un step o cajón bajo." },
-                    { name: "Pies Elevados Alto", desc: "Ángulo severo. Preparación directa para la full planche." },
-                    { name: "Planche Lean", desc: "Brazos bloqueados, escapulas protraídas. Resiste la gravedad." }
-                ]
-            },
-            diamond: {
+        // --- DEFAULT DATA ---
+        const DEFAULT_EXERCISES = {
+            "ex_1": {
                 name: "Flexiones Diamante",
                 levels: [
-                    { name: "Rodillas", desc: "Inicia la activación de tríceps sin la carga total de tu cuerpo." },
-                    { name: "Normal", desc: "Manos juntas formando un diamante. Core activado." },
-                    { name: "Pausa 2s", desc: "Detente a un milímetro del suelo. Exige el máximo a tus tríceps." },
-                    { name: "Pies Elevados", desc: "Cambio de centro de masa. Más presión en el tren superior." },
-                    { name: "Tempo 4s", desc: "4 segundos de bajada agonizante. Hipertrofia y control mental." },
-                    { name: "Archer Push-up", desc: "Transición a un brazo. Flexiona uno, extiende el otro. Asimetría letal." }
+                    { name: "Inclinadas", desc: "Manos juntas sobre elevación. Adaptación articular." },
+                    { name: "Suelo", desc: "El estándar. Tríceps bajo tensión." },
+                    { name: "Pausa 2s", desc: "Elimina inercia. Tensión isométrica abajo." },
+                    { name: "Declinadas", desc: "Pies elevados. Mayor carga sobre cadena anterior." }
                 ]
             },
-            pullups: {
+            "ex_2": {
                 name: "Dominadas",
                 levels: [
-                    { name: "Banda Gruesa", desc: "Aprende el patrón motor. Tracción vertical asistida." },
-                    { name: "Banda Fina", desc: "Menos ayuda elástica. Tu dorsal asume el mando." },
-                    { name: "Sin Ayuda", desc: "Tu peso contra la gravedad. El estándar de fuerza." },
-                    { name: "Pausa 2s Arriba", desc: "Mentón sobre la barra y congela el tiempo." },
-                    { name: "Tempo 4s Bajada", desc: "Fase excéntrica controlada. Destruye fibras para construir acero." },
-                    { name: "Pausa + Tempo", desc: "Sube, pausa 2s, baja en 4s. Dominio absoluto de la barra." },
-                    { name: "Archer Pull-up", desc: "Carga unilateral cruzada. El umbral hacia la dominada a un brazo." }
+                    { name: "Asistidas (Banda)", desc: "Construyendo la vía neuronal de tracción." },
+                    { name: "Estrictas", desc: "Barbilla sobre la barra. Sin balanceo." },
+                    { name: "L-Sit Pull-up", desc: "Core activado al máximo. Fricción pura." }
                 ]
             },
-            vups: {
-                name: "V-Ups",
-                levels: [
-                    { name: "Crunch", desc: "Flexión espinal básica. Despierta el recto abdominal." },
-                    { name: "Bicicleta", desc: "Torsión y rotación. Fuego en los oblicuos." },
-                    { name: "V-Up Parcial", desc: "Toca tus rodillas. Coordinación tren superior/inferior." },
-                    { name: "V-Up Completo", desc: "Bisagra perfecta. Manos tocan pies en el aire." },
-                    { name: "Pausa 1s", desc: "Mantén la posición V en el pico de contracción." },
-                    { name: "Con Peso", desc: "Sostén un disco o mancuerna. Sobrecarga progresiva pura." }
-                ]
-            },
-            lsit: {
-                name: "Tuck L-Sit",
-                levels: [
-                    { name: "10s", desc: "Rodillas al pecho. Depresión escapular a tope." },
-                    { name: "20s", desc: "Resistencia isométrica inicial. El abdomen quema." },
-                    { name: "30s", desc: "Dominio del tuck. Base sólida creada." },
-                    { name: "Una Pierna 10s", desc: "Extiende una pierna. La palanca se vuelve hostil." },
-                    { name: "Una Pierna 20s", desc: "Soporta el torque asimétrico prolongado." },
-                    { name: "L-Sit Completa 10s", desc: "Piernas bloqueadas rectas. Tensión en cuádriceps y core." },
-                    { name: "L-Sit Completa 20s", desc: "Nivel de gimnasta alcanzado. Fuerza de gravedad sometida." }
-                ]
-            },
-            superman: {
-                name: "Superman",
-                levels: [
-                    { name: "10 Reps", desc: "Extensión lumbar básica. Despierta la cadena posterior." },
-                    { name: "15 Reps", desc: "Aumenta volumen. Más sangre a la zona lumbar." },
-                    { name: "Pausa 3s", desc: "Contracción máxima arriba. Tensión sostenida." },
-                    { name: "Alterno", desc: "Brazo derecho, pierna izquierda. Coordinación cruzada." },
-                    { name: "Alterno Pausa", desc: "El mismo patrón cruzado pero congelando el movimiento." },
-                    { name: "Bird-Dog", desc: "En cuadrupedia. Estabilidad central y anti-rotación extrema." }
-                ]
-            },
-            hollow: {
-                name: "Hollow Body",
-                levels: [
-                    { name: "Rodillas 15s", desc: "Espalda baja pegada al suelo. Posición de canoa inicial." },
-                    { name: "Rodillas 30s", desc: "Resistencia base. Condicionamiento de core." },
-                    { name: "Semiestirado 20s", desc: "Brazos atrás, rodillas ligeramente flexionadas." },
-                    { name: "Completo 20s", desc: "El Hollow puro. Tensión estructural total." },
-                    { name: "Completo 30s", desc: "Dominio de la línea recta bajo tensión." },
-                    { name: "Rock 10 Reps", desc: "Balanceo manteniendo el bloque sólido. Control dinámico." }
-                ]
-            },
-            pistol: {
+            "ex_3": {
                 name: "Pistol Squat",
                 levels: [
-                    { name: "Búlgara", desc: "Sentadilla dividida. Fuerza unilateral y equilibrio base." },
-                    { name: "Apoyo Pared", desc: "Baja a una pierna asistido por la pared." },
-                    { name: "Apoyo Dedo", desc: "Asistencia mínima. El sistema nervioso se adapta." },
-                    { name: "Sin Apoyo", desc: "Pistol squat pura. Equilibrio, movilidad y fuerza." },
-                    { name: "Pausa 3s", desc: "Frena en el fondo. Destruye el reflejo de estiramiento." },
-                    { name: "Tempo 4s", desc: "Bajada hipercontrolada. El cuádriceps al límite." },
-                    { name: "Desde Step", desc: "Rango de recorrido aumentado (déficit). Profundidad insana." }
+                    { name: "Asistida", desc: "Apoyo ligero en poste o marco." },
+                    { name: "Al Cajón", desc: "Rompe el paralelo pero con seguridad abajo." },
+                    { name: "Estricta", desc: "Rango completo. Equilibrio y fuerza bruta." },
+                    { name: "Con Salto", desc: "Potencia pliométrica a una pierna." }
                 ]
             }
         };
 
-        const ACHIEVEMENTS_DATA = {
-            firstBlood: { id: 'firstBlood', icon: '🩸', title: 'Primera Sangre', desc: 'Sube tu primer nivel.' },
-            noNet: { id: 'noNet', icon: '🦅', title: 'Sin Red', desc: 'Desbloquea Dominadas sin ayuda.' },
-            steel: { id: 'steel', icon: '⚔️', title: 'Acero', desc: '5 ejercicios a nivel 4 o superior.' },
-            veteran: { id: 'veteran', icon: '🛡️', title: 'Veterano', desc: 'Racha de 10 Sábados.' },
-            legend: { id: 'legend', icon: '👑', title: 'Leyenda', desc: 'Todos los ejercicios al máximo nivel.' }
-        };
-
-        const RANKS = [
-            { xp: 0, name: "Novato" },
-            { xp: 500, name: "Guerrero" },
-            { xp: 1500, name: "Élite" },
-            { xp: 3000, name: "Leyenda" }
+        const RARITIES = [
+            { id: 'common', name: 'Común', color: 'var(--rarity-common)', chance: 50, xpMult: 1 },
+            { id: 'uncommon', name: 'Poco Común', color: 'var(--rarity-uncommon)', chance: 25, xpMult: 1.5 },
+            { id: 'rare', name: 'Raro', color: 'var(--rarity-rare)', chance: 15, xpMult: 2 },
+            { id: 'epic', name: 'Épico', color: 'var(--rarity-epic)', chance: 9, xpMult: 3 },
+            { id: 'legendary', name: 'Legendario', color: 'var(--rarity-legendary)', chance: 1, xpMult: 5 }
         ];
 
-        // --- STATE MANAGEMENT ---
         let state = {
+            exercises: null,
+            progress: {}, // { ex_id: currentLevelIndex }
             xp: 0,
-            progress: {}, // id: currentLevelIndex
             saturdaysCompleted: 0,
-            currentStreak: 0,
-            recordStreak: 0,
-            lastRaidWeek: null,
-            history: [],
-            achievements: [],
-            soundEnabled: true,
-            theme: 'dark'
+            lastRaidDate: null,
+            history: []
         };
 
-        const TOTAL_LEVELS = Object.values(EXERCISES).reduce((acc, ex) => acc + ex.levels.length - 1, 0);
-
+        // --- INIT & TIME LOGIC ---
         function init() {
-            const saved = localStorage.getItem('calisteniaRogueState');
-            if (saved) {
-                state = { ...state, ...JSON.parse(saved) };
-            } else {
-                Object.keys(EXERCISES).forEach(k => state.progress[k] = 0);
-            }
-            
-            applyTheme(state.theme);
-            updateUI();
+            loadState();
+            setupDateDisplay();
             checkRaidAvailability();
+            updateUI();
             
-            // Event Listeners
-            document.getElementById('btn-theme').addEventListener('click', () => {
-                state.theme = state.theme === 'dark' ? 'light' : 'dark';
-                applyTheme(state.theme);
-                saveState();
-            });
+            document.getElementById('btn-raid').addEventListener('click', startRaid);
+        }
 
-            document.getElementById('btn-sound').addEventListener('click', () => {
-                state.soundEnabled = !state.soundEnabled;
-                document.getElementById('btn-sound').innerText = state.soundEnabled ? '🔊' : '🔇';
+        function loadState() {
+            const saved = localStorage.getItem('rogueFitState');
+            if (saved) {
+                state = JSON.parse(saved);
+                // Sync progress with exercises in case they were edited
+                for (let key in state.exercises) {
+                    if (state.progress[key] === undefined) state.progress[key] = 0;
+                    if (state.progress[key] >= state.exercises[key].levels.length) {
+                        state.progress[key] = state.exercises[key].levels.length - 1;
+                    }
+                }
+            } else {
+                state.exercises = JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
+                for (let key in state.exercises) {
+                    state.progress[key] = 0;
+                }
                 saveState();
-            });
-            document.getElementById('btn-sound').innerText = state.soundEnabled ? '🔊' : '🔇';
-
-            document.getElementById('btn-raid').addEventListener('click', executeRaid);
+            }
         }
 
         function saveState() {
-            checkAchievements();
-            localStorage.setItem('calisteniaRogueState', JSON.stringify(state));
-            updateUI();
+            localStorage.setItem('rogueFitState', JSON.stringify(state));
         }
 
-        // --- LOGIC ---
-        function getAthleteRank() {
-            let rank = RANKS[0].name;
-            for (let r of RANKS) {
-                if (state.xp >= r.xp) rank = r.name;
-            }
-            return rank;
-        }
-
-        function getGlobalProgress() {
-            let current = Object.values(state.progress).reduce((acc, val) => acc + val, 0);
-            return { current, total: TOTAL_LEVELS, percent: (current / TOTAL_LEVELS) * 100 };
-        }
-
-        function getWeekNumber(d) {
-            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
-            let yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        function setupDateDisplay() {
+            const d = new Date();
+            const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            document.getElementById('current-day').innerText = days[d.getDay()];
+            document.getElementById('current-date').innerText = d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
         }
 
         function checkRaidAvailability() {
-            const btn = document.getElementById('btn-raid');
-            const info = document.getElementById('raid-info');
-            const today = new Date();
-            const currentWeek = getWeekNumber(today) + "-" + today.getFullYear();
+            const d = new Date();
+            const isSaturday = d.getDay() === 6;
+            const dateStr = d.toDateString();
             
-            // Verifica si es sábado (6)
-            if (today.getDay() !== 6) {
+            const btn = document.getElementById('btn-raid');
+            const status = document.getElementById('raid-status');
+
+            if (!isSaturday) {
                 btn.disabled = true;
-                info.innerText = "El calabozo está cerrado. Regresa el Sábado.";
+                status.innerText = "Sistemas bloqueados. Esperando al Sábado para autorización.";
                 return;
             }
 
-            if (state.lastRaidWeek === currentWeek) {
+            if (state.lastRaidDate === dateStr) {
                 btn.disabled = true;
-                info.innerText = "Ya has completado tu Raid esta semana.";
+                status.innerText = "Ciclo de mejora completado por esta semana.";
                 return;
             }
 
-            const gp = getGlobalProgress();
-            if (gp.current >= gp.total) {
+            // Check if there are exercises left to upgrade
+            const upgradable = getUpgradableExercises();
+            if (upgradable.length === 0) {
                 btn.disabled = true;
-                info.innerText = "¡Has dominado todo! No hay más niveles que subir.";
+                status.innerText = "Has alcanzado el límite genético en todo tu arsenal.";
                 return;
             }
 
             btn.disabled = false;
-            info.innerText = "¡El calabozo está abierto! Reclama tu poder.";
+            status.innerText = "Protocolo listo. Elige tu destino.";
         }
 
-        function executeRaid() {
-            const today = new Date();
-            const currentWeek = getWeekNumber(today) + "-" + today.getFullYear();
-            
-            // Streak Logic
-            if (state.lastRaidWeek) {
-                let [lw, ly] = state.lastRaidWeek.split('-');
-                let [cw, cy] = currentWeek.split('-');
-                if (cy === ly && parseInt(cw) === parseInt(lw) + 1) {
-                    state.currentStreak++;
-                } else if (cy > ly || parseInt(cw) > parseInt(lw) + 1) {
-                    state.currentStreak = 1; // Racha rota
-                }
-            } else {
-                state.currentStreak = 1;
+        function getUpgradableExercises() {
+            return Object.keys(state.exercises).filter(key => {
+                return state.progress[key] < state.exercises[key].levels.length - 1;
+            });
+        }
+
+        // --- GACHA & RAID LOGIC ---
+        function getRandomRarity() {
+            const roll = Math.random() * 100;
+            let cumulative = 0;
+            for (let r of RARITIES) {
+                cumulative += r.chance;
+                if (roll <= cumulative) return r;
             }
+            return RARITIES[0];
+        }
+
+        function startRaid() {
+            const available = getUpgradableExercises();
+            if(available.length === 0) return;
+
+            // Shuffle and pick up to 3
+            available.sort(() => 0.5 - Math.random());
+            const options = available.slice(0, 3);
+
+            const grid = document.getElementById('choice-grid');
+            grid.innerHTML = '';
+
+            options.forEach(exId => {
+                const ex = state.exercises[exId];
+                const currentLvlIdx = state.progress[exId];
+                const nextVariant = ex.levels[currentLvlIdx + 1];
+                const rarity = getRandomRarity();
+                
+                const baseXP = 100 * (currentLvlIdx + 1);
+                const finalXP = Math.round(baseXP * rarity.xpMult);
+
+                const card = document.createElement('div');
+                card.className = 'choice-card';
+                card.style.borderColor = rarity.color;
+                card.innerHTML = `
+                    <div class="rarity-badge" style="color: ${rarity.color}; border: 1px solid ${rarity.color};">${rarity.name}</div>
+                    <h3 style="margin-top: 15px; color: #fff;">${ex.name}</h3>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Sube a Nivel ${currentLvlIdx + 2}</div>
+                    <div style="margin: 15px 0; font-weight: 600; color: ${rarity.color};">${nextVariant.name}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); min-height: 40px;">${nextVariant.desc}</div>
+                    <div class="xp-text" style="color: ${rarity.color};">+${finalXP} XP</div>
+                `;
+                
+                card.onclick = () => confirmChoice(exId, rarity, finalXP);
+                grid.appendChild(card);
+            });
+
+            document.getElementById('gacha-modal').classList.add('show');
+        }
+
+        function confirmChoice(exId, rarity, xpGain) {
+            const d = new Date();
             
-            if (state.currentStreak > state.recordStreak) state.recordStreak = state.currentStreak;
+            const exName = state.exercises[exId].name;
+            const oldVariant = state.exercises[exId].levels[state.progress[exId]].name;
             
-            state.lastRaidWeek = currentWeek;
+            state.progress[exId]++;
+            const newVariant = state.exercises[exId].levels[state.progress[exId]].name;
+            
+            state.xp += xpGain;
             state.saturdaysCompleted++;
+            state.lastRaidDate = d.toDateString();
 
-            // Select random exercise not maxed out
-            const availableKeys = Object.keys(EXERCISES).filter(k => state.progress[k] < EXERCISES[k].levels.length - 1);
-            if (availableKeys.length === 0) return;
-
-            const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
-            const oldLvl = state.progress[randomKey];
-            const newLvl = oldLvl + 1;
-            
-            state.progress[randomKey] = newLvl;
-            
-            // Calc XP
-            const xpGained = newLvl * 50 + 50; // Bonus por sábado incluido implícitamente
-            state.xp += xpGained;
-
-            // History
             state.history.unshift({
-                date: today.toLocaleDateString(),
-                exercise: EXERCISES[randomKey].name,
-                oldVariant: EXERCISES[randomKey].levels[oldLvl].name,
-                newVariant: EXERCISES[randomKey].levels[newLvl].name,
-                xp: xpGained
+                date: d.toLocaleDateString('es-ES'),
+                exercise: exName,
+                transition: `${oldVariant} → ${newVariant}`,
+                rarity: rarity.name,
+                color: rarity.color,
+                xp: xpGain
             });
 
             saveState();
+            document.getElementById('gacha-modal').classList.remove('show');
+            
+            updateUI();
             checkRaidAvailability();
-            
-            // Efectos
-            triggerConfetti();
-            playSound('levelup');
-            showLevelUpOverlay(randomKey, newLvl, xpGained);
-            createFloatingXP(xpGained);
         }
 
-        function checkAchievements() {
-            if (state.history.length >= 1 && !state.achievements.includes('firstBlood')) state.achievements.push('firstBlood');
-            if (state.progress['pullups'] >= 2 && !state.achievements.includes('noNet')) state.achievements.push('noNet');
-            
-            let highLevels = Object.values(state.progress).filter(v => v >= 4).length;
-            if (highLevels >= 5 && !state.achievements.includes('steel')) state.achievements.push('steel');
-            
-            if (state.currentStreak >= 10 && !state.achievements.includes('veteran')) state.achievements.push('veteran');
-            
-            const gp = getGlobalProgress();
-            if (gp.current === gp.total && gp.total > 0 && !state.achievements.includes('legend')) state.achievements.push('legend');
-        }
-
-        // --- UI UPDATES ---
+        // --- UI RENDERING ---
         function updateUI() {
             renderDashboard();
             renderProfile();
-            renderAchievements();
-            renderHistory();
-            
-            const gp = getGlobalProgress();
-            document.getElementById('global-progress-bar').style.width = gp.percent + '%';
-            document.getElementById('global-progress-text').innerText = `Progreso Global: ${gp.current} / ${gp.total}`;
+            renderEditorList();
         }
 
         function renderDashboard() {
             const grid = document.getElementById('exercises-grid');
             grid.innerHTML = '';
-            for (let [key, ex] of Object.entries(EXERCISES)) {
-                const lvlIdx = state.progress[key];
-                const currentVariant = ex.levels[lvlIdx];
-                const totalLvl = ex.levels.length;
-                
-                let dotsHtml = '';
-                for(let i=0; i<totalLvl; i++) {
-                    dotsHtml += `<div class="dot ${i <= lvlIdx ? 'filled' : ''}"></div>`;
+            
+            for (let id in state.exercises) {
+                const ex = state.exercises[id];
+                const lvl = state.progress[id];
+                const variant = ex.levels[lvl];
+                const total = ex.levels.length;
+
+                let dots = '';
+                for(let i=0; i<total; i++) {
+                    dots += `<div class="dot ${i <= lvl ? 'filled' : ''}"></div>`;
                 }
 
                 grid.innerHTML += `
-                    <div class="card" id="card-${key}">
+                    <div class="card">
                         <h3>${ex.name}</h3>
-                        <div class="variant">Nvl ${lvlIdx + 1}: ${currentVariant.name}</div>
-                        <div class="desc">${currentVariant.desc}</div>
-                        <div class="level-dots">${dotsHtml}</div>
+                        <div class="variant">Fase ${lvl + 1}: ${variant.name}</div>
+                        <div class="desc">${variant.desc}</div>
+                        <div class="progress-dots">${dots}</div>
                     </div>
                 `;
             }
         }
 
         function renderProfile() {
-            document.getElementById('athlete-level-display').innerText = `Rango: ${getAthleteRank()}`;
             document.getElementById('stat-xp').innerText = state.xp;
             document.getElementById('stat-saturdays').innerText = state.saturdaysCompleted;
-            document.getElementById('stat-streak').innerText = state.currentStreak;
-            document.getElementById('stat-record').innerText = state.recordStreak;
             
-            // Fav
-            let fav = "Ninguno";
-            let maxLvl = 0;
-            for(let [key, val] of Object.entries(state.progress)){
-                if(val > maxLvl) { maxLvl = val; fav = EXERCISES[key].name; }
-            }
-            document.getElementById('stat-fav').innerText = maxLvl > 0 ? fav : "Ninguno";
+            let rank = "Iniciado";
+            if(state.xp > 1000) rank = "Discípulo";
+            if(state.xp > 5000) rank = "Guerrero";
+            if(state.xp > 15000) rank = "Maestro";
+            document.getElementById('rank-display').innerText = `Rango: ${rank}`;
+
+            const histContainer = document.getElementById('history-list');
+            histContainer.innerHTML = '';
+            state.history.forEach(h => {
+                histContainer.innerHTML += `
+                    <div style="padding: 15px 0; border-bottom: 1px solid var(--border);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span style="color: ${h.color}; font-weight:bold;">[${h.rarity}] ${h.exercise}</span>
+                            <span style="color: var(--text-muted); font-size:0.8rem;">${h.date}</span>
+                        </div>
+                        <div style="color: #ccc;">${h.transition} <span style="color:${h.color}; font-size:0.85rem; float:right;">+${h.xp} XP</span></div>
+                    </div>
+                `;
+            });
         }
 
-        function renderAchievements() {
-            const grid = document.getElementById('achievements-grid');
-            grid.innerHTML = '';
-            for(let key in ACHIEVEMENTS_DATA) {
-                const a = ACHIEVEMENTS_DATA[key];
-                const unlocked = state.achievements.includes(key);
-                grid.innerHTML += `
-                    <div class="achievement ${unlocked ? 'unlocked' : ''}">
-                        <div class="icon">${unlocked ? a.icon : '🔒'}</div>
-                        <h4>${a.title}</h4>
-                        <p>${a.desc}</p>
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // --- CRUD LOGIC ---
+        let editingId = null;
+
+        function renderEditorList() {
+            const list = document.getElementById('editor-exercise-list');
+            list.innerHTML = '';
+            for (let id in state.exercises) {
+                const ex = state.exercises[id];
+                list.innerHTML += `
+                    <div class="ex-list-item" onclick="loadExerciseForEdit('${id}')">
+                        <span>${ex.name} <small style="color:var(--text-muted)">(${ex.levels.length} fases)</small></span>
+                        <span style="color: var(--accent);">✎</span>
                     </div>
                 `;
             }
         }
 
-        function renderHistory() {
-            const tbody = document.getElementById('history-body');
-            tbody.innerHTML = '';
-            state.history.forEach(h => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${h.date}</td>
-                        <td style="color: var(--gold); font-weight:bold;">${h.exercise}</td>
-                        <td>${h.oldVariant} ➔ <b>${h.newVariant}</b></td>
-                        <td style="color: var(--success);">+${h.xp} XP</td>
-                    </tr>
+        function createNewExercise() {
+            const newId = 'ex_' + Date.now();
+            state.exercises[newId] = {
+                name: "Nuevo Ejercicio",
+                levels: [{ name: "Base", desc: "Descripción inicial" }]
+            };
+            state.progress[newId] = 0;
+            saveState();
+            renderEditorList();
+            loadExerciseForEdit(newId);
+            updateUI();
+        }
+
+        function loadExerciseForEdit(id) {
+            editingId = id;
+            const ex = state.exercises[id];
+            
+            document.getElementById('edit-panel-content').style.display = 'block';
+            document.getElementById('edit-ex-title').innerText = ex.name;
+            document.getElementById('edit-ex-name').value = ex.name;
+            
+            renderEditVariants();
+        }
+
+        function saveBasicExerciseInfo() {
+            if(!editingId) return;
+            const newName = document.getElementById('edit-ex-name').value;
+            state.exercises[editingId].name = newName;
+            document.getElementById('edit-ex-title').innerText = newName;
+            saveState();
+            renderEditorList();
+            updateUI();
+        }
+
+        function renderEditVariants() {
+            const list = document.getElementById('edit-variants-list');
+            list.innerHTML = '';
+            const levels = state.exercises[editingId].levels;
+            
+            levels.forEach((lvl, idx) => {
+                list.innerHTML += `
+                    <div class="variant-item">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                            <strong style="color: var(--text-muted);">Fase ${idx + 1}</strong>
+                            ${levels.length > 1 ? `<button class="btn btn-danger" style="padding:2px 8px; font-size:0.7rem;" onclick="removeVariant(${idx})">Borrar</button>` : ''}
+                        </div>
+                        <input type="text" placeholder="Nombre de fase" value="${lvl.name}" onchange="updateVariant(${idx}, 'name', this.value)" style="margin-bottom:8px;">
+                        <textarea placeholder="Descripción" rows="2" onchange="updateVariant(${idx}, 'desc', this.value)">${lvl.desc}</textarea>
+                    </div>
                 `;
             });
         }
 
-        function applyTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
+        function addVariant() {
+            state.exercises[editingId].levels.push({ name: "Nueva Fase", desc: "..." });
+            saveState();
+            renderEditVariants();
+            updateUI();
         }
 
-        function switchTab(tabId, btnElement) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById(`sec-${tabId}`).classList.add('active');
-            btnElement.classList.add('active');
+        function updateVariant(idx, field, value) {
+            state.exercises[editingId].levels[idx][field] = value;
+            saveState();
+            updateUI();
         }
 
-        // --- EFFECTS & AUDIO ---
-        function showLevelUpOverlay(exKey, newLvlIdx, xp) {
-            const ex = EXERCISES[exKey];
-            const variant = ex.levels[newLvlIdx];
+        function removeVariant(idx) {
+            const levels = state.exercises[editingId].levels;
+            if(levels.length <= 1) return;
             
-            document.getElementById('overlay-exercise').innerText = ex.name;
-            document.getElementById('overlay-variant').innerText = `Nivel ${newLvlIdx + 1}: ${variant.name}`;
-            document.getElementById('overlay-desc').innerText = variant.desc;
-            document.getElementById('overlay-xp').innerText = `+${xp} XP ⚡`;
-            
-            const overlay = document.getElementById('level-up-overlay');
-            overlay.classList.add('show');
+            levels.splice(idx, 1);
+            // Adjust progress if necessary
+            if (state.progress[editingId] >= levels.length) {
+                state.progress[editingId] = levels.length - 1;
+            }
+            saveState();
+            renderEditVariants();
+            updateUI();
         }
 
-        function closeOverlay() {
-            document.getElementById('level-up-overlay').classList.remove('show');
-        }
-
-        function createFloatingXP(xp) {
-            const btn = document.getElementById('btn-raid');
-            const rect = btn.getBoundingClientRect();
-            
-            const el = document.createElement('div');
-            el.className = 'floating-xp';
-            el.innerText = `+${xp} XP`;
-            el.style.left = `${rect.left + rect.width/2 - 20}px`;
-            el.style.top = `${rect.top}px`;
-            
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 1500);
-        }
-
-        function triggerConfetti() {
-            for (let i = 0; i < 50; i++) {
-                const conf = document.createElement('div');
-                conf.className = 'confetti';
-                conf.style.left = Math.random() * 100 + 'vw';
-                conf.style.backgroundColor = ['#FFD700', '#8A2BE2', '#00C851', '#ff4444'][Math.floor(Math.random()*4)];
-                conf.style.top = '-10px';
-                document.body.appendChild(conf);
-
-                const duration = Math.random() * 2 + 1;
-                conf.animate([
-                    { transform: `translate3d(0,0,0) rotate(0deg)` },
-                    { transform: `translate3d(${Math.random()*200 - 100}px, 100vh, 0) rotate(${Math.random()*360}deg)` }
-                ], {
-                    duration: duration * 1000,
-                    easing: 'cubic-bezier(.37,0,.63,1)'
-                });
-
-                setTimeout(() => conf.remove(), duration * 1000);
+        function deleteCurrentExercise() {
+            if(confirm('¿Eliminar este ejercicio y todo su progreso?')) {
+                delete state.exercises[editingId];
+                delete state.progress[editingId];
+                editingId = null;
+                document.getElementById('edit-panel-content').style.display = 'none';
+                saveState();
+                renderEditorList();
+                updateUI();
             }
         }
 
-        // Web Audio API Synth
-        let audioCtx;
-        function playSound(type) {
-            if (!state.soundEnabled) return;
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            const t = audioCtx.currentTime;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            
-            if (type === 'levelup') {
-                // Arpegio epico: C4, E4, G4, C5
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(261.63, t); // C4
-                osc.frequency.setValueAtTime(329.63, t + 0.1); // E4
-                osc.frequency.setValueAtTime(392.00, t + 0.2); // G4
-                osc.frequency.setValueAtTime(523.25, t + 0.3); // C5
-                
-                gain.gain.setValueAtTime(0.1, t);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
-                
-                osc.start(t);
-                osc.stop(t + 0.8);
-            }
-        }
-
-        // Init App
         window.onload = init;
-
     </script>
 </body>
 </html>
