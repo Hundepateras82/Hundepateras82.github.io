@@ -2,212 +2,984 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cuartel General - Creador</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calistenia Roguelike</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-muted: #888;
+            --gold: #FFD700;
+            --violet: #8A2BE2;
+            --violet-glow: rgba(138, 43, 226, 0.4);
+            --danger: #ff4444;
+            --success: #00C851;
+            --border: #333;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f5f5f5;
+            --surface-color: #ffffff;
+            --text-color: #121212;
+            --text-muted: #666;
+            --border: #ddd;
+            --violet-glow: rgba(138, 43, 226, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
         body {
-            margin: 0; padding: 0; background: #050914; color: white;
-            font-family: 'Nunito', sans-serif; display: flex; flex-direction: column;
-            height: 100dvh; overflow: hidden;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 80px;
         }
 
-        /* BARRA DE HERRAMIENTAS SUPERIOR */
-        .toolbar {
-            background: #162032; border-bottom: 2px solid #e11d48;
-            padding: 10px 15px; display: flex; justify-content: space-between;
-            align-items: center; z-index: 100; flex-shrink: 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        h1, h2, h3, .bebas {
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 1px;
         }
 
-        .tools-left, .tools-right { display: flex; gap: 8px; align-items: center; }
-
-        button {
-            background: #1e293b; color: #e2e8f0; border: 1px solid #334155;
-            padding: 8px 12px; border-radius: 8px; font-family: 'Nunito', sans-serif;
-            font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; gap: 5px;
-        }
-        button:hover { background: #334155; }
-        button:active { transform: scale(0.95); }
-        
-        .btn-nexo { background: transparent; border-color: transparent; font-size: 20px; padding: 5px; }
-        .btn-primary { background: #e11d48; border-color: #be123c; color: white; }
-        .btn-primary:hover { background: #f43f5e; border-color: #e11d48; }
-        
-        .btn-toggle.active { background: #10b981; border-color: #059669; color: white; }
-
-        /* LIENZO DONDE SE DIBUJA EL HTML */
-        .workspace {
-            flex-grow: 1; background: #fff; width: 100%; position: relative;
-        }
-        iframe {
-            width: 100%; height: 100%; border: none; display: block;
+        /* HEADER & GLOBAL BAR */
+        header {
+            background: var(--surface-color);
+            padding: 15px 20px;
+            border-bottom: 2px solid var(--violet);
+            box-shadow: 0 0 15px var(--violet-glow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        /* MODAL PARA PEGAR CÓDIGO */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(5, 9, 20, 0.9);
-            display: flex; flex-direction: column; z-index: 2000;
-            padding: 20px; backdrop-filter: blur(5px);
-            opacity: 0; pointer-events: none; transition: 0.3s;
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
-        .modal-overlay.show { opacity: 1; pointer-events: auto; }
 
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
+        .title {
+            color: var(--gold);
+            font-size: 2rem;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .controls button {
+            background: none;
+            border: 1px solid var(--text-muted);
+            color: var(--text-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+
+        .controls button:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .progress-container {
+            width: 100%;
+            background: var(--bg-color);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4b0082, var(--violet));
+            width: 0%;
+            transition: width 0.5s ease-out;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        /* NAVIGATION */
+        nav {
+            display: flex;
+            justify-content: space-around;
+            background: var(--surface-color);
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            border-top: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 10px;
+            font-family: 'Bebas Neue', sans-serif;
+        }
+
+        nav button.active {
+            color: var(--gold);
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        /* SECTIONS */
+        .section {
+            display: none;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* RAID BUTTON */
+        .raid-container {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--surface-color);
+            border-radius: 8px;
+            border: 1px dashed var(--gold);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1) inset;
+        }
+
+        .raid-btn {
+            background: linear-gradient(45deg, #b8860b, var(--gold));
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.8rem;
+            font-family: 'Bebas Neue', sans-serif;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            transition: transform 0.2s;
+        }
+
+        .raid-btn:active {
+            transform: scale(0.95);
+        }
+
+        .raid-btn:disabled {
+            background: var(--border);
+            color: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .raid-info {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* CARDS */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            background: var(--surface-color);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .card h3 {
+            color: var(--violet);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .card .variant {
+            color: var(--gold);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .card .desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
             margin-bottom: 15px;
+            min-height: 40px;
         }
-        .modal-header h2 { margin: 0; color: #06b6d4; font-weight: 900; text-transform: uppercase; }
 
-        textarea {
-            flex-grow: 1; background: #0f172a; color: #38bdf8;
-            border: 2px solid #1e293b; border-radius: 12px; padding: 15px;
-            font-family: monospace; font-size: 14px; resize: none; outline: none;
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+        .card .level-dots {
+            display: flex;
+            gap: 5px;
         }
-        textarea:focus { border-color: #06b6d4; }
 
-        .modal-footer { margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
-
-        /* TOAST NOTIFICATION */
-        .toast {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: #10b981; color: white; padding: 10px 20px; border-radius: 50px;
-            font-weight: 800; font-size: 14px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 3000; box-shadow: 0 4px 15px rgba(0,0,0,0.4); pointer-events: none;
+        .dot {
+            height: 8px;
+            flex-grow: 1;
+            background: var(--border);
+            border-radius: 4px;
         }
-        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        .dot.filled {
+            background: var(--violet);
+            box-shadow: 0 0 5px var(--violet-glow);
+        }
+
+        /* PROFILE & STATS */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: var(--surface-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-box .value {
+            font-size: 2rem;
+            color: var(--gold);
+            font-family: 'Bebas Neue', sans-serif;
+        }
+
+        .stat-box .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* ACHIEVEMENTS */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .achievement {
+            background: var(--surface-color);
+            border: 1px solid var(--border);
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            opacity: 0.5;
+            filter: grayscale(100%);
+            transition: all 0.3s;
+        }
+
+        .achievement.unlocked {
+            opacity: 1;
+            filter: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .achievement .icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .achievement h4 {
+            color: var(--gold);
+            font-size: 1.1rem;
+        }
+
+        .achievement p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* HISTORY */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--violet);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        /* OVERLAY LEVEL UP */
+        #level-up-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        #level-up-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .overlay-content {
+            text-align: center;
+            transform: scale(0.5);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #level-up-overlay.show .overlay-content {
+            transform: scale(1);
+        }
+
+        .overlay-title {
+            font-size: 4rem;
+            color: var(--gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            margin-bottom: 10px;
+        }
+
+        .overlay-variant {
+            font-size: 2rem;
+            color: var(--violet);
+            margin-bottom: 20px;
+        }
+
+        .overlay-desc {
+            font-size: 1.2rem;
+            color: #ddd;
+            max-width: 400px;
+            margin: 0 auto 30px auto;
+            line-height: 1.4;
+        }
+
+        .overlay-xp {
+            font-size: 1.5rem;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* FLOATING PARTICLES */
+        .floating-xp {
+            position: fixed;
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 1.5rem;
+            pointer-events: none;
+            z-index: 500;
+            animation: floatUp 1.5s ease-out forwards;
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px; height: 10px;
+            background: red;
+            z-index: 999;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
-    <div class="toolbar">
-        <div class="tools-left">
-            <button class="btn-nexo" onclick="window.location.href='index.html'" title="Volver al Nexo">🔙</button>
-            <button onclick="openModal()">📋 Pegar Código</button>
+    <header>
+        <div class="header-top">
+            <div class="title">CALISTENIA ROGUELIKE</div>
+            <div class="controls">
+                <button id="btn-sound">🔊</button>
+                <button id="btn-theme">🌙</button>
+            </div>
         </div>
-        <div class="tools-right">
-            <button id="btn-edit" class="btn-toggle" onclick="toggleEditMode()">✏️ Modo Edición</button>
-            <button class="btn-primary" onclick="exportCode()">💾 Copiar Resultado</button>
+        <div class="progress-container">
+            <div class="progress-bar" id="global-progress-bar"></div>
+        </div>
+        <div class="progress-text" id="global-progress-text">Progreso Global: 0 / 0</div>
+    </header>
+
+    <main>
+        <!-- DASHBOARD -->
+        <section id="sec-dashboard" class="section active">
+            <div class="raid-container">
+                <h2 style="color: var(--violet); margin-bottom: 10px; font-size: 2rem;">Día de Raid</h2>
+                <button id="btn-raid" class="raid-btn">INICIAR RAID</button>
+                <div class="raid-info" id="raid-info">Solo disponible los Sábados. Sube un ejercicio al azar.</div>
+            </div>
+            <div class="grid" id="exercises-grid">
+                <!-- Se inyectan ejercicios via JS -->
+            </div>
+        </section>
+
+        <!-- PERFIL -->
+        <section id="sec-profile" class="section">
+            <h2 class="bebas" style="font-size: 2.5rem; margin-bottom: 20px; color: var(--gold); text-align: center;" id="athlete-level-display">Rango: Novato</h2>
+            
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="value" id="stat-xp">0</div>
+                    <div class="label">XP Total</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value" id="stat-saturdays">0</div>
+                    <div class="label">Sábados Completados</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value" id="stat-streak">0</div>
+                    <div class="label">Racha Actual</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value" id="stat-record">0</div>
+                    <div class="label">Racha Récord</div>
+                </div>
+            </div>
+            <div class="stat-box" style="margin-bottom: 20px;">
+                <div class="value" id="stat-fav" style="font-size: 1.5rem; color: var(--violet);">Ninguno</div>
+                <div class="label">Arma Favorita (Más subido)</div>
+            </div>
+        </section>
+
+        <!-- LOGROS -->
+        <section id="sec-achievements" class="section">
+            <h2 class="bebas" style="font-size: 2rem; margin-bottom: 20px; color: var(--violet);">Sala de Trofeos</h2>
+            <div class="achievements-grid" id="achievements-grid">
+                <!-- Se inyectan logros via JS -->
+            </div>
+        </section>
+
+        <!-- HISTORIAL -->
+        <section id="sec-history" class="section">
+            <h2 class="bebas" style="font-size: 2rem; margin-bottom: 20px; color: var(--violet);">Crónicas de Batalla</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Ejercicio</th>
+                            <th>Evolución</th>
+                            <th>XP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        <!-- Se inyecta historial via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <nav>
+        <button class="active" onclick="switchTab('dashboard', this)">Campamento</button>
+        <button onclick="switchTab('profile', this)">Atleta</button>
+        <button onclick="switchTab('achievements', this)">Trofeos</button>
+        <button onclick="switchTab('history', this)">Crónicas</button>
+    </nav>
+
+    <!-- LEVEL UP OVERLAY -->
+    <div id="level-up-overlay" onclick="closeOverlay()">
+        <div class="overlay-content">
+            <div class="overlay-title">¡LEVEL UP!</div>
+            <div class="overlay-variant" id="overlay-exercise">Pseudo Flexiones</div>
+            <div class="overlay-variant" style="color: var(--gold); font-size: 1.5rem;" id="overlay-variant">Nueva Variante</div>
+            <div class="overlay-desc" id="overlay-desc">Descripción de la mecánica rogue-like.</div>
+            <div class="overlay-xp" id="overlay-xp">+150 XP</div>
         </div>
     </div>
-
-    <div class="workspace">
-        <iframe id="canvas"></iframe>
-    </div>
-
-    <div id="code-modal" class="modal-overlay">
-        <div class="modal-header">
-            <h2>🛠️ Cargar Plantilla HTML</h2>
-            <button onclick="closeModal()">❌ Cerrar</button>
-        </div>
-        <textarea id="html-input" placeholder="Pega aquí todo el código HTML de tu plan de batalla..."></textarea>
-        <div class="modal-footer">
-            <button onclick="closeModal()">Cancelar</button>
-            <button class="btn-primary" onclick="loadHTML()">⚡ Renderizar Misión</button>
-        </div>
-    </div>
-
-    <div id="toast" class="toast">¡Copiado al portapapeles!</div>
 
     <script>
-        const iframe = document.getElementById('canvas');
-        const modal = document.getElementById('code-modal');
-        const inputArea = document.getElementById('html-input');
-        const btnEdit = document.getElementById('btn-edit');
-        const toast = document.getElementById('toast');
-        let isEditing = false;
-
-        // Recuperar progreso de la última sesión si existe
-        window.onload = () => {
-            const savedHtml = localStorage.getItem('cuartel_html_save');
-            if (savedHtml) {
-                renderToIframe(savedHtml);
-            } else {
-                // Estado por defecto
-                renderToIframe('<div style="font-family:sans-serif; text-align:center; padding:50px; color:#666;"><h3>Lienzo vacío.</h3><p>Haz clic en "Pegar Código" para cargar tu misión.</p></div>');
+        // --- DATA ESTRUCTURAS ---
+        const EXERCISES = {
+            pseudo: {
+                name: "Pseudo Flexiones",
+                levels: [
+                    { name: "Rodillas", desc: "Apóyate en rodillas. Acostumbra tus muñecas a la inclinación leve." },
+                    { name: "Normal", desc: "Modo estándar. Inclínate hacia adelante, manos a la altura de la cadera." },
+                    { name: "Pausa 2s Abajo", desc: "Controla la fase isométrica. Elimina el rebote. Fuerza pura." },
+                    { name: "Pies Elevados Bajo", desc: "Aumenta la carga en hombros. Usa un step o cajón bajo." },
+                    { name: "Pies Elevados Alto", desc: "Ángulo severo. Preparación directa para la full planche." },
+                    { name: "Planche Lean", desc: "Brazos bloqueados, escapulas protraídas. Resiste la gravedad." }
+                ]
+            },
+            diamond: {
+                name: "Flexiones Diamante",
+                levels: [
+                    { name: "Rodillas", desc: "Inicia la activación de tríceps sin la carga total de tu cuerpo." },
+                    { name: "Normal", desc: "Manos juntas formando un diamante. Core activado." },
+                    { name: "Pausa 2s", desc: "Detente a un milímetro del suelo. Exige el máximo a tus tríceps." },
+                    { name: "Pies Elevados", desc: "Cambio de centro de masa. Más presión en el tren superior." },
+                    { name: "Tempo 4s", desc: "4 segundos de bajada agonizante. Hipertrofia y control mental." },
+                    { name: "Archer Push-up", desc: "Transición a un brazo. Flexiona uno, extiende el otro. Asimetría letal." }
+                ]
+            },
+            pullups: {
+                name: "Dominadas",
+                levels: [
+                    { name: "Banda Gruesa", desc: "Aprende el patrón motor. Tracción vertical asistida." },
+                    { name: "Banda Fina", desc: "Menos ayuda elástica. Tu dorsal asume el mando." },
+                    { name: "Sin Ayuda", desc: "Tu peso contra la gravedad. El estándar de fuerza." },
+                    { name: "Pausa 2s Arriba", desc: "Mentón sobre la barra y congela el tiempo." },
+                    { name: "Tempo 4s Bajada", desc: "Fase excéntrica controlada. Destruye fibras para construir acero." },
+                    { name: "Pausa + Tempo", desc: "Sube, pausa 2s, baja en 4s. Dominio absoluto de la barra." },
+                    { name: "Archer Pull-up", desc: "Carga unilateral cruzada. El umbral hacia la dominada a un brazo." }
+                ]
+            },
+            vups: {
+                name: "V-Ups",
+                levels: [
+                    { name: "Crunch", desc: "Flexión espinal básica. Despierta el recto abdominal." },
+                    { name: "Bicicleta", desc: "Torsión y rotación. Fuego en los oblicuos." },
+                    { name: "V-Up Parcial", desc: "Toca tus rodillas. Coordinación tren superior/inferior." },
+                    { name: "V-Up Completo", desc: "Bisagra perfecta. Manos tocan pies en el aire." },
+                    { name: "Pausa 1s", desc: "Mantén la posición V en el pico de contracción." },
+                    { name: "Con Peso", desc: "Sostén un disco o mancuerna. Sobrecarga progresiva pura." }
+                ]
+            },
+            lsit: {
+                name: "Tuck L-Sit",
+                levels: [
+                    { name: "10s", desc: "Rodillas al pecho. Depresión escapular a tope." },
+                    { name: "20s", desc: "Resistencia isométrica inicial. El abdomen quema." },
+                    { name: "30s", desc: "Dominio del tuck. Base sólida creada." },
+                    { name: "Una Pierna 10s", desc: "Extiende una pierna. La palanca se vuelve hostil." },
+                    { name: "Una Pierna 20s", desc: "Soporta el torque asimétrico prolongado." },
+                    { name: "L-Sit Completa 10s", desc: "Piernas bloqueadas rectas. Tensión en cuádriceps y core." },
+                    { name: "L-Sit Completa 20s", desc: "Nivel de gimnasta alcanzado. Fuerza de gravedad sometida." }
+                ]
+            },
+            superman: {
+                name: "Superman",
+                levels: [
+                    { name: "10 Reps", desc: "Extensión lumbar básica. Despierta la cadena posterior." },
+                    { name: "15 Reps", desc: "Aumenta volumen. Más sangre a la zona lumbar." },
+                    { name: "Pausa 3s", desc: "Contracción máxima arriba. Tensión sostenida." },
+                    { name: "Alterno", desc: "Brazo derecho, pierna izquierda. Coordinación cruzada." },
+                    { name: "Alterno Pausa", desc: "El mismo patrón cruzado pero congelando el movimiento." },
+                    { name: "Bird-Dog", desc: "En cuadrupedia. Estabilidad central y anti-rotación extrema." }
+                ]
+            },
+            hollow: {
+                name: "Hollow Body",
+                levels: [
+                    { name: "Rodillas 15s", desc: "Espalda baja pegada al suelo. Posición de canoa inicial." },
+                    { name: "Rodillas 30s", desc: "Resistencia base. Condicionamiento de core." },
+                    { name: "Semiestirado 20s", desc: "Brazos atrás, rodillas ligeramente flexionadas." },
+                    { name: "Completo 20s", desc: "El Hollow puro. Tensión estructural total." },
+                    { name: "Completo 30s", desc: "Dominio de la línea recta bajo tensión." },
+                    { name: "Rock 10 Reps", desc: "Balanceo manteniendo el bloque sólido. Control dinámico." }
+                ]
+            },
+            pistol: {
+                name: "Pistol Squat",
+                levels: [
+                    { name: "Búlgara", desc: "Sentadilla dividida. Fuerza unilateral y equilibrio base." },
+                    { name: "Apoyo Pared", desc: "Baja a una pierna asistido por la pared." },
+                    { name: "Apoyo Dedo", desc: "Asistencia mínima. El sistema nervioso se adapta." },
+                    { name: "Sin Apoyo", desc: "Pistol squat pura. Equilibrio, movilidad y fuerza." },
+                    { name: "Pausa 3s", desc: "Frena en el fondo. Destruye el reflejo de estiramiento." },
+                    { name: "Tempo 4s", desc: "Bajada hipercontrolada. El cuádriceps al límite." },
+                    { name: "Desde Step", desc: "Rango de recorrido aumentado (déficit). Profundidad insana." }
+                ]
             }
         };
 
-        function openModal() { modal.classList.add('show'); }
-        function closeModal() { modal.classList.remove('show'); }
+        const ACHIEVEMENTS_DATA = {
+            firstBlood: { id: 'firstBlood', icon: '🩸', title: 'Primera Sangre', desc: 'Sube tu primer nivel.' },
+            noNet: { id: 'noNet', icon: '🦅', title: 'Sin Red', desc: 'Desbloquea Dominadas sin ayuda.' },
+            steel: { id: 'steel', icon: '⚔️', title: 'Acero', desc: '5 ejercicios a nivel 4 o superior.' },
+            veteran: { id: 'veteran', icon: '🛡️', title: 'Veterano', desc: 'Racha de 10 Sábados.' },
+            legend: { id: 'legend', icon: '👑', title: 'Leyenda', desc: 'Todos los ejercicios al máximo nivel.' }
+        };
 
-        function loadHTML() {
-            const code = inputArea.value;
-            if(code.trim() === '') return closeModal();
-            
-            renderToIframe(code);
-            closeModal();
-            inputArea.value = ''; // Limpiar tras cargar
-            
-            // Si el modo edición estaba activo, lo aplicamos al nuevo HTML
-            if(isEditing) {
-                iframe.contentDocument.designMode = "on";
-            }
-        }
+        const RANKS = [
+            { xp: 0, name: "Novato" },
+            { xp: 500, name: "Guerrero" },
+            { xp: 1500, name: "Élite" },
+            { xp: 3000, name: "Leyenda" }
+        ];
 
-        function renderToIframe(htmlString) {
-            const doc = iframe.contentWindow.document;
-            doc.open();
-            doc.write(htmlString);
-            doc.close();
-            // Guardar en localstorage automáticamente
-            saveToLocal();
-        }
+        // --- STATE MANAGEMENT ---
+        let state = {
+            xp: 0,
+            progress: {}, // id: currentLevelIndex
+            saturdaysCompleted: 0,
+            currentStreak: 0,
+            recordStreak: 0,
+            lastRaidWeek: null,
+            history: [],
+            achievements: [],
+            soundEnabled: true,
+            theme: 'dark'
+        };
 
-        // EL MODO MAGIA: designMode="on" convierte la web en un editor de texto libre
-        function toggleEditMode() {
-            isEditing = !isEditing;
-            const doc = iframe.contentWindow.document;
-            
-            if (isEditing) {
-                doc.designMode = "on";
-                btnEdit.classList.add('active');
-                btnEdit.innerHTML = '✅ Edición Activa';
+        const TOTAL_LEVELS = Object.values(EXERCISES).reduce((acc, ex) => acc + ex.levels.length - 1, 0);
+
+        function init() {
+            const saved = localStorage.getItem('calisteniaRogueState');
+            if (saved) {
+                state = { ...state, ...JSON.parse(saved) };
             } else {
-                doc.designMode = "off";
-                btnEdit.classList.remove('active');
-                btnEdit.innerHTML = '✏️ Modo Edición';
-                saveToLocal(); // Guarda al salir del modo edición
+                Object.keys(EXERCISES).forEach(k => state.progress[k] = 0);
+            }
+            
+            applyTheme(state.theme);
+            updateUI();
+            checkRaidAvailability();
+            
+            // Event Listeners
+            document.getElementById('btn-theme').addEventListener('click', () => {
+                state.theme = state.theme === 'dark' ? 'light' : 'dark';
+                applyTheme(state.theme);
+                saveState();
+            });
+
+            document.getElementById('btn-sound').addEventListener('click', () => {
+                state.soundEnabled = !state.soundEnabled;
+                document.getElementById('btn-sound').innerText = state.soundEnabled ? '🔊' : '🔇';
+                saveState();
+            });
+            document.getElementById('btn-sound').innerText = state.soundEnabled ? '🔊' : '🔇';
+
+            document.getElementById('btn-raid').addEventListener('click', executeRaid);
+        }
+
+        function saveState() {
+            checkAchievements();
+            localStorage.setItem('calisteniaRogueState', JSON.stringify(state));
+            updateUI();
+        }
+
+        // --- LOGIC ---
+        function getAthleteRank() {
+            let rank = RANKS[0].name;
+            for (let r of RANKS) {
+                if (state.xp >= r.xp) rank = r.name;
+            }
+            return rank;
+        }
+
+        function getGlobalProgress() {
+            let current = Object.values(state.progress).reduce((acc, val) => acc + val, 0);
+            return { current, total: TOTAL_LEVELS, percent: (current / TOTAL_LEVELS) * 100 };
+        }
+
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            let yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        }
+
+        function checkRaidAvailability() {
+            const btn = document.getElementById('btn-raid');
+            const info = document.getElementById('raid-info');
+            const today = new Date();
+            const currentWeek = getWeekNumber(today) + "-" + today.getFullYear();
+            
+            // Verifica si es sábado (6)
+            if (today.getDay() !== 6) {
+                btn.disabled = true;
+                info.innerText = "El calabozo está cerrado. Regresa el Sábado.";
+                return;
+            }
+
+            if (state.lastRaidWeek === currentWeek) {
+                btn.disabled = true;
+                info.innerText = "Ya has completado tu Raid esta semana.";
+                return;
+            }
+
+            const gp = getGlobalProgress();
+            if (gp.current >= gp.total) {
+                btn.disabled = true;
+                info.innerText = "¡Has dominado todo! No hay más niveles que subir.";
+                return;
+            }
+
+            btn.disabled = false;
+            info.innerText = "¡El calabozo está abierto! Reclama tu poder.";
+        }
+
+        function executeRaid() {
+            const today = new Date();
+            const currentWeek = getWeekNumber(today) + "-" + today.getFullYear();
+            
+            // Streak Logic
+            if (state.lastRaidWeek) {
+                let [lw, ly] = state.lastRaidWeek.split('-');
+                let [cw, cy] = currentWeek.split('-');
+                if (cy === ly && parseInt(cw) === parseInt(lw) + 1) {
+                    state.currentStreak++;
+                } else if (cy > ly || parseInt(cw) > parseInt(lw) + 1) {
+                    state.currentStreak = 1; // Racha rota
+                }
+            } else {
+                state.currentStreak = 1;
+            }
+            
+            if (state.currentStreak > state.recordStreak) state.recordStreak = state.currentStreak;
+            
+            state.lastRaidWeek = currentWeek;
+            state.saturdaysCompleted++;
+
+            // Select random exercise not maxed out
+            const availableKeys = Object.keys(EXERCISES).filter(k => state.progress[k] < EXERCISES[k].levels.length - 1);
+            if (availableKeys.length === 0) return;
+
+            const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
+            const oldLvl = state.progress[randomKey];
+            const newLvl = oldLvl + 1;
+            
+            state.progress[randomKey] = newLvl;
+            
+            // Calc XP
+            const xpGained = newLvl * 50 + 50; // Bonus por sábado incluido implícitamente
+            state.xp += xpGained;
+
+            // History
+            state.history.unshift({
+                date: today.toLocaleDateString(),
+                exercise: EXERCISES[randomKey].name,
+                oldVariant: EXERCISES[randomKey].levels[oldLvl].name,
+                newVariant: EXERCISES[randomKey].levels[newLvl].name,
+                xp: xpGained
+            });
+
+            saveState();
+            checkRaidAvailability();
+            
+            // Efectos
+            triggerConfetti();
+            playSound('levelup');
+            showLevelUpOverlay(randomKey, newLvl, xpGained);
+            createFloatingXP(xpGained);
+        }
+
+        function checkAchievements() {
+            if (state.history.length >= 1 && !state.achievements.includes('firstBlood')) state.achievements.push('firstBlood');
+            if (state.progress['pullups'] >= 2 && !state.achievements.includes('noNet')) state.achievements.push('noNet');
+            
+            let highLevels = Object.values(state.progress).filter(v => v >= 4).length;
+            if (highLevels >= 5 && !state.achievements.includes('steel')) state.achievements.push('steel');
+            
+            if (state.currentStreak >= 10 && !state.achievements.includes('veteran')) state.achievements.push('veteran');
+            
+            const gp = getGlobalProgress();
+            if (gp.current === gp.total && gp.total > 0 && !state.achievements.includes('legend')) state.achievements.push('legend');
+        }
+
+        // --- UI UPDATES ---
+        function updateUI() {
+            renderDashboard();
+            renderProfile();
+            renderAchievements();
+            renderHistory();
+            
+            const gp = getGlobalProgress();
+            document.getElementById('global-progress-bar').style.width = gp.percent + '%';
+            document.getElementById('global-progress-text').innerText = `Progreso Global: ${gp.current} / ${gp.total}`;
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('exercises-grid');
+            grid.innerHTML = '';
+            for (let [key, ex] of Object.entries(EXERCISES)) {
+                const lvlIdx = state.progress[key];
+                const currentVariant = ex.levels[lvlIdx];
+                const totalLvl = ex.levels.length;
+                
+                let dotsHtml = '';
+                for(let i=0; i<totalLvl; i++) {
+                    dotsHtml += `<div class="dot ${i <= lvlIdx ? 'filled' : ''}"></div>`;
+                }
+
+                grid.innerHTML += `
+                    <div class="card" id="card-${key}">
+                        <h3>${ex.name}</h3>
+                        <div class="variant">Nvl ${lvlIdx + 1}: ${currentVariant.name}</div>
+                        <div class="desc">${currentVariant.desc}</div>
+                        <div class="level-dots">${dotsHtml}</div>
+                    </div>
+                `;
             }
         }
 
-        function saveToLocal() {
-            const currentHtml = `<html lang="es">\n${iframe.contentDocument.documentElement.innerHTML}\n</html>`;
-            localStorage.setItem('cuartel_html_save', currentHtml);
-        }
-
-        function exportCode() {
-            // Desactiva el modo diseño momentáneamente si está activo para no exportarlo con errores raros
-            const wasEditing = isEditing;
-            if(wasEditing) iframe.contentDocument.designMode = "off";
-
-            // Recoger el HTML completo del iframe
-            let docType = "<!DOCTYPE html>\n";
-            let rawHtml = docType + `<html lang="es">\n${iframe.contentDocument.documentElement.innerHTML}\n</html>`;
-
-            // Restaurar el modo edición si estaba activo
-            if(wasEditing) iframe.contentDocument.designMode = "on";
-
-            // Copiar al portapapeles
-            navigator.clipboard.writeText(rawHtml).then(() => {
-                showToast("¡HTML final copiado al portapapeles! 💾");
-            }).catch(err => {
-                alert("Error al copiar. Puede que tu navegador no lo soporte.");
-            });
+        function renderProfile() {
+            document.getElementById('athlete-level-display').innerText = `Rango: ${getAthleteRank()}`;
+            document.getElementById('stat-xp').innerText = state.xp;
+            document.getElementById('stat-saturdays').innerText = state.saturdaysCompleted;
+            document.getElementById('stat-streak').innerText = state.currentStreak;
+            document.getElementById('stat-record').innerText = state.recordStreak;
             
-            saveToLocal();
+            // Fav
+            let fav = "Ninguno";
+            let maxLvl = 0;
+            for(let [key, val] of Object.entries(state.progress)){
+                if(val > maxLvl) { maxLvl = val; fav = EXERCISES[key].name; }
+            }
+            document.getElementById('stat-fav').innerText = maxLvl > 0 ? fav : "Ninguno";
         }
 
-        function showToast(msg) {
-            toast.innerText = msg;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 2500);
+        function renderAchievements() {
+            const grid = document.getElementById('achievements-grid');
+            grid.innerHTML = '';
+            for(let key in ACHIEVEMENTS_DATA) {
+                const a = ACHIEVEMENTS_DATA[key];
+                const unlocked = state.achievements.includes(key);
+                grid.innerHTML += `
+                    <div class="achievement ${unlocked ? 'unlocked' : ''}">
+                        <div class="icon">${unlocked ? a.icon : '🔒'}</div>
+                        <h4>${a.title}</h4>
+                        <p>${a.desc}</p>
+                    </div>
+                `;
+            }
         }
 
-        // Auto-guardado cada 10 segundos por si acaso estás editando mucho tiempo
-        setInterval(saveToLocal, 10000);
+        function renderHistory() {
+            const tbody = document.getElementById('history-body');
+            tbody.innerHTML = '';
+            state.history.forEach(h => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${h.date}</td>
+                        <td style="color: var(--gold); font-weight:bold;">${h.exercise}</td>
+                        <td>${h.oldVariant} ➔ <b>${h.newVariant}</b></td>
+                        <td style="color: var(--success);">+${h.xp} XP</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`sec-${tabId}`).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
+        // --- EFFECTS & AUDIO ---
+        function showLevelUpOverlay(exKey, newLvlIdx, xp) {
+            const ex = EXERCISES[exKey];
+            const variant = ex.levels[newLvlIdx];
+            
+            document.getElementById('overlay-exercise').innerText = ex.name;
+            document.getElementById('overlay-variant').innerText = `Nivel ${newLvlIdx + 1}: ${variant.name}`;
+            document.getElementById('overlay-desc').innerText = variant.desc;
+            document.getElementById('overlay-xp').innerText = `+${xp} XP ⚡`;
+            
+            const overlay = document.getElementById('level-up-overlay');
+            overlay.classList.add('show');
+        }
+
+        function closeOverlay() {
+            document.getElementById('level-up-overlay').classList.remove('show');
+        }
+
+        function createFloatingXP(xp) {
+            const btn = document.getElementById('btn-raid');
+            const rect = btn.getBoundingClientRect();
+            
+            const el = document.createElement('div');
+            el.className = 'floating-xp';
+            el.innerText = `+${xp} XP`;
+            el.style.left = `${rect.left + rect.width/2 - 20}px`;
+            el.style.top = `${rect.top}px`;
+            
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1500);
+        }
+
+        function triggerConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.backgroundColor = ['#FFD700', '#8A2BE2', '#00C851', '#ff4444'][Math.floor(Math.random()*4)];
+                conf.style.top = '-10px';
+                document.body.appendChild(conf);
+
+                const duration = Math.random() * 2 + 1;
+                conf.animate([
+                    { transform: `translate3d(0,0,0) rotate(0deg)` },
+                    { transform: `translate3d(${Math.random()*200 - 100}px, 100vh, 0) rotate(${Math.random()*360}deg)` }
+                ], {
+                    duration: duration * 1000,
+                    easing: 'cubic-bezier(.37,0,.63,1)'
+                });
+
+                setTimeout(() => conf.remove(), duration * 1000);
+            }
+        }
+
+        // Web Audio API Synth
+        let audioCtx;
+        function playSound(type) {
+            if (!state.soundEnabled) return;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            if (type === 'levelup') {
+                // Arpegio epico: C4, E4, G4, C5
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(261.63, t); // C4
+                osc.frequency.setValueAtTime(329.63, t + 0.1); // E4
+                osc.frequency.setValueAtTime(392.00, t + 0.2); // G4
+                osc.frequency.setValueAtTime(523.25, t + 0.3); // C5
+                
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+                
+                osc.start(t);
+                osc.stop(t + 0.8);
+            }
+        }
+
+        // Init App
+        window.onload = init;
+
     </script>
 </body>
 </html>
