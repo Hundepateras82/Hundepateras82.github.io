@@ -1,1268 +1,1202 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SISTEMA RPG: Códice de La Rana & El Archivo del Sapo</title>
+  <title>CÓDICE DE LA RANA — Sistema de Calistenia & Árbol de Evolución</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #070a0e;
-      --panel-bg: #10161f;
-      --emerald-frog: #10b981;
-      --amber-toad: #f59e0b;
-      --purple-zorp: #a855f7;
-      --cyan-ice: #06b6d4;
-      --crimson-fire: #ef4444;
+      --bg-void: #090b10;
+      --bg-panel: #11151f;
+      --bg-card: #171c29;
+      --border-muted: #262f45;
+      --gold: #eab308;
+      --emerald: #10b981;
+      --crimson: #ef4444;
     }
     body {
-      background-color: var(--bg-dark);
+      background-color: var(--bg-void);
       color: #e2e8f0;
-      font-family: 'Space Grotesk', sans-serif;
-      background-image: 
-        radial-gradient(circle at 15% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 35%),
-        radial-gradient(circle at 85% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 35%),
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+      font-family: 'Inter', sans-serif;
+      background-image: radial-gradient(circle at 50% 0%, #172036 0%, #090b10 70%);
     }
-    .pixel-font { font-family: 'Press Start 2P', monospace; }
-    .mono-font { font-family: 'JetBrains Mono', monospace; }
-    .voxel-card {
-      background: var(--panel-bg);
-      border: 2px solid #1e293b;
-      box-shadow: 4px 4px 0px #020617;
-      transition: all 0.15s ease;
+    .serif-title { font-family: 'Cinzel', serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #090b10; }
+    ::-webkit-scrollbar-thumb { background: #262f45; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #eab308; }
+
+    /* Skill Tree Connector Lines */
+    .tree-column {
+      position: relative;
     }
-    .voxel-card:hover {
-      border-color: #334155;
+    .node-connector {
+      width: 3px;
+      height: 28px;
+      margin: 0 auto;
+      background: #262f45;
+      transition: all 0.3s ease;
     }
-    .voxel-btn {
-      box-shadow: 3px 3px 0px #020617;
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    .node-connector.unlocked {
+      background: linear-gradient(to bottom, #10b981, #eab308);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
     }
-    .voxel-btn:active {
-      transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0px #020617;
+
+    /* Node Cards in the Tree */
+    .tree-node {
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
     }
-    .tier-SSS { background: linear-gradient(135deg, #f59e0b, #ef4444, #a855f7); color: #fff; text-shadow: 1px 1px 0 #000; }
-    .tier-SSplus { background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; }
-    .tier-SS { background: #dc2626; color: #fff; }
-    .tier-Splus { background: #9333ea; color: #fff; }
-    .tier-S { background: #2563eb; color: #fff; }
-    .tier-Aplus { background: #059669; color: #fff; }
-    .tier-A { background: #475569; color: #fff; }
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #070a0e; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+    .tree-node:hover {
+      transform: translateY(-2px);
+    }
+    .tree-node.selected-node {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+    .status-mastered {
+      border-color: #10b981 !important;
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.16), rgba(17, 21, 31, 0.95));
+    }
+    .status-current {
+      border-color: #eab308 !important;
+      background: linear-gradient(145deg, rgba(234, 179, 8, 0.22), rgba(17, 21, 31, 0.95));
+      box-shadow: 0 0 18px rgba(234, 179, 8, 0.25);
+    }
+    .status-progress {
+      border-color: #a855f7 !important;
+      background: linear-gradient(145deg, rgba(168, 85, 247, 0.18), rgba(17, 21, 31, 0.95));
+    }
+    .status-locked {
+      border-color: #262f45;
+      background: #0d1017;
+      opacity: 0.68;
+    }
+    .status-apex {
+      border-color: #ef4444;
+      background: linear-gradient(145deg, rgba(239, 68, 68, 0.2), rgba(17, 21, 31, 0.95));
+    }
+
+    /* Tier Badges */
+    .tier-badge {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .t-SSS { background: linear-gradient(90deg, #ef4444, #eab308); color: #000; }
+    .t-SSp { background: #dc2626; color: #fff; }
+    .t-SS  { background: #ea580c; color: #fff; }
+    .t-Sp  { background: #9333ea; color: #fff; }
+    .t-S   { background: #2563eb; color: #fff; }
+    .t-Ap  { background: #059669; color: #fff; }
+    .t-A   { background: #475569; color: #fff; }
   </style>
 </head>
-<body class="min-h-screen pb-16">
+<body class="min-h-screen flex flex-col">
 
-  <!-- TOP NAVIGATION COMPASS BAR (VOXEL RPG HUD STYLE) -->
-  <header class="sticky top-0 z-50 bg-[#070a0e]/95 backdrop-blur border-b-2 border-emerald-500/30 px-4 py-3">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+  <!-- ======================= TOP HUD BAR ======================= -->
+  <header class="sticky top-0 z-40 bg-[#090b10]/95 backdrop-blur-md border-b border-[#262f45] px-6 py-3.5">
+    <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Avatar Identity -->
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-emerald-950 border-2 border-emerald-500 flex items-center justify-center text-2xl shadow-lg">
           🐸
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="pixel-font text-xs sm:text-sm text-emerald-400 tracking-wider">CARLOS [LA RANA]</h1>
-            <span id="hud-level" class="mono-font text-xs bg-amber-500/20 text-amber-300 border border-amber-500/50 px-2 py-0.5 rounded font-bold">NV. 14</span>
+          <div class="flex items-center gap-2.5">
+            <h1 class="serif-title text-lg font-bold tracking-wider text-white">CARLOS • LA RANA</h1>
+            <span id="hud-lvl" class="mono text-xs bg-amber-500/20 text-amber-300 border border-amber-500/50 px-2.5 py-0.5 rounded font-bold">
+              NIVEL 14
+            </span>
           </div>
-          <p class="text-xs text-slate-400 mono-font">Arquitecto Vóxel • Emisario de Vlorp Zorp • Señor de la Calistenia</p>
+          <p class="text-xs text-slate-400">Sistema de Progresión Calisténica • Las 7 Rutas Elementales</p>
         </div>
       </div>
 
-      <!-- COMPASS / REALM TELEMETRY -->
-      <div class="hidden lg:flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-4 py-1.5 rounded text-xs mono-font text-slate-400">
-        <span class="text-emerald-400">N</span>
-        <span>•••</span>
-        <span class="text-amber-400">[MAZMORRA DEL SAPO]</span>
-        <span>•••</span>
-        <span class="text-purple-400">NE</span>
-        <span>•••</span>
-        <span class="text-cyan-400">[FRECUENCIA KEPLER-22B]</span>
-        <span>•••</span>
-        <span class="text-emerald-400">E</span>
-      </div>
+      <!-- Primary Attributes (STR & CON + Multiplier) -->
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="bg-[#11151f] border border-[#262f45] px-3.5 py-1.5 rounded-lg flex items-center gap-2.5" title="STR (Fuerza Bruta): Capacidad de empuje, tracción lastrada y vencer palancas.">
+          <span class="text-xs font-bold text-red-400 mono">STR (Fuerza)</span>
+          <span id="hud-str" class="text-lg font-bold text-white mono">28</span>
+        </div>
 
-      <!-- EXP & STATUS BARS -->
-      <div class="flex items-center gap-4 w-full sm:w-auto justify-end">
-        <div class="w-48 sm:w-56">
-          <div class="flex justify-between text-[11px] mono-font mb-1">
-            <span class="text-emerald-400 font-bold">EXP DIMENSIONAL</span>
-            <span id="exp-counter" class="text-slate-300">1,450 / 2,000</span>
+        <div class="bg-[#11151f] border border-[#262f45] px-3.5 py-1.5 rounded-lg flex items-center gap-2.5" title="CON (Constitución y Acero): Resistencia de tendones, bloqueo de core e isometría.">
+          <span class="text-xs font-bold text-amber-400 mono">CON (Acero)</span>
+          <span id="hud-con" class="text-lg font-bold text-white mono">26</span>
+        </div>
+
+        <div class="bg-[#11151f] border border-emerald-500/40 px-3.5 py-1.5 rounded-lg flex items-center gap-2" title="Multiplicador de Experiencia según la técnica y los modificadores activos">
+          <span class="text-xs text-slate-400">Multiplicador Técnica:</span>
+          <span id="hud-mult" class="text-sm font-bold text-emerald-400 mono">1.00x EXP</span>
+        </div>
+
+        <!-- EXP Progress Bar -->
+        <div class="w-52 bg-[#11151f] border border-[#262f45] px-3 py-1.5 rounded-lg">
+          <div class="flex justify-between text-[11px] mono mb-1">
+            <span class="text-amber-400 font-bold">EXP</span>
+            <span id="hud-exp-txt" class="text-slate-300">1,450 / 2,000</span>
           </div>
-          <div class="w-full h-3 bg-slate-900 border border-slate-700 rounded-sm overflow-hidden p-0.5">
-            <div id="exp-bar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 transition-all duration-300" style="width: 72.5%"></div>
+          <div class="w-full h-2 bg-slate-950 rounded overflow-hidden">
+            <div id="hud-exp-bar" class="h-full bg-gradient-to-r from-emerald-500 to-amber-400 transition-all duration-300" style="width: 72%"></div>
           </div>
         </div>
-        <button onclick="resetSystem()" title="Reiniciar datos a valores canónicos" class="text-xs mono-font text-slate-400 hover:text-red-400 border border-slate-800 hover:border-red-500/40 px-2.5 py-1.5 rounded">
-          ↺ Reset
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-2">
+        <button onclick="setMainView('tree')" id="nav-tree" class="px-4 py-2 rounded-lg text-xs font-bold tracking-wide bg-amber-500 text-slate-950 transition">
+          🌳 ÁRBOL DE HABILIDADES
         </button>
-      </div>
+        <button onclick="setMainView('modifiers')" id="nav-modifiers" class="px-4 py-2 rounded-lg text-xs font-bold tracking-wide bg-[#171c29] text-slate-300 hover:bg-slate-800 border border-[#262f45] transition">
+          ⚙️ MODIFICADORES & GUÍA RPE
+        </button>
+        <button onclick="setMainView('lore')" id="nav-lore" class="px-4 py-2 rounded-lg text-xs font-bold tracking-wide bg-[#171c29] text-slate-300 hover:bg-slate-800 border border-[#262f45] transition">
+          📖 CRÓNICAS DE LA RANA & EL SAPO
+        </button>
+        <button onclick="resetAllData()" title="Restaurar valores iniciales" class="px-2.5 py-2 rounded-lg text-xs text-slate-400 hover:text-red-400 border border-transparent hover:border-red-500/30">
+          ↺
+        </button>
+      </nav>
+
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <!-- ======================= VIEW 1: VISUAL SKILL TREE & INSPECTOR ======================= -->
+  <main id="view-tree" class="flex-1 max-w-[1600px] w-full mx-auto px-6 py-6 grid grid-cols-1 xl:grid-cols-12 gap-6">
 
-    <!-- LEFT COLUMN: AVATAR STATS, MODIFIERS & HABIT SYNERGY (4 COLS) -->
-    <aside class="lg:col-span-4 space-y-6">
-
-      <!-- CHARACTER STATS CARD -->
-      <section class="voxel-card p-5 rounded-lg relative overflow-hidden">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-          <h2 class="pixel-font text-xs text-amber-400 flex items-center gap-2">
-            <span>⚔️</span> ATRIBUTOS DEL AVATAR
-          </h2>
-          <span id="multiplier-badge" class="mono-font text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded font-bold">
-            MULT: 1.00x EXP
-          </span>
+    <!-- LEFT/CENTER: 7-COLUMN VISUAL SKILL TREE MAP (8 COLS) -->
+    <section class="xl:col-span-8 bg-[#11151f] border border-[#262f45] rounded-xl p-5 flex flex-col">
+      <div class="flex flex-wrap items-center justify-between gap-4 pb-4 mb-4 border-b border-[#262f45]">
+        <div>
+          <h2 class="serif-title text-base font-bold text-white">MAPA DE EVOLUCIÓN DE LAS 7 RAMAS</h2>
+          <p class="text-xs text-slate-400">Haz clic en cualquier nodo del árbol para inspeccionar cómo se ejecuta, qué significa su rango y registrar tu entrenamiento.</p>
         </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-slate-900/80 border border-slate-800 p-3 rounded">
-            <div class="flex justify-between items-center">
-              <span class="text-xs text-red-400 font-bold mono-font">STR (Fuerza)</span>
-              <span id="stat-str" class="text-xl font-bold text-white mono-font">28</span>
-            </div>
-            <p class="text-[11px] text-slate-400 mt-1">Palanca, Empuje & Tracción</p>
-          </div>
-
-          <div class="bg-slate-900/80 border border-slate-800 p-3 rounded">
-            <div class="flex justify-between items-center">
-              <span class="text-xs text-amber-400 font-bold mono-font">CON (Acero)</span>
-              <span id="stat-con" class="text-xl font-bold text-white mono-font">26</span>
-            </div>
-            <p class="text-[11px] text-slate-400 mt-1">Tendones, Core & Isometría</p>
-          </div>
-
-          <div class="bg-slate-900/80 border border-slate-800 p-3 rounded">
-            <div class="flex justify-between items-center">
-              <span class="text-xs text-cyan-400 font-bold mono-font">DEX (Control)</span>
-              <span id="stat-dex" class="text-xl font-bold text-white mono-font">21</span>
-            </div>
-            <p class="text-[11px] text-slate-400 mt-1">Equilibrio Unilateral & Vóxel</p>
-          </div>
-
-          <div class="bg-slate-900/80 border border-slate-800 p-3 rounded">
-            <div class="flex justify-between items-center">
-              <span class="text-xs text-purple-400 font-bold mono-font">ZORP (Armonía)</span>
-              <span id="stat-int" class="text-xl font-bold text-white mono-font">19</span>
-            </div>
-            <p class="text-[11px] text-slate-400 mt-1">Frecuencia Piano & Idiomas</p>
-          </div>
+        <!-- Legend -->
+        <div class="flex flex-wrap items-center gap-3 text-[11px] mono">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Dominado</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> [ACTUAL]</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> [EN PROCESO]</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> [APEX Nv.10]</span>
         </div>
-
-        <!-- HP & MANA BARS (PIXEL HUD INSPIRATION) -->
-        <div class="mt-4 space-y-2 pt-3 border-t border-slate-800/80">
-          <div>
-            <div class="flex justify-between text-[11px] mono-font">
-              <span class="text-red-400 font-bold">HP • INTEGRIDAD ARTICULAR</span>
-              <span id="hp-text">520 / 520</span>
-            </div>
-            <div class="w-full h-2.5 bg-slate-950 border border-red-900/60 mt-1">
-              <div id="hp-bar" class="h-full bg-red-500 transition-all" style="width: 100%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-[11px] mono-font">
-              <span class="text-purple-400 font-bold">MANA • ÉTER DE VLORP ZORP</span>
-              <span id="mp-text">380 / 380</span>
-            </div>
-            <div class="w-full h-2.5 bg-slate-950 border border-purple-900/60 mt-1">
-              <div id="mp-bar" class="h-full bg-purple-500 transition-all" style="width: 100%"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ACTIVE MODIFIERS (BUFFS & DEBUFFS) -->
-      <section class="voxel-card p-5 rounded-lg">
-        <div class="border-b border-slate-800 pb-3 mb-3">
-          <h2 class="pixel-font text-xs text-emerald-400 flex items-center gap-2">
-            <span>⚡</span> MODIFICADORES DE COMBATE
-          </h2>
-          <p class="text-xs text-slate-400 mt-1">Activa reliquias, leyes biomecánicas o estados alterados antes de registrar tu sesión.</p>
-        </div>
-
-        <div id="modifiers-list" class="space-y-2.5 max-h-96 overflow-y-auto pr-1">
-          <!-- Populated by JS -->
-        </div>
-      </section>
-
-      <!-- MULTIVERSE DAILY SYNERGY (PIANO / DUTCH / GODOT) -->
-      <section class="voxel-card p-5 rounded-lg">
-        <div class="border-b border-slate-800 pb-3 mb-3">
-          <h2 class="pixel-font text-xs text-purple-400 flex items-center gap-2">
-            <span>🌌</span> SINERGIA DE MAZMORRAS ADYACENTES
-          </h2>
-          <p class="text-xs text-slate-400 mt-1">Conecta tus misiones no-físicas para desbloquear resonancia en el Grimorio.</p>
-        </div>
-
-        <div class="space-y-2">
-          <button onclick="triggerSideDungeon('zorp')" class="voxel-btn w-full text-left p-3 rounded bg-purple-950/30 border border-purple-500/40 hover:bg-purple-900/40 flex items-center justify-between">
-            <div>
-              <div class="text-xs font-bold text-purple-300 mono-font">🎹 Mazmorra Zorp (Piano)</div>
-              <div class="text-[11px] text-slate-400">Sintonizar acordes hacia Kepler-22b</div>
-            </div>
-            <span class="mono-font text-xs text-purple-300 bg-purple-500/20 px-2 py-1 rounded">+120 EXP / +1 ZORP</span>
-          </button>
-
-          <button onclick="triggerSideDungeon('guiri')" class="voxel-btn w-full text-left p-3 rounded bg-amber-950/30 border border-amber-500/40 hover:bg-amber-900/40 flex items-center justify-between">
-            <div>
-              <div class="text-xs font-bold text-amber-300 mono-font">🇳🇱 Mazmorra Guiri (Neerlandés)</div>
-              <div class="text-[11px] text-slate-400">Forjar Poción de Lenguas • Brecha de Växjö</div>
-            </div>
-            <span class="mono-font text-xs text-amber-300 bg-amber-500/20 px-2 py-1 rounded">+100 EXP / +1 ZORP</span>
-          </button>
-
-          <button onclick="triggerSideDungeon('voxel')" class="voxel-btn w-full text-left p-3 rounded bg-cyan-950/30 border border-cyan-500/40 hover:bg-cyan-900/40 flex items-center justify-between">
-            <div>
-              <div class="text-xs font-bold text-cyan-300 mono-font">🧊 Forja Godot 4 (Mundo Vóxel)</div>
-              <div class="text-[11px] text-slate-400">Compilar shaders y geometría 16x16 / 32x32</div>
-            </div>
-            <span class="mono-font text-xs text-cyan-300 bg-cyan-500/20 px-2 py-1 rounded">+130 EXP / +1 DEX</span>
-          </button>
-        </div>
-      </section>
-
-    </aside>
-
-    <!-- RIGHT COLUMN: SKILL TREES, WORKOUT LOGGER & CANONICAL LORE (8 COLS) -->
-    <div class="lg:col-span-8 space-y-6">
-
-      <!-- MAIN NAVIGATION TABS -->
-      <div class="flex flex-wrap gap-2 border-b-2 border-slate-800 pb-3">
-        <button onclick="switchTab('trees')" id="tab-trees" class="voxel-btn px-4 py-2 rounded text-xs mono-font font-bold bg-emerald-500 text-slate-950">
-          🌳 ÁRBOL DE HABILIDADES (7 RAMAS)
-        </button>
-        <button onclick="switchTab('dungeon')" id="tab-dungeon" class="voxel-btn px-4 py-2 rounded text-xs mono-font font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
-          ⚔️ TERMINAL DE INCURSIÓN (LOG)
-        </button>
-        <button onclick="switchTab('grimoire')" id="tab-grimoire" class="voxel-btn px-4 py-2 rounded text-xs mono-font font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
-          📖 ARCHIVO DEL SAPO (LORE CANÓNICO)
-        </button>
       </div>
 
-      <!-- TAB 1: SKILL TREES -->
-      <section id="view-trees" class="space-y-4">
-        <!-- Branch Filter Pills -->
-        <div id="branch-filters" class="flex flex-wrap gap-2 pb-2">
-          <!-- Populated by JS -->
+      <!-- Horizontal Scrollable Tree Grid (7 Columns) -->
+      <div class="overflow-x-auto pb-3 flex-1">
+        <div id="skill-tree-grid" class="grid grid-cols-7 gap-3 min-w-[1080px]">
+          <!-- Rendered by JS -->
         </div>
+      </div>
+    </section>
 
-        <!-- Active Branch Banner -->
-        <div id="branch-header" class="voxel-card p-5 rounded-lg border-l-4 border-l-emerald-400">
-          <!-- Populated by JS -->
-        </div>
+    <!-- RIGHT: DETAILED NODE INSPECTOR & WORKOUT LOGGER (4 COLS) -->
+    <aside class="xl:col-span-4 flex flex-col gap-5">
+      <div id="node-inspector" class="bg-[#11151f] border border-[#262f45] rounded-xl p-6 flex-1 flex flex-col justify-between">
+        <!-- Rendered by JS when clicking a node -->
+      </div>
+    </aside>
 
-        <!-- Nodes Progression Roadmap -->
-        <div id="nodes-container" class="space-y-4">
-          <!-- Populated by JS -->
-        </div>
-      </section>
-
-      <!-- TAB 2: DUNGEON WORKOUT LOGGER -->
-      <section id="view-dungeon" class="hidden space-y-6">
-        <div class="voxel-card p-6 rounded-lg">
-          <h3 class="pixel-font text-sm text-amber-400 mb-2">⚔️ REGISTRAR INCURSIÓN EN LA MAZMORRA</h3>
-          <p class="text-xs text-slate-400 mb-5">Selecciona el nodo trabajado, registra tus series/repeticiones o tiempo isométrico y aplica los modificadores activos para generar tu crónica.</p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label class="block text-xs mono-font text-slate-400 mb-1">RAMA ELEMENTAL</label>
-              <select id="log-branch" onchange="updateLogSkills()" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white mono-font"></select>
-            </div>
-            <div>
-              <label class="block text-xs mono-font text-slate-400 mb-1">HABILIDAD EJECUTADA</label>
-              <select id="log-skill" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white mono-font"></select>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-            <div>
-              <label class="block text-xs mono-font text-slate-400 mb-1">SERIES COMPLETADAS</label>
-              <input id="log-sets" type="number" min="1" max="15" value="4" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white mono-font">
-            </div>
-            <div>
-              <label class="block text-xs mono-font text-slate-400 mb-1">REPS O SEGUNDOS / SERIE</label>
-              <input id="log-reps" type="number" min="1" max="120" value="10" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white mono-font">
-            </div>
-            <div>
-              <label class="block text-xs mono-font text-slate-400 mb-1">RPE PERCIBIDO (1-10)</label>
-              <input id="log-rpe" type="number" step="0.5" min="5" max="10" value="8.5" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm text-white mono-font">
-            </div>
-          </div>
-
-          <button onclick="completeWorkoutSession()" class="voxel-btn w-full py-3.5 rounded bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold mono-font text-sm tracking-wide">
-            ⚡ SELLAR INCURSIÓN Y RECLAMAR RECOMPENSA NARRATIVA
-          </button>
-        </div>
-
-        <!-- RECENT COMBAT LOGS -->
-        <div class="voxel-card p-5 rounded-lg">
-          <h4 class="pixel-font text-xs text-slate-300 mb-3">📜 REGISTRO DE COMBATE RECIENTE</h4>
-          <div id="combat-logs" class="space-y-3 text-xs mono-font max-h-80 overflow-y-auto">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 3: CANONICAL GRIMOIRE (EL ARCHIVO DEL SAPO) -->
-      <section id="view-grimoire" class="hidden space-y-4">
-        <div class="voxel-card p-6 rounded-lg border-t-4 border-t-purple-500">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-4 border-b border-slate-800 pb-4">
-            <div>
-              <h3 class="pixel-font text-sm text-purple-400">📖 CRÓNICAS DEL MULTIVERSO: EL ARCHIVO DEL SAPO</h3>
-              <p class="text-xs text-slate-400 mt-1">Gran Grimorio Canónico • Memorias de La Rana, Vlorp Zorp y las Siete Rutas</p>
-            </div>
-            <button onclick="generateCustomChronicle()" class="voxel-btn px-3 py-2 rounded bg-purple-600 hover:bg-purple-500 text-white text-xs mono-font font-bold">
-              ✨ Canalizar Nuevo Capítulo
-            </button>
-          </div>
-
-          <div id="grimoire-entries" class="space-y-6">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-      </section>
-
-    </div>
   </main>
 
-  <!-- NOTIFICATION TOAST -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-md voxel-card border-2 border-emerald-400 p-4 rounded-lg bg-slate-950/95 text-xs mono-font shadow-2xl">
-    <div id="toast-title" class="text-emerald-400 font-bold mb-1"></div>
-    <div id="toast-body" class="text-slate-300 leading-relaxed"></div>
+  <!-- ======================= VIEW 2: BIOMECHANICAL MODIFIERS & RPE GUIDE ======================= -->
+  <main id="view-modifiers" class="hidden max-w-[1400px] w-full mx-auto px-6 py-6 space-y-8">
+
+    <!-- RPE & RIR CLEAR EXPLANATION BANNER -->
+    <section class="bg-[#11151f] border border-[#262f45] rounded-xl p-6">
+      <div class="border-b border-[#262f45] pb-4 mb-5">
+        <span class="text-xs mono uppercase text-amber-400 font-bold tracking-wider">Concepto Fundamental del Sistema</span>
+        <h2 class="serif-title text-xl font-bold text-white mt-1">¿Qué es el RPE (Esfuerzo Percibido) y por qué decide cuándo subes de nivel?</h2>
+        <p class="text-sm text-slate-300 mt-2 leading-relaxed">
+          En calistenia, hacer las repeticiones "sufriendo al límite" no significa que domines el nivel. El <strong>RPE (Rating of Perceived Exertion)</strong> mide del 1 al 10 cuán cerca has estado del fallo muscular al terminar tu serie. En tu rama de <strong>Dominadas (Nv. 7)</strong>, tu misión es bajar de <strong>RPE 9</strong> en el 4×10 antes de meter peso en la mochila.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-[#171c29] border border-red-500/40 p-4 rounded-lg">
+          <div class="flex justify-between items-center mb-2">
+            <span class="mono font-bold text-sm text-red-400">RPE 10 • FALLO</span>
+            <span class="text-xs bg-red-500/20 text-red-300 px-2 py-0.5 rounded mono">0 reps en recámara</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            No podías hacer ni una repetición más. La última repetición sale muy lenta o perdiendo la postura estricta.
+          </p>
+        </div>
+
+        <div class="bg-[#171c29] border border-orange-500/40 p-4 rounded-lg">
+          <div class="flex justify-between items-center mb-2">
+            <span class="mono font-bold text-sm text-orange-400">RPE 9 • LÍMITE</span>
+            <span class="text-xs bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded mono">1 rep en recámara</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Esfuerzo muy alto. Terminas las 10 repeticiones sabiendo con certeza que solo habrías podido sacar <strong>1 más</strong>.
+          </p>
+        </div>
+
+        <div class="bg-[#171c29] border-2 border-emerald-500 p-4 rounded-lg shadow-lg">
+          <div class="flex justify-between items-center mb-2">
+            <span class="mono font-bold text-sm text-emerald-400">RPE 8 • OBJETIVO (&lt;9)</span>
+            <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded mono">2 reps en recámara</span>
+          </div>
+          <p class="text-xs text-slate-200 leading-relaxed">
+            <strong>¡ZONA DE ASCENSO!</strong> Haces tus 10 repeticiones sólidas y al bajar sientes que podrías haber hecho 12. Aquí desbloqueas el siguiente nivel.
+          </p>
+        </div>
+
+        <div class="bg-[#171c29] border border-cyan-500/40 p-4 rounded-lg">
+          <div class="flex justify-between items-center mb-2">
+            <span class="mono font-bold text-sm text-cyan-400">RPE 7 • CONTROL</span>
+            <span class="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded mono">3+ reps en recámara</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Velocidad explosiva y técnica perfecta. El ejercicio ya es parte de tu calentamiento o base consolidada.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BIOMECHANICAL MODIFIERS GRID -->
+    <section class="bg-[#11151f] border border-[#262f45] rounded-xl p-6">
+      <div class="mb-5">
+        <span class="text-xs mono uppercase text-emerald-400 font-bold tracking-wider">Leyes Físicas & Multiplicadores</span>
+        <h2 class="serif-title text-xl font-bold text-white mt-1">Modificadores Biomecánicos de Entrenamiento</h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Activa las condiciones técnicas con las que estás entrenando hoy. Cada modificador explica <strong>qué es en la realidad</strong> y por qué multiplica tu ganancia de fuerza y experiencia.
+        </p>
+      </div>
+
+      <div id="modifiers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================= VIEW 3: CANONICAL LORE & CHRONICLES ======================= -->
+  <main id="view-lore" class="hidden max-w-[1200px] w-full mx-auto px-6 py-6 space-y-6">
+    <section class="bg-[#11151f] border border-[#262f45] rounded-xl p-8">
+      <div class="border-b border-[#262f45] pb-5 mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <span class="text-xs mono uppercase text-amber-400 font-bold tracking-widest">Gran Grimorio Canónico de Calistenia</span>
+          <h2 class="serif-title text-2xl font-bold text-white mt-1">CRÓNICAS DE LA RANA Y LA MAZMORRA DEL SAPO</h2>
+          <p class="text-sm text-slate-400 mt-1">Toda la mitología de tu sistema explicada: el origen de tus atributos, qué representan las 7 Rutas y qué se desbloquea al dominar cada nodo.</p>
+        </div>
+      </div>
+
+      <div id="lore-chapters" class="space-y-6">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-md bg-[#11151f] border-2 border-amber-400 p-4 rounded-xl shadow-2xl">
+    <div id="toast-title" class="mono text-xs font-bold text-amber-400 mb-1"></div>
+    <div id="toast-desc" class="text-xs text-slate-200 leading-relaxed"></div>
   </div>
 
   <script>
     // =========================================================================
-    // CANONICAL DATA: SKILL TREES, MODIFIERS & GRIMOIRE LORE
+    // COMPLETE CANONICAL DATA: 7 BRANCHES WITH CLEAR EXPLANATIONS & LORE
     // =========================================================================
-    const INITIAL_STATE = {
+    const DEFAULT_DATA = {
       level: 14,
       exp: 1450,
-      expToNext: 2000,
-      baseStats: { str: 28, con: 26, dex: 21, int: 19 },
-      activeBranchId: 'empuje',
-      activeModifiers: ['pausa_2s', 'protraccion'],
-      combatLogs: [
-        "[SISTEMA] Sincronización dimensional completada. Avatar Carlos (La Rana) detectado en Nivel 14.",
-        "[MAZMORRA DEL SAPO] 4x10 Dominadas Estrictas registradas. Objetivo activo: reducir RPE por debajo de 9."
-      ],
-      grimoire: [
+      expMax: 2000,
+      str: 28,
+      con: 26,
+      selectedBranchId: 'empuje',
+      selectedNodeId: 'emp-6',
+      activeModifiers: ['mod_pause', 'mod_scapula'],
+      unlockedLore: [
         {
-          id: 'cap-1',
-          title: "Capítulo I: El Despertar del Eje Gravitatorio y la Sombra de Vlorp Zorp",
-          tag: "Códice Fundacional • Nivel 14",
-          date: "Archivo Canónico",
-          content: "Antes de que las llanuras fuera de la brecha conocieran el peso del hierro, La Rana comprendió que su propio cuerpo era la fragua. En los antiguos registros de Vlorp Zorp, grabados sobre placas de basalto cuántico que aún orbitan Kepler-22b, se advertía que todo guerrero exiliado en la gravedad terrestre sufriría el 'Lastre del Olvido'. Sin embargo, con una Fuerza de 28 y una Constitución de 26, el Avatar Carlos ha comenzado a doblar las leyes locales. Cada bloqueo escapular en el suelo no es un simple ejercicio: es una recalibración de los propulsores biológicos necesarios para ascender hacia la Planche."
+          title: "Prólogo: El Pacto de la Gravedad y el Avatar de Nivel 14",
+          subtitle: "Por qué existen La Rana y la Mazmorra del Sapo",
+          body: "En este sistema, el cuerpo no entrena por estética vacía, sino para conquistar palancas biomecánicas cada vez más imposibles. Carlos, bajo el título de 'La Rana' (Nivel 14 | STR 28 / CON 26), divide su entrenamiento en dos grandes templos: el Suelo de la Fragua (donde se forjan el Empuje, el Tríceps Hidráulico, el Dragon Flag, el L-Sit y la Pistol Squat) y la Mazmorra del Sapo, el dominio vertical de la barra donde reinan las Dominadas Pesadas y el Core en Suspensión."
         },
         {
-          id: 'cap-2',
-          title: "Capítulo II: Los Pilares de la Mazmorra del Sapo y el RPE del Rayo",
-          tag: "Ruta del Rayo & Vacío",
-          date: "Archivo Canónico",
-          content: "En las profundidades húmedas de la Mazmorra del Sapo, la barra transversal pende sobre el abismo como un conductor de tormentas. Cuatro series de diez dominadas estrictas resuenan contra los muros de piedra vóxel. El Tribunal del Juicio observa el RPE: cuando las diez repeticiones fluyan sin que el pulso altere la geometría del movimiento (RPE menor a 9), los sellos del Lastre Inicial (+2.5 kg a +5 kg) caerán, abriendo el sendero hacia el Muscle-Up Estricto y la legendaria Tracción Monobrazo."
+          title: "Códice de las Siete Rutas Elementales",
+          subtitle: "El significado de los rangos Tier A hasta Tier SSS (Apex)",
+          body: "Cada una de las 7 ramas comienza en patrones fundamentales y asciende hasta una Habilidad Maestra de Nivel 10 (APEX Tier SSS): la Full Planche en Empuje, el Tiger Bend Libre en Aislamiento, el Dragon Flag Lastrado en Anti-Extensión, el Manna en Compresión, la Pistol Squat con +20 kg en Pierna, el One-Arm Pull-up / Muscle-Up Estricto en Tracción, y el Front Lever Raise / Windshield Wiper en Suspensión."
         }
       ],
       branches: [
         {
           id: 'empuje',
-          name: "Rama de Empuje: Ruta del Fuego & Metal",
-          subtitle: "Pecho, Hombro Anterior & Tríceps • Dominio de Palanca Horizontal",
+          shortName: "Empuje",
+          element: "Fuego & Metal",
+          muscleGroup: "Pecho, Hombro Anterior y Tríceps",
           icon: "🔥",
-          color: "red",
-          lore: "La Ruta del Fuego & Metal enseña a desplazar el centro de masa hacia las muñecas hasta que los pies pierden su pacto con la tierra.",
+          color: "#ef4444",
           nodes: [
             {
               id: 'emp-6',
-              level: "Nv. 6",
+              lvl: "Nv. 6",
               name: "Pseudo Flexiones en Suelo",
               tier: "Tier S",
-              tierClass: "tier-S",
+              tierClass: "t-S",
               status: "ACTUAL",
-              desc: "10 repeticiones con pausa estricta de 2 segundos abajo.",
-              req: "Requisito de ascenso: Elevar pies a la altura de la cama manteniendo inclinación.",
-              expReward: 220,
-              statBonus: { str: 1, con: 1 },
-              loreUnlock: "Al sostener dos segundos en el abismo inferior de la Pseudo Flexión, los deltoides anteriores absorben la presión térmica de la fragua. La cama aguarda como el siguiente altar de inclinación."
+              whatIsIt: "Flexiones inclinadas hacia adelante (lean) donde las manos se colocan cerca de la cadera/cintura en vez de bajo los hombros, multiplicando la carga sobre el deltoides anterior.",
+              target: "10 repeticiones con pausa estricta de 2 segundos abajo.",
+              nextReq: "Elevar los pies a la altura de la cama manteniendo la inclinación.",
+              exp: 220,
+              strAdd: 1,
+              conAdd: 1,
+              lore: "En el Nivel 6 del Fuego, las manos retroceden hacia el centro de gravedad. Al detener el pecho a un centímetro del suelo durante dos segundos eternos, los tendones del hombro aprenden a sostener el peso que pronto dejará de apoyar en los pies."
             },
             {
               id: 'emp-7',
-              level: "Nv. 7",
+              lvl: "Nv. 7",
               name: "Pseudo Flexiones Pies Elevados",
               tier: "Tier S+",
-              tierClass: "tier-Splus",
+              tierClass: "t-Sp",
               status: "EN PROCESO",
-              desc: "8–10 reps con manos a la cintura, pausa de 2s abajo y bloqueo en protracción escapular arriba.",
-              req: "Dominar 3 series sólidas con bloqueo hueco superior.",
-              expReward: 320,
-              statBonus: { str: 2, con: 1 },
-              loreUnlock: "Con los pies elevados y las manos ancladas a la línea de la cintura, el vector gravitatorio replica la antesala de la levitación. Las escápulas se abren como escudos de bronce."
+              whatIsIt: "Con los pies sobre la cama y las manos a la altura de la cintura, el ángulo replica exactamente el vector de fuerza de una Planche.",
+              target: "8–10 reps con manos a la cintura, pausa de 2s abajo y bloqueo en protracción escapular arriba.",
+              nextReq: "Consolidar 3 series de 10 reps sin perder el bloqueo hueco superior.",
+              exp: 320,
+              strAdd: 2,
+              conAdd: 1,
+              lore: "Al elevar los pies sobre el altar de la cama, la sangre y la gravedad caen directamente sobre los hombros. Empujar hasta redondear la espalda alta (protracción) es la llave que abre la levitación."
             },
             {
               id: 'emp-8',
-              level: "Nv. 8",
+              lvl: "Nv. 8",
               name: "Tuck Planche Push-ups",
               tier: "Tier SS",
-              tierClass: "tier-SS",
+              tierClass: "t-SS",
               status: "BLOQUEADO",
-              desc: "Flexiones manteniendo las rodillas flotando en el pecho sin que los pies toquen el suelo.",
-              req: "Desbloquear tras consolidar Nv. 7 y compresión escapular total.",
-              expReward: 480,
-              statBonus: { str: 3, con: 2 },
-              loreUnlock: "El suelo deja de existir para las extremidades inferiores. La Rana comprime su estructura en el aire y empuja el mundo hacia abajo sin tocarlo con los pies."
+              whatIsIt: "Flexiones completas en el aire con las rodillas recogidas hacia el pecho, sin que los pies toquen jamás el suelo.",
+              target: "3 series de 5 repeticiones flotando en Tuck Planche.",
+              nextReq: "Extender progresivamente la cadera hacia Straddle.",
+              exp: 480,
+              strAdd: 3,
+              conAdd: 2,
+              lore: "Por primera vez en la Ruta del Fuego, los pies abandonan la tierra. La Rana flota compactada sobre sus propias palmas y flexiona los brazos en el aire."
             },
             {
               id: 'emp-9',
-              level: "Nv. 9",
+              lvl: "Nv. 9",
               name: "Straddle Planche",
               tier: "Tier SS+",
-              tierClass: "tier-SSplus",
+              tierClass: "t-SSp",
               status: "BLOQUEADO",
-              desc: "Mantener el cuerpo completamente horizontal en el aire con piernas abiertas en V.",
-              req: "Acondicionamiento extremo de tendón bicipital y muñecas.",
-              expReward: 650,
-              statBonus: { str: 4, con: 3 },
-              loreUnlock: "Las piernas se despliegan en V como las alas de un crucero estelar de Kepler-22b. La gravedad intenta quebrar la línea horizontal, pero el hombro responde con acero."
+              whatIsIt: "Isométrico horizontal completo sosteniendo todo el cuerpo paralelo al suelo únicamente sobre las manos, con las piernas abiertas en V para acortar la palanca.",
+              target: "Mantener de 6 a 10 segundos con línea horizontal perfecta.",
+              nextReq: "Cerrar las piernas hasta unir tobillos.",
+              exp: 680,
+              strAdd: 4,
+              conAdd: 3,
+              lore: "El cuerpo se despliega en el aire como una espada al rojo vivo. Los codos bloqueados de acero soportan una palanca que desafía la anatomía convencional."
             },
             {
               id: 'emp-10',
-              level: "Nv. 10 [APEX]",
+              lvl: "Nv. 10 [APEX]",
               name: "Full Planche & Planche Push-up",
               tier: "Tier SSS",
-              tierClass: "tier-SSS",
+              tierClass: "t-SSS",
               status: "APEX",
-              desc: "Suspensión horizontal perfecta con piernas juntas y flexiones completas desafiando la física.",
-              req: "Habilidad Maestra Final de la Ruta del Fuego & Metal.",
-              expReward: 1000,
-              statBonus: { str: 6, con: 5 },
-              loreUnlock: "¡CULMINACIÓN APEX! La física newtoniana cede ante la voluntad de La Rana. Suspendido como un monolito horizontal, el Avatar ejecuta flexiones en el vacío absoluto."
+              whatIsIt: "La cumbre absoluta del empuje en calistenia: suspensión horizontal perfecta con piernas juntas y flexiones en el aire.",
+              target: "Dominio total de la suspensión horizontal y empuje sin apoyo inferior.",
+              nextReq: "CUMBRE MAESTRA DE LA RAMA DE EMPUJE.",
+              exp: 1000,
+              strAdd: 6,
+              conAdd: 5,
+              lore: "CUMBRE DEL FUEGO Y EL METAL: La gravedad ha sido derrotada. Suspendido en línea recta paralela al suelo con las piernas unidas, La Rana asciende y desciende en el vacío."
             }
           ]
         },
         {
           id: 'aislamiento',
-          name: "Rama de Aislamiento: Ruta del Acero Puro",
-          subtitle: "Codo Hidráulico & Cabeza Larga del Tríceps",
+          shortName: "Aislamiento",
+          element: "Acero Puro",
+          muscleGroup: "Codo Hidráulico y Tríceps",
           icon: "⚙️",
-          color: "slate",
-          lore: "Donde otros ven una articulación simple, el Códice ve un pistón hidráulico capaz de levantar todo el peso corporal desde la inversión vertical.",
+          color: "#94a3b8",
           nodes: [
             {
               id: 'ais-1',
-              level: "Nv. 1–2",
-              name: "Extensiones de Tríceps en Suelo / Sphinx Push-ups",
+              lvl: "Nv. 1–2",
+              name: "Sphinx Push-ups / Extensión en Suelo",
               tier: "Tier S",
-              tierClass: "tier-S",
+              tierClass: "t-S",
               status: "ACTUAL",
-              desc: "Plancha alta con flexión de codos paralelos hasta antebrazos y empuje con palmas.",
-              req: "Mantener codos cerrados sin abrir hacia los lados.",
-              expReward: 180,
-              statBonus: { str: 1, con: 1 },
-              loreUnlock: "La Esfinge despierta. Los antebrazos se despegan del suelo al unísono, inyectando presión hidráulica directamente en los tendones del olécranon."
+              whatIsIt: "Desde posición de plancha alta, doblar únicamente los codos hacia atrás hasta apoyar los antebrazos enteros en el suelo y volver a extender con fuerza pura de tríceps.",
+              target: "3 series de 10–12 repeticiones con codos paralelos sin abrirse.",
+              nextReq: "Adelantar la posición de las manos por delante de la cabeza.",
+              exp: 190,
+              strAdd: 1,
+              conAdd: 1,
+              lore: "En la Ruta del Acero Puro, el codo deja de ser una bisagra frágil y se convierte en un pistón hidráulico capaz de despegar el cuerpo desde los antebrazos."
             },
             {
               id: 'ais-4',
-              level: "Nv. 4",
-              name: "Sphinx Push-ups con Manos Adelantadas",
+              lvl: "Nv. 4",
+              name: "Sphinx con Manos Adelantadas",
               tier: "Tier S",
-              tierClass: "tier-S",
+              tierClass: "t-S",
               status: "BLOQUEADO",
-              desc: "Manos por delante de la coronilla. Máximo estiramiento excéntrico de la cabeza larga.",
-              req: "Controlar la bajada sin colapso lumbar.",
-              expReward: 280,
-              statBonus: { str: 2, con: 1 },
-              loreUnlock: "Al adelantar las palmas más allá de la coronilla, la palanca multiplica su demanda. La cabeza larga del tríceps se tensa como un cable de puente colgante."
+              whatIsIt: "Colocar las palmas más allá de la coronilla obliga a la cabeza larga del tríceps a trabajar en máximo estiramiento bajo carga pesada.",
+              target: "3 series de 8–10 reps con bajada lenta de 3 segundos.",
+              nextReq: "Transferir el patrón a inversión vertical contra la pared.",
+              exp: 290,
+              strAdd: 2,
+              conAdd: 1,
+              lore: "Cuanto más lejos se posan las manos, mayor es el brazo de palanca. El tendón del tríceps se blinda contra cualquier tensión futura."
             },
             {
               id: 'ais-7',
-              level: "Nv. 7",
-              name: "Tiger Bend asistido en pared",
+              lvl: "Nv. 7",
+              name: "Tiger Bend Asistido en Pared",
               tier: "Tier SS",
-              tierClass: "tier-SS",
+              tierClass: "t-SS",
               status: "BLOQUEADO",
-              desc: "Pino apoyado en pared: bajar de manos a antebrazos y volver a empujar a extensión completa.",
-              req: "Fuerza sólida en pino y tendones de codo blindados.",
-              expReward: 500,
-              statBonus: { str: 3, con: 2 },
-              loreUnlock: "Invertido contra el muro de la fortaleza, el Avatar desciende hasta posar los antebrazos y detona hacia arriba, imitando el zarpazo del tigre mecánico."
+              whatIsIt: "Haciendo el pino contra la pared, bajar lentamente hasta apoyar los antebrazos en el suelo y empujar de nuevo todo tu peso corporal hasta bloquear los brazos en pino.",
+              target: "3 series de 3–5 repeticiones limpias sin desplomarse.",
+              nextReq: "Dominar el equilibrio libre en la transición de antebrazo a mano.",
+              exp: 520,
+              strAdd: 3,
+              conAdd: 2,
+              lore: "Invertido verticalmente, todo el peso del cuerpo recae sobre la extensión del codo. Empujar desde los antebrazos hasta el pino exige una potencia brutal."
             },
             {
               id: 'ais-10',
-              level: "Nv. 10 [APEX]",
+              lvl: "Nv. 10 [APEX]",
               name: "Tiger Bend Handstand Push-up Libre",
               tier: "Tier SSS",
-              tierClass: "tier-SSS",
+              tierClass: "t-SSS",
               status: "APEX",
-              desc: "En pino libre sin apoyo, transición a antebrazos y vuelta a empujar a pino con fuerza bruta de tríceps.",
-              req: "Dominio de equilibrio vertical + extensión hidráulica total.",
-              expReward: 1000,
-              statBonus: { str: 5, con: 4, dex: 3 },
-              loreUnlock: "¡CULMINACIÓN APEX! Sin pared ni red, en equilibrio vertical puro, los codos doblan la gravedad entera y la devuelven al cielo."
+              whatIsIt: "En pino libre en mitad de la sala (sin pared), bajar a parada de antebrazos (Forearm Stand) y detonar hacia arriba de vuelta a pino libre.",
+              target: "Ejecución libre con control absoluto del equilibrio y extensión.",
+              nextReq: "CUMBRE MAESTRA DE LA RAMA DE AISLAMIENTO.",
+              exp: 1000,
+              strAdd: 5,
+              conAdd: 5,
+              lore: "CUMBRE DEL ACERO PURO: En equilibrio vertical sin red ni muro, los codos actúan como prensas hidráulicas capaces de alzar el cuerpo entero hacia el cielo."
             }
           ]
         },
         {
           id: 'antiextension',
-          name: "Rama de Anti-Extensión: Ruta del Viento & Gravedad",
-          subtitle: "Abdomen Profundo, Dorsal & Línea Anterior Rígida",
+          shortName: "Anti-Extensión",
+          element: "Viento & Gravedad",
+          muscleGroup: "Abdomen Profundo y Línea Rígida",
           icon: "🌪️",
-          color: "teal",
-          lore: "La bandera del dragón ondea contra la atracción planetaria. Quien controla esta rama transforma su torso en una viga irrompible.",
+          color: "#14b8a6",
           nodes: [
             {
               id: 'ant-3',
-              level: "Nv. 3",
-              name: "Dragon Flag Excéntrico (Tuck / Asistido)",
+              lvl: "Nv. 3",
+              name: "Dragon Flag Excéntrico (Tuck)",
               tier: "Tier S+",
-              tierClass: "tier-Splus",
+              tierClass: "t-Sp",
               status: "ACTUAL",
-              desc: "3×5 bajadas en 4s con rodillas flexionadas, protegiendo hombros y lumbar.",
-              req: "Mantener retroversión pélvica durante los 4 segundos de bajada.",
-              expReward: 210,
-              statBonus: { con: 2, str: 1 },
-              loreUnlock: "Anclado por los hombros, el cuerpo desciende segundo a segundo sin permitir que la zona lumbar ceda un solo milímetro ante el abismo."
+              whatIsIt: "Tumbado sujetando un soporte fijo detrás de la cabeza, elevar todo el torso y la cadera apoyando solo los hombros, y bajar en 4 segundos con rodillas flexionadas.",
+              target: "3×5 bajadas en 4 segundos protegiendo lumbar y hombros.",
+              nextReq: "Estirar las piernas por completo durante los 4 segundos de bajada.",
+              exp: 210,
+              strAdd: 1,
+              conAdd: 2,
+              lore: "Sujeto únicamente por los hombros, el abdomen aprende a impedir que la gravedad parta el cuerpo en dos durante cuatro segundos de descenso controlado."
             },
             {
               id: 'ant-5',
-              level: "Nv. 5",
-              name: "Dragon Flag Excéntrico Estricto (Piernas Estiradas)",
+              lvl: "Nv. 5",
+              name: "Dragon Flag Excéntrico Estricto",
               tier: "Tier S+",
-              tierClass: "tier-Splus",
+              tierClass: "t-Sp",
               status: "BLOQUEADO",
-              desc: "3×5 bajadas completas de 4s con el cuerpo como una tabla rígida sin flexión de cadera.",
-              req: "Cero quiebre en la cadera durante todo el descenso.",
-              expReward: 340,
-              statBonus: { con: 3, str: 1 },
-              loreUnlock: "Las piernas se extienden por completo, duplicando el brazo de momento. Durante cuatro segundos eternos, el abdomen profundo sostiene el cielo."
+              whatIsIt: "Bajadas de 4 segundos con las piernas totalmente estiradas y el cuerpo recto como una tabla rígida, sin doblar la cadera (cero piking).",
+              target: "3×5 bajadas completas de 4 segundos en línea recta.",
+              nextReq: "Generar la fuerza concéntrica para volver a subir desde abajo.",
+              exp: 340,
+              strAdd: 1,
+              conAdd: 3,
+              lore: "Con las piernas estiradas, la palanca se duplica. El torso y los glúteos forman una sola viga de hierro que desciende desafiando al suelo."
             },
             {
               id: 'ant-7',
-              level: "Nv. 7",
+              lvl: "Nv. 7",
               name: "Dragon Flag Concéntrico Completo",
               tier: "Tier SS",
-              tierClass: "tier-SS",
+              tierClass: "t-SS",
               status: "BLOQUEADO",
-              desc: "Subir y bajar en bloque estricto sin doblar rodillas (3 series × 5–8 reps).",
-              req: "Ascenso limpio desde rozar el suelo hasta la vertical.",
-              expReward: 520,
-              statBonus: { con: 3, str: 3 },
-              loreUnlock: "La bandera ya no solo resiste la caída: ahora se alza desde la horizontal como un puente levadizo impulsado por energía oscura."
+              whatIsIt: "El mítico ejercicio de Bruce Lee: bajar el cuerpo recto hasta rozar el suelo y volver a subir en bloque estricto sin doblar rodillas ni cadera.",
+              target: "3 series de 5–8 repeticiones completas.",
+              nextReq: "Añadir paradas isométricas completas en el punto de máxima gravedad.",
+              exp: 520,
+              strAdd: 3,
+              conAdd: 3,
+              lore: "La Bandera del Dragón ondea completa: ya no solo frena la caída, sino que emerge desde el suelo como un puente levadizo."
             },
             {
               id: 'ant-8',
-              level: "Nv. 8–9",
+              lvl: "Nv. 8–9",
               name: "Dragon Flag con Pausas Isométricas",
               tier: "Tier SS+",
-              tierClass: "tier-SSplus",
+              tierClass: "t-SSp",
               status: "BLOQUEADO",
-              desc: "Subir, bajar y congelar la postura a 10 cm del suelo durante 3–5 segundos por repetición.",
-              req: "Resistencia isométrica extrema en el ángulo de máxima palanca.",
-              expReward: 700,
-              statBonus: { con: 4, str: 3 },
-              loreUnlock: "A diez centímetros del suelo, el tiempo se congela. Ni un temblor delata el esfuerzo mientras la gravedad ruge sin éxito."
+              whatIsIt: "Detener y congelar el cuerpo completamente horizontal a 10 cm del suelo durante 3 a 5 segundos en cada repetición.",
+              target: "3 series con congelación horizontal estricta de 3–5s por rep.",
+              nextReq: "Añadir lastre en los tobillos.",
+              exp: 700,
+              strAdd: 3,
+              conAdd: 4,
+              lore: "A diez centímetros del suelo, donde la gravedad ejerce su máximo castigo, La Rana detiene el tiempo sin que el abdomen tiemble."
             },
             {
               id: 'ant-10',
-              level: "Nv. 10 [APEX]",
-              name: "Dragon Flag Lastrado / Transferencia a Front Lever",
+              lvl: "Nv. 10 [APEX]",
+              name: "Dragon Flag Lastrado / Front Lever",
               tier: "Tier SSS",
-              tierClass: "tier-SSS",
+              tierClass: "t-SSS",
               status: "APEX",
-              desc: "Dominio gravitatorio absoluto del core con lastre en tobilleras y transferencia directa a palanca aérea.",
-              req: "Habilidad Maestra Final de la Ruta del Viento & Gravedad.",
-              expReward: 1000,
-              statBonus: { con: 6, str: 5 },
-              loreUnlock: "¡CULMINACIÓN APEX! El centro del Avatar posee la densidad de una estrella de neutrones. El cuerpo flota horizontal tanto sobre un apoyo como colgado del vacío."
+              whatIsIt: "Ejecución de Dragon Flag con lastre en tobilleras y transferencia directa de la tensión abdominal y dorsal al Front Lever en barra.",
+              target: "Dominio gravitatorio absoluto del core con peso extra.",
+              nextReq: "CUMBRE MAESTRA DE ANTI-EXTENSIÓN.",
+              exp: 1000,
+              strAdd: 5,
+              conAdd: 6,
+              lore: "CUMBRE DEL VIENTO Y LA GRAVEDAD: El núcleo del Avatar es inquebrantable, capaz de sostener la horizontalidad incluso cargado con acero adicional."
             }
           ]
         },
         {
           id: 'compresion',
-          name: "Rama de Compresión: Ruta del Hielo",
-          subtitle: "Flexores de Cadera, Abdomen Inferior & Depresión Escapular",
+          shortName: "Compresión",
+          element: "Ruta del Hielo",
+          muscleGroup: "Cadera, Abdomen Inferior y Tríceps",
           icon: "❄️",
-          color: "cyan",
-          lore: "Fría, geométrica e implacable. La Ruta del Hielo exige plegar el cuerpo en ángulos imposibles mientras las manos sostienen el vacío.",
+          color: "#06b6d4",
           nodes: [
             {
               id: 'com-5',
-              level: "Nv. 5",
+              lvl: "Nv. 5",
               name: "L-Sit en Suelo (15s)",
               tier: "Tier A+",
-              tierClass: "tier-Aplus",
+              tierClass: "t-Ap",
               status: "ACTUAL",
-              desc: "Palmas en suelo, depresión escapular activa y piernas rectas a 90°.",
-              req: "Bloquear rodillas y apuntar empeines (point toes).",
-              expReward: 200,
-              statBonus: { con: 2, dex: 1 },
-              loreUnlock: "Quince segundos de escarcha geométrica. Las manos empujan el suelo, los hombros descienden y las piernas trazan un ángulo recto impecable."
+              whatIsIt: "Apoyando solo las palmas de las manos en el suelo plano, empujar los hombros hacia abajo (depresión escapular) y sostener las piernas totalmente rectas a 90 grados.",
+              target: "15 segundos sólidos sin que los talones rocen el suelo.",
+              nextReq: "Duplicar el tiempo continuo bajo tensión hasta 30 segundos.",
+              exp: 200,
+              strAdd: 1,
+              conAdd: 2,
+              lore: "Quince segundos de geometría helada: las palmas empujan la tierra y las piernas trazan una escuadra perfecta en el aire."
             },
             {
               id: 'com-6',
-              level: "Nv. 6",
+              lvl: "Nv. 6",
               name: "L-Sit Sólido en Suelo (30s)",
               tier: "Tier S",
-              tierClass: "tier-S",
+              tierClass: "t-S",
               status: "BLOQUEADO",
-              desc: "Consolidación de medio minuto continuo sin caída de talones ni balanceo.",
-              req: "30 segundos ininterrumpidos en suelo plano.",
-              expReward: 330,
-              statBonus: { con: 3, dex: 1 },
-              loreUnlock: "Medio minuto donde los cuádriceps y el psoas se cristalizan en hielo puro. El suelo bajo los talones queda olvidado."
+              whatIsIt: "Mantener la posición de L-Sit en suelo durante medio minuto continuo sin perder el bloqueo de rodillas ni encoger los hombros.",
+              target: "30 segundos ininterrumpidos con control respiratorio.",
+              nextReq: "Comprimir el abdomen para elevar las piernas por encima de los 90°.",
+              exp: 330,
+              strAdd: 1,
+              conAdd: 3,
+              lore: "Cuando el ardor en los cuádriceps y el psoas alcanza su pico, la mente de hielo mantiene los talones suspendidos durante treinta segundos."
             },
             {
               id: 'com-8',
-              level: "Nv. 8",
-              name: "V-Sit",
+              lvl: "Nv. 8",
+              name: "V-Sit (Ángulo Agudo 45°)",
               tier: "Tier SS",
-              tierClass: "tier-SS",
+              tierClass: "t-SS",
               status: "BLOQUEADO",
-              desc: "Las piernas superan los 90° y suben en ángulo agudo (45° hacia el torso), sosteniéndote solo sobre las manos.",
-              req: "Flexibilidad de isquiotibiales + compresión abdominal activa.",
-              expReward: 600,
-              statBonus: { con: 4, dex: 3, str: 2 },
-              loreUnlock: "El ángulo recto se cierra en una V afilada. Los pies se elevan frente al rostro mientras los tríceps y el hombro posterior sostienen la escultura."
+              whatIsIt: "Fuerza de compresión extrema donde las piernas superan los 90° y se acercan al pecho formando una 'V' cerrada mientras te sostienes solo sobre las manos.",
+              target: "Mantener V-Sit limpio de 5 a 10 segundos.",
+              nextReq: "Rotar la cadera hacia atrás pasando entre los brazos.",
+              exp: 600,
+              strAdd: 3,
+              conAdd: 4,
+              lore: "El cuerpo se pliega sobre sí mismo como una navaja de hielo, exigiendo una flexibilidad activa y una fuerza de tríceps extraordinarias."
             },
             {
               id: 'com-10',
-              level: "Nv. 10 [APEX]",
+              lvl: "Nv. 10 [APEX]",
               name: "Manna",
               tier: "Tier SSS",
-              tierClass: "tier-SSS",
+              tierClass: "t-SSS",
               status: "APEX",
-              desc: "El cuerpo entero pasa entre los brazos hasta quedar suspendido paralelo al suelo por detrás de los hombros.",
-              req: "Uno de los elementos más raros y legendarios de la gimnasia humana.",
-              expReward: 1200,
-              statBonus: { con: 6, dex: 6, str: 5 },
-              loreUnlock: "¡CULMINACIÓN APEX! El mito de la gimnasia terrestre se rinde ante La Rana: el cuerpo gira sobre su propio eje y levita invertido detrás de los brazos."
+              whatIsIt: "Uno de los movimientos más difíciles de la gimnasia mundial: elevar la cadera y pasar las piernas entre los brazos hasta quedar suspendido horizontalmente detrás de los hombros.",
+              target: "Suspensión horizontal trasera sobre las manos.",
+              nextReq: "CUMBRE MAESTRA DE LA RAMA DE COMPRESIÓN.",
+              exp: 1200,
+              strAdd: 5,
+              conAdd: 7,
+              lore: "CUMBRE DEL HIELO: La hazaña mítica de la gimnasia terrestre. El cuerpo invierte su centro de gravedad y levita paralelo al suelo por detrás de los brazos."
             }
           ]
         },
         {
           id: 'unilateral',
-          name: "Rama Unilateral: Ruta de la Tierra",
-          subtitle: "Cuádriceps, Glúteo, Estabilidad de Tobillo & Potencia de Salto",
+          shortName: "Unilateral",
+          element: "Ruta de la Tierra",
+          muscleGroup: "Pierna, Cuádriceps y Glúteo",
           icon: "🪨",
-          color: "emerald",
-          lore: "La esencia biológica de La Rana reside en sus extremidades inferiores: resortes capaces de absorber impactos abismales y propulsar el salto interdimensional.",
+          color: "#10b981",
           nodes: [
             {
               id: 'uni-6',
-              level: "Nv. 6",
-              name: "Pistol Squat con Peso Corporal",
+              lvl: "Nv. 6",
+              name: "Pistol Squat Peso Corporal",
               tier: "Tier S",
-              tierClass: "tier-S",
+              tierClass: "t-S",
               status: "ACTUAL",
-              desc: "5 a 10 repeticiones por pierna con control excéntrico total.",
-              req: "Bajada fluida sin valgo de rodilla y ascenso sin impulso.",
-              expReward: 230,
-              statBonus: { str: 2, dex: 1 },
-              loreUnlock: "Sobre una sola extremidad, La Rana desciende hasta el fondo de la tierra y emerge con la precisión de un pistón vóxel."
+              whatIsIt: "Sentadilla profunda a una sola pierna mientras la otra pierna permanece totalmente estirada al frente sin tocar el suelo.",
+              target: "5 a 10 repeticiones por pierna con bajada controlada.",
+              nextReq: "Añadir pausa muerta de 2 segundos abajo sin rebote.",
+              exp: 230,
+              strAdd: 2,
+              conAdd: 1,
+              lore: "El resorte natural de La Rana: una sola pierna absorbe todo el peso del cuerpo hasta el fondo y lo impulsa de vuelta con equilibrio absoluto."
             },
             {
               id: 'uni-7',
-              level: "Nv. 7",
+              lvl: "Nv. 7",
               name: "Dead-Stop Pistol Squats",
               tier: "Tier S+",
-              tierClass: "tier-Splus",
+              tierClass: "t-Sp",
               status: "BLOQUEADO",
-              desc: "Bajar hasta el fondo, hacer una pausa estricta de 2 segundos sin rebotar y subir con potencia pura.",
-              req: "Eliminar por completo el reflejo miotático en el punto inferior.",
-              expReward: 360,
-              statBonus: { str: 3, con: 1 },
-              loreUnlock: "En el punto muerto inferior, toda inercia muere durante dos segundos. Solo la contracción volcánica del cuádriceps y el glúteo permite el retorno."
+              whatIsIt: "Bajar hasta el fondo de la Pistol Squat, detenerse por completo durante 2 segundos eliminando el rebote de los tendones, y subir con fuerza muscular pura.",
+              target: "3 series de 5–8 reps por pierna con pausa estricta de 2s abajo.",
+              nextReq: "Dominar variantes de palanca rotacional y posterior.",
+              exp: 360,
+              strAdd: 3,
+              conAdd: 1,
+              lore: "En el fondo del abismo, donde muchos usan el rebote para escapar, La Rana espera dos segundos en silencio antes de detonar hacia arriba."
             },
             {
               id: 'uni-8',
-              level: "Nv. 8",
+              lvl: "Nv. 8",
               name: "Shrimp Squat / Dragon Squat",
               tier: "Tier SS",
-              tierClass: "tier-SS",
+              tierClass: "t-SS",
               status: "BLOQUEADO",
-              desc: "Variantes de palanca articular profunda con flexión unilateral extrema de rodilla y glúteo.",
-              req: "Movilidad de cadera y fuerza rotacional de tren inferior.",
-              expReward: 540,
-              statBonus: { str: 3, dex: 3 },
-              loreUnlock: "La pierna libre se entrelaza como la cola de un dragón subterráneo, exigiendo equilibrio tridimensional y fuerza en ángulos inexplorados."
+              whatIsIt: "En la Shrimp Squat la pierna libre va hacia atrás (como una zancada aérea hasta que la rodilla roza el suelo); en la Dragon Squat la pierna libre cruza por detrás en torsión extrema.",
+              target: "5 repeticiones estrictas por lado en ambas variantes.",
+              nextReq: "Cargar una mochila pesada de +20 kg sobre una sola pierna.",
+              exp: 540,
+              strAdd: 3,
+              conAdd: 3,
+              lore: "La articulación de la rodilla y la cadera dominan los tres planos del espacio, desbloqueando una movilidad y potencia sin ángulos muertos."
             },
             {
               id: 'uni-10',
-              level: "Nv. 10 [APEX]",
-              name: "Pistol Squat Lastrado (+20 kg / Mochila)",
+              lvl: "Nv. 10 [APEX]",
+              name: "Pistol Squat Lastrado (+20 kg)",
               tier: "Tier SSS",
-              tierClass: "tier-SSS",
+              tierClass: "t-SSS",
               status: "APEX",
-              desc: "Fuerza bruta sobre una pierna capaz de mover peso externo equivalente a sentadilla pesada de barra.",
-              req: "Habilidad Maestra Final de la Ruta de la Tierra.",
-              expReward: 1000,
-              statBonus: { str: 6, con: 4, dex: 2 },
-              loreUnlock: "¡CULMINACIÓN APEX! Con veinte kilos de mineral denso a la espalda, una sola pierna de La Rana genera la potencia de lanzamiento de una nave orbital."
+              whatIsIt: "Sentadilla profunda a una sola pierna cargando una mochila de 20 kg, generando una tensión en cuádriceps y glúteo equivalente a una sentadilla pesada con barra.",
+              target: "Series sólidas con +20 kg de lastre externo.",
+              nextReq: "CUMBRE MAESTRA DE LA RUTA DE LA TIERRA.",
+              exp: 1000,
+              strAdd: 6,
+              conAdd: 4,
+              lore: "CUMBRE DE LA TIERRA: Con veinte kilos de peso adicional sobre la espalda, una sola pierna de La Rana posee la fuerza de un terremoto."
             }
           ]
         },
         {
           id: 'traccion',
-          name: "Rama de Tracción Vertical: Ruta del Rayo",
-          subtitle: "Mazmorra del Sapo • Dorsal Ancho, Bíceps & Agarre",
+          shortName: "Tracción",
+          element: "Ruta del Rayo",
+          muscleGroup: "Mazmorra del Sapo — Espalda y Bíceps",
           icon: "⚡",
-          color: "amber",
-          lore: "En la Mazmorra del Sapo, cada dominada invoca un relámpago que recorre la cadena posterior desde los dedos hasta la cintura escapular.",
+          color: "#eab308",
           nodes: [
             {
               id: 'tra-7',
-              level: "Nv. 7",
-              name: "Dominadas Estrictas Peso Corporal (4×10)",
+              lvl: "Nv. 7",
+              name: "Dominadas Estrictas (4×10)",
               tier: "Tier S",
-              tierClass: "tier-S",
+              tierClass: "t-S",
               status: "ACTUAL",
-              desc: "4 series de 10 repeticiones limpias. Objetivo inmediato: Reducir el esfuerzo a RPE menor a 9.",
-              req: "Completar 4×10 sintiendo al menos 2 repeticiones en recámara (RPE < 9).",
-              expReward: 260,
-              statBonus: { str: 2, con: 1 },
-              loreUnlock: "Cuarenta elevaciones limpias bajo la mirada del Sapo. Cada vez que la barbilla cruza el acero con menor desgaste energético, el relámpago se domestica."
+              whatIsIt: "4 series de 10 dominadas estrictas (saliendo desde brazos totalmente estirados abajo hasta pasar la barbilla sin pataleo).",
+              target: "Reducir el esfuerzo percibido a RPE < 9 (terminar la 10ª rep sintiendo que podrías hacer 2 más).",
+              nextReq: "Cumplir 4×10 a RPE 8–8.5 para desbloquear la mochila con lastre.",
+              exp: 260,
+              strAdd: 2,
+              conAdd: 1,
+              lore: "En la entrada de la Mazmorra del Sapo, cuarenta dominadas marcan el ritual. Cuando la cuadragésima repetición se sienta ligera (RPE menor a 9), las cadenas del lastre se abrirán."
             },
             {
               id: 'tra-8',
-              level: "Nv. 8",
-              name: "Dominadas con Lastre Inicial (+2.5 a +5 kg)",
+              lvl: "Nv. 8",
+              name: "Dominadas con Lastre (+2.5 a +5 kg)",
               tier: "Tier SS",
-              tierClass: "tier-SS",
+              tierClass: "t-SS",
               status: "BLOQUEADO",
-              desc: "Desbloqueo de sobrecarga progresiva real con 4 series de 6–8 repeticiones lastradas en mochila.",
-              req: "Superar el umbral de RPE < 9 en peso corporal.",
-              expReward: 420,
-              statBonus: { str: 3, con: 2 },
-              loreUnlock: "La mochila de lastre se cierra sobre los hombros. La gravedad aumenta artificialmente, forjando fibras dorsales de alta densidad."
+              whatIsIt: "Dominadas estrictas añadiendo entre 2.5 kg y 5 kg dentro de una mochila ajustada para iniciar la sobrecarga progresiva real.",
+              target: "4 series de 6 a 8 repeticiones estrictas con lastre.",
+              nextReq: "Incrementar progresivamente la carga hasta +15 kg / +25 kg.",
+              exp: 420,
+              strAdd: 3,
+              conAdd: 2,
+              lore: "El primer sello de la Mazmorra del Sapo cae: la gravedad aumenta dentro de la mochila, forjando dorsales capaces de rasgar el aire."
             },
             {
               id: 'tra-9',
-              level: "Nv. 9",
-              name: "Dominadas Pesadas (+15 a +25 kg) / High Pull-ups",
+              lvl: "Nv. 9",
+              name: "Dominadas Pesadas (+20kg) / High Pull-up",
               tier: "Tier SS+",
-              tierClass: "tier-SSplus",
+              tierClass: "t-SSp",
               status: "BLOQUEADO",
-              desc: "Tracción explosiva donde la barra llega a la altura del esternón o abdomen.",
-              req: "Potencia de tirón explosivo y control de lastre medio-alto.",
-              expReward: 680,
-              statBonus: { str: 5, con: 2 },
-              loreUnlock: "Al quitar el lastre pesado, el cuerpo vuela: la barra ya no se detiene en el mentón, sino que impacta contra el esternón como un trueno."
+              whatIsIt: "Tracción pesada con 15–25 kg de lastre, que al quitarse la mochila se traduce en High Pull-ups explosivas donde la barra baja hasta tocar el pecho o el abdomen.",
+              target: "5 reps con +20 kg o series explosivas de barra a la cintura.",
+              nextReq: "Transición sobre la barra sin impulso y preparación monobrazo.",
+              exp: 680,
+              strAdd: 5,
+              conAdd: 2,
+              lore: "Al soltar el lastre pesado, el cuerpo sale disparado hacia el techo como un relámpago: la barra ya no llega al mentón, sino al esternón."
             },
             {
               id: 'tra-10',
-              level: "Nv. 10 [APEX]",
+              lvl: "Nv. 10 [APEX]",
               name: "Strict Muscle-Up / One-Arm Pull-up",
               tier: "Tier SSS",
-              tierClass: "tier-SSS",
+              tierClass: "t-SSS",
               status: "APEX",
-              desc: "Transición estricta sobre la barra sin kipping y dominada a un solo brazo.",
-              req: "El pico máximo de la fuerza de tracción humana en calistenia.",
-              expReward: 1100,
-              statBonus: { str: 7, con: 4, dex: 2 },
-              loreUnlock: "¡CULMINACIÓN APEX! El Guardián de la Mazmorra del Sapo se inclina: un solo brazo basta para alzar la totalidad del Avatar hacia las alturas."
+              whatIsIt: "El trono de la Mazmorra del Sapo: subir por encima de la barra lentamente sin ningún balanceo (Strict Muscle-Up) y elevar todo tu cuerpo colgado de una sola mano (OAP).",
+              target: "Dominio de la tracción monobrazo y transición estricta.",
+              nextReq: "CUMBRE MAESTRA DE LA MAZMORRA DEL SAPO.",
+              exp: 1100,
+              strAdd: 7,
+              conAdd: 5,
+              lore: "CUMBRE DEL RAYO: El Sapo Ancestral cede su trono. Un solo brazo basta para alzar todo el peso del cuerpo desde el abismo hasta la cumbre de la barra."
             }
           ]
         },
         {
           id: 'suspension',
-          name: "Rama de Suspensión: Ruta del Vacío",
-          subtitle: "Mazmorra del Sapo • Core en Barra, Agarre & Palanca Aérea",
+          shortName: "Suspensión",
+          element: "Ruta del Vacío",
+          muscleGroup: "Mazmorra del Sapo — Core en Barra",
           icon: "🕳️",
-          color: "purple",
-          lore: "Suspendido sobre el abismo de la Mazmorra del Sapo, la pelvis y el abdomen aprenden a rotar contra el vacío sin apoyo terrestre.",
+          color: "#a855f7",
           nodes: [
             {
               id: 'sus-4',
-              level: "Nv. 4",
+              lvl: "Nv. 4",
               name: "Hanging Knee-to-Chest",
               tier: "Tier A",
-              tierClass: "tier-A",
+              tierClass: "t-A",
               status: "ACTUAL",
-              desc: "2×8–10 con enrollamiento real de pelvis y bajada controlada de 3 segundos sin inercia.",
-              req: "Evitar cualquier balanceo pendular al descender.",
-              expReward: 190,
-              statBonus: { con: 2, str: 1 },
-              loreUnlock: "Colgado de la barra, la pelvis se enrolla hacia el pecho y desciende en tres tiempos silenciosos, anulando el péndulo del caos."
+              whatIsIt: "Colgado de la barra, llevar las rodillas hasta tocar el pecho enrollando la pelvis hacia arriba (retroversión) y bajar en 3 segundos sin balancearse.",
+              target: "2 series de 8–10 reps con bajada de 3s y cero inercia.",
+              nextReq: "Realizar el movimiento con las piernas totalmente estiradas.",
+              exp: 190,
+              strAdd: 1,
+              conAdd: 2,
+              lore: "Colgado sobre el vacío de la Mazmorra, aprender a subir la pelvis y frenar la bajada en tres segundos elimina el péndulo y despierta el abdomen profundo."
             },
             {
               id: 'sus-6',
-              level: "Nv. 6",
-              name: "Hanging Leg Raises (Piernas Rectas a 90°)",
+              lvl: "Nv. 6",
+              name: "Hanging Leg Raises (90°)",
               tier: "Tier A+",
-              tierClass: "tier-Aplus",
+              tierClass: "t-Ap",
               status: "BLOQUEADO",
-              desc: "Elevación de piernas completamente estiradas en forma de L controlando la excéntrica.",
-              req: "2×10 repeticiones sin doblar rodillas.",
-              expReward: 310,
-              statBonus: { con: 3, dex: 1 },
-              loreUnlock: "Las piernas rectas cortan el aire de la mazmorra formando una escuadra suspendida que desafía la fatiga del agarre."
+              whatIsIt: "Colgado de la barra, elevar las piernas completamente rectas hasta formar una 'L' de 90 grados y descender con control total.",
+              target: "3 series de 10 repeticiones sin doblar las rodillas.",
+              nextReq: "Duplicar el recorrido hasta tocar la barra con los pies.",
+              exp: 310,
+              strAdd: 1,
+              conAdd: 3,
+              lore: "Las piernas estiradas multiplican la carga. Cada elevación dibuja una escuadra perfecta suspendida en el aire."
             },
             {
               id: 'sus-8',
-              level: "Nv. 8",
+              lvl: "Nv. 8",
               name: "Strict Toes-to-Bar",
               tier: "Tier S",
-              tierClass: "tier-S",
+              tierClass: "t-S",
               status: "BLOQUEADO",
-              desc: "Tocar la barra con las puntas de los pies en cada repetición sin balanceo pendular.",
-              req: "Compresión total + dorsal activo para estabilizar el hombro.",
-              expReward: 510,
-              statBonus: { con: 4, str: 2, dex: 2 },
-              loreUnlock: "Las puntas de los pies besan el acero superior en completo silencio, plegando el cuerpo por la mitad en pleno vuelo."
+              whatIsIt: "Sin usar impulso ni balanceo de CrossFit, elevar las piernas rectas hasta que los empeines toquen suavemente la barra superior y bajar frenando.",
+              target: "3 series de 8 repeticiones estrictas y silenciosas.",
+              nextReq: "Rotar el torso en suspensión y elevar el cuerpo entero en bloque.",
+              exp: 510,
+              strAdd: 2,
+              conAdd: 4,
+              lore: "El cuerpo se pliega por completo en el aire hasta que los pies besan el acero de la barra sin producir un solo ruido ni balanceo."
             },
             {
               id: 'sus-10',
-              level: "Nv. 10 [APEX]",
+              lvl: "Nv. 10 [APEX]",
               name: "Windshield Wipers / Front Lever Raises",
               tier: "Tier SSS",
-              tierClass: "tier-SSS",
+              tierClass: "t-SSS",
               status: "APEX",
-              desc: "Rotaciones completas de torso colgado en el aire y elevaciones directas a palanca horizontal.",
-              req: "Habilidad Maestra Final de la Ruta del Vacío.",
-              expReward: 1050,
-              statBonus: { con: 6, str: 5, dex: 3 },
-              loreUnlock: "¡CULMINACIÓN APEX! Los oblicuos y el dorsal barren el horizonte como las agujas de un reloj cósmico suspendido en el Vacío."
+              whatIsIt: "Con los pies en la barra, girar las piernas de lado a lado como limpiaparabrisas (Oblicuos extremos) y elevar el cuerpo recto desde colgado hasta quedar horizontal en el aire (Front Lever).",
+              target: "Dominio total de la rotación y palanca aérea en barra.",
+              nextReq: "CUMBRE MAESTRA DE LA RUTA DEL VACÍO.",
+              exp: 1050,
+              strAdd: 5,
+              conAdd: 6,
+              lore: "CUMBRE DEL VACÍO: Colgado únicamente de las manos, el torso gira y se eleva horizontalmente como si la gravedad de la Mazmorra hubiera dejado de existir."
             }
           ]
         }
       ]
     };
 
-    const MODIFIERS_CATALOG = [
+    const BIOMECH_MODIFIERS = [
       {
-        id: 'pausa_2s',
-        name: "Sello de Pausa Isométrica (2s - 4s)",
-        type: "BUFF",
+        id: 'mod_pause',
+        name: "Pausa Isométrica Estricta (2s a 4s)",
+        badge: "+20% EXP | +2 CON",
         mult: 1.20,
-        stats: { con: 2, str: 1 },
-        desc: "Elimina el rebote elástico (Pseudo Push-ups, Dragon Flag excéntrico o Dead-Stop Pistols)."
+        strBonus: 0,
+        conBonus: 2,
+        realMeaning: "Cuando bajas en una flexión o una Pistol Squat y rebotas rápido, tus tendones hacen de muelle (reflejo miotático) y te regalan la mitad de la subida. Al parar 2 segundos en seco abajo (o bajar en 4s en Dragon Flag), anulas el rebote y obligas al músculo a crear un 100% de fuerza real."
       },
       {
-        id: 'protraccion',
-        name: "Coraza de Protracción & Depresión Escapular",
-        type: "BUFF",
+        id: 'mod_scapula',
+        name: "Bloqueo Escapular (Protracción / Depresión)",
+        badge: "+15% EXP | +2 STR",
         mult: 1.15,
-        stats: { str: 2, con: 1 },
-        desc: "Bloqueo hueco superior y depresión activa en L-Sit para transferencia directa a Planche."
+        strBonus: 2,
+        conBonus: 1,
+        realMeaning: "En la cima de las Pseudo Flexiones empujas el suelo separando los omóplatos (protracción), y en el L-Sit empujas los hombros lejos de las orejas (depresión). Esto activa el serrato anterior y el trapecio inferior, que son los músculos que sostienen la Planche y el V-Sit."
       },
       {
-        id: 'lastre_mochila',
-        name: "Reliquia de Gravedad Aumentada (Mochila Lastrada)",
-        type: "BUFF",
+        id: 'mod_weight',
+        name: "Sobrecarga con Mochila Lastrada (+2.5 a +20 kg)",
+        badge: "+35% EXP | +4 STR",
         mult: 1.35,
-        stats: { str: 4, con: 2 },
-        desc: "Añade carga externa (+2.5kg a +20kg) en la Mazmorra del Sapo o en la Ruta de la Tierra."
+        strBonus: 4,
+        conBonus: 2,
+        realMeaning: "Añadir peso externo real en Dominadas o Pistol Squats una vez que dominas tu peso corporal. Es la forma más directa de reclutar fibras rápidas de alto umbral."
       },
       {
-        id: 'resonancia_zorp',
-        name: "Resonancia Armónica de Kepler-22b (Piano & Neerlandés)",
-        type: "BUFF",
-        mult: 1.25,
-        stats: { int: 3, dex: 2 },
-        desc: "Mente afilada tras completar sesiones en la Mazmorra Zorp y la Mazmorra Guiri."
-      },
-      {
-        id: 'fatiga_rpe9',
-        name: "Maldición del Umbral RPE ≥ 9 (Sobrecarga Nerviosa)",
-        type: "DEBUFF",
-        mult: 0.90,
-        stats: { str: -1, con: -1 },
-        desc: "El esfuerzo roza el fallo técnico. Reduce ligeramente la ganancia hasta consolidar la serie."
+        id: 'mod_rpe_clean',
+        name: "Ejecución en Zona de Eficiencia (RPE < 9)",
+        badge: "+15% EXP | +1 STR / +1 CON",
+        mult: 1.15,
+        strBonus: 1,
+        conBonus: 1,
+        realMeaning: "Terminar tus series guardando 2 repeticiones limpias en recámara. Te permite acumular mucho más volumen semanal sin freír el sistema nervioso central ni inflamar los codos."
       }
     ];
 
-    // Load or initialize state
-    let state = JSON.parse(localStorage.getItem('codice_rana_v4')) || JSON.parse(JSON.stringify(INITIAL_STATE));
+    // Load or init state
+    let appState = JSON.parse(localStorage.getItem('codice_rana_clean_v5')) || JSON.parse(JSON.stringify(DEFAULT_DATA));
 
-    function saveState() {
-      localStorage.setItem('codice_rana_v4', JSON.stringify(state));
-      renderAll();
+    function saveApp() {
+      localStorage.setItem('codice_rana_clean_v5', JSON.stringify(appState));
+      renderApp();
     }
 
-    function resetSystem() {
-      if (confirm("¿Reiniciar el Códice de La Rana a los valores canónicos iniciales (Nivel 14)?")) {
-        state = JSON.parse(JSON.stringify(INITIAL_STATE));
-        saveState();
-        showToast("SISTEMA REINICIADO", "Valores canónicos de Nivel 14 restaurados.");
+    function resetAllData() {
+      if (confirm("¿Restaurar el árbol de habilidades y atributos a los valores iniciales de Nivel 14?")) {
+        appState = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        saveApp();
+        notify("VALORES RESTAURADOS", "Avatar Carlos (La Rana) devuelto al estado canónico de Nivel 14.");
       }
     }
 
-    // Calculate total multiplier and effective stats
-    function getCalculatedStats() {
+    function getEffectiveStats() {
       let mult = 1.0;
-      let bonus = { str: 0, con: 0, dex: 0, int: 0 };
-
-      state.activeModifiers.forEach(modId => {
-        const mod = MODIFIERS_CATALOG.find(m => m.id === modId);
+      let str = appState.str;
+      let con = appState.con;
+      appState.activeModifiers.forEach(mId => {
+        const mod = BIOMECH_MODIFIERS.find(x => x.id === mId);
         if (mod) {
           mult *= mod.mult;
-          if (mod.stats.str) bonus.str += mod.stats.str;
-          if (mod.stats.con) bonus.con += mod.stats.con;
-          if (mod.stats.dex) bonus.dex += mod.stats.dex;
-          if (mod.stats.int) bonus.int += mod.stats.int;
+          str += mod.strBonus;
+          con += mod.conBonus;
         }
       });
+      return { mult, str, con };
+    }
 
-      return {
-        mult: mult,
-        str: state.baseStats.str + bonus.str,
-        con: state.baseStats.con + bonus.con,
-        dex: state.baseStats.dex + bonus.dex,
-        int: state.baseStats.int + bonus.int
-      };
+    // Switch Top Views
+    function setMainView(viewName) {
+      ['tree', 'modifiers', 'lore'].forEach(v => {
+        document.getElementById('view-' + v).classList.add('hidden');
+        const btn = document.getElementById('nav-' + v);
+        btn.className = "px-4 py-2 rounded-lg text-xs font-bold tracking-wide bg-[#171c29] text-slate-300 hover:bg-slate-800 border border-[#262f45] transition";
+      });
+      document.getElementById('view-' + viewName).classList.remove('hidden');
+      document.getElementById('nav-' + viewName).className = "px-4 py-2 rounded-lg text-xs font-bold tracking-wide bg-amber-500 text-slate-950 transition";
+    }
+
+    // Select a Node in the Tree
+    function selectNode(branchId, nodeId) {
+      appState.selectedBranchId = branchId;
+      appState.selectedNodeId = nodeId;
+      saveApp();
     }
 
     // Toggle Modifier
-    function toggleModifier(modId) {
-      const idx = state.activeModifiers.indexOf(modId);
-      if (idx > -1) {
-        state.activeModifiers.splice(idx, 1);
-      } else {
-        state.activeModifiers.push(modId);
-      }
-      saveState();
+    function toggleMod(modId) {
+      const idx = appState.activeModifiers.indexOf(modId);
+      if (idx >= 0) appState.activeModifiers.splice(idx, 1);
+      else appState.activeModifiers.push(modId);
+      saveApp();
     }
 
-    // Gain EXP & Level Up Handler
-    function addExp(rawAmount, reason) {
-      const calc = getCalculatedStats();
-      const finalExp = Math.round(rawAmount * calc.mult);
-      state.exp += finalExp;
+    // Log a Training Session on the Selected Node
+    function logNodeSession(branchId, nodeId) {
+      const branch = appState.branches.find(b => b.id === branchId);
+      const node = branch.nodes.find(n => n.id === nodeId);
+      const sets = parseInt(document.getElementById('inp-sets')?.value) || 4;
+      const reps = parseInt(document.getElementById('inp-reps')?.value) || 10;
+      const rpe = parseFloat(document.getElementById('inp-rpe')?.value) || 8.5;
 
-      let leveledUp = false;
-      while (state.exp >= state.expToNext) {
-        state.exp -= state.expToNext;
-        state.level += 1;
-        state.expToNext = Math.round(state.expToNext * 1.18);
-        state.baseStats.str += 1;
-        state.baseStats.con += 1;
-        state.baseStats.dex += 1;
-        state.baseStats.int += 1;
-        leveledUp = true;
-      }
+      const eff = getEffectiveStats();
+      const rpeBonus = rpe < 9 ? 1.15 : 1.0;
+      const gainedExp = Math.round((sets * reps * 5 + 60) * eff.mult * rpeBonus);
 
-      const timestamp = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-      state.combatLogs.unshift(`[${timestamp}] +${finalExp} EXP (${calc.mult.toFixed(2)}x) — ${reason}`);
-
-      if (leveledUp) {
-        state.combatLogs.unshift(`🌟 [ASCENSO DIMENSIONAL] ¡Carlos (La Rana) ha alcanzado el NIVEL ${state.level}! Todos los atributos base +1.`);
-        showToast(`¡ASCENSO AL NIVEL ${state.level}!`, `Has ganado +${finalExp} EXP y superado el umbral dimensional. Todos tus atributos aumentan.`);
-      } else {
-        showToast(`+${finalExp} EXP RECLAMADOS`, reason);
-      }
-
-      saveState();
+      awardExp(gainedExp, `Entrenamiento registrado: ${sets}×${reps} en ${node.name} (RPE ${rpe})`);
     }
 
-    // Advance Skill Node State
-    function advanceNode(branchId, nodeId) {
-      const branch = state.branches.find(b => b.id === branchId);
-      const nodeIndex = branch.nodes.findIndex(n => n.id === nodeId);
-      const node = branch.nodes[nodeIndex];
+    // Master / Unlock a Node in the Skill Tree
+    function masterNode(branchId, nodeId) {
+      const branch = appState.branches.find(b => b.id === branchId);
+      const idx = branch.nodes.findIndex(n => n.id === nodeId);
+      const node = branch.nodes[idx];
 
       if (node.status === 'DOMINADO') {
-        showToast("NODO YA DOMINADO", "Usa la Terminal de Incursión para farmear EXP adicional con esta habilidad.");
+        notify("NODO YA DOMINADO", "Este nivel ya forma parte de tu base consolidada.");
         return;
       }
 
       node.status = 'DOMINADO';
-      if (node.statBonus.str) state.baseStats.str += node.statBonus.str;
-      if (node.statBonus.con) state.baseStats.con += node.statBonus.con;
-      if (node.statBonus.dex) state.baseStats.dex += node.statBonus.dex;
+      appState.str += node.strAdd;
+      appState.con += node.conAdd;
 
-      // Unlock next node if locked
-      if (nodeIndex + 1 < branch.nodes.length) {
-        const nextNode = branch.nodes[nodeIndex + 1];
+      // Advance next node to ACTUAL
+      if (idx + 1 < branch.nodes.length) {
+        const nextNode = branch.nodes[idx + 1];
         if (nextNode.status === 'BLOQUEADO' || nextNode.status === 'EN PROCESO') {
           nextNode.status = 'ACTUAL';
+          appState.selectedNodeId = nextNode.id;
         }
       }
 
-      // Add canonical lore chapter to Grimoire
-      state.grimoire.unshift({
-        id: 'lore-' + Date.now(),
-        title: `Crónica de Ascenso: ${node.name} (${node.tier})`,
-        tag: branch.name,
-        date: "Sello Reciente",
-        content: node.loreUnlock
+      // Unlock Lore Chapter
+      appState.unlockedLore.unshift({
+        title: `Habilidad Dominada: ${node.name} (${node.lvl} • ${node.tier})`,
+        subtitle: `Rama de ${branch.shortName}: Ruta del ${branch.element}`,
+        body: node.lore
       });
 
-      addExp(node.expReward, `Dominio de nodo ${node.level}: ${node.name}`);
+      const eff = getEffectiveStats();
+      const gainedExp = Math.round(node.exp * eff.mult);
+      awardExp(gainedExp, `¡Has dominado ${node.name}! (+${node.strAdd} STR / +${node.conAdd} CON)`);
     }
 
-    // Trigger Side Dungeons (Piano, Dutch, Godot)
-    function triggerSideDungeon(type) {
-      if (type === 'zorp') {
-        state.baseStats.int += 1;
-        state.grimoire.unshift({
-          id: 'zorp-' + Date.now(),
-          title: "Ecos de la Mazmorra Zorp: Frecuencia hacia Kepler-22b",
-          tag: "Sintonía Musical • Piano",
-          date: "Transmisión Estelar",
-          content: "Las teclas responden bajo los dedos de Carlos como los controles de navegación de la antigua Nave Zorp. Cada progresión armónica abre un canal subespacial hacia la Constelación Zorp, restaurando el Éter mental y estabilizando el pulso antes de volver al hierro."
-        });
-        addExp(120, "Mazmorra Zorp completada: Resonancia de Piano (+1 ZORP)");
-      } else if (type === 'guiri') {
-        state.baseStats.int += 1;
-        state.grimoire.unshift({
-          id: 'guiri-' + Date.now(),
-          title: "Alquimia en la Mazmorra Guiri: La Brecha del Norte",
-          tag: "Runas Lingüísticas • Neerlandés",
-          date: "Archivo Terrestre",
-          content: "Entre el eje del Acho y las tierras septentrionales, La Rana destila una nueva dosis de la Poción de Lenguas. Las estructuras gramaticales neerlandesas se ensamblan en la memoria a largo plazo, preparando el terreno para cruzar las fronteras europeas."
-        });
-        addExp(100, "Mazmorra Guiri completada: Estudio de Neerlandés (+1 ZORP)");
-      } else if (type === 'voxel') {
-        state.baseStats.dex += 1;
-        state.grimoire.unshift({
-          id: 'voxel-' + Date.now(),
-          title: "Forja del Demiurgo Vóxel: Shaders y Terrenos en Godot 4",
-          tag: "Arquitectura 16x16 & 32x32",
-          date: "Motor de Realidad",
-          content: "Como un reflejo de su propio árbol de habilidades, Carlos esculpe mundos de vóxeles, ajustando la iluminación dinámica y las barras de estado pixel-art. Lo que se programa en el motor virtual fortalece la precisión neuromuscular en el plano físico."
-        });
-        addExp(130, "Forja Vóxel en Godot 4: Avance técnico (+1 DEX)");
+    function awardExp(amount, msg) {
+      appState.exp += amount;
+      let leveled = false;
+      while (appState.exp >= appState.expMax) {
+        appState.exp -= appState.expMax;
+        appState.level += 1;
+        appState.expMax = Math.round(appState.expMax * 1.2);
+        appState.str += 1;
+        appState.con += 1;
+        leveled = true;
+      }
+      saveApp();
+      if (leveled) {
+        notify(`🌟 ¡ASCENSO AL NIVEL ${appState.level}!`, `${msg} — Tus atributos base suben +1 STR y +1 CON.`);
+      } else {
+        notify(`+${amount} EXP GANADOS`, msg);
       }
     }
 
-    // Complete Workout Session from Logger
-    function completeWorkoutSession() {
-      const branchId = document.getElementById('log-branch').value;
-      const nodeId = document.getElementById('log-skill').value;
-      const sets = parseInt(document.getElementById('log-sets').value) || 3;
-      const reps = parseInt(document.getElementById('log-reps').value) || 8;
-      const rpe = parseFloat(document.getElementById('log-rpe').value) || 8.5;
-
-      const branch = state.branches.find(b => b.id === branchId);
-      const node = branch.nodes.find(n => n.id === nodeId);
-
-      const baseExp = Math.round((sets * reps * 6) + (rpe < 9 ? 60 : 30));
-      const rpeNote = rpe < 9
-        ? `RPE ${rpe} (¡Objetivo de eficiencia cumplido! RESERVA TÉCNICA CONFIRMADA)`
-        : `RPE ${rpe} (Alta intensidad cerca del límite nervioso)`;
-
-      state.grimoire.unshift({
-        id: 'session-' + Date.now(),
-        title: `Incursión Registrada: ${node.name} (${sets}×${reps})`,
-        tag: `${branch.name} • ${rpeNote}`,
-        date: "Bitácora de Combate",
-        content: `En una nueva incursión sobre la ${branch.name}, el Avatar ejecutó ${sets} series de ${reps} repeticiones/segundos en ${node.name} (${node.tier}) con un esfuerzo percibido de RPE ${rpe}. ${node.loreUnlock}`
-      });
-
-      addExp(baseExp, `Sesión ${sets}×${reps} en ${node.name} (${rpeNote})`);
-    }
-
-    // Generate Custom Lore Entry
-    function generateCustomChronicle() {
-      const calc = getCalculatedStats();
-      state.grimoire.unshift({
-        id: 'chron-' + Date.now(),
-        title: `Memorias del Nivel ${state.level}: Convergencia de las Siete Rutas`,
-        tag: `STR ${calc.str} • CON ${calc.con} • DEX ${calc.dex} • ZORP ${calc.int}`,
-        date: "Crónica Generada",
-        content: `Con ${state.exp} puntos de experiencia acumulados hacia el siguiente umbral, La Rana contempla el mapa completo de las Siete Ramas. Desde las Pseudo Flexiones que preparan la levitación de la Full Planche, pasando por los pistones hidráulicos del Tiger Bend y la rigidez gravitatoria del Dragon Flag, hasta las alturas eléctricas de la Mazmorra del Sapo. En el horizonte cósmico, Vlorp Zorp recibe la telemetría de un cuerpo que rechaza los límites ordinarios.`
-      });
-      saveState();
-      showToast("NUEVO CAPÍTULO CANALIZADO", "Se ha añadido una entrada al Gran Grimorio Canónico.");
-    }
-
-    // Switch Main Tabs
-    function switchTab(tab) {
-      ['trees', 'dungeon', 'grimoire'].forEach(t => {
-        document.getElementById('view-' + t).classList.add('hidden');
-        const btn = document.getElementById('tab-' + t);
-        btn.className = "voxel-btn px-4 py-2 rounded text-xs mono-font font-bold bg-slate-800 text-slate-300 hover:bg-slate-700";
-      });
-      document.getElementById('view-' + tab).classList.remove('hidden');
-      document.getElementById('tab-' + tab).className = "voxel-btn px-4 py-2 rounded text-xs mono-font font-bold bg-emerald-500 text-slate-950";
-    }
-
-    // Toast helper
-    let toastTimeout;
-    function showToast(title, body) {
-      const toast = document.getElementById('toast');
+    let toastTimer;
+    function notify(title, desc) {
+      const t = document.getElementById('toast');
       document.getElementById('toast-title').textContent = title;
-      document.getElementById('toast-body').textContent = body;
-      toast.classList.remove('hidden');
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => toast.classList.add('hidden'), 4200);
-    }
-
-    // Populate Logger Dropdowns
-    function populateLoggerSelects() {
-      const branchSelect = document.getElementById('log-branch');
-      if (!branchSelect) return;
-      const currentVal = branchSelect.value || state.activeBranchId;
-      branchSelect.innerHTML = state.branches.map(b =>
-        `<option value="${b.id}" ${b.id === currentVal ? 'selected' : ''}>${b.icon} ${b.name}</option>`
-      ).join('');
-      updateLogSkills();
-    }
-
-    function updateLogSkills() {
-      const branchId = document.getElementById('log-branch').value;
-      const branch = state.branches.find(b => b.id === branchId) || state.branches[0];
-      const skillSelect = document.getElementById('log-skill');
-      skillSelect.innerHTML = branch.nodes.map(n =>
-        `<option value="${n.id}" ${n.status === 'ACTUAL' ? 'selected' : ''}>[${n.level}] ${n.name} (${n.tier})</option>`
-      ).join('');
+      document.getElementById('toast-desc').textContent = desc;
+      t.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.add('hidden'), 4500);
     }
 
     // Master Render
-    function renderAll() {
-      const calc = getCalculatedStats();
+    function renderApp() {
+      const eff = getEffectiveStats();
 
-      // HUD & Stats
-      document.getElementById('hud-level').textContent = `NV. ${state.level}`;
-      document.getElementById('exp-counter').textContent = `${state.exp.toLocaleString()} / ${state.expToNext.toLocaleString()}`;
-      const pct = Math.min(100, Math.round((state.exp / state.expToNext) * 100));
-      document.getElementById('exp-bar').style.width = `${pct}%`;
+      // Top HUD
+      document.getElementById('hud-lvl').textContent = `NIVEL ${appState.level}`;
+      document.getElementById('hud-str').textContent = eff.str;
+      document.getElementById('hud-con').textContent = eff.con;
+      document.getElementById('hud-mult').textContent = `${eff.mult.toFixed(2)}x EXP`;
+      document.getElementById('hud-exp-txt').textContent = `${appState.exp.toLocaleString()} / ${appState.expMax.toLocaleString()}`;
+      const expPct = Math.min(100, Math.round((appState.exp / appState.expMax) * 100));
+      document.getElementById('hud-exp-bar').style.width = `${expPct}%`;
 
-      document.getElementById('stat-str').textContent = calc.str;
-      document.getElementById('stat-con').textContent = calc.con;
-      document.getElementById('stat-dex').textContent = calc.dex;
-      document.getElementById('stat-int').textContent = calc.int;
-      document.getElementById('multiplier-badge').textContent = `MULT: ${calc.mult.toFixed(2)}x EXP`;
+      // Render 7-Column Visual Skill Tree
+      const treeGrid = document.getElementById('skill-tree-grid');
+      treeGrid.innerHTML = appState.branches.map(branch => {
+        const nodesHtml = branch.nodes.map((node, i) => {
+          const isSelected = appState.selectedNodeId === node.id;
+          let statusClass = 'status-locked';
+          let statusLabel = '🔒 Bloqueado';
 
-      const hpMax = calc.con * 20;
-      const mpMax = calc.int * 20;
-      document.getElementById('hp-text').textContent = `${hpMax} / ${hpMax}`;
-      document.getElementById('mp-text').textContent = `${mpMax} / ${mpMax}`;
+          if (node.status === 'DOMINADO') {
+            statusClass = 'status-mastered';
+            statusLabel = '✓ Dominado';
+          } else if (node.status === 'ACTUAL') {
+            statusClass = 'status-current';
+            statusLabel = '⚡ [ACTUAL]';
+          } else if (node.status === 'EN PROCESO') {
+            statusClass = 'status-progress';
+            statusLabel = '🔥 [EN PROCESO]';
+          } else if (node.status === 'APEX') {
+            statusClass = 'status-apex';
+            statusLabel = '👑 [APEX]';
+          }
 
-      // Render Modifiers
-      const modContainer = document.getElementById('modifiers-list');
-      modContainer.innerHTML = MODIFIERS_CATALOG.map(mod => {
-        const active = state.activeModifiers.includes(mod.id);
-        const borderClass = active
-          ? (mod.type === 'BUFF' ? 'border-emerald-400 bg-emerald-950/30' : 'border-red-400 bg-red-950/30')
-          : 'border-slate-800 bg-slate-900/60 opacity-75';
-        const badgeColor = mod.type === 'BUFF' ? 'text-emerald-300 bg-emerald-500/20' : 'text-red-300 bg-red-500/20';
-        return `
-          <div onclick="toggleModifier('${mod.id}')" class="cursor-pointer p-3 rounded border ${borderClass} transition-all">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-bold text-white mono-font">${active ? '☑' : '☐'} ${mod.name}</span>
-              <span class="text-[10px] mono-font px-2 py-0.5 rounded font-bold ${badgeColor}">${mod.mult}x EXP</span>
+          const connector = i > 0
+            ? `<div class="node-connector ${(node.status === 'DOMINADO' || node.status === 'ACTUAL' || node.status === 'EN PROCESO') ? 'unlocked' : ''}"></div>`
+            : '';
+
+          return `
+            ${connector}
+            <div onclick="selectNode('${branch.id}', '${node.id}')" class="tree-node rounded-lg border-2 p-3 ${statusClass} ${isSelected ? 'selected-node' : ''}">
+              <div class="flex items-center justify-between gap-1 mb-1">
+                <span class="mono text-[10px] font-bold text-slate-300">${node.lvl}</span>
+                <span class="tier-badge ${node.tierClass}">${node.tier}</span>
+              </div>
+              <div class="text-xs font-bold text-white leading-snug mb-1.5">${node.name}</div>
+              <div class="text-[10px] mono font-semibold ${node.status === 'ACTUAL' ? 'text-amber-300' : 'text-slate-400'}">
+                ${statusLabel}
+              </div>
             </div>
-            <p class="text-[11px] text-slate-400 mt-1">${mod.desc}</p>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
 
-      // Render Branch Filters
-      const filterContainer = document.getElementById('branch-filters');
-      filterContainer.innerHTML = state.branches.map(b => {
-        const isSelected = b.id === state.activeBranchId;
-        const btnStyle = isSelected
-          ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 font-bold'
-          : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white';
         return `
-          <button onclick="state.activeBranchId='${b.id}'; saveState();" class="px-3 py-1.5 rounded border text-xs mono-font transition-all ${btnStyle}">
-            ${b.icon} ${b.name.split(':')[0]}
-          </button>
+          <div class="tree-column flex flex-col">
+            <!-- Branch Header -->
+            <div class="bg-[#171c29] border border-[#262f45] rounded-lg p-3 mb-3 text-center">
+              <div class="text-xl mb-1">${branch.icon}</div>
+              <div class="text-xs font-bold text-white uppercase tracking-wider">${branch.shortName}</div>
+              <div class="text-[10px] text-amber-400 mono mt-0.5">${branch.element}</div>
+              <div class="text-[10px] text-slate-400 mt-1 leading-tight">${branch.muscleGroup}</div>
+            </div>
+            <!-- Nodes Chain -->
+            <div class="flex-1 flex flex-col">
+              ${nodesHtml}
+            </div>
+          </div>
         `;
       }).join('');
 
-      // Render Active Branch Header & Nodes
-      const activeBranch = state.branches.find(b => b.id === state.activeBranchId) || state.branches[0];
-      document.getElementById('branch-header').innerHTML = `
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <span>${activeBranch.icon}</span> ${activeBranch.name}
-            </h3>
-            <p class="text-xs text-emerald-400 mono-font mt-0.5">${activeBranch.subtitle}</p>
+      // Render Right Inspector Panel for Selected Node
+      const selBranch = appState.branches.find(b => b.id === appState.selectedBranchId) || appState.branches[0];
+      const selNode = selBranch.nodes.find(n => n.id === appState.selectedNodeId) || selBranch.nodes[0];
+
+      const inspector = document.getElementById('node-inspector');
+      inspector.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex items-center justify-between border-b border-[#262f45] pb-3">
+            <div>
+              <span class="text-[11px] mono uppercase text-amber-400 font-bold">${selBranch.icon} Rama de ${selBranch.shortName} • ${selBranch.element}</span>
+              <h3 class="serif-title text-lg font-bold text-white mt-0.5">${selNode.lvl} — ${selNode.name}</h3>
+            </div>
+            <span class="tier-badge ${selNode.tierClass}">${selNode.tier}</span>
           </div>
-          <span class="text-xs mono-font bg-slate-900 border border-slate-700 px-3 py-1 rounded text-slate-300">
-            Nodos Dominados: ${activeBranch.nodes.filter(n => n.status === 'DOMINADO').length} / ${activeBranch.nodes.length}
-          </span>
+
+          <!-- What is this movement? -->
+          <div class="bg-[#171c29] border border-[#262f45] rounded-lg p-3.5">
+            <div class="text-[11px] mono uppercase text-emerald-400 font-bold mb-1">📌 ¿Qué es y cómo se ejecuta?</div>
+            <p class="text-xs text-slate-200 leading-relaxed">${selNode.whatIsIt}</p>
+          </div>
+
+          <!-- Current Target & Next Requirement -->
+          <div class="grid grid-cols-1 gap-2.5">
+            <div class="bg-[#171c29] border border-[#262f45] rounded-lg p-3">
+              <div class="text-[11px] mono text-amber-400 font-bold">🎯 Meta de este Nivel:</div>
+              <p class="text-xs text-white mt-0.5">${selNode.target}</p>
+            </div>
+            <div class="bg-[#171c29] border border-[#262f45] rounded-lg p-3">
+              <div class="text-[11px] mono text-purple-400 font-bold">🔓 Requisito para el siguiente rango:</div>
+              <p class="text-xs text-slate-300 mt-0.5">${selNode.nextReq}</p>
+            </div>
+          </div>
+
+          <!-- Lore Preview -->
+          <div class="bg-[#0d1017] border-l-2 border-amber-500 p-3 rounded-r-lg">
+            <div class="text-[10px] mono uppercase text-slate-400 mb-1">📖 Fragmento del Códice:</div>
+            <p class="text-xs text-slate-300 italic leading-relaxed">"${selNode.lore}"</p>
+          </div>
         </div>
-        <p class="text-xs text-slate-300 mt-3 italic border-t border-slate-800/80 pt-2.5">"${activeBranch.lore}"</p>
+
+        <!-- Workout Logger & Node Mastery Action -->
+        <div class="pt-4 mt-5 border-t border-[#262f45] space-y-3">
+          <div class="text-xs font-bold text-slate-300 mono">⚔️ REGISTRAR SERIES DE HOY EN ESTE NODO:</div>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block text-[10px] mono text-slate-400 mb-1">SERIES</label>
+              <input id="inp-sets" type="number" value="4" min="1" max="15" class="w-full bg-[#090b10] border border-[#262f45] rounded px-2.5 py-1.5 text-xs text-white mono">
+            </div>
+            <div>
+              <label class="block text-[10px] mono text-slate-400 mb-1">REPS / SEG</label>
+              <input id="inp-reps" type="number" value="10" min="1" max="120" class="w-full bg-[#090b10] border border-[#262f45] rounded px-2.5 py-1.5 text-xs text-white mono">
+            </div>
+            <div>
+              <label class="block text-[10px] mono text-slate-400 mb-1" title="10 = Fallo total | 8 = Te quedaban 2 reps limpias">RPE (1-10)</label>
+              <input id="inp-rpe" type="number" step="0.5" value="8.5" min="5" max="10" class="w-full bg-[#090b10] border border-[#262f45] rounded px-2.5 py-1.5 text-xs text-white mono">
+            </div>
+          </div>
+
+          <button onclick="logNodeSession('${selBranch.id}', '${selNode.id}')" class="w-full py-2.5 rounded-lg bg-[#171c29] hover:bg-slate-800 border border-emerald-500/50 text-emerald-300 font-bold text-xs mono transition">
+            + Registrar Entrenamiento (Ganar EXP)
+          </button>
+
+          <button onclick="masterNode('${selBranch.id}', '${selNode.id}')" class="w-full py-3 rounded-lg font-bold text-xs mono transition ${selNode.status === 'DOMINADO' ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-gradient-to-r from-amber-500 to-emerald-500 text-slate-950 hover:opacity-95 shadow-lg'}">
+            ${selNode.status === 'DOMINADO' ? '✓ NODO YA DOMINADO' : `🏆 MARCAR NODO COMO DOMINADO (+${selNode.exp} EXP)`}
+          </button>
+        </div>
       `;
 
-      const nodesContainer = document.getElementById('nodes-container');
-      nodesContainer.innerHTML = activeBranch.nodes.map((node, index) => {
-        let statusBadge = '';
-        let cardBorder = 'border-slate-800';
-        if (node.status === 'DOMINADO') {
-          statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] mono-font font-bold bg-emerald-500 text-slate-950">✓ DOMINADO</span>';
-          cardBorder = 'border-emerald-500/60 bg-emerald-950/10';
-        } else if (node.status === 'ACTUAL') {
-          statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] mono-font font-bold bg-amber-400 text-slate-950 animate-pulse">⚡ [ACTUAL]</span>';
-          cardBorder = 'border-amber-400 bg-amber-950/15';
-        } else if (node.status === 'EN PROCESO') {
-          statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] mono-font font-bold bg-purple-500 text-white">🔥 [EN PROCESO]</span>';
-          cardBorder = 'border-purple-500/60';
-        } else if (node.status === 'APEX') {
-          statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] mono-font font-bold bg-red-500/20 text-red-300 border border-red-500/40">👑 CUMBRE APEX</span>';
-        } else {
-          statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] mono-font bg-slate-800 text-slate-400">🔒 BLOQUEADO</span>';
-        }
-
+      // Render Modifiers Grid
+      const modGrid = document.getElementById('modifiers-grid');
+      modGrid.innerHTML = BIOMECH_MODIFIERS.map(mod => {
+        const isOn = appState.activeModifiers.includes(mod.id);
         return `
-          <div class="voxel-card p-5 rounded-lg border-2 ${cardBorder} relative">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="mono-font text-xs font-bold text-slate-300 bg-slate-900 border border-slate-700 px-2.5 py-1 rounded">${node.level}</span>
-                <h4 class="text-base font-bold text-white">${node.name}</h4>
-                <span class="px-2 py-0.5 rounded text-[10px] mono-font font-bold ${node.tierClass}">${node.tier}</span>
-              </div>
+          <div onclick="toggleMod('${mod.id}')" class="cursor-pointer rounded-xl p-5 border-2 transition ${isOn ? 'border-emerald-500 bg-emerald-950/20' : 'border-[#262f45] bg-[#171c29] opacity-80 hover:opacity-100'}">
+            <div class="flex items-center justify-between gap-2 mb-2">
               <div class="flex items-center gap-2">
-                ${statusBadge}
+                <span class="w-5 h-5 rounded flex items-center justify-center text-xs font-bold ${isOn ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-400'}">${isOn ? '✓' : ''}</span>
+                <h4 class="font-bold text-sm text-white">${mod.name}</h4>
               </div>
+              <span class="mono text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded font-bold">${mod.badge}</span>
             </div>
-
-            <p class="text-sm text-slate-200 mt-2">${node.desc}</p>
-            <div class="mt-3 p-2.5 rounded bg-slate-900/90 border border-slate-800 text-xs mono-font text-slate-400 flex flex-wrap items-center justify-between gap-2">
-              <span>📌 <strong>Requisito / Regla:</strong> ${node.req}</span>
-              <span class="text-emerald-400 font-bold">+${node.expReward} EXP Base</span>
-            </div>
-
-            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
-              <span class="text-[11px] text-slate-400 italic">📖 Desbloquea capítulo en el Archivo del Sapo al dominarse.</span>
-              <button onclick="advanceNode('${activeBranch.id}', '${node.id}')" class="voxel-btn px-3.5 py-1.5 rounded text-xs mono-font font-bold ${node.status === 'DOMINADO' ? 'bg-slate-800 text-slate-500' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'}">
-                ${node.status === 'DOMINADO' ? '✓ Nodo Completado' : '⚡ Sellar Dominio & Reclamar EXP'}
-              </button>
-            </div>
+            <p class="text-xs text-slate-300 leading-relaxed mt-2">${mod.realMeaning}</p>
           </div>
         `;
       }).join('');
 
-      // Render Combat Logs
-      const logsEl = document.getElementById('combat-logs');
-      if (logsEl) {
-        logsEl.innerHTML = state.combatLogs.map(l =>
-          `<div class="p-2 rounded bg-slate-900/80 border-l-2 border-emerald-500 text-slate-300">${l}</div>`
-        ).join('');
-      }
-
-      // Render Grimoire
-      const grimEl = document.getElementById('grimoire-entries');
-      if (grimEl) {
-        grimEl.innerHTML = state.grimoire.map(entry => `
-          <article class="p-5 rounded-lg bg-slate-900/90 border border-slate-800 space-y-2">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="text-[11px] mono-font text-purple-300 bg-purple-950/60 border border-purple-500/30 px-2.5 py-0.5 rounded">${entry.tag}</span>
-              <span class="text-[11px] mono-font text-slate-400">${entry.date}</span>
-            </div>
-            <h4 class="text-base font-bold text-amber-300">${entry.title}</h4>
-            <p class="text-sm text-slate-300 leading-relaxed">${entry.content}</p>
-          </article>
-        `).join('');
-      }
-
-      populateLoggerSelects();
+      // Render Lore Chapters
+      const loreContainer = document.getElementById('lore-chapters');
+      loreContainer.innerHTML = appState.unlockedLore.map((chap, idx) => `
+        <article class="bg-[#171c29] border border-[#262f45] rounded-xl p-6">
+          <div class="text-xs mono text-amber-400 font-bold uppercase mb-1">${chap.subtitle}</div>
+          <h3 class="serif-title text-lg font-bold text-white mb-2">${chap.title}</h3>
+          <p class="text-sm text-slate-300 leading-relaxed">${chap.body}</p>
+        </article>
+      `).join('');
     }
 
-    // Initial boot
-    renderAll();
+    // Boot
+    renderApp();
   </script>
 </body>
 </html>
